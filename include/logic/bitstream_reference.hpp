@@ -41,8 +41,6 @@ public:
 
     operator bool() const noexcept;
 private:
-    friend class bitstream_const_reference;
-
     pointer m_bits;
     size_type m_index;
 };

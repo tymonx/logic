@@ -90,8 +90,6 @@ public:
 
     bool operator!=(const bitstream_iterator& other) const noexcept;
 private:
-    friend class bitstream_const_iterator;
-
     pointer m_bits;
     difference_type m_index;
 };
