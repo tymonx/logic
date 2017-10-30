@@ -44,25 +44,42 @@ find_package_handle_standard_args(Natural_Docs REQUIRED_VARS
 if (NATURAL_DOCS_FOUND)
     file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/doc/html)
 
-    if (UNIX)
-        add_custom_target(doc
-            COMMAND mono ${NATURAL_DOCS_EXECUTABLE}
-                -i ${CMAKE_SOURCE_DIR}
-                -p ${CMAKE_SOURCE_DIR}/doc
-                -o html ${CMAKE_BINARY_DIR}/doc/html
-                -w ${CMAKE_BINARY_DIR}/doc/tmp
-            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-            COMMENT "Creating documentation"
-        )
-    else()
-        add_custom_target(doc
-            COMMAND ${NATURAL_DOCS_EXECUTABLE}
-                -i ${CMAKE_SOURCE_DIR}
-                -p ${CMAKE_SOURCE_DIR}/doc
-                -o html ${CMAKE_BINARY_DIR}/doc/html
-                -w ${CMAKE_BINARY_DIR}/doc/tmp
-            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-            COMMENT "Creating documentation"
-        )
+    set(NATURAL_DOCS_COMMAND ${NATURAL_DOCS_EXECUTABLE})
+
+    if (UNIX AND NOT CMAKE_SYSTEM_NAME MATCHES CYGWIN)
+        set(NATURAL_DOCS_COMMAND "mono ${NATURAL_DOCS_COMMAND}")
     endif()
+
+    set(NATURAL_DOCS_INPUT_DIRECTORY    ${CMAKE_SOURCE_DIR})
+    set(NATURAL_DOCS_CONFIG_DIRECTORY   ${CMAKE_SOURCE_DIR}/doc)
+    set(NATURAL_DOCS_WORKING_DIRECTORY  ${CMAKE_BINARY_DIR}/doc/tmp)
+    set(NATURAL_DOCS_OUTPUT_DIRECTORY   ${CMAKE_BINARY_DIR}/doc/html)
+
+    if (CMAKE_SYSTEM_NAME MATCHES CYGWIN)
+        execute_process(COMMAND cygpath -m ${NATURAL_DOCS_INPUT_DIRECTORY}
+            OUTPUT_VARIABLE NATURAL_DOCS_INPUT_DIRECTORY
+            OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+        execute_process(COMMAND cygpath -m ${NATURAL_DOCS_CONFIG_DIRECTORY}
+            OUTPUT_VARIABLE NATURAL_DOCS_CONFIG_DIRECTORY
+            OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+        execute_process(COMMAND cygpath -m ${NATURAL_DOCS_WORKING_DIRECTORY}
+            OUTPUT_VARIABLE NATURAL_DOCS_WORKING_DIRECTORY
+            OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+        execute_process(COMMAND cygpath -m ${NATURAL_DOCS_OUTPUT_DIRECTORY}
+            OUTPUT_VARIABLE NATURAL_DOCS_OUTPUT_DIRECTORY
+            OUTPUT_STRIP_TRAILING_WHITESPACE)
+    endif()
+
+    add_custom_target(doc
+        COMMAND ${NATURAL_DOCS_COMMAND}
+            -i ${NATURAL_DOCS_INPUT_DIRECTORY}
+            -p ${NATURAL_DOCS_CONFIG_DIRECTORY}
+            -o html ${NATURAL_DOCS_OUTPUT_DIRECTORY}
+            -w ${NATURAL_DOCS_WORKING_DIRECTORY}
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        COMMENT "Creating documentation"
+    )
 endif()

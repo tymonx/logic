@@ -16,7 +16,11 @@ if (NOT CMAKE_CXX_COMPILER_ID MATCHES Clang)
     return()
 endif ()
 
-set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -std=c++11 -fPIC)
+set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -std=c++11)
+
+if (NOT CMAKE_SYSTEM_NAME MATCHES CYGWIN)
+    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -fPIC)
+endif()
 
 if (LTO)
     set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -flto)

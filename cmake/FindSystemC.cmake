@@ -37,6 +37,7 @@ find_package(PackageHandleStandardArgs REQUIRED)
 find_library(SYSTEMC_LIBRARY systemc
     HINTS $ENV{SYSTEMC_LIBDIR} $ENV{SYSTEMC_HOME}
     PATH_SUFFIXES lib lib32 lib64 lib-linux lib-linux32 lib-linux64
+        lib-cygwin lib-cygwin32 lib-cygwin64
     DOC "Path to the SystemC library"
 )
 
@@ -62,6 +63,7 @@ macro(find_systemc_component_scv)
     find_library(SCV_LIBRARY scv
         HINTS $ENV{SCV_LIBDIR} $ENV{SYSTEMC_LIBDIR} $ENV{SYSTEMC_HOME}
         PATH_SUFFIXES lib lib32 lib64 lib-linux lib-linux32 lib-linux64
+            lib-cygwin lib-cygwin32 lib-cygwin64
         DOC "Path to the SystemC verification library"
     )
 
@@ -94,6 +96,7 @@ macro(find_systemc_component_uvm)
     find_library(UVM_SYSTEMC_LIBRARY uvm-systemc
         HINTS $ENV{UVM_SYSTEMC_LIBDIR} $ENV{SYSTEMC_LIBDIR} $ENV{SYSTEMC_HOME}
         PATH_SUFFIXES lib lib32 lib64 lib-linux lib-linux32 lib-linux64
+            lib-cygwin lib-cygwin32 lib-cygwin64
         DOC "Path to the UVM SystemC library"
     )
 
