@@ -34,5 +34,6 @@ find_package(SystemC REQUIRED COMPONENTS SCV UVM)
 find_package(Verilator REQUIRED)
 
 include_directories(include)
+include_directories(SYSTEM ${SYSTEMC_INCLUDE_DIRS})
 
 add_subdirectory(src)

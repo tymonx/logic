@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-include_directories(SYSTEM ${SYSTEMC_INCLUDE_DIRS})
+add_subdirectory(axi4)
 
 add_library(logic-core OBJECT
     range.cpp
@@ -25,6 +25,7 @@ add_library(logic-core OBJECT
 
 add_library(logic SHARED
     $<TARGET_OBJECTS:logic-core>
+    $<TARGET_OBJECTS:logic-axi4-stream>
 )
 
 target_link_libraries(logic ${SYSTEMC_LIBRARIES})
