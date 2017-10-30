@@ -42,7 +42,7 @@ find_library(SYSTEMC_LIBRARY systemc
 )
 
 if (SYSTEMC_LIBRARY)
-    add_library(systemc SHARED IMPORTED)
+    add_library(systemc STATIC IMPORTED)
     set_target_properties(systemc PROPERTIES IMPORTED_LOCATION
         ${SYSTEMC_LIBRARY})
 endif()
@@ -68,7 +68,7 @@ macro(find_systemc_component_scv)
     )
 
     if (SCV_LIBRARY)
-        add_library(scv SHARED IMPORTED)
+        add_library(scv STATIC IMPORTED)
         set_target_properties(scv PROPERTIES IMPORTED_LOCATION ${SCV_LIBRARY})
     endif()
 
@@ -101,7 +101,7 @@ macro(find_systemc_component_uvm)
     )
 
     if (UVM_SYSTEMC_LIBRARY)
-        add_library(uvm-systemc SHARED IMPORTED)
+        add_library(uvm-systemc STATIC IMPORTED)
         set_target_properties(uvm-systemc PROPERTIES IMPORTED_LOCATION
             ${UVM_SYSTEMC_LIBRARY})
     endif()

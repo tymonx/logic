@@ -12,7 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+include_directories(SYSTEM ${SYSTEMC_INCLUDE_DIRS})
+
 add_library(logic-core OBJECT
+    range.cpp
     bitstream.cpp
     bitstream_iterator.cpp
     bitstream_const_iterator.cpp
@@ -23,3 +26,5 @@ add_library(logic-core OBJECT
 add_library(logic SHARED
     $<TARGET_OBJECTS:logic-core>
 )
+
+target_link_libraries(logic ${SYSTEMC_LIBRARIES})
