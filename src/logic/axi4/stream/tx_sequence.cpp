@@ -13,51 +13,44 @@
  * limitations under the License.
  */
 
-#include "logic/axi4/stream/rx_sequence.hpp"
+#include "logic/axi4/stream/tx_sequence.hpp"
 
-using logic::axi4::stream::rx_sequence;
+using logic::axi4::stream::tx_sequence;
 
-rx_sequence::rx_sequence() :
-    rx_sequence{"rx_sequence"}
+tx_sequence::tx_sequence() :
+    tx_sequence{"tx_sequence"}
 { }
 
-rx_sequence::rx_sequence(const std::string& name) :
-    uvm::uvm_sequence<rx_sequence_item>{name},
-    packet_length{},
-    number_of_packets{},
-    idle_scheme{}
+tx_sequence::tx_sequence(const std::string& name) :
+    uvm::uvm_sequence<tx_sequence_item>{name},
+    idle_scheme{},
+    number_of_packets{}
 { }
 
-rx_sequence::~rx_sequence() { }
+tx_sequence::~tx_sequence() { }
 
-void rx_sequence::pre_body() {
+void tx_sequence::pre_body() {
     if (starting_phase) {
         starting_phase->raise_objection(this);
     }
 }
 
-void rx_sequence::body() {
+void tx_sequence::body() {
     UVM_INFO(get_name(), "Starting sequence", uvm::UVM_NONE);
 
-    number_of_packets->next();
-    const auto packets_count = *number_of_packets;
+    tx_sequence_item item;
 
-    rx_sequence_item item;
+    item.number_of_packets = number_of_packets;
+    item.idle_scheme = idle_scheme;
 
-    for (std::size_t i = 0u; i < packets_count; ++i) {
-        packet_length->next();
-        item.tdata.resize(*packet_length);
-        item.idle_scheme = idle_scheme;
-
-        item.randomize();
-        start_item(&item);
-        finish_item(&item);
-    }
+    item.randomize();
+    start_item(&item);
+    finish_item(&item);
 
     UVM_INFO(get_name(), "Finishing sequence", uvm::UVM_NONE);
 }
 
-void rx_sequence::post_body() {
+void tx_sequence::post_body() {
     if (starting_phase) {
         starting_phase->drop_objection(this);
     }

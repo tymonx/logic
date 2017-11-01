@@ -13,50 +13,42 @@
  * limitations under the License.
  */
 
-#ifndef LOGIC_AXI4_RX_SEQUENCE_ITEM_HPP
-#define LOGIC_AXI4_RX_SEQUENCE_ITEM_HPP
-
-#include "logic/range.hpp"
-#include "logic/bitstream.hpp"
+#ifndef LOGIC_AXI4_STREAM_TX_SEQUENCE_ITEM_HPP
+#define LOGIC_AXI4_STREAM_TX_SEQUENCE_ITEM_HPP
 
 #include <uvm>
 #include <scv.h>
 
-#include <vector>
-#include <cstdint>
 #include <cstddef>
 
 namespace logic {
 namespace axi4 {
 namespace stream {
 
-class rx_sequence_item : public uvm::uvm_sequence_item {
+class tx_sequence_item : public uvm::uvm_sequence_item {
 public:
-    UVM_OBJECT_UTILS(rx_sequence_item)
+    UVM_OBJECT_UTILS(tx_sequence_item)
 
-    bitstream tid;
-    bitstream tdest;
-    std::vector<bitstream> tuser;
-    std::vector<std::uint8_t> tdata;
+    scv_smart_ptr<std::size_t> number_of_packets;
     scv_smart_ptr<std::size_t> idle_scheme;
 
-    rx_sequence_item();
+    tx_sequence_item();
 
-    rx_sequence_item(const std::string& name);
+    tx_sequence_item(const std::string& name);
 
-    rx_sequence_item(rx_sequence_item&& other) = default;
+    tx_sequence_item(tx_sequence_item&&) = default;
 
-    rx_sequence_item(const rx_sequence_item& other) = default;
+    tx_sequence_item(const tx_sequence_item&) = default;
 
-    rx_sequence_item& operator=(rx_sequence_item&& other) = default;
+    tx_sequence_item& operator=(tx_sequence_item&&) = default;
 
-    rx_sequence_item& operator=(const rx_sequence_item& other) = default;
+    tx_sequence_item& operator=(const tx_sequence_item&) = default;
 
     virtual void randomize();
 
     virtual std::string convert2string() const override;
 
-    virtual ~rx_sequence_item() override;
+    virtual ~tx_sequence_item() override;
 protected:
     virtual void do_print(const uvm::uvm_printer& printer) const override;
 
@@ -74,4 +66,4 @@ protected:
 }
 }
 
-#endif /* LOGIC_AXI4_RX_SEQUENCE_ITEM_HPP */
+#endif /* LOGIC_AXI4_STREAM_TX_SEQUENCE_ITEM_HPP */

@@ -13,53 +13,39 @@
  * limitations under the License.
  */
 
-#include "logic/axi4/stream/rx_sequence_item.hpp"
+#include "logic/axi4/stream/packet.hpp"
 
 #include <iomanip>
 
-using logic::axi4::stream::rx_sequence_item;
+using logic::axi4::stream::packet;
 
-rx_sequence_item::rx_sequence_item() :
-    rx_sequence_item{"rx_sequence_item"}
+packet::packet() :
+    packet{"packet"}
 { }
 
-rx_sequence_item::rx_sequence_item(const std::string& name) :
-    uvm::uvm_sequence_item{name},
+packet::packet(const std::string& name) :
+    uvm::uvm_object{name},
     tid{},
     tdest{},
     tuser{},
     tdata{},
-    idle_scheme{}
+    tdata_timestamp{},
+    transfer_timestamp{},
+    bus_size{}
 { }
 
-void rx_sequence_item::randomize() {
-    scv_smart_ptr<bool> random_bit;
-    scv_smart_ptr<std::uint8_t> random_byte;
-
-    for (auto bit : tid) {
-        random_bit->next();
-        bit = *random_bit;
-    }
-
-    for (auto bit : tdest) {
-        random_bit->next();
-        bit = *random_bit;
-    }
-
-    for (auto& item : tuser) {
-        for (auto bit : item) {
-            random_bit->next();
-            bit = *random_bit;
-        }
-    }
-
-    for (auto& byte : tdata) {
-        random_byte->next();
-        byte = *random_byte;
-    }
+auto packet::clear() -> packet& {
+    tid.clear();
+    tdest.clear();
+    tuser.clear();
+    tdata.clear();
+    tdata_timestamp.clear();
+    transfer_timestamp.clear();
+    bus_size = 0;
+    return *this;
 }
 
-auto rx_sequence_item::convert2string() const -> std::string {
+std::string packet::convert2string() const {
     std::ostringstream ss;
     ss << " data:";
 
@@ -71,9 +57,9 @@ auto rx_sequence_item::convert2string() const -> std::string {
     return ss.str();
 }
 
-rx_sequence_item::~rx_sequence_item() { }
+packet::~packet() { }
 
-void rx_sequence_item::do_print(const uvm::uvm_printer& printer) const {
+void packet::do_print(const uvm::uvm_printer& printer) const {
     printer.print_array_header("data", int(tdata.size()),
             "std::vector<std::uint8_t>");
 
@@ -84,31 +70,32 @@ void rx_sequence_item::do_print(const uvm::uvm_printer& printer) const {
     printer.print_array_footer();
 }
 
-void rx_sequence_item::do_pack(uvm::uvm_packer& p) const {
+void packet::do_pack(uvm::uvm_packer& p) const {
     p << tdata;
 }
 
-void rx_sequence_item::do_unpack(uvm::uvm_packer& p) {
+void packet::do_unpack(uvm::uvm_packer& p) {
     p >> tdata;
 }
 
-void rx_sequence_item::do_copy(const uvm::uvm_object& rhs) {
-    auto other = dynamic_cast<const rx_sequence_item*>(&rhs);
+void packet::do_copy(const uvm::uvm_object& rhs) {
+    auto other = dynamic_cast<const packet*>(&rhs);
     if (other) {
-        tdata = other->tdata;
+        *this = *other;
     }
     else {
         UVM_ERROR(get_name(), "Error in do_copy");
     }
 }
 
-bool rx_sequence_item::do_compare(const uvm::uvm_object& rhs,
+bool packet::do_compare(const uvm::uvm_object& rhs,
         const uvm::uvm_comparer* /* comparer */) const {
-    auto other = dynamic_cast<const rx_sequence_item*>(&rhs);
+    auto other = dynamic_cast<const packet*>(&rhs);
     auto status = false;
 
     if (other) {
-        status = (tdata == other->tdata);
+        status = (tid == other->tid) && (tdest == other->tdest) &&
+            (tdata == other->tdata);
     }
     else {
         UVM_ERROR(get_name(), "Error in do_compare");

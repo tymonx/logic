@@ -13,51 +13,48 @@
  * limitations under the License.
  */
 
-#include "logic/axi4/stream/rx_sequence.hpp"
+#include "logic/axi4/stream/reset_sequence.hpp"
 
-using logic::axi4::stream::rx_sequence;
+using logic::axi4::stream::reset_sequence;
 
-rx_sequence::rx_sequence() :
-    rx_sequence{"rx_sequence"}
+reset_sequence::reset_sequence() :
+    reset_sequence{"reset_sequence"}
 { }
 
-rx_sequence::rx_sequence(const std::string& name) :
-    uvm::uvm_sequence<rx_sequence_item>{name},
-    packet_length{},
-    number_of_packets{},
-    idle_scheme{}
+reset_sequence::reset_sequence(const std::string& name) :
+    uvm::uvm_sequence<reset_sequence_item>{name},
+    duration{},
+    idle{},
+    number_of_resets{}
 { }
 
-rx_sequence::~rx_sequence() { }
+reset_sequence::~reset_sequence() { }
 
-void rx_sequence::pre_body() {
+void reset_sequence::pre_body() {
     if (starting_phase) {
         starting_phase->raise_objection(this);
     }
 }
 
-void rx_sequence::body() {
-    UVM_INFO(get_name(), "Starting sequence", uvm::UVM_NONE);
+void reset_sequence::body() {
+    UVM_INFO(get_name(), "Starting reset sequence", uvm::UVM_FULL);
 
-    number_of_packets->next();
-    const auto packets_count = *number_of_packets;
+    reset_sequence_item item;
 
-    rx_sequence_item item;
+    item.duration = duration;
+    item.idle = idle;
+    number_of_resets->next();
 
-    for (std::size_t i = 0u; i < packets_count; ++i) {
-        packet_length->next();
-        item.tdata.resize(*packet_length);
-        item.idle_scheme = idle_scheme;
-
+    for (auto i = 0u; i < *number_of_resets; ++i) {
         item.randomize();
         start_item(&item);
         finish_item(&item);
     }
 
-    UVM_INFO(get_name(), "Finishing sequence", uvm::UVM_NONE);
+    UVM_INFO(get_name(), "Finishing reset sequence", uvm::UVM_FULL);
 }
 
-void rx_sequence::post_body() {
+void reset_sequence::post_body() {
     if (starting_phase) {
         starting_phase->drop_objection(this);
     }

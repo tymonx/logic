@@ -13,11 +13,10 @@
  * limitations under the License.
  */
 
-#ifndef LOGIC_AXI4_STREAM_RX_SEQUENCE_HPP
-#define LOGIC_AXI4_STREAM_RX_SEQUENCE_HPP
+#ifndef LOGIC_AXI4_STREAM_RESET_SEQUENCE_HPP
+#define LOGIC_AXI4_STREAM_RESET_SEQUENCE_HPP
 
-#include "logic/range.hpp"
-#include "rx_sequence_item.hpp"
+#include "reset_sequence_item.hpp"
 
 #include <uvm>
 #include <scv.h>
@@ -28,27 +27,19 @@ namespace logic {
 namespace axi4 {
 namespace stream {
 
-class rx_sequence : public uvm::uvm_sequence<rx_sequence_item> {
+class reset_sequence : public uvm::uvm_sequence<reset_sequence_item> {
 public:
-    UVM_OBJECT_UTILS(rx_sequence)
+    UVM_OBJECT_UTILS(reset_sequence)
 
-    scv_smart_ptr<std::size_t> packet_length;
-    scv_smart_ptr<std::size_t> number_of_packets;
-    scv_smart_ptr<std::size_t> idle_scheme;
+    scv_smart_ptr<std::size_t> duration;
+    scv_smart_ptr<std::size_t> idle;
+    scv_smart_ptr<std::size_t> number_of_resets;
 
-    rx_sequence();
+    reset_sequence();
 
-    rx_sequence(const std::string& name);
+    reset_sequence(const std::string& name);
 
-    rx_sequence(rx_sequence&&) = default;
-
-    rx_sequence(const rx_sequence& other) = default;
-
-    rx_sequence& operator=(rx_sequence&&) = default;
-
-    rx_sequence& operator=(const rx_sequence& other) = default;
-
-    virtual ~rx_sequence() override;
+    virtual ~reset_sequence() override;
 protected:
     virtual void pre_body() override;
 
@@ -61,4 +52,4 @@ protected:
 }
 }
 
-#endif /* LOGIC_AXI4_STREAM_RX_SEQUENCE_HPP */
+#endif /* LOGIC_AXI4_STREAM_RESET_SEQUENCE_HPP */

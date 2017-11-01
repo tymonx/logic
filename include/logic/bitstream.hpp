@@ -275,6 +275,18 @@ public:
     template<typename T, enable_class<T> = 0>
     operator const T&() const noexcept;
 
+    bool operator==(const bitstream& other) const noexcept;
+
+    bool operator!=(const bitstream& other) const noexcept;
+
+    bool operator<(const bitstream& other) const noexcept;
+
+    bool operator>(const bitstream& other) const noexcept;
+
+    bool operator<=(const bitstream& other) const noexcept;
+
+    bool operator>=(const bitstream& other) const noexcept;
+
     ~bitstream();
 private:
     pointer m_bits;

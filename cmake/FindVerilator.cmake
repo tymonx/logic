@@ -158,8 +158,8 @@ function(verilator_add_systemc_module target_name)
             ${VERILATOR_EXECUTABLE}
         ARGS
             --sc
-            -O3
-            -CFLAGS '-O3 -fdata-sections -ffunction-sections'
+            -O2
+            -CFLAGS '-std=c++11 -O2 -fdata-sections -ffunction-sections'
             --trace
             --prefix ${target_top_module}
             --top-module ${target_top_module}
@@ -168,7 +168,7 @@ function(verilator_add_systemc_module target_name)
             ${target_include_directories_expand}
             ${target_sources}
         COMMAND
-            make
+            $(MAKE)
         ARGS
             -f ${target_output_directory}/${target_top_module}.mk
         DEPENDS

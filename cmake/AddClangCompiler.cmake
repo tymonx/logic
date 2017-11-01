@@ -34,6 +34,7 @@ set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS}
     -Wno-covered-switch-default
     -Wno-c++98-compat
     -Wno-c++98-compat-pedantic
+    -Wno-undefined-func-template
 )
 
 if (WARNINGS_INTO_ERRORS)
@@ -53,6 +54,7 @@ if (CMAKE_BUILD_TYPE MATCHES "Release" OR NOT CMAKE_BUILD_TYPE)
     set(CMAKE_EXE_LINKER_FLAGS_RELEASE
         -Wl,--gc-sections
         -Wl,--strip-all
+        -lstdc++
     )
 
     string(REPLACE ";" " " CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")

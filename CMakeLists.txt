@@ -20,7 +20,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
-option(TESTS "Enable/disable tests" OFF)
+option(TESTS "Enable/disable tests" ON)
 option(EXAMPLES "Enable/disable examples" OFF)
 option(WARNINGS_INTO_ERRORS "Enable/disable warnings as errors" OFF)
 
@@ -28,6 +28,7 @@ include(AddThreads)
 include(AddGnuCompiler)
 include(AddMsvcCompiler)
 include(AddClangCompiler)
+include(AddLogic)
 
 find_package(NaturalDocs)
 find_package(SystemC REQUIRED COMPONENTS SCV UVM)
@@ -37,3 +38,9 @@ include_directories(include)
 include_directories(SYSTEM ${SYSTEMC_INCLUDE_DIRS})
 
 add_subdirectory(src)
+add_subdirectory(rtl)
+
+if (TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()

@@ -12,25 +12,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(axi4)
-
-include_directories(SYSTEM ${VERILATOR_INCLUDE_DIR})
-
-add_library(logic-core OBJECT
-    range.cpp
-    trace_base.cpp
-    trace_systemc.cpp
-    trace_verilated.cpp
-    bitstream.cpp
-    bitstream_iterator.cpp
-    bitstream_const_iterator.cpp
-    bitstream_reference.cpp
-    bitstream_const_reference.cpp
+add_library(logic-axi4-stream OBJECT
+    bus_if_base.cpp
+    monitor.cpp
+    packet.cpp
+    reset_agent.cpp
+    reset_driver.cpp
+    reset_if.cpp
+    reset_sequence.cpp
+    reset_sequence_item.cpp
+    reset_sequencer.cpp
+    rx_agent.cpp
+    rx_driver.cpp
+    rx_sequence.cpp
+    rx_sequence_item.cpp
+    rx_sequencer.cpp
+    scoreboard.cpp
+    sequence.cpp
+    sequencer.cpp
+    test.cpp
+    testbench.cpp
+    tx_agent.cpp
+    tx_driver.cpp
+    tx_sequence.cpp
+    tx_sequence_item.cpp
+    tx_sequencer.cpp
 )
-
-add_library(logic SHARED
-    $<TARGET_OBJECTS:logic-core>
-    $<TARGET_OBJECTS:logic-axi4-stream>
-)
-
-target_link_libraries(logic ${SYSTEMC_LIBRARIES})

@@ -300,6 +300,48 @@ bitstream::operator bool() const noexcept {
     return (m_size && (*byte & 0x01)) ? true : false;
 }
 
+auto bitstream::operator==(const bitstream& other) const noexcept -> bool {
+    auto first = reinterpret_cast<const std::uint8_t*>(m_bits);
+    auto second = reinterpret_cast<const std::uint8_t*>(other.m_bits);
+    auto bytes = ::size(std::min(m_size, other.m_size));
+
+    auto result = std::equal(first, first + bytes, second);
+
+    if (result) {
+        auto it = (m_size < other.m_size) ? second : first;
+        auto total_bytes = ::size(std::max(m_size, other.m_size));
+
+        result = std::all_of(it + bytes, it + total_bytes,
+            [] (const std::uint8_t& value) {
+                return (0 == value);
+            }
+        );
+    }
+
+    return result;
+}
+
+auto bitstream::operator!=(const bitstream& other) const noexcept -> bool {
+    return !(*this == other);
+}
+
+auto bitstream::operator<(const bitstream& /* other */) const noexcept -> bool {
+    /* TODO: Implement < */
+    return false;
+}
+
+auto bitstream::operator>(const bitstream& other) const noexcept -> bool {
+    return (other < *this);
+}
+
+auto bitstream::operator<=(const bitstream& other) const noexcept -> bool {
+    return !(other < *this);
+}
+
+auto bitstream::operator>=(const bitstream& other) const noexcept -> bool {
+    return !(*this <  other);
+}
+
 bitstream::~bitstream() {
     delete [] reinterpret_cast<std::uint8_t*>(m_bits);
 }

@@ -152,8 +152,6 @@ if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0)
     set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS}
         -Wdouble-promotion
         -Wsized-deallocation
-        -Wsuggest-final-methods
-        -Wsuggest-final-types
         -Wsuggest-override
         -Wtrampolines
         -Wvector-operation-performance
