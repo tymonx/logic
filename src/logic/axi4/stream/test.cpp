@@ -56,6 +56,8 @@ void test::build_phase(uvm::uvm_phase& phase) {
         this, "", "reset_duration", m_sequence->reset_duration);
     */
 
+    scv_random::set_global_seed(scv_random::pick_random_seed());
+
     m_sequence->reset_repeats->keep_only(1);
     m_sequence->reset_duration->keep_only(1);
     m_sequence->reset_idle->keep_only(0);
@@ -84,7 +86,7 @@ void test::report_phase(uvm::uvm_phase& phase) {
     uvm::uvm_test::report_phase(phase);
 
     if (m_test_passed) {
-        UVM_INFO(get_name(), "TEST PASSED", uvm::UVM_NONE);
+        UVM_INFO(get_name(), "TEST PASSED", uvm::UVM_FULL);
     }
     else {
         UVM_ERROR(get_name(), "TEST FAILED");

@@ -32,7 +32,7 @@ tx_agent::tx_agent(const uvm::uvm_component_name& name) :
     m_monitor{nullptr},
     m_driver{nullptr}
 {
-    UVM_INFO(get_name(), "Constructor", uvm::UVM_NONE);
+    UVM_INFO(get_name(), "Constructor", uvm::UVM_FULL);
 }
 
 tx_agent::~tx_agent() { }
@@ -40,10 +40,10 @@ tx_agent::~tx_agent() { }
 void tx_agent::build_phase(uvm::uvm_phase& phase) {
     uvm::uvm_agent::build_phase(phase);
 
-    UVM_INFO(get_name(), "Build phase", uvm::UVM_NONE);
+    UVM_INFO(get_name(), "Build phase", uvm::UVM_FULL);
 
     if (get_is_active() == uvm::UVM_ACTIVE) {
-        UVM_INFO(get_name(), "is set to UVM_ACTIVE", uvm::UVM_NONE);
+        UVM_INFO(get_name(), "is set to UVM_ACTIVE", uvm::UVM_FULL);
 
         sequencer = tx_sequencer::type_id::create("sequencer", this);
         if (!sequencer) {
@@ -58,7 +58,7 @@ void tx_agent::build_phase(uvm::uvm_phase& phase) {
         }
     }
     else {
-        UVM_INFO(get_name(), "is set to UVM_PASSIVE", uvm::UVM_NONE);
+        UVM_INFO(get_name(), "is set to UVM_PASSIVE", uvm::UVM_FULL);
     }
 
     m_monitor = monitor::type_id::create("monitor", this);
@@ -70,7 +70,7 @@ void tx_agent::build_phase(uvm::uvm_phase& phase) {
 void tx_agent::connect_phase(uvm::uvm_phase& phase) {
     uvm::uvm_agent::connect_phase(phase);
 
-    UVM_INFO(get_name(), "Connect phase", uvm::UVM_NONE);
+    UVM_INFO(get_name(), "Connect phase", uvm::UVM_FULL);
 
     m_monitor->analysis_port.connect(analysis_port);
 

@@ -36,7 +36,7 @@ void tx_sequence::pre_body() {
 }
 
 void tx_sequence::body() {
-    UVM_INFO(get_name(), "Starting sequence", uvm::UVM_NONE);
+    UVM_INFO(get_name(), "Starting sequence", uvm::UVM_FULL);
 
     tx_sequence_item item;
 
@@ -47,7 +47,7 @@ void tx_sequence::body() {
     start_item(&item);
     finish_item(&item);
 
-    UVM_INFO(get_name(), "Finishing sequence", uvm::UVM_NONE);
+    UVM_INFO(get_name(), "Finishing sequence", uvm::UVM_FULL);
 }
 
 void tx_sequence::post_body() {

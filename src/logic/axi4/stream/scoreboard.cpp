@@ -99,7 +99,7 @@ void scoreboard::connect_phase(uvm::uvm_phase& phase) {
 }
 
 void scoreboard::run_phase(uvm::uvm_phase& /* phase */) {
-    UVM_INFO(get_name(), "Run phase", uvm::UVM_NONE);
+    UVM_INFO(get_name(), "Run phase", uvm::UVM_FULL);
 
     while (true) {
         auto rx_packet = m_rx_fifo.get(nullptr);

@@ -33,7 +33,7 @@ reset_driver::~reset_driver() { }
 
 void reset_driver::build_phase(uvm::uvm_phase& phase) {
     uvm::uvm_driver<reset_sequence_item>::build_phase(phase);
-    UVM_INFO(get_name(), "Build phase", uvm::UVM_NONE);
+    UVM_INFO(get_name(), "Build phase", uvm::UVM_FULL);
 
     auto ok = uvm::uvm_config_db<reset_if*>::get(this, "*", "vif", m_vif);
 
@@ -44,7 +44,7 @@ void reset_driver::build_phase(uvm::uvm_phase& phase) {
 }
 
 void reset_driver::run_phase(uvm::uvm_phase& /* phase */) {
-    UVM_INFO(get_name(), "Run phase", uvm::UVM_NONE);
+    UVM_INFO(get_name(), "Run phase", uvm::UVM_FULL);
     reset_sequence_item item;
 
     while (true) {

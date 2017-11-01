@@ -36,7 +36,7 @@ testbench::testbench(const uvm::uvm_component_name& name) :
     m_scoreboard{nullptr},
     m_reset_agent{nullptr}
 {
-    UVM_INFO(get_name(), "Constructor", uvm::UVM_NONE);
+    UVM_INFO(get_name(), "Constructor", uvm::UVM_FULL);
 }
 
 testbench::~testbench() { }
@@ -44,7 +44,7 @@ testbench::~testbench() { }
 void testbench::build_phase(uvm::uvm_phase& phase) {
     uvm::uvm_env::build_phase(phase);
 
-    UVM_INFO(get_name(), "Build phase", uvm::UVM_NONE);
+    UVM_INFO(get_name(), "Build phase", uvm::UVM_FULL);
 
     m_rx_agent = rx_agent::type_id::create("rx_agent", this);
     if (!m_rx_agent) {
@@ -89,7 +89,7 @@ void testbench::build_phase(uvm::uvm_phase& phase) {
 void testbench::connect_phase(uvm::uvm_phase& phase) {
     uvm::uvm_env::connect_phase(phase);
 
-    UVM_INFO(get_name(), "Connect phase", uvm::UVM_NONE);
+    UVM_INFO(get_name(), "Connect phase", uvm::UVM_FULL);
 
     sequencer->rx_sequencer = m_rx_agent->sequencer;
     sequencer->tx_sequencer = m_tx_agent->sequencer;

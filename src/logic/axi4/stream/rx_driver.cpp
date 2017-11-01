@@ -26,7 +26,7 @@ rx_driver::rx_driver(const uvm::uvm_component_name& name) :
 
 void rx_driver::build_phase(uvm::uvm_phase& phase) {
     uvm::uvm_driver<rx_sequence_item>::build_phase(phase);
-    UVM_INFO(get_name(), "Build phase", uvm::UVM_NONE);
+    UVM_INFO(get_name(), "Build phase", uvm::UVM_FULL);
 
     auto ok = uvm::uvm_config_db<bus_if_base*>::get(this, "*", "vif", m_vif);
 
@@ -37,7 +37,7 @@ void rx_driver::build_phase(uvm::uvm_phase& phase) {
 }
 
 void rx_driver::run_phase(uvm::uvm_phase& /* phase */) {
-    UVM_INFO(get_name(), "Run phase", uvm::UVM_NONE);
+    UVM_INFO(get_name(), "Run phase", uvm::UVM_FULL);
     rx_sequence_item item;
 
     while (true) {

@@ -37,7 +37,7 @@ void rx_sequence::pre_body() {
 }
 
 void rx_sequence::body() {
-    UVM_INFO(get_name(), "Starting sequence", uvm::UVM_NONE);
+    UVM_INFO(get_name(), "Starting sequence", uvm::UVM_FULL);
 
     number_of_packets->next();
     const auto packets_count = *number_of_packets;
@@ -54,7 +54,7 @@ void rx_sequence::body() {
         finish_item(&item);
     }
 
-    UVM_INFO(get_name(), "Finishing sequence", uvm::UVM_NONE);
+    UVM_INFO(get_name(), "Finishing sequence", uvm::UVM_FULL);
 }
 
 void rx_sequence::post_body() {

@@ -29,17 +29,17 @@ reset_agent::reset_agent(const uvm::uvm_component_name& name) :
     sequencer{nullptr},
     m_driver{nullptr}
 {
-    UVM_INFO(get_name(), "Constructor", uvm::UVM_NONE);
+    UVM_INFO(get_name(), "Constructor", uvm::UVM_FULL);
 }
 
 reset_agent::~reset_agent() { }
 
 void reset_agent::build_phase(uvm::uvm_phase& phase) {
     uvm::uvm_agent::build_phase(phase);
-    UVM_INFO(get_name(), "Build phase", uvm::UVM_NONE);
+    UVM_INFO(get_name(), "Build phase", uvm::UVM_FULL);
 
     if (get_is_active() == uvm::UVM_ACTIVE) {
-        UVM_INFO(get_name(), "is set to UVM_ACTIVE", uvm::UVM_NONE);
+        UVM_INFO(get_name(), "is set to UVM_ACTIVE", uvm::UVM_FULL);
 
         sequencer = reset_sequencer::type_id::create("sequencer", this);
         if (!sequencer) {
@@ -54,13 +54,13 @@ void reset_agent::build_phase(uvm::uvm_phase& phase) {
         }
     }
     else {
-        UVM_INFO(get_name(), "is set to UVM_PASSIVE", uvm::UVM_NONE);
+        UVM_INFO(get_name(), "is set to UVM_PASSIVE", uvm::UVM_FULL);
     }
 }
 
 void reset_agent::connect_phase(uvm::uvm_phase& phase) {
     uvm::uvm_agent::connect_phase(phase);
-    UVM_INFO(get_name(), "Connect phase", uvm::UVM_NONE);
+    UVM_INFO(get_name(), "Connect phase", uvm::UVM_FULL);
 
     if (get_is_active() == uvm::UVM_ACTIVE) {
         m_driver->seq_item_port.connect(sequencer->seq_item_export);

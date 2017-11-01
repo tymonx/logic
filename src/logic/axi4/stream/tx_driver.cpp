@@ -33,7 +33,7 @@ tx_driver::~tx_driver() { }
 
 void tx_driver::build_phase(uvm::uvm_phase& phase) {
     uvm::uvm_driver<tx_sequence_item>::build_phase(phase);
-    UVM_INFO(get_name(), "Build phase", uvm::UVM_NONE);
+    UVM_INFO(get_name(), "Build phase", uvm::UVM_FULL);
 
     auto ok = uvm::uvm_config_db<bus_if_base*>::get(this, "*", "vif", m_vif);
 
@@ -44,7 +44,7 @@ void tx_driver::build_phase(uvm::uvm_phase& phase) {
 }
 
 void tx_driver::run_phase(uvm::uvm_phase& /* phase */) {
-    UVM_INFO(get_name(), "Run phase", uvm::UVM_NONE);
+    UVM_INFO(get_name(), "Run phase", uvm::UVM_FULL);
     tx_sequence_item item;
 
     while (true) {

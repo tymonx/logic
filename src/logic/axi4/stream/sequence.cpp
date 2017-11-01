@@ -99,7 +99,7 @@ void sequence::pre_body() {
 }
 
 void sequence::body() {
-    UVM_INFO(get_name(), "Starting sequence", uvm::UVM_NONE);
+    UVM_INFO(get_name(), "Starting sequence", uvm::UVM_FULL);
 
     rx_repeats->next();
     std::size_t repeat_count = *rx_repeats;
@@ -118,7 +118,7 @@ void sequence::body() {
         SC_JOIN
     }
 
-    UVM_INFO(get_name(), "Finishing sequence", uvm::UVM_NONE);
+    UVM_INFO(get_name(), "Finishing sequence", uvm::UVM_FULL);
 }
 
 void sequence::reset_sequence_handler() {

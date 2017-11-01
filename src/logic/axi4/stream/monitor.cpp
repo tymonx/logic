@@ -61,7 +61,7 @@ monitor::~monitor() { }
 
 void monitor::build_phase(uvm::uvm_phase& phase) {
     uvm::uvm_monitor::build_phase(phase);
-    UVM_INFO(get_name(), "Build phase", uvm::UVM_NONE);
+    UVM_INFO(get_name(), "Build phase", uvm::UVM_FULL);
 
     auto ok = uvm::uvm_config_db<bus_if_base*>::get(this, "*", "vif", m_vif);
 
@@ -76,7 +76,7 @@ void monitor::build_phase(uvm::uvm_phase& phase) {
 }
 
 void monitor::run_phase(uvm::uvm_phase& /* phase */) {
-    UVM_INFO(get_name(), "Run phase", uvm::UVM_NONE);
+    UVM_INFO(get_name(), "Run phase", uvm::UVM_FULL);
 
     packets_type packets;
     const auto bus_size = m_vif->size();
