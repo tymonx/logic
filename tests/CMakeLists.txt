@@ -16,4 +16,13 @@ function(add_systemc_module)
     verilator_add_systemc_module(${ARGV})
 endfunction()
 
+add_rtl_sources(
+    ${QUARTUS_MEGA_FUNCTIONS}
+)
+
+add_verilator_configurations(
+    "lint_off -msg STMTDLY      -file \"${QUARTUS_MEGA_FUNCTIONS}\""
+    "lint_off -msg PINMISSING   -file \"${QUARTUS_MEGA_FUNCTIONS}\""
+)
+
 add_subdirectory(logic)

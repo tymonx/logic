@@ -32,5 +32,3 @@ add_library(logic SHARED
     $<TARGET_OBJECTS:logic-core>
     $<TARGET_OBJECTS:logic-axi4-stream>
 )
-
-target_link_libraries(logic ${SYSTEMC_LIBRARIES})

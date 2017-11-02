@@ -86,7 +86,7 @@ void test::report_phase(uvm::uvm_phase& phase) {
     uvm::uvm_test::report_phase(phase);
 
     if (m_test_passed) {
-        UVM_INFO(get_name(), "TEST PASSED", uvm::UVM_FULL);
+        UVM_INFO(get_name(), "TEST PASSED", uvm::UVM_NONE);
     }
     else {
         UVM_ERROR(get_name(), "TEST FAILED");

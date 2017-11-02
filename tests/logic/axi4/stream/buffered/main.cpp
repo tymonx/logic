@@ -30,7 +30,7 @@ int sc_main(int /* argc */, char** /* argv */) {
     logic::axi4::stream::bus_if<> tx{"tx"};
     logic::axi4::stream::reset_if reset{};
 
-    logic_axi4_stream_buffered_top dut("dut");
+    logic_axi4_stream_buffered_top dut("logic_axi4_stream_buffered_top");
 
     logic::trace<decltype(dut)> trace(dut);
 

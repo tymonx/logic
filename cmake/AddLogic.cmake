@@ -12,27 +12,36 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(RTL_SOURCES "" CACHE INTERNAL "RTL sources" FORCE)
-set(RTL_INCLUDES "" CACHE INTERNAL "RTL includes" FORCE)
+set(RTL_SOURCES "" CACHE INTERNAL
+    "RTL sources" FORCE)
 
-macro(add_rtl_sources)
-    set(rtl_sources)
+set(RTL_INCLUDES "" CACHE INTERNAL
+    "RTL includes" FORCE)
 
+set(VERILATOR_CONFIGURATIONS "" CACHE INTERNAL
+    "Verilator configurations" FORCE)
+
+function(add_verilator_configurations)
+    set(VERILATOR_CONFIGURATIONS ${VERILATOR_CONFIGURATIONS} ${ARGV}
+        CACHE INTERNAL "Verilator configurations" FORCE)
+endfunction()
+
+function(add_rtl_sources)
     foreach(src ${ARGV})
-        set(rtl_sources ${rtl_sources} ${CMAKE_CURRENT_SOURCE_DIR}/${src})
+        get_filename_component(src ${src} REALPATH)
+        list(APPEND sources ${src})
     endforeach()
 
-    set(RTL_SOURCES ${RTL_SOURCES} ${rtl_sources}
+    set(RTL_SOURCES ${RTL_SOURCES} ${sources}
         CACHE INTERNAL "RTL sources" FORCE)
-endmacro()
+endfunction()
 
-macro(add_rtl_includes)
-    set(rtl_includes)
-
+function(add_rtl_includes)
     foreach(inc ${ARGV})
-        set(rtl_includes ${rtl_includes} ${CMAKE_CURRENT_SOURCE_DIR}/${inc})
+        get_filename_component(inc ${inc} REALPATH)
+        list(APPEND includes ${inc})
     endforeach()
 
-    set(RTL_INCLUDES ${RTL_INCLUDES} ${rtl_includes}
+    set(RTL_INCLUDES ${RTL_INCLUDES} ${includes}
         CACHE INTERNAL "RTL includes" FORCE)
-endmacro()
+endfunction()

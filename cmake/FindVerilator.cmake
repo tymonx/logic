@@ -51,7 +51,7 @@ mark_as_advanced(VERILATOR_INCLUDE_DIR)
 find_package_handle_standard_args(Verilator REQUIRED_VARS
     VERILATOR_EXECUTABLE VERILATOR_INCLUDE_DIR)
 
-add_library(verilated STATIC
+add_library(verilated SHARED
     ${VERILATOR_INCLUDE_DIR}/verilated.cpp
     ${VERILATOR_INCLUDE_DIR}/verilated_vcd_c.cpp
     ${VERILATOR_INCLUDE_DIR}/verilated_vcd_sc.cpp
@@ -94,6 +94,8 @@ if (CMAKE_CXX_COMPILER_ID MATCHES GNU)
 elseif (CMAKE_CXX_COMPILER_ID MATCHES Clang)
     target_compile_options(verilated PRIVATE -Wno-everything)
 endif()
+
+set(find_verilator_internal_dir ${CMAKE_CURRENT_LIST_DIR} CACHE INTERNAL "")
 
 function(verilator_add_systemc_module target_name)
     set(state GET_SOURCES)
@@ -151,6 +153,14 @@ function(verilator_add_systemc_module target_name)
 
     file(MAKE_DIRECTORY ${target_output_directory})
 
+    string(REPLACE ";" "\n" VERILATOR_CONFIGURATIONS_SEPERATE
+        "${VERILATOR_CONFIGURATIONS}")
+
+    set(verilator_config_file ${target_output_directory}/verilator_config.vlt)
+
+    configure_file(${find_verilator_internal_dir}/VerilatorConfig.cmake.in
+        ${verilator_config_file})
+
     add_custom_command(
         OUTPUT
             ${target_output_directory}/${target_library}
@@ -166,6 +176,7 @@ function(verilator_add_systemc_module target_name)
             -Mdir ${target_output_directory}
             ${target_definitions_expand}
             ${target_include_directories_expand}
+            ${verilator_config_file}
             ${target_sources}
         COMMAND
             $(MAKE)
@@ -174,6 +185,8 @@ function(verilator_add_systemc_module target_name)
         DEPENDS
             ${target_depends}
             ${target_sources}
+            ${verilator_config_file}
+            ${target_include_directories}
         WORKING_DIRECTORY ${target_output_directory}
         COMMENT
             "Creating SystemC ${target_top_module} module"
@@ -193,10 +206,12 @@ function(verilator_add_systemc_module target_name)
     set(module_libraries
         verilated_${target_name}
         verilated
+        ${SYSTEMC_LIBRARIES}
     )
 
     set(module_include_directories
         ${VERILATOR_INCLUDE_DIR}
+        ${SYSTEMC_INCLUDE_DIRS}
         ${target_output_directory}
     )
 
