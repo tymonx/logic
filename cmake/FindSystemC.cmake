@@ -42,7 +42,7 @@ find_library(SYSTEMC_LIBRARY systemc
 )
 
 if (SYSTEMC_LIBRARY)
-    add_library(systemc STATIC IMPORTED)
+    add_library(systemc UNKNOWN IMPORTED)
     set_target_properties(systemc PROPERTIES IMPORTED_LOCATION
         ${SYSTEMC_LIBRARY})
 endif()
@@ -68,7 +68,7 @@ macro(find_systemc_component_scv)
     )
 
     if (SCV_LIBRARY)
-        add_library(scv STATIC IMPORTED)
+        add_library(scv UNKNOWN IMPORTED)
         set_target_properties(scv PROPERTIES IMPORTED_LOCATION ${SCV_LIBRARY})
     endif()
 
@@ -101,7 +101,7 @@ macro(find_systemc_component_uvm)
     )
 
     if (UVM_SYSTEMC_LIBRARY)
-        add_library(uvm-systemc STATIC IMPORTED)
+        add_library(uvm-systemc UNKNOWN IMPORTED)
         set_target_properties(uvm-systemc PROPERTIES IMPORTED_LOCATION
             ${UVM_SYSTEMC_LIBRARY})
     endif()
@@ -137,7 +137,15 @@ foreach (component ${SystemC_FIND_COMPONENTS})
 endforeach()
 
 if (SYSTEMC_FOUND)
-    set(SYSTEMC_LIBRARIES ${SYSTEMC_LIBRARIES} systemc)
+    add_library(systemc-main STATIC
+        ${CMAKE_CURRENT_LIST_DIR}/sc_main.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/sc_main_main.cpp
+    )
+
+    target_include_directories(systemc-main SYSTEM
+        PRIVATE ${SYSTEMC_INCLUDE_DIR})
+
+    set(SYSTEMC_LIBRARIES systemc-main ${SYSTEMC_LIBRARIES} systemc)
     set(SYSTEMC_INCLUDE_DIRS ${SYSTEMC_INCLUDE_DIRS} ${SYSTEMC_INCLUDE_DIR})
 endif()
 

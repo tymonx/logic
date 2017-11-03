@@ -51,11 +51,13 @@ mark_as_advanced(VERILATOR_INCLUDE_DIR)
 find_package_handle_standard_args(Verilator REQUIRED_VARS
     VERILATOR_EXECUTABLE VERILATOR_INCLUDE_DIR)
 
-add_library(verilated SHARED
+add_library(verilated STATIC
     ${VERILATOR_INCLUDE_DIR}/verilated.cpp
     ${VERILATOR_INCLUDE_DIR}/verilated_vcd_c.cpp
     ${VERILATOR_INCLUDE_DIR}/verilated_vcd_sc.cpp
 )
+
+#target_link_libraries(verilated PRIVATE systemc)
 
 set_target_properties(verilated PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib

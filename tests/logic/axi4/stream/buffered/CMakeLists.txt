@@ -47,6 +47,6 @@ add_test(NAME test_${MODULE_NAME}
 )
 
 target_link_libraries(test_${MODULE_NAME}
-    logic
+    -Wl,--whole-archive logic -Wl,--no-whole-archive
     ${MODULE_LIBRARIES}
 )
