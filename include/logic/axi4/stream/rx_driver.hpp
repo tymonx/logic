@@ -29,7 +29,7 @@ class rx_sequence_item;
 
 class rx_driver : public uvm::uvm_driver<rx_sequence_item> {
 public:
-    UVM_COMPONENT_UTILS(rx_driver)
+    UVM_COMPONENT_UTILS(logic::axi4::stream::rx_driver)
 
     rx_driver();
 

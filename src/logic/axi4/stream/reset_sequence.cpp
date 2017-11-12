@@ -39,14 +39,19 @@ void reset_sequence::pre_body() {
 void reset_sequence::body() {
     UVM_INFO(get_name(), "Starting reset sequence", uvm::UVM_FULL);
 
-    reset_sequence_item item;
-
-    item.duration = duration;
-    item.idle = idle;
     number_of_resets->next();
+    const std::size_t resets = *number_of_resets;
 
-    for (auto i = 0u; i < *number_of_resets; ++i) {
+    for (std::size_t i = 0; i < resets; ++i) {
+        reset_sequence_item item;
+
+        duration->next();
+        idle->next();
+
         item.randomize();
+        item.duration = *duration;
+        item.idle = *idle;
+
         start_item(&item);
         finish_item(&item);
     }

@@ -27,7 +27,7 @@ class bus_if_base;
 
 class monitor : public uvm::uvm_monitor {
 public:
-    UVM_COMPONENT_UTILS(monitor)
+    UVM_COMPONENT_UTILS(logic::axi4::stream::monitor)
 
     monitor();
 

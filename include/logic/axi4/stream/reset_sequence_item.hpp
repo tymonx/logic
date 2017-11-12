@@ -17,7 +17,6 @@
 #define LOGIC_AXI4_STREAM_RESET_SEQUENCE_ITEM_HPP
 
 #include <uvm>
-#include <scv.h>
 
 #include <cstddef>
 
@@ -27,10 +26,10 @@ namespace stream {
 
 class reset_sequence_item : public uvm::uvm_sequence_item {
 public:
-    UVM_OBJECT_UTILS(reset_sequence_item)
+    UVM_OBJECT_UTILS(logic::axi4::stream::reset_sequence_item)
 
-    scv_smart_ptr<std::size_t> duration;
-    scv_smart_ptr<std::size_t> idle;
+    std::size_t duration;
+    std::size_t idle;
 
     reset_sequence_item();
 

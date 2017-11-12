@@ -29,7 +29,7 @@ namespace stream {
 
 class packet : public uvm::uvm_object {
 public:
-    UVM_OBJECT_UTILS(packet)
+    UVM_OBJECT_UTILS(logic::axi4::stream::packet)
 
     bitstream tid;
     bitstream tdest;

@@ -18,6 +18,8 @@
 #include "logic/axi4/stream/bus_if_base.hpp"
 #include "logic/axi4/stream/rx_sequence_item.hpp"
 
+#include <utility>
+
 using logic::axi4::stream::rx_driver;
 
 rx_driver::rx_driver(const uvm::uvm_component_name& name) :
@@ -38,6 +40,7 @@ void rx_driver::build_phase(uvm::uvm_phase& phase) {
 
 void rx_driver::run_phase(uvm::uvm_phase& /* phase */) {
     UVM_INFO(get_name(), "Run phase", uvm::UVM_FULL);
+
     rx_sequence_item item;
 
     while (true) {
@@ -48,28 +51,30 @@ void rx_driver::run_phase(uvm::uvm_phase& /* phase */) {
 }
 
 void rx_driver::transfer(const rx_sequence_item& item) {
-    auto idle_scheme = item.idle_scheme;
-    idle_scheme->next();
-
-    auto index = 0u;
-    auto count = 0u;
-    auto size_count = item.tdata.size();
-    auto idle_count = *idle_scheme;
-    const auto bus_size = m_vif->size();
+    std::size_t index = 0;
+    std::size_t count = 0;
+    std::size_t idle_count = 0;
+    std::size_t size_count = item.tdata.size();
+    std::size_t timeout = item.timeout;
+    const std::size_t bus_size = m_vif->size();
 
     while (size_count) {
         if (!m_vif->get_areset_n()) {
             size_count = 0;
         }
         else if (m_vif->get_tready()) {
+            timeout = item.timeout;
+
             if (idle_count) {
                 --idle_count;
                 m_vif->set_tvalid(false);
                 m_vif->aclk_posedge();
             }
             else {
-                idle_scheme->next();
-                idle_count = *idle_scheme;
+                if (!item.idle_scheme.empty()) {
+                    idle_count = item.idle_scheme[
+                        count % item.idle_scheme.size()];
+                }
 
                 m_vif->set_tvalid(true);
 
@@ -90,7 +95,7 @@ void rx_driver::transfer(const rx_sequence_item& item) {
                     m_vif->set_tuser(item.tuser[count % item.tuser.size()]);
                 }
 
-                for (auto i = 0u; i < bus_size; ++i) {
+                for (std::size_t i = 0; i < bus_size; ++i) {
                     if (size_count) {
                         m_vif->set_tkeep(i, true);
                         m_vif->set_tstrb(i, true);
@@ -104,14 +109,24 @@ void rx_driver::transfer(const rx_sequence_item& item) {
                     }
                 }
 
+                ++count;
+
                 do {
                     m_vif->aclk_posedge();
                 } while (!size_count && !m_vif->get_tready());
-
-                ++count;
             }
         }
         else {
+            if (item.timeout) {
+                if (timeout) {
+                    --timeout;
+                }
+                else {
+                    size_count = 0;
+                    UVM_ERROR(get_name(), "Timeout!");
+                }
+            }
+
             m_vif->aclk_posedge();
         }
     }

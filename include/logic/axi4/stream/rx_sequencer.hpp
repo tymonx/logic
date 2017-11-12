@@ -26,7 +26,7 @@ class rx_sequence_item;
 
 class rx_sequencer : public uvm::uvm_sequencer<rx_sequence_item> {
 public:
-    UVM_COMPONENT_UTILS(rx_sequencer)
+    UVM_COMPONENT_UTILS(logic::axi4::stream::rx_sequencer)
 
     rx_sequencer();
 

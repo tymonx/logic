@@ -55,8 +55,8 @@ void reset_driver::run_phase(uvm::uvm_phase& /* phase */) {
 }
 
 void reset_driver::transfer(const reset_sequence_item& item) {
-    auto duration = *item.duration;
-    auto idle = *item.idle;
+    auto duration = item.duration;
+    auto idle = item.idle;
 
     m_vif->set_areset_n(false);
     while (duration--) {

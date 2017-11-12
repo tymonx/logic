@@ -20,7 +20,6 @@
 #include "logic/bitstream.hpp"
 
 #include <uvm>
-#include <scv.h>
 
 #include <vector>
 #include <cstdint>
@@ -32,13 +31,14 @@ namespace stream {
 
 class rx_sequence_item : public uvm::uvm_sequence_item {
 public:
-    UVM_OBJECT_UTILS(rx_sequence_item)
+    UVM_OBJECT_UTILS(logic::axi4::stream::rx_sequence_item)
 
     bitstream tid;
     bitstream tdest;
     std::vector<bitstream> tuser;
     std::vector<std::uint8_t> tdata;
-    scv_smart_ptr<std::size_t> idle_scheme;
+    std::vector<std::size_t> idle_scheme;
+    std::size_t timeout;
 
     rx_sequence_item();
 

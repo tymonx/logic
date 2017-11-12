@@ -15,7 +15,11 @@
 
 #include "logic/axi4/stream/rx_sequence_item.hpp"
 
+#include <scv.h>
+
 #include <iomanip>
+
+static constexpr std::size_t TIMEOUT{10000};
 
 using logic::axi4::stream::rx_sequence_item;
 
@@ -29,12 +33,16 @@ rx_sequence_item::rx_sequence_item(const std::string& name) :
     tdest{},
     tuser{},
     tdata{},
-    idle_scheme{}
+    idle_scheme{},
+    timeout{TIMEOUT}
 { }
 
 void rx_sequence_item::randomize() {
     scv_smart_ptr<bool> random_bit;
     scv_smart_ptr<std::uint8_t> random_byte;
+    scv_smart_ptr<std::size_t> random_idle;
+
+    random_idle->keep_only(0, 3);
 
     for (auto bit : tid) {
         random_bit->next();
@@ -56,6 +64,11 @@ void rx_sequence_item::randomize() {
     for (auto& byte : tdata) {
         random_byte->next();
         byte = *random_byte;
+    }
+
+    for (auto& idle : idle_scheme) {
+        random_idle->next();
+        idle = *random_idle;
     }
 }
 
@@ -95,7 +108,7 @@ void rx_sequence_item::do_unpack(uvm::uvm_packer& p) {
 void rx_sequence_item::do_copy(const uvm::uvm_object& rhs) {
     auto other = dynamic_cast<const rx_sequence_item*>(&rhs);
     if (other) {
-        tdata = other->tdata;
+        *this = *other;
     }
     else {
         UVM_ERROR(get_name(), "Error in do_copy");

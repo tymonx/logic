@@ -36,6 +36,12 @@ find_program(VERILATOR_EXECUTABLE verilator
     DOC "Path to the Verilator executable"
 )
 
+find_program(VERILATOR_COVERAGE_EXECUTABLE verilator_coverage
+    HINTS $ENV{VERILATOR_ROOT}
+    PATH_SUFFIXES bin
+    DOC "Path to the Verilator coverage executable"
+)
+
 get_filename_component(VERILATOR_EXECUTABLE_DIR ${VERILATOR_EXECUTABLE}
     DIRECTORY)
 
@@ -46,25 +52,36 @@ find_path(VERILATOR_INCLUDE_DIR verilated.h
 )
 
 mark_as_advanced(VERILATOR_EXECUTABLE)
+mark_as_advanced(VERILATOR_COVERAGE_EXECUTABLE)
 mark_as_advanced(VERILATOR_INCLUDE_DIR)
 
 find_package_handle_standard_args(Verilator REQUIRED_VARS
-    VERILATOR_EXECUTABLE VERILATOR_INCLUDE_DIR)
+    VERILATOR_EXECUTABLE VERILATOR_COVERAGE_EXECUTABLE VERILATOR_INCLUDE_DIR)
 
-add_library(verilated STATIC
+add_library(verilated SHARED
     ${VERILATOR_INCLUDE_DIR}/verilated.cpp
+    ${VERILATOR_INCLUDE_DIR}/verilated_cov.cpp
+    ${VERILATOR_INCLUDE_DIR}/verilated_dpi.cpp
     ${VERILATOR_INCLUDE_DIR}/verilated_vcd_c.cpp
     ${VERILATOR_INCLUDE_DIR}/verilated_vcd_sc.cpp
 )
 
-#target_link_libraries(verilated PRIVATE systemc)
+set_source_files_properties(
+    ${VERILATOR_INCLUDE_DIR}/verilated_cov.cpp
+    PROPERTIES
+    COMPILE_DEFINITIONS "VM_COVERAGE=1"
+)
+
+target_link_libraries(verilated PRIVATE systemc)
 
 set_target_properties(verilated PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
 )
 
 target_include_directories(verilated SYSTEM PRIVATE
     ${VERILATOR_INCLUDE_DIR}
+    ${VERILATOR_INCLUDE_DIR}/vltstd
     ${SYSTEMC_INCLUDE_DIRS}
 )
 
@@ -91,6 +108,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES GNU)
         -Wno-switch-enum
         -Wno-undef
         -Wno-inline
+        -Wno-variadic-macros
         -Wno-zero-as-null-pointer-constant
     )
 elseif (CMAKE_CXX_COMPILER_ID MATCHES Clang)
@@ -158,7 +176,8 @@ function(verilator_add_systemc_module target_name)
     string(REPLACE ";" "\n" VERILATOR_CONFIGURATIONS_SEPERATE
         "${VERILATOR_CONFIGURATIONS}")
 
-    set(verilator_config_file ${target_output_directory}/verilator_config.vlt)
+    set(verilator_config_file
+        ${target_output_directory}/${target_top_module}.vlt)
 
     configure_file(${find_verilator_internal_dir}/VerilatorConfig.cmake.in
         ${verilator_config_file})
@@ -173,6 +192,7 @@ function(verilator_add_systemc_module target_name)
             -O2
             -CFLAGS '-std=c++11 -O2 -fdata-sections -ffunction-sections'
             --trace
+            --coverage
             --prefix ${target_top_module}
             --top-module ${target_top_module}
             -Mdir ${target_output_directory}

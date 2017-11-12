@@ -38,15 +38,19 @@ set_source_files_properties(main.cpp PROPERTIES
     COMPILE_DEFINITIONS "${MODULE_DEFINITIONS}"
 )
 
-add_executable(test_${MODULE_NAME}
+set(TEST_MODULE_NAME test_${MODULE_NAME})
+
+add_executable(${TEST_MODULE_NAME}
     main.cpp
+    test.cpp
 )
 
-add_test(NAME test_${MODULE_NAME}
-    COMMAND test_${MODULE_NAME}
+add_test(NAME ${TEST_MODULE_NAME}
+    COMMAND ${TEST_MODULE_NAME}
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/output
 )
 
-target_link_libraries(test_${MODULE_NAME}
-    -Wl,--whole-archive logic -Wl,--no-whole-archive
+target_link_libraries(${TEST_MODULE_NAME}
+    logic
     ${MODULE_LIBRARIES}
 )

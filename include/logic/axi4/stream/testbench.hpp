@@ -30,7 +30,7 @@ class reset_agent;
 
 class testbench : public uvm::uvm_env {
 public:
-    UVM_COMPONENT_PARAM_UTILS(testbench)
+    UVM_COMPONENT_UTILS(logic::axi4::stream::testbench)
 
     logic::axi4::stream::sequencer* sequencer;
 

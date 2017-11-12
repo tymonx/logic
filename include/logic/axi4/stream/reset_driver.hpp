@@ -27,7 +27,7 @@ class reset_sequence_item;
 
 class reset_driver : public uvm::uvm_driver<reset_sequence_item> {
 public:
-    UVM_COMPONENT_UTILS(reset_driver)
+    UVM_COMPONENT_UTILS(logic::axi4::stream::reset_driver)
 
     reset_driver();
 

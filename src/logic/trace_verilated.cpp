@@ -16,16 +16,15 @@
 #include "logic/trace_verilated.hpp"
 
 #include <verilated.h>
+#include <verilated_cov.h>
 #include <verilated_vcd_sc.h>
-
-#include <string>
 
 using logic::trace_verilated;
 
-using sc_core::sc_object;
-
-trace_verilated::trace_verilated() :
-    m_trace_file{new VerilatedVcdSc}
+trace_verilated::trace_verilated(const std::string& name,
+        const char* filename) :
+    m_trace_file{new VerilatedVcdSc},
+    m_filename{filename ? filename : name}
 {
     Verilated::traceEverOn(true);
 }
@@ -34,13 +33,9 @@ trace_verilated::~trace_verilated() {
         m_trace_file->close();
         Verilated::traceEverOn(false);
         delete m_trace_file;
+        VerilatedCov::write((m_filename + ".dat").c_str());
 }
 
-void trace_verilated::open(const char* filename) {
-    std::string vcd_filename{filename};
-    auto pos = vcd_filename.rfind(".vcd");
-    if ((std::string::npos == pos) || ((vcd_filename.size() - 4) != pos)) {
-        vcd_filename += ".vcd";
-    }
-    m_trace_file->open(vcd_filename.c_str());
+void trace_verilated::open() {
+    m_trace_file->open((m_filename + ".vcd").c_str());
 }

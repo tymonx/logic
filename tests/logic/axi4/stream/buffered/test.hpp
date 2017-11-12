@@ -13,30 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef LOGIC_AXI4_STREAM_TX_SEQUENCER_HPP
-#define LOGIC_AXI4_STREAM_TX_SEQUENCER_HPP
+#ifndef LOGIC_AXI4_STREAM_BUFFERED_TEST_HPP
+#define LOGIC_AXI4_STREAM_BUFFERED_TEST_HPP
 
-#include <uvm>
+#include "logic/axi4/stream/test.hpp"
 
-namespace logic {
-namespace axi4 {
-namespace stream {
-
-class tx_sequence_item;
-
-class tx_sequencer : public uvm::uvm_sequencer<tx_sequence_item> {
+class logic_axi4_stream_buffered_test : public logic::axi4::stream::test {
 public:
-    UVM_COMPONENT_UTILS(logic::axi4::stream::tx_sequencer)
+    UVM_COMPONENT_UTILS(logic_axi4_stream_buffered_test)
 
-    tx_sequencer();
+    logic_axi4_stream_buffered_test(const uvm::uvm_component_name& name);
 
-    tx_sequencer(const uvm::uvm_component_name& name);
-
-    virtual ~tx_sequencer() override;
+    virtual ~logic_axi4_stream_buffered_test() override;
+protected:
+    virtual void build_phase(uvm::uvm_phase& phase) override;
 };
 
-}
-}
-}
-
-#endif /* LOGIC_AXI4_STREAM_TX_SEQUENCER_HPP */
+#endif /* LOGIC_AXI4_STREAM_BUFFERED_TEST_HPP */

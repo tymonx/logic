@@ -15,6 +15,8 @@
 
 #include "logic/axi4/stream/reset_sequence_item.hpp"
 
+#include <scv.h>
+
 using logic::axi4::stream::reset_sequence_item;
 
 reset_sequence_item::reset_sequence_item() :
@@ -28,14 +30,24 @@ reset_sequence_item::reset_sequence_item(const std::string& name) :
 { }
 
 void reset_sequence_item::randomize() {
-    duration->next();
-    idle->next();
+    scv_smart_ptr<std::size_t> random_value;
+
+    random_value->keep_only(1, 4);
+    random_value->next();
+
+    duration = *random_value;
+
+    random_value->reset_distribution();
+    random_value->keep_only(0, 3);
+    random_value->next();
+
+    idle = *random_value;
 }
 
 std::string reset_sequence_item::convert2string() const {
     std::ostringstream ss;
-    ss << "duration: " << std::size_t(*duration) <<
-        ", idle: " << std::size_t(*idle);
+    ss << "duration: " << duration <<
+        ", idle: " << idle;
     return ss.str();
 }
 
@@ -43,20 +55,18 @@ reset_sequence_item::~reset_sequence_item() { }
 
 void reset_sequence_item::do_print(const uvm::uvm_printer& printer) const {
     printer.print_field_int("duration",
-            std::size_t(*duration), 8 * sizeof(std::size_t));
+            duration, 8 * sizeof(std::size_t));
 
     printer.print_field_int("idle",
-            std::size_t(*idle), 8 * sizeof(std::size_t));
+            idle, 8 * sizeof(std::size_t));
 }
 
 void reset_sequence_item::do_pack(uvm::uvm_packer& p) const {
-    p << std::size_t(*duration);
+    p << duration;
 }
 
 void reset_sequence_item::do_unpack(uvm::uvm_packer& p) {
-    std::size_t value;
-    p >> value;
-    *duration = value;
+    p >> duration;
 }
 
 void reset_sequence_item::do_copy(const uvm::uvm_object& rhs) {
@@ -75,8 +85,8 @@ bool reset_sequence_item::do_compare(const uvm::uvm_object& rhs,
     auto status = false;
 
     if (other) {
-        status = (*duration == *other->duration) &&
-            (*idle == *other->idle);
+        status = (duration == other->duration) &&
+            (idle == other->idle);
     }
     else {
         UVM_ERROR(get_name(), "Error in do_compare");

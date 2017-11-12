@@ -28,9 +28,10 @@ add_library(logic-core OBJECT
     bitstream_const_reference.cpp
 )
 
-add_library(logic STATIC
+add_library(logic SHARED
     $<TARGET_OBJECTS:logic-core>
     $<TARGET_OBJECTS:logic-axi4-stream>
 )
 
-#target_link_libraries(logic PRIVATE verilated scv uvm-systemc systemc)
+target_link_libraries(logic PRIVATE
+    verilated scv uvm-systemc systemc)

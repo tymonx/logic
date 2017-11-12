@@ -139,7 +139,6 @@ endforeach()
 if (SYSTEMC_FOUND)
     add_library(systemc-main STATIC
         ${CMAKE_CURRENT_LIST_DIR}/sc_main.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/sc_main_main.cpp
     )
 
     target_include_directories(systemc-main SYSTEM

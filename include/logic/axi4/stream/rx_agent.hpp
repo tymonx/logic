@@ -29,7 +29,7 @@ class rx_sequencer;
 
 class rx_agent : public uvm::uvm_agent {
 public:
-    UVM_COMPONENT_UTILS(rx_agent)
+    UVM_COMPONENT_UTILS(logic::axi4::stream::rx_agent)
 
     rx_agent();
 

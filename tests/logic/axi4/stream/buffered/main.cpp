@@ -23,6 +23,8 @@
 #include <systemc>
 
 int sc_main(int /* argc */, char** /* argv */) {
+    bool test_passed{false};
+
     sc_core::sc_clock aclk{"aclk"};
     sc_core::sc_signal<bool> areset_n{"areset_n"};
 
@@ -30,9 +32,9 @@ int sc_main(int /* argc */, char** /* argv */) {
     logic::axi4::stream::bus_if<> tx{"tx"};
     logic::axi4::stream::reset_if reset{};
 
-    logic_axi4_stream_buffered_top dut("logic_axi4_stream_buffered_top");
+    logic_axi4_stream_buffered_top dut{"logic_axi4_stream_buffered_top"};
 
-    logic::trace<decltype(dut)> trace(dut);
+    logic::trace<decltype(dut)> trace{dut};
 
     uvm::uvm_config_db<logic::axi4::stream::bus_if_base*>::set(
             nullptr, "*.rx_agent.*", "vif", &rx);
@@ -74,7 +76,9 @@ int sc_main(int /* argc */, char** /* argv */) {
     dut.tx_tdest(tx.tdest);
     dut.tx_tid(tx.tid);
 
-    uvm::run_test("test");
+    uvm::run_test("logic_axi4_stream_buffered_test");
 
-    return 0;
+    uvm::uvm_config_db<bool>::get(nullptr, "*", "test_passed", test_passed);
+
+    return test_passed ? EXIT_SUCCESS : EXIT_FAILURE;
 }

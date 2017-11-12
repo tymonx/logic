@@ -15,7 +15,11 @@
 
 #include "logic/axi4/stream/tx_sequence_item.hpp"
 
+#include <scv.h>
+
 using logic::axi4::stream::tx_sequence_item;
+
+static constexpr std::size_t TIMEOUT{10000};
 
 tx_sequence_item::tx_sequence_item() :
     tx_sequence_item{"sequence_item"}
@@ -23,39 +27,33 @@ tx_sequence_item::tx_sequence_item() :
 
 tx_sequence_item::tx_sequence_item(const std::string& name) :
     uvm::uvm_sequence_item{name},
-    number_of_packets{},
-    idle_scheme{}
+    idle_scheme{},
+    timeout{TIMEOUT}
 { }
 
 void tx_sequence_item::randomize() {
-    number_of_packets->next();
+    scv_smart_ptr<std::size_t> random_idle;
+
+    random_idle->keep_only(0, 3);
+
+    for (auto& idle : idle_scheme) {
+        random_idle->next();
+        idle = *random_idle;
+    }
 }
 
 std::string tx_sequence_item::convert2string() const {
     std::ostringstream ss;
-    ss << "packets: " << std::size_t(*number_of_packets);
     return ss.str();
 }
 
 tx_sequence_item::~tx_sequence_item() { }
 
-void tx_sequence_item::do_print(const uvm::uvm_printer& printer) const {
-    printer.print_field_int("number_of_packets",
-            std::size_t(*number_of_packets), 8 * sizeof(std::size_t));
+void tx_sequence_item::do_print(const uvm::uvm_printer&) const { }
 
-    printer.print_field_int("idle_scheme",
-            std::size_t(*idle_scheme), 8 * sizeof(std::size_t));
-}
+void tx_sequence_item::do_pack(uvm::uvm_packer&) const { }
 
-void tx_sequence_item::do_pack(uvm::uvm_packer& p) const {
-    p << std::size_t(*number_of_packets);
-}
-
-void tx_sequence_item::do_unpack(uvm::uvm_packer& p) {
-    std::size_t value;
-    p >> value;
-    *number_of_packets = value;
-}
+void tx_sequence_item::do_unpack(uvm::uvm_packer&) { }
 
 void tx_sequence_item::do_copy(const uvm::uvm_object& rhs) {
     auto other = dynamic_cast<const tx_sequence_item*>(&rhs);
@@ -73,7 +71,7 @@ bool tx_sequence_item::do_compare(const uvm::uvm_object& rhs,
     auto status = false;
 
     if (other) {
-        status = (*number_of_packets == *other->number_of_packets);
+        status = true;
     }
     else {
         UVM_ERROR(get_name(), "Error in do_compare");

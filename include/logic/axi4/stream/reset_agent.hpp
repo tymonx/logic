@@ -28,7 +28,7 @@ class reset_sequencer;
 
 class reset_agent : public uvm::uvm_agent {
 public:
-    UVM_COMPONENT_UTILS(reset_agent)
+    UVM_COMPONENT_UTILS(logic::axi4::stream::reset_agent)
 
     reset_sequencer* sequencer;
 

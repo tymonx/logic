@@ -29,7 +29,7 @@ class tx_sequence_item;
 
 class tx_driver : public uvm::uvm_driver<tx_sequence_item> {
 public:
-    UVM_COMPONENT_UTILS(tx_driver)
+    UVM_COMPONENT_UTILS(logic::axi4::stream::tx_driver)
 
     tx_driver();
 

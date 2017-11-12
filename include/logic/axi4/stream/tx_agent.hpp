@@ -29,7 +29,7 @@ class tx_sequencer;
 
 class tx_agent : public uvm::uvm_agent {
 public:
-    UVM_COMPONENT_PARAM_UTILS(tx_agent)
+    UVM_COMPONENT_UTILS(logic::axi4::stream::tx_agent)
 
     tx_agent();
 

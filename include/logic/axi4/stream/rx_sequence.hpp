@@ -30,7 +30,7 @@ namespace stream {
 
 class rx_sequence : public uvm::uvm_sequence<rx_sequence_item> {
 public:
-    UVM_OBJECT_UTILS(rx_sequence)
+    UVM_OBJECT_UTILS(logic::axi4::stream::rx_sequence)
 
     scv_smart_ptr<std::size_t> packet_length;
     scv_smart_ptr<std::size_t> number_of_packets;

@@ -40,16 +40,22 @@ void rx_sequence::body() {
     UVM_INFO(get_name(), "Starting sequence", uvm::UVM_FULL);
 
     number_of_packets->next();
-    const auto packets_count = *number_of_packets;
+    const std::size_t packets_count = *number_of_packets;
 
-    rx_sequence_item item;
+    for (std::size_t i = 0; i < packets_count; ++i) {
+        rx_sequence_item item;
 
-    for (std::size_t i = 0u; i < packets_count; ++i) {
         packet_length->next();
         item.tdata.resize(*packet_length);
-        item.idle_scheme = idle_scheme;
+        item.idle_scheme.resize(16);
 
         item.randomize();
+
+        for (auto& idle : item.idle_scheme) {
+            idle_scheme->next();
+            idle = *idle_scheme;
+        }
+
         start_item(&item);
         finish_item(&item);
     }

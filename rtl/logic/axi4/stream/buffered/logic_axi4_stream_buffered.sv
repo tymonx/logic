@@ -31,7 +31,7 @@ module logic_axi4_stream_buffered (
             fsm_state <= FSM_IDLE;
         end
         else begin
-            case (fsm_state)
+            unique case (fsm_state)
             FSM_IDLE: begin
                 if (rx.tvalid && rx.tready && !tx.tready) begin
                     fsm_state <= FSM_BUFFERED;
@@ -41,9 +41,6 @@ module logic_axi4_stream_buffered (
                 if (tx.tready) begin
                     fsm_state <= FSM_IDLE;
                 end
-            end
-            default: begin
-                fsm_state <= FSM_IDLE;
             end
             endcase
         end
@@ -64,14 +61,25 @@ module logic_axi4_stream_buffered (
         end
     end
 
-    always_comb tx.tvalid = (FSM_BUFFERED == fsm_state) || rx.tvalid;
+    always_comb begin
+        unique case (fsm_state)
+        FSM_BUFFERED: begin
+            tx.tvalid = 1'b1;
+        end
+        default: begin
+            tx.tvalid = rx.tvalid && rx.tready;
+        end
+        endcase
+    end
 
     always_comb begin
-        if (FSM_BUFFERED == fsm_state) begin
+        unique case (fsm_state)
+        FSM_BUFFERED: begin
             tx.comb_write(buffered);
         end
-        else begin
+        default: begin
             tx.comb_write(rx.read());
         end
+        endcase
     end
 endmodule

@@ -32,7 +32,9 @@ test::test(const uvm::uvm_component_name& name) :
     m_sequence{nullptr},
     m_testbench{nullptr},
     m_test_passed{false}
-{ }
+{
+    scv_random::set_global_seed(scv_random::pick_random_seed());
+}
 
 test::~test() { }
 
@@ -50,13 +52,6 @@ void test::build_phase(uvm::uvm_phase& phase) {
         UVM_FATAL(get_name(), "Cannot create sequence!"
                 " Simulation aborted!");
     }
-
-    /*
-    uvm::uvm_config_db<scv_smart_ptr<std::size_t>>::get(
-        this, "", "reset_duration", m_sequence->reset_duration);
-    */
-
-    scv_random::set_global_seed(scv_random::pick_random_seed());
 
     m_sequence->reset_repeats->keep_only(1);
     m_sequence->reset_duration->keep_only(1);
@@ -80,6 +75,8 @@ void test::extract_phase(uvm::uvm_phase& phase) {
     uvm::uvm_test::extract_phase(phase);
 
     m_test_passed = m_testbench->passed();
+
+    uvm::uvm_config_db<bool>::set(nullptr, "*", "test_passed", m_test_passed);
 }
 
 void test::report_phase(uvm::uvm_phase& phase) {

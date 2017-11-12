@@ -104,7 +104,7 @@ void sequence::body() {
     rx_repeats->next();
     std::size_t repeat_count = *rx_repeats;
 
-    for (auto i = 0u; i < repeat_count; ++i) {
+    for (std::size_t i = 0; i < repeat_count; ++i) {
         reset_sequence_handler();
 
         rx_number_of_packets->next();
@@ -126,14 +126,14 @@ void sequence::reset_sequence_handler() {
 }
 
 void sequence::rx_sequence_handler(std::size_t packets_count) {
-    m_rx_sequence->number_of_packets = {};
+    m_rx_sequence->number_of_packets->reset_distribution();;
     m_rx_sequence->number_of_packets->keep_only(packets_count);
 
     m_rx_sequence->start(m_rx_sequencer);
 }
 
 void sequence::tx_sequence_handler(std::size_t packets_count) {
-    m_tx_sequence->number_of_packets = {};
+    m_tx_sequence->number_of_packets->reset_distribution();
     m_tx_sequence->number_of_packets->keep_only(packets_count);
 
     m_tx_sequence->start(m_tx_sequencer);

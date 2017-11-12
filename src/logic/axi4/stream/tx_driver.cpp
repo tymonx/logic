@@ -55,21 +55,25 @@ void tx_driver::run_phase(uvm::uvm_phase& /* phase */) {
 }
 
 void tx_driver::transfer(const tx_sequence_item& item) {
-    auto idle_scheme = item.idle_scheme;
-    idle_scheme->next();
-
     auto tready_tmp = m_vif->get_tready();
-    auto idle_count = *item.idle_scheme;
-    auto packets_count = *item.number_of_packets;
+
+    std::size_t packets_count = 1;
+    std::size_t idle_count = 0;
+    std::size_t count = 0;
+    std::size_t timeout = item.timeout;
 
     while (packets_count) {
         if (!m_vif->get_areset_n()) {
             packets_count = 0;
         }
         else {
-            if (m_vif->get_tready() && m_vif->get_tvalid() &&
-                    m_vif->get_tlast()) {
-                --packets_count;
+            if (m_vif->get_tready() && m_vif->get_tvalid()) {
+                timeout = item.timeout;
+                ++count;
+
+                if (m_vif->get_tlast()) {
+                    --packets_count;
+                }
             }
 
             if (packets_count) {
@@ -78,13 +82,28 @@ void tx_driver::transfer(const tx_sequence_item& item) {
                     m_vif->set_tready(false);
                 }
                 else {
-                    idle_scheme->next();
-                    idle_count = *idle_scheme;
+                    if (!item.idle_scheme.empty()) {
+                        idle_count = item.idle_scheme[
+                            count % item.idle_scheme.size()];
+                    }
                     m_vif->set_tready(true);
                 }
-                m_vif->aclk_posedge();
             }
+            else {
+                m_vif->set_tready(tready_tmp);
+            }
+
+            if (item.timeout) {
+                if (timeout) {
+                    --timeout;
+                }
+                else {
+                    packets_count = 0;
+                    UVM_ERROR(get_name(), "Timeout!");
+                }
+            }
+
+            m_vif->aclk_posedge();
         }
     }
-    m_vif->set_tready(tready_tmp);
 }

@@ -26,7 +26,7 @@ class reset_sequence_item;
 
 class reset_sequencer : public uvm::uvm_sequencer<reset_sequence_item> {
 public:
-    UVM_COMPONENT_UTILS(reset_sequencer)
+    UVM_COMPONENT_UTILS(logic::axi4::stream::reset_sequencer)
 
     reset_sequencer();
 

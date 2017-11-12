@@ -29,7 +29,7 @@ namespace stream {
 
 class tx_sequence : public uvm::uvm_sequence<tx_sequence_item> {
 public:
-    UVM_OBJECT_UTILS(tx_sequence)
+    UVM_OBJECT_UTILS(logic::axi4::stream::tx_sequence)
 
     scv_smart_ptr<std::size_t> idle_scheme;
     scv_smart_ptr<std::size_t> number_of_packets;

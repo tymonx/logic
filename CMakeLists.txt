@@ -38,14 +38,6 @@ find_package(Quartus REQUIRED)
 include_directories(include)
 include_directories(SYSTEM ${SYSTEMC_INCLUDE_DIRS})
 
-#add_library(systemc-main STATIC
-#    cmake/sc_main.cpp
-#    cmake/sc_main_main.cpp
-#)
-
-#target_include_directories(systemc-main SYSTEM
-#    PRIVATE ${SYSTEMC_INCLUDE_DIR})
-
 add_subdirectory(src)
 add_subdirectory(rtl)
 

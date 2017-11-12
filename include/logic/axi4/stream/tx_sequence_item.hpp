@@ -17,8 +17,8 @@
 #define LOGIC_AXI4_STREAM_TX_SEQUENCE_ITEM_HPP
 
 #include <uvm>
-#include <scv.h>
 
+#include <vector>
 #include <cstddef>
 
 namespace logic {
@@ -27,10 +27,10 @@ namespace stream {
 
 class tx_sequence_item : public uvm::uvm_sequence_item {
 public:
-    UVM_OBJECT_UTILS(tx_sequence_item)
+    UVM_OBJECT_UTILS(logic::axi4::stream::tx_sequence_item)
 
-    scv_smart_ptr<std::size_t> number_of_packets;
-    scv_smart_ptr<std::size_t> idle_scheme;
+    std::vector<std::size_t> idle_scheme;
+    std::size_t timeout;
 
     tx_sequence_item();
 

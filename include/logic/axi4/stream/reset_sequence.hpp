@@ -29,7 +29,7 @@ namespace stream {
 
 class reset_sequence : public uvm::uvm_sequence<reset_sequence_item> {
 public:
-    UVM_OBJECT_UTILS(reset_sequence)
+    UVM_OBJECT_UTILS(logic::axi4::stream::reset_sequence)
 
     scv_smart_ptr<std::size_t> duration;
     scv_smart_ptr<std::size_t> idle;

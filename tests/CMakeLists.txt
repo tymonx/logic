@@ -16,6 +16,8 @@ function(add_systemc_module)
     verilator_add_systemc_module(${ARGV})
 endfunction()
 
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/output)
+
 add_rtl_sources(
     ${QUARTUS_MEGA_FUNCTIONS}
 )
@@ -24,5 +26,15 @@ add_verilator_configurations(
     "lint_off -msg STMTDLY      -file \"${QUARTUS_MEGA_FUNCTIONS}\""
     "lint_off -msg PINMISSING   -file \"${QUARTUS_MEGA_FUNCTIONS}\""
 )
+
+if (VERILATOR_FOUND)
+    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/coverage)
+
+    add_custom_target(coverage
+        ${VERILATOR_COVERAGE_EXECUTABLE}
+            --annotate ${CMAKE_BINARY_DIR}/coverage
+            ${CMAKE_BINARY_DIR}/output/*.dat
+    )
+endif()
 
 add_subdirectory(logic)

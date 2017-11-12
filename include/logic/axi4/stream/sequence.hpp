@@ -34,7 +34,7 @@ class reset_sequencer;
 
 class sequence : public uvm::uvm_sequence<> {
 public:
-    UVM_OBJECT_UTILS(sequence)
+    UVM_OBJECT_UTILS(logic::axi4::stream::sequence)
 
     scv_smart_ptr<std::size_t> reset_idle;
     scv_smart_ptr<std::size_t> reset_duration;

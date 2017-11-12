@@ -21,6 +21,7 @@
 #include <systemc>
 #include <verilated_vcd_sc.h>
 
+#include <string>
 #include <cstddef>
 
 namespace logic {
@@ -54,20 +55,21 @@ private:
 
     trace_verilated& operator=(const trace_verilated&) = delete;
 
-    trace_verilated();
+    trace_verilated(const std::string& name, const char* filename);
 
-    void open(const char* filename);
+    void open();
 
     VerilatedVcdSc* m_trace_file{nullptr};
+    std::string m_filename{};
 };
 
 template<typename T>
 trace_verilated::trace_verilated(const T& object, const char* filename,
         std::size_t level) :
-    trace_verilated{}
+    trace_verilated{object.basename(), filename}
 {
     const_cast<T&>(object).trace(m_trace_file, int(level));
-    open(filename ? filename : object.basename());
+    open();
 }
 
 }

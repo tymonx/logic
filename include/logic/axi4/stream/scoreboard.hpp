@@ -29,7 +29,7 @@ namespace stream {
 
 class scoreboard : public uvm::uvm_scoreboard {
 public:
-    UVM_COMPONENT_UTILS(scoreboard)
+    UVM_COMPONENT_UTILS(logic::axi4::stream::scoreboard)
 
     scoreboard();
 

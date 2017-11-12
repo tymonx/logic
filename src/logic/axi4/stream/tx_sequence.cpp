@@ -38,14 +38,23 @@ void tx_sequence::pre_body() {
 void tx_sequence::body() {
     UVM_INFO(get_name(), "Starting sequence", uvm::UVM_FULL);
 
-    tx_sequence_item item;
+    number_of_packets->next();
+    const std::size_t packets_count = *number_of_packets;
 
-    item.number_of_packets = number_of_packets;
-    item.idle_scheme = idle_scheme;
+    for (std::size_t i = 0; i < packets_count; ++i) {
+        tx_sequence_item item;
+        item.idle_scheme.resize(16);
 
-    item.randomize();
-    start_item(&item);
-    finish_item(&item);
+        item.randomize();
+
+        for (auto& idle : item.idle_scheme) {
+            idle_scheme->next();
+            idle = *idle_scheme;
+        }
+
+        start_item(&item);
+        finish_item(&item);
+    }
 
     UVM_INFO(get_name(), "Finishing sequence", uvm::UVM_FULL);
 }

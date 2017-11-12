@@ -28,7 +28,7 @@ class reset_sequencer;
 
 class sequencer : public uvm::uvm_sequencer<> {
 public:
-    UVM_COMPONENT_UTILS(sequencer)
+    UVM_COMPONENT_UTILS(logic::axi4::stream::sequencer)
 
     logic::axi4::stream::rx_sequencer* rx_sequencer;
     logic::axi4::stream::tx_sequencer* tx_sequencer;

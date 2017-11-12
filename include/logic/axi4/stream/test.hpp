@@ -28,7 +28,7 @@ class testbench;
 
 class test : public uvm::uvm_test {
 public:
-    UVM_COMPONENT_UTILS(test)
+    UVM_COMPONENT_UTILS(logic::axi4::stream::test)
 
     test();
 
