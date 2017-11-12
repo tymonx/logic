@@ -35,7 +35,12 @@ rx_sequence_item::rx_sequence_item(const std::string& name) :
     tdata{},
     idle_scheme{},
     timeout{TIMEOUT}
-{ }
+{
+    tid.resize(1);
+    tdest.resize(1);
+    tuser.resize(1);
+    tuser[0].resize(1);
+}
 
 void rx_sequence_item::randomize() {
     scv_smart_ptr<bool> random_bit;

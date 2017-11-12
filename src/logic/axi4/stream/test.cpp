@@ -82,6 +82,10 @@ void test::extract_phase(uvm::uvm_phase& phase) {
 void test::report_phase(uvm::uvm_phase& phase) {
     uvm::uvm_test::report_phase(phase);
 
+    UVM_INFO(get_name(),
+            "Seed " + std::to_string(scv_random::get_global_seed()),
+            uvm::UVM_NONE);
+
     if (m_test_passed) {
         UVM_INFO(get_name(), "TEST PASSED", uvm::UVM_NONE);
     }

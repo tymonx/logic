@@ -36,7 +36,7 @@ void logic_axi4_stream_buffered_test::build_phase(uvm::uvm_phase& phase) {
     m_sequence->rx_number_of_packets->keep_only(1, 4);
 
     m_sequence->rx_repeats->reset_distribution();
-    m_sequence->rx_repeats->keep_only(4);
+    m_sequence->rx_repeats->keep_only(8);
 
     m_sequence->rx_packet_length->keep_only(1, 256);
 
