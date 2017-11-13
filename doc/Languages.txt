@@ -18,6 +18,20 @@
 # Languages
 # ------------------------------------------------------------------------
 
+Language: SystemVerilog
+
+   Extensions: v vh sv svh
+
+   Line Comment: //
+   Block Comment: /* */
+   Member Operator: ::
+   Enum Values: Global
+   Case Sensitive: Yes
+
+   Function Prototype Enders: ; begin
+   Class Prototype Ender: ;
+
+
 # These settings define the languages Natural Docs knows how to parse.  You
 # can define your own here or override the settings of the existing ones.
 # Note that all lists are space separated so that commas can be used as

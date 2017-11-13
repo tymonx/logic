@@ -13,17 +13,39 @@
  * limitations under the License.
  */
 
+`include "logic.svh"
+
+/* Module: logic_axi4_stream_buffered
+ *
+ * Improve timings between modules by adding register to ready signal from tx to
+ * rx.
+ *
+ * Parameters:
+ *  aclk        - Clock.
+ *  areset_n    - Asynchronous active-low reset.
+ *  rx          - AXI4-Stream interface.
+ *  tx          - AXI4-Stream interface.
+ */
 module logic_axi4_stream_buffered (
     input aclk,
     input areset_n,
-    logic_axi4_stream_if.rx rx,
-    logic_axi4_stream_if.tx tx
+    `logic_modport(logic_axi4_stream_if, rx) rx,
+    `logic_modport(logic_axi4_stream_if, tx) tx
 );
+    /* Enum: fsm_state
+     *
+     * FSM_IDLE     - Data signals that come directly from rx.
+     * FSM_BUFFERED - Data signals that come from internal buffer.
+     */
     enum logic [0:0] {
         FSM_IDLE,
         FSM_BUFFERED
     } fsm_state;
 
+    /* Logic: buffered
+     *
+     * Store captured data signals.
+     */
     logic [$bits(rx.read())-1:0] buffered;
 
     always_ff @(posedge aclk or negedge areset_n) begin

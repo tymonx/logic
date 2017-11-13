@@ -14,6 +14,17 @@
  * limitations under the License.
  */
 
+`include "logic.svh"
+
+/* Interface: logic_axi4_stream_if
+ *
+ * AXI4-Stream interface.
+ *
+ * Parameters:
+ *  aclk        - Clock. Used only for internal checkers and assertions
+ *  areset_n    - Asynchronous active-low reset. Used only for internal checkers
+ *                and assertions
+ */
 interface logic_axi4_stream_if #(
     int TDATA_BYTES = 1,
     int TDEST_WIDTH = 1,
@@ -65,6 +76,7 @@ interface logic_axi4_stream_if #(
         {tuser, tdest, tid, tlast, tkeep, tstrb, tdata} = packet;
     endtask
 
+`ifndef LOGIC_MODPORT_DISABLED
     modport rx (
         input tvalid,
         input tuser,
@@ -104,4 +116,5 @@ interface logic_axi4_stream_if #(
         input tready,
         import read
     );
+`endif
 endinterface

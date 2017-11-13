@@ -20,6 +20,21 @@
 
 # Comment Types
 # ------------------------------------------------------------------------
+# The syntax reference is after the definitions.
+
+Alter Comment Type: Class
+
+   Keywords:
+      module
+      package
+      interface
+
+
+Alter Comment Type: Variable
+
+   Keywords:
+      logic
+
 
 # Each Natural Docs comment has a corresponding type which determine its
 # behavior.  You can define your own here or override the settings of the

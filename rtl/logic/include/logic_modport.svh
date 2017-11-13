@@ -6,6 +6,7 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
+ * @copyright
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -13,15 +14,13 @@
  * limitations under the License.
  */
 
-/* Package: logic_pkg
- *
- * Logic package.
- */
-package logic_pkg;
+`ifndef LOGIC_MODPORT_SVH
+`define LOGIC_MODPORT_SVH
 
-    typedef enum {
-        GENERIC,
-        INTEL_ARRIA_10
-    } target_t;
+`ifndef LOGIC_MODPORT_DISABLED
+    `define logic_modport(_interface, _modport) _interface.``_modport
+`else
+    `define logic_modport(_interface, _modport) _interface
+`endif
 
-endpackage
+`endif /* LOGIC_MODPORT_SVH */

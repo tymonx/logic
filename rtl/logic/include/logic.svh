@@ -20,5 +20,6 @@
 `include "logic_drc.svh"
 `include "logic_config.svh"
 `include "logic_axi4.svh"
+`include "logic_modport.svh"
 
 `endif /* LOGIC_SVH */
