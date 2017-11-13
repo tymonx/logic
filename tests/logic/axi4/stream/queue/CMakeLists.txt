@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(MODULE_NAME logic_axi4_stream_buffered)
+set(MODULE_NAME logic_axi4_stream_queue)
 set(MODULE_TOP ${MODULE_NAME}_top)
 
 set(MODULE_DEFINITIONS

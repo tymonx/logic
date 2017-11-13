@@ -6,7 +6,6 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * @copyright
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,11 +13,20 @@
  * limitations under the License.
  */
 
-`ifndef LOGIC_SVH
-`define LOGIC_SVH
+#ifndef LOGIC_AXI4_STREAM_QUEUE_TEST_HPP
+#define LOGIC_AXI4_STREAM_QUEUE_TEST_HPP
 
-`include "logic_drc.svh"
-`include "logic_config.svh"
-`include "logic_axi4.svh"
+#include "logic/axi4/stream/test.hpp"
 
-`endif /* LOGIC_SVH */
+class logic_axi4_stream_queue_test : public logic::axi4::stream::test {
+public:
+    UVM_COMPONENT_UTILS(logic_axi4_stream_queue_test)
+
+    logic_axi4_stream_queue_test(const uvm::uvm_component_name& name);
+
+    virtual ~logic_axi4_stream_queue_test() override;
+protected:
+    virtual void build_phase(uvm::uvm_phase& phase) override;
+};
+
+#endif /* LOGIC_AXI4_STREAM_QUEUE_TEST_HPP */

@@ -21,6 +21,21 @@
 #include <utility>
 
 using logic::axi4::stream::rx_driver;
+using logic::axi4::stream::rx_sequence_item;
+
+static std::size_t get_idle_count(const rx_sequence_item& item,
+        std::size_t count = 0) noexcept {
+    std::size_t idle;
+
+    if (!item.idle_scheme.empty()) {
+        idle = item.idle_scheme[count % item.idle_scheme.size()];
+    }
+    else {
+        idle = 0;
+    }
+
+    return idle;
+}
 
 rx_driver::rx_driver(const uvm::uvm_component_name& name) :
     uvm::uvm_driver<rx_sequence_item>{name}
@@ -53,7 +68,8 @@ void rx_driver::run_phase(uvm::uvm_phase& /* phase */) {
 void rx_driver::transfer(const rx_sequence_item& item) {
     std::size_t index = 0;
     std::size_t count = 0;
-    std::size_t idle_count = 0;
+    std::size_t idle_index = 0;
+    std::size_t idle_count = get_idle_count(item, idle_index++);
     std::size_t size_count = item.tdata.size();
     std::size_t timeout = item.timeout;
     const std::size_t bus_size = m_vif->size();
@@ -71,11 +87,7 @@ void rx_driver::transfer(const rx_sequence_item& item) {
                 m_vif->aclk_posedge();
             }
             else {
-                if (!item.idle_scheme.empty()) {
-                    idle_count = item.idle_scheme[
-                        count % item.idle_scheme.size()];
-                }
-
+                idle_count = get_idle_count(item, idle_index++);
                 m_vif->set_tvalid(true);
 
                 if (size_count <= bus_size) {

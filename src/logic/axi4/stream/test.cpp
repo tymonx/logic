@@ -21,6 +21,8 @@
 #include "logic/axi4/stream/scoreboard.hpp"
 #include "logic/axi4/stream/rx_sequencer.hpp"
 
+#include <verilated.h>
+
 using logic::axi4::stream::test;
 
 test::test() :
@@ -66,7 +68,12 @@ void test::build_phase(uvm::uvm_phase& phase) {
 void test::run_phase(uvm::uvm_phase& phase) {
     phase.raise_objection(this);
 
-    m_sequence->start(m_testbench->sequencer);
+    if (!Verilated::gotFinish()) {
+        m_sequence->start(m_testbench->sequencer);
+    }
+    else {
+        m_testbench = nullptr;
+    }
 
     phase.drop_objection(this);
 }
@@ -74,7 +81,9 @@ void test::run_phase(uvm::uvm_phase& phase) {
 void test::extract_phase(uvm::uvm_phase& phase) {
     uvm::uvm_test::extract_phase(phase);
 
-    m_test_passed = m_testbench->passed();
+    if (m_testbench) {
+        m_test_passed = m_testbench->passed();
+    }
 
     uvm::uvm_config_db<bool>::set(nullptr, "*", "test_passed", m_test_passed);
 }

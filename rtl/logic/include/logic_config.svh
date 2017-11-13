@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-`ifndef LOGIC_SVH
-`define LOGIC_SVH
+`ifndef LOGIC_CONFIG_SVH
+`define LOGIC_CONFIG_SVH
 
-`include "logic_drc.svh"
-`include "logic_config.svh"
-`include "logic_axi4.svh"
+`ifndef LOGIC_CONFIG_TARGET
+`define LOGIC_CONFIG_TARGET logic_pkg::GENERIC
+`endif
 
-`endif /* LOGIC_SVH */
+`endif /* LOGIC_CONFIG_SVH */

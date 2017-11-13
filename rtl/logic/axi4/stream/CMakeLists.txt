@@ -13,3 +13,4 @@
 # limitations under the License.
 
 add_subdirectory(buffered)
+add_subdirectory(queue)

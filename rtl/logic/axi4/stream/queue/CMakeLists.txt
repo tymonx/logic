@@ -13,5 +13,8 @@
 # limitations under the License.
 
 add_rtl_sources(
-    logic_pkg.sv
+    logic_axi4_stream_queue_intel.sv
+    logic_axi4_stream_queue_generic.sv
+    logic_axi4_stream_queue.sv
+    logic_axi4_stream_queue_top.sv
 )

@@ -19,6 +19,21 @@
 #include "logic/axi4/stream/tx_sequence_item.hpp"
 
 using logic::axi4::stream::tx_driver;
+using logic::axi4::stream::tx_sequence_item;
+
+static std::size_t get_idle_count(const tx_sequence_item& item,
+        std::size_t count = 0) noexcept {
+    std::size_t idle;
+
+    if (!item.idle_scheme.empty()) {
+        idle = item.idle_scheme[count % item.idle_scheme.size()];
+    }
+    else {
+        idle = 0;
+    }
+
+    return idle;
+}
 
 tx_driver::tx_driver() :
     tx_driver{"tx_driver"}
@@ -58,8 +73,8 @@ void tx_driver::transfer(const tx_sequence_item& item) {
     auto tready_tmp = m_vif->get_tready();
 
     std::size_t packets_count = 1;
-    std::size_t idle_count = 0;
-    std::size_t count = 0;
+    std::size_t idle_index = 0;
+    std::size_t idle_count = get_idle_count(item, idle_index++);
     std::size_t timeout = item.timeout;
 
     while (packets_count) {
@@ -69,7 +84,6 @@ void tx_driver::transfer(const tx_sequence_item& item) {
         else {
             if (m_vif->get_tready() && m_vif->get_tvalid()) {
                 timeout = item.timeout;
-                ++count;
 
                 if (m_vif->get_tlast()) {
                     --packets_count;
@@ -82,10 +96,7 @@ void tx_driver::transfer(const tx_sequence_item& item) {
                     m_vif->set_tready(false);
                 }
                 else {
-                    if (!item.idle_scheme.empty()) {
-                        idle_count = item.idle_scheme[
-                            count % item.idle_scheme.size()];
-                    }
+                    idle_count = get_idle_count(item, idle_index++);
                     m_vif->set_tready(true);
                 }
             }

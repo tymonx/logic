@@ -16,16 +16,16 @@
 #include "test.hpp"
 #include "logic/axi4/stream/sequence.hpp"
 
-logic_axi4_stream_buffered_test::logic_axi4_stream_buffered_test(
+logic_axi4_stream_queue_test::logic_axi4_stream_queue_test(
         const uvm::uvm_component_name& name) :
     logic::axi4::stream::test{name}
 {
     scv_random::set_global_seed(100);
 }
 
-logic_axi4_stream_buffered_test::~logic_axi4_stream_buffered_test() { }
+logic_axi4_stream_queue_test::~logic_axi4_stream_queue_test() { }
 
-void logic_axi4_stream_buffered_test::build_phase(uvm::uvm_phase& phase) {
+void logic_axi4_stream_queue_test::build_phase(uvm::uvm_phase& phase) {
     logic::axi4::stream::test::build_phase(phase);
 
     m_sequence->reset_repeats->reset_distribution();
@@ -44,11 +44,11 @@ void logic_axi4_stream_buffered_test::build_phase(uvm::uvm_phase& phase) {
     m_sequence->rx_repeats->keep_only(8);
 
     m_sequence->rx_packet_length->reset_distribution();
-    m_sequence->rx_packet_length->keep_only(1, 256);
+    m_sequence->rx_packet_length->keep_only(256, 512);
 
     m_sequence->rx_idle_scheme->reset_distribution();
-    m_sequence->rx_idle_scheme->keep_only(0, 3);
+    m_sequence->rx_idle_scheme->keep_only(0, 2);
 
     m_sequence->tx_idle_scheme->reset_distribution();
-    m_sequence->tx_idle_scheme->keep_only(0, 3);
+    m_sequence->tx_idle_scheme->keep_only(3, 4);
 }

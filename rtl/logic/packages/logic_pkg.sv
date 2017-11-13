@@ -6,7 +6,6 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * @copyright
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,11 +13,11 @@
  * limitations under the License.
  */
 
-`ifndef LOGIC_SVH
-`define LOGIC_SVH
+package logic_pkg;
 
-`include "logic_drc.svh"
-`include "logic_config.svh"
-`include "logic_axi4.svh"
+    typedef enum {
+        GENERIC,
+        INTEL_ARRIA_10
+    } target_t;
 
-`endif /* LOGIC_SVH */
+endpackage
