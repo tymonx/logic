@@ -19,6 +19,11 @@
  */
 package logic_pkg;
 
+    /* Enum: target_t
+     *
+     * GENERIC          - Generic target not related to any vendor or device.
+     * INTEL_ARRIA_10   - Optimized for Intel Arria 10 without HPS.
+     */
     typedef enum {
         GENERIC,
         INTEL_ARRIA_10

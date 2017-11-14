@@ -24,12 +24,13 @@ Language: SystemVerilog
 
    Line Comment: //
    Block Comment: /* */
-   Member Operator: ::
+   Member Operator: .
    Enum Values: Global
    Case Sensitive: Yes
 
    Function Prototype Enders: ; begin
    Class Prototype Ender: ;
+   Interface Prototype Ender: ;
 
 
 # These settings define the languages Natural Docs knows how to parse.  You

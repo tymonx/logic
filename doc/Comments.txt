@@ -25,15 +25,45 @@
 Alter Comment Type: Class
 
    Keywords:
-      module
-      package
-      interface
+      module, Modules
+      package, Packages
+      interface, Interfaces
 
 
-Alter Comment Type: Variable
+Comment Type: Logic
+
+   Display Name: Logics
+   Plural Display Name: Logics
+
+   Scope: Normal
+   Flags: Code, Variable Type
 
    Keywords:
       logic
+
+
+Comment Type: Structure
+
+   Display Name: Structs
+   Plural Display Name: Structs
+
+   Scope: Normal
+   Flags: Code, Variable Type
+
+   Keywords:
+      struct
+
+
+Comment Type: Enum
+
+   Display Name: Enums
+   Plural Display Name: Enums
+
+   Scope: Normal
+   Flags: Code, Variable Type
+
+   Keywords:
+      enum
 
 
 # Each Natural Docs comment has a corresponding type which determine its

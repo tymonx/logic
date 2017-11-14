@@ -21,6 +21,12 @@
  * AXI4-Stream interface.
  *
  * Parameters:
+ *  TDATA_BYTES - Number of bytes for tdata signal.
+ *  TDEST_WIDTH - Number of bits for tdest signal.
+ *  TUSER_WIDTH - Number of bits for tuser signal.
+ *  TID_WIDTH   - Number of bits for tid signal.
+ *
+ * Ports:
  *  aclk        - Clock. Used only for internal checkers and assertions
  *  areset_n    - Asynchronous active-low reset. Used only for internal checkers
  *                and assertions

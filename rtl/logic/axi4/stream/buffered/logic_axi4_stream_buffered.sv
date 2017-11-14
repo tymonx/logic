@@ -20,7 +20,7 @@
  * Improve timings between modules by adding register to ready signal from tx to
  * rx.
  *
- * Parameters:
+ * Ports:
  *  aclk        - Clock.
  *  areset_n    - Asynchronous active-low reset.
  *  rx          - AXI4-Stream interface.
@@ -29,8 +29,8 @@
 module logic_axi4_stream_buffered (
     input aclk,
     input areset_n,
-    `logic_modport(logic_axi4_stream_if, rx) rx,
-    `logic_modport(logic_axi4_stream_if, tx) tx
+    `LOGIC_MODPORT(logic_axi4_stream_if, rx) rx,
+    `LOGIC_MODPORT(logic_axi4_stream_if, tx) tx
 );
     /* Enum: fsm_state
      *

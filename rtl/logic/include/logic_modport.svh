@@ -17,10 +17,19 @@
 `ifndef LOGIC_MODPORT_SVH
 `define LOGIC_MODPORT_SVH
 
+/* Define: LOGIC_MODPORT
+ *
+ * Define that helps to enable or disable modport feature. Useful only for Intel
+ * Quartus Pro Prime that doesn't support modports properly.
+ *
+ * Parameters:
+ *  _interface  - Interface name.
+ *  _modport    - Modport name.
+ */
 `ifndef LOGIC_MODPORT_DISABLED
-    `define logic_modport(_interface, _modport) _interface.``_modport
+    `define LOGIC_MODPORT(_interface, _modport) _interface.``_modport
 `else
-    `define logic_modport(_interface, _modport) _interface
+    `define LOGIC_MODPORT(_interface, _modport) _interface
 `endif
 
 `endif /* LOGIC_MODPORT_SVH */

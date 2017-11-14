@@ -15,6 +15,21 @@
 
 `include "logic.svh"
 
+/* Module: logic_axi4_stream_queue
+ *
+ * Stores data stream in queue (FIFO)
+ *
+ * Parameters:
+ *  CAPACITY    - Number of single data transactions that can be store in
+ *                internal queue memory (FIFO capacity).
+ *  TARGET      - Target device.
+ *
+ * Ports:
+ *  aclk        - Clock.
+ *  areset_n    - Asynchronous active-low reset.
+ *  rx          - AXI4-Stream interface.
+ *  tx          - AXI4-Stream interface.
+ */
 module logic_axi4_stream_queue #(
     int CAPACITY = 256,
     logic_pkg::target_t TARGET = `LOGIC_CONFIG_TARGET
