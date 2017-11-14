@@ -21,8 +21,8 @@ module logic_axi4_stream_queue_intel #(
 ) (
     input aclk,
     input areset_n,
-    logic_axi4_stream_if.rx rx,
-    logic_axi4_stream_if.tx tx
+    `LOGIC_MODPORT(logic_axi4_stream_if, rx) rx,
+    `LOGIC_MODPORT(logic_axi4_stream_if, tx) tx
 );
     initial begin: design_rule_checks
         `LOGIC_DRC_EQUAL_OR_GREATER_THAN(CAPACITY, 4)

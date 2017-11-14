@@ -21,6 +21,8 @@ package logic_pkg;
 
     /* Enum: target_t
      *
+     * Optimize project using dedicated target.
+     *
      * GENERIC          - Generic target not related to any vendor or device.
      * INTEL_ARRIA_10   - Optimized for Intel Arria 10 without HPS.
      */

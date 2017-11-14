@@ -13,14 +13,16 @@
  * limitations under the License.
  */
 
+`include "logic.svh"
+
 module logic_axi4_stream_queue_generic #(
     int CAPACITY = 256,
     int ADDRESS_WIDTH = $clog2(CAPACITY)
 ) (
     input aclk,
     input areset_n,
-    logic_axi4_stream_if.rx rx,
-    logic_axi4_stream_if.tx tx
+    `LOGIC_MODPORT(logic_axi4_stream_if, rx) rx,
+    `LOGIC_MODPORT(logic_axi4_stream_if, tx) tx
 );
     localparam QUEUE_DEPTH = 2**ADDRESS_WIDTH;
     localparam ALMOST_FULL = QUEUE_DEPTH - 3;
