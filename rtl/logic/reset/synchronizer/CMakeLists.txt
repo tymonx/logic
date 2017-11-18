@@ -12,11 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_rtl_includes(
-    include
+add_rtl_sources(
+    logic_reset_synchronizer.sv
 )
-
-add_subdirectory(packages)
-add_subdirectory(interfaces)
-add_subdirectory(reset)
-add_subdirectory(axi4)

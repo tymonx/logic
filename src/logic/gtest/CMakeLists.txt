@@ -12,11 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_rtl_includes(
-    include
-)
+if (NOT GTEST_FOUND)
+    return()
+endif()
 
-add_subdirectory(packages)
-add_subdirectory(interfaces)
-add_subdirectory(reset)
-add_subdirectory(axi4)
+include_directories(SYSTEM ${GTEST_INCLUDE_DIRS})
+
+add_library(logic-gtest-main STATIC
+    factory.cpp
+    main.cpp
+)

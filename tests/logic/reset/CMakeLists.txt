@@ -12,11 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_rtl_includes(
-    include
-)
-
-add_subdirectory(packages)
-add_subdirectory(interfaces)
-add_subdirectory(reset)
-add_subdirectory(axi4)
+add_subdirectory(synchronizer)

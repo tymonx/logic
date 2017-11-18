@@ -13,6 +13,7 @@
 # limitations under the License.
 
 add_subdirectory(axi4)
+add_subdirectory(gtest)
 
 include_directories(SYSTEM ${VERILATOR_INCLUDE_DIR})
 

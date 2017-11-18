@@ -13,3 +13,4 @@
 # limitations under the License.
 
 add_subdirectory(axi4)
+add_subdirectory(reset)

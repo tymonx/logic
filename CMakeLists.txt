@@ -34,6 +34,7 @@ find_package(NaturalDocs)
 find_package(SystemC REQUIRED COMPONENTS SCV UVM)
 find_package(Verilator REQUIRED)
 find_package(Quartus REQUIRED)
+find_package(GTest)
 
 include_directories(include)
 include_directories(SYSTEM ${SYSTEMC_INCLUDE_DIRS})
