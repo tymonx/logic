@@ -30,8 +30,12 @@ endif()
 find_package(PackageHandleStandardArgs REQUIRED)
 
 find_program(QUARTUS_EXECUTABLE quartus
-    HINTS $ENV{QUARTUS_ROOTDIR} $ENV{QUARTUS_HOME} $ENV{QUARTUS_ROOT}
-        $ENV{QUARTUS_DIR} $ENV{QUARTUS}
+    HINTS
+        $ENV{QUARTUS_ROOTDIR}
+        $ENV{QUARTUS_HOME}
+        $ENV{QUARTUS_ROOT}
+        $ENV{QUARTUS_DIR}
+        $ENV{QUARTUS}
     PATH_SUFFIXES bin
     DOC "Path to the Quartus executable"
 )
