@@ -31,6 +31,7 @@ Language: SystemVerilog
    Function Prototype Enders: ; begin
    Class Prototype Ender: ;
    Interface Prototype Ender: ;
+   Macro Prototype Enders: \ \n
 
 
 # These settings define the languages Natural Docs knows how to parse.  You
