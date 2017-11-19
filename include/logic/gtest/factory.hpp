@@ -62,9 +62,9 @@ private:
 };
 
 template<typename T, typename ...Args>
-factory::add<T, Args...>::add(Args&&... args) {
-    add("", args...);
-}
+factory::add<T, Args...>::add(Args&&... args) :
+    add{"", args...}
+{ }
 
 template<typename T, typename ...Args>
 factory::add<T, Args...>::add(const std::string& name, Args&&... args) {

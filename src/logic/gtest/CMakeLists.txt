@@ -18,6 +18,12 @@ endif()
 
 include_directories(SYSTEM ${GTEST_INCLUDE_DIRS})
 
+if (CMAKE_CXX_COMPILER_ID MATCHES Clang)
+    set_source_files_properties(factory.cpp
+        PROPERTIES COMPILE_FLAGS "-Wno-exit-time-destructors"
+    )
+endif()
+
 add_library(logic-gtest-main STATIC
     factory.cpp
     main.cpp

@@ -12,8 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(MODULE_NAME logic_reset_synchronizer)
-set(MODULE_TOP ${MODULE_NAME})
+# Create SystemVerilog with SVUnit
 
 add_hdl_sources(
     logic_reset_synchronizer_unit_test.sv
@@ -21,6 +20,11 @@ add_hdl_sources(
 )
 
 add_hdl_test(logic_reset_synchronizer_testrunner)
+
+# Create SystemC with GTest
+
+set(MODULE_NAME logic_reset_synchronizer)
+set(MODULE_TOP ${MODULE_NAME})
 
 add_systemc_module(${MODULE_TOP}
     ${RTL_SOURCES}
@@ -39,6 +43,8 @@ set(TEST_MODULE_NAME ${MODULE_NAME}_test)
 
 add_executable(${TEST_MODULE_NAME}
     main.cpp
+    test.cpp
+    dut.cpp
 )
 
 add_test(NAME ${TEST_MODULE_NAME}

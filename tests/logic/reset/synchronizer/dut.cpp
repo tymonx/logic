@@ -14,30 +14,15 @@
  */
 
 #include "dut.hpp"
-#include "test.hpp"
 
-using logic_reset_synchronizer_test = test;
-
-TEST_F(logic_reset_synchronizer_test, simple) {
-    m_dut->areset_n = 0;
-    sc_start(3, SC_NS);
-
-    EXPECT_FALSE(m_dut->areset_n_synced.read());
-
-    m_dut->areset_n = 1;
-    sc_start(3, SC_NS);
-
-    EXPECT_TRUE(m_dut->areset_n_synced.read());
-}
-
-TEST_F(logic_reset_synchronizer_test, deassertion) {
-    m_dut->areset_n = 1;
-    sc_start(3, SC_NS);
-
-    EXPECT_TRUE(m_dut->areset_n_synced.read());
-
-    m_dut->areset_n = 0;
-    sc_start(1, SC_NS);
-
-    EXPECT_FALSE(m_dut->areset_n_synced.read());
+dut::dut() :
+    aclk{"aclk"},
+    areset_n{"areset_n"},
+    areset_n_synced{"areset_n_synced"},
+    m_dut{"logic_reset_synchronizer"},
+    m_trace{m_dut}
+{
+    m_dut.aclk(aclk);
+    m_dut.areset_n(areset_n);
+    m_dut.areset_n_synced(areset_n_synced);
 }

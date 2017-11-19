@@ -13,31 +13,24 @@
  * limitations under the License.
  */
 
-#include "dut.hpp"
-#include "test.hpp"
+#ifndef DUT_HPP
+#define DUT_HPP
 
-using logic_reset_synchronizer_test = test;
+#include "logic_reset_synchronizer.h"
 
-TEST_F(logic_reset_synchronizer_test, simple) {
-    m_dut->areset_n = 0;
-    sc_start(3, SC_NS);
+#include <logic/trace.hpp>
+#include <systemc>
 
-    EXPECT_FALSE(m_dut->areset_n_synced.read());
+class dut {
+public:
+    sc_core::sc_clock aclk;
+    sc_core::sc_signal<bool> areset_n;
+    sc_core::sc_signal<bool> areset_n_synced;
 
-    m_dut->areset_n = 1;
-    sc_start(3, SC_NS);
+    dut();
+private:
+    logic_reset_synchronizer m_dut;
+    logic::trace<decltype(m_dut)> m_trace;
+};
 
-    EXPECT_TRUE(m_dut->areset_n_synced.read());
-}
-
-TEST_F(logic_reset_synchronizer_test, deassertion) {
-    m_dut->areset_n = 1;
-    sc_start(3, SC_NS);
-
-    EXPECT_TRUE(m_dut->areset_n_synced.read());
-
-    m_dut->areset_n = 0;
-    sc_start(1, SC_NS);
-
-    EXPECT_FALSE(m_dut->areset_n_synced.read());
-}
+#endif /* DUT_HPP */

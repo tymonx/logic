@@ -141,7 +141,7 @@ function(create_simulation)
             set(MODULE_LAST ${MODULE})
         endforeach()
 
-        add_custom_target(modelsim-compile-all
+        add_custom_target(modelsim-compile-all ALL
             DEPENDS modelsim-compile-${MODULE_LAST})
     endif()
 endfunction()

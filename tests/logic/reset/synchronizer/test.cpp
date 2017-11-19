@@ -13,31 +13,22 @@
  * limitations under the License.
  */
 
-#include "dut.hpp"
 #include "test.hpp"
+#include "dut.hpp"
 
-using logic_reset_synchronizer_test = test;
+#include <logic/gtest/factory.hpp>
 
-TEST_F(logic_reset_synchronizer_test, simple) {
-    m_dut->areset_n = 0;
-    sc_start(3, SC_NS);
+test::test() :
+    m_dut{logic::gtest::factory::get<dut>()}
+{ }
 
-    EXPECT_FALSE(m_dut->areset_n_synced.read());
-
-    m_dut->areset_n = 1;
-    sc_start(3, SC_NS);
-
-    EXPECT_TRUE(m_dut->areset_n_synced.read());
-}
-
-TEST_F(logic_reset_synchronizer_test, deassertion) {
-    m_dut->areset_n = 1;
-    sc_start(3, SC_NS);
-
-    EXPECT_TRUE(m_dut->areset_n_synced.read());
-
+void test::SetUp() {
     m_dut->areset_n = 0;
     sc_start(1, SC_NS);
-
-    EXPECT_FALSE(m_dut->areset_n_synced.read());
 }
+
+void test::TearDown() {
+    m_dut->areset_n = 0;
+}
+
+static logic::gtest::factory::add<dut> g;

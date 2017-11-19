@@ -13,31 +13,26 @@
  * limitations under the License.
  */
 
-#include "dut.hpp"
-#include "test.hpp"
+#ifndef TEST_HPP
+#define TEST_HPP
 
-using logic_reset_synchronizer_test = test;
+#include <gtest/gtest.h>
 
-TEST_F(logic_reset_synchronizer_test, simple) {
-    m_dut->areset_n = 0;
-    sc_start(3, SC_NS);
+class dut;
 
-    EXPECT_FALSE(m_dut->areset_n_synced.read());
+class test : public ::testing::Test {
+protected:
+    test();
 
-    m_dut->areset_n = 1;
-    sc_start(3, SC_NS);
+    test(const test& other) = delete;
 
-    EXPECT_TRUE(m_dut->areset_n_synced.read());
-}
+    test& operator=(const test& other) = delete;
 
-TEST_F(logic_reset_synchronizer_test, deassertion) {
-    m_dut->areset_n = 1;
-    sc_start(3, SC_NS);
+    virtual void SetUp() override;
 
-    EXPECT_TRUE(m_dut->areset_n_synced.read());
+    virtual void TearDown() override;
 
-    m_dut->areset_n = 0;
-    sc_start(1, SC_NS);
+    dut* m_dut;
+};
 
-    EXPECT_FALSE(m_dut->areset_n_synced.read());
-}
+#endif /* TEST_HPP */
