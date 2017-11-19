@@ -23,6 +23,15 @@ set(RTL_INCLUDES "" CACHE INTERNAL
 set(RTL_DEFINES "" CACHE INTERNAL
     "RTL defines" FORCE)
 
+set(HDL_SOURCES "" CACHE INTERNAL
+    "HDL sources" FORCE)
+
+set(HDL_INCLUDES "" CACHE INTERNAL
+    "HDL includes" FORCE)
+
+set(HDL_DEFINES "" CACHE INTERNAL
+    "HDL defines" FORCE)
+
 set(VERILATOR_CONFIGURATIONS "" CACHE INTERNAL
     "Verilator configurations" FORCE)
 
@@ -40,8 +49,6 @@ if (MODELSIM_FOUND)
             WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/modelsim)
     endif()
 
-    add_custom_target(modelsim-compile-all)
-
     add_custom_target(modelsim-run
         ${MODELSIM_VSIM} ${MODELSIM_TOP_LEVEL}
         DEPENDS modelsim-compile-all
@@ -55,49 +62,93 @@ function(add_verilator_configurations)
         CACHE INTERNAL "Verilator configurations" FORCE)
 endfunction()
 
+function(add_hdl_test test_name)
+    if (MODELSIM_FOUND)
+        add_test(NAME ${test_name}
+            COMMAND ${MODELSIM_VSIM}
+                -c
+                -wlf ../output/${test_name}.wlf
+                -do ${CMAKE_SOURCE_DIR}/scripts/modelsim_run.tcl
+                ${test_name}
+            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/modelsim
+        )
+    endif()
+endfunction()
+
+function(add_modelsim_source src)
+    set(MODELSIM_COMPILER)
+    set(MODELSIM_FLAGS)
+
+    if (src MATCHES .sv)
+        set(MODELSIM_COMPILER ${MODELSIM_VLOG})
+        set(MODELSIM_FLAGS ${MODELSIM_FLAGS} -sv)
+
+        foreach (inc ${RTL_INCLUDES})
+            set(MODELSIM_FLAGS ${MODELSIM_FLAGS} +incdir+${inc})
+        endforeach()
+
+        foreach (inc ${HDL_INCLUDES})
+            set(MODELSIM_FLAGS ${MODELSIM_FLAGS} +incdir+${inc})
+        endforeach()
+    elseif (src MATCHES .v)
+        set(MODELSIM_COMPILER ${MODELSIM_VLOG})
+
+        foreach (inc ${RTL_INCLUDES})
+            set(MODELSIM_FLAGS ${MODELSIM_FLAGS} +incdir+${inc})
+        endforeach()
+
+        foreach (inc ${HDL_INCLUDES})
+            set(MODELSIM_FLAGS ${MODELSIM_FLAGS} +incdir+${inc})
+        endforeach()
+    elseif (src MATCHES .vhd)
+        set(MODELSIM_COMPILER ${MODELSIM_VCOM})
+        set(MODELSIM_FLAGS ${MODELSIM_FLAGS} -2008)
+    endif()
+
+    get_filename_component(MODELSIM_MODULE ${src} NAME_WE)
+
+    add_custom_command(OUTPUT
+            ${CMAKE_BINARY_DIR}/modelsim/.modules/${MODELSIM_MODULE}
+        COMMAND ${CMAKE_COMMAND} -E touch .modules/${MODELSIM_MODULE}
+        COMMAND ${MODELSIM_COMPILER} ${MODELSIM_FLAGS} ${src}
+        DEPENDS ${src}
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/modelsim
+    )
+
+    add_custom_target(modelsim-compile-${MODELSIM_MODULE}
+        DEPENDS ${CMAKE_BINARY_DIR}/modelsim/.modules/${MODELSIM_MODULE}
+    )
+endfunction()
+
+function(create_simulation)
+    set(SOURCES ${RTL_SOURCES} ${HDL_SOURCES})
+    set(INCLUDES ${RTL_INCLUDES} ${HDL_INCLUDES})
+    set(DEFINES ${RTL_DEFINES} ${HDL_DEFINES})
+
+    if (MODELSIM_FOUND)
+        set(MODULE_LAST)
+
+        foreach (src ${SOURCES})
+            add_modelsim_source(${src})
+
+            get_filename_component(MODULE ${src} NAME_WE)
+
+            if (MODULE_LAST)
+                add_dependencies(modelsim-compile-${MODULE}
+                    modelsim-compile-${MODULE_LAST})
+            endif()
+
+            set(MODULE_LAST ${MODULE})
+        endforeach()
+
+        add_custom_target(modelsim-compile-all
+            DEPENDS modelsim-compile-${MODULE_LAST})
+    endif()
+endfunction()
+
 function(add_rtl_sources)
     foreach(src ${ARGV})
         get_filename_component(src ${src} REALPATH)
-
-        if (MODELSIM_FOUND)
-            set(MODELSIM_COMPILER)
-            set(MODELSIM_FLAGS)
-
-            if (src MATCHES .sv)
-                set(MODELSIM_COMPILER ${MODELSIM_VLOG})
-                set(MODELSIM_FLAGS ${MODELSIM_FLAGS} -sv)
-
-                foreach (inc ${RTL_INCLUDES})
-                    set(MODELSIM_FLAGS ${MODELSIM_FLAGS} +incdir+${inc})
-                endforeach()
-            elseif (src MATCHES .v)
-                set(MODELSIM_COMPILER ${MODELSIM_VLOG})
-
-                foreach (inc ${RTL_INCLUDES})
-                    set(MODELSIM_FLAGS ${MODELSIM_FLAGS} +incdir+${inc})
-                endforeach()
-            elseif (src MATCHES .vhd)
-                set(MODELSIM_COMPILER ${MODELSIM_VCOM})
-                set(MODELSIM_FLAGS ${MODELSIM_FLAGS} -2008)
-            endif()
-
-            get_filename_component(MODELSIM_MODULE ${src} NAME_WE)
-
-            add_custom_command(OUTPUT
-                    ${CMAKE_BINARY_DIR}/modelsim/.modules/${MODELSIM_MODULE}
-                COMMAND ${CMAKE_COMMAND} -E touch .modules/${MODELSIM_MODULE}
-                COMMAND ${MODELSIM_COMPILER} ${MODELSIM_FLAGS} ${src}
-                DEPENDS ${src}
-                WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/modelsim
-            )
-
-            add_custom_target(modelsim-compile-${MODELSIM_MODULE}
-                DEPENDS ${CMAKE_BINARY_DIR}/modelsim/.modules/${MODELSIM_MODULE}
-            )
-
-            add_dependencies(modelsim-compile-all
-                modelsim-compile-${MODELSIM_MODULE})
-        endif()
 
         list(APPEND sources ${src})
     endforeach()
@@ -123,4 +174,34 @@ function(add_rtl_defines)
 
     set(RTL_DEFINES ${RTL_DEFINES} ${defines}
         CACHE INTERNAL "RTL defines" FORCE)
+endfunction()
+
+function(add_hdl_sources)
+    foreach(src ${ARGV})
+        get_filename_component(src ${src} REALPATH)
+
+        list(APPEND sources ${src})
+    endforeach()
+
+    set(HDL_SOURCES ${HDL_SOURCES} ${sources}
+        CACHE INTERNAL "HDL sources" FORCE)
+endfunction()
+
+function(add_hdl_includes)
+    foreach(inc ${ARGV})
+        get_filename_component(inc ${inc} REALPATH)
+        list(APPEND includes ${inc})
+    endforeach()
+
+    set(HDL_INCLUDES ${HDL_INCLUDES} ${includes}
+        CACHE INTERNAL "HDL includes" FORCE)
+endfunction()
+
+function(add_hdl_defines)
+    foreach(def ${ARGV})
+        list(APPEND defines ${def})
+    endforeach()
+
+    set(HDL_DEFINES ${HDL_DEFINES} ${defines}
+        CACHE INTERNAL "HDL defines" FORCE)
 endfunction()

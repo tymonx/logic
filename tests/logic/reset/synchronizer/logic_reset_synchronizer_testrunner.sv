@@ -1,0 +1,58 @@
+/* Copyright 2017 Tymoteusz Blazejczyk
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+module logic_reset_synchronizer_testrunner;
+    logic test_passed = 0;
+
+    import svunit_pkg::svunit_testrunner;
+    import svunit_pkg::svunit_testsuite;
+
+    svunit_testrunner svunit_tr;
+    svunit_testsuite svunit_ts;
+
+    logic_reset_synchronizer_unit_test ut();
+
+    initial begin
+        build();
+        run();
+
+        unique case (svunit_tr.get_results())
+        svunit_pkg::PASS: begin
+            test_passed = 1;
+            $finish;
+        end
+        svunit_pkg::FAIL: begin
+            test_passed = 0;
+            $fatal(1);
+        end
+        endcase
+    end
+
+    function void build();
+        svunit_tr = new ("testrunner");
+        svunit_ts = new ("testsuite");
+
+        ut.build();
+        svunit_ts.add_testcase(ut.svunit_ut);
+        svunit_tr.add_testsuite(svunit_ts);
+    endfunction
+
+    task run();
+        svunit_ts.run();
+        ut.run();
+        svunit_ts.report();
+        svunit_tr.report();
+    endtask
+endmodule

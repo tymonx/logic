@@ -22,6 +22,14 @@ add_rtl_sources(
     ${QUARTUS_MEGA_FUNCTIONS}
 )
 
+add_hdl_includes(
+    ${SVUNIT_INCLUDE_DIRS}
+)
+
+add_hdl_sources(
+    ${SVUNIT_HDL_SOURCES}
+)
+
 add_verilator_configurations(
     "lint_off -msg STMTDLY      -file \"${QUARTUS_MEGA_FUNCTIONS}\""
     "lint_off -msg PINMISSING   -file \"${QUARTUS_MEGA_FUNCTIONS}\""
@@ -38,3 +46,5 @@ if (VERILATOR_FOUND)
 endif()
 
 add_subdirectory(logic)
+
+create_simulation()

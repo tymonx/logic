@@ -15,6 +15,13 @@
 set(MODULE_NAME logic_reset_synchronizer)
 set(MODULE_TOP ${MODULE_NAME})
 
+add_hdl_sources(
+    logic_reset_synchronizer_unit_test.sv
+    logic_reset_synchronizer_testrunner.sv
+)
+
+add_hdl_test(logic_reset_synchronizer_testrunner)
+
 add_systemc_module(${MODULE_TOP}
     ${RTL_SOURCES}
     INCLUDE_DIRECTORIES ${RTL_INCLUDES}

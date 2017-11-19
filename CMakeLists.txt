@@ -30,6 +30,7 @@ include(AddMsvcCompiler)
 include(AddClangCompiler)
 include(AddLogic)
 
+find_package(SVUnit)
 find_package(ModelSim)
 find_package(NaturalDocs)
 find_package(SystemC REQUIRED COMPONENTS SCV UVM)
