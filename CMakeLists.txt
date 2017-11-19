@@ -45,6 +45,6 @@ add_subdirectory(src)
 add_subdirectory(rtl)
 
 if (TESTS)
-    enable_testing()
+    include(CTest)
     add_subdirectory(tests)
 endif()
