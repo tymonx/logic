@@ -29,7 +29,7 @@ add_library(logic-core OBJECT
     bitstream_const_reference.cpp
 )
 
-add_library(logic SHARED
+add_library(logic STATIC
     $<TARGET_OBJECTS:logic-core>
     $<TARGET_OBJECTS:logic-axi4-stream>
 )

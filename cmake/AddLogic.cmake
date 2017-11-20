@@ -64,11 +64,19 @@ endfunction()
 
 function(add_hdl_test test_name)
     if (MODELSIM_FOUND)
+        set(MODELSIM_RUN_TCL ${CMAKE_SOURCE_DIR}/scripts/modelsim_run.tcl)
+
+        if (CYGWIN)
+            execute_process(COMMAND cygpath -m ${MODELSIM_RUN_TCL}
+                OUTPUT_VARIABLE MODELSIM_RUN_TCL
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+        endif()
+
         add_test(NAME ${test_name}
             COMMAND ${MODELSIM_VSIM}
                 -c
                 -wlf ../output/${test_name}.wlf
-                -do ${CMAKE_SOURCE_DIR}/scripts/modelsim_run.tcl
+                -do ${MODELSIM_RUN_TCL}
                 ${test_name}
             WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/modelsim
         )
@@ -80,37 +88,37 @@ function(add_modelsim_source src)
     set(MODELSIM_FLAGS)
 
     if (src MATCHES .sv)
-        set(MODELSIM_COMPILER ${MODELSIM_VLOG})
         set(MODELSIM_FLAGS ${MODELSIM_FLAGS} -sv)
-
-        foreach (inc ${RTL_INCLUDES})
-            set(MODELSIM_FLAGS ${MODELSIM_FLAGS} +incdir+${inc})
-        endforeach()
-
-        foreach (inc ${HDL_INCLUDES})
-            set(MODELSIM_FLAGS ${MODELSIM_FLAGS} +incdir+${inc})
-        endforeach()
-    elseif (src MATCHES .v)
-        set(MODELSIM_COMPILER ${MODELSIM_VLOG})
-
-        foreach (inc ${RTL_INCLUDES})
-            set(MODELSIM_FLAGS ${MODELSIM_FLAGS} +incdir+${inc})
-        endforeach()
-
-        foreach (inc ${HDL_INCLUDES})
-            set(MODELSIM_FLAGS ${MODELSIM_FLAGS} +incdir+${inc})
-        endforeach()
     elseif (src MATCHES .vhd)
         set(MODELSIM_COMPILER ${MODELSIM_VCOM})
         set(MODELSIM_FLAGS ${MODELSIM_FLAGS} -2008)
     endif()
 
+    if (src MATCHES .sv OR src MATCHES .v)
+        set(MODELSIM_COMPILER ${MODELSIM_VLOG})
+
+        foreach (inc ${RTL_INCLUDES} ${HDL_INCLUDES})
+            if (CYGWIN)
+                execute_process(COMMAND cygpath -m ${inc}
+                    OUTPUT_VARIABLE inc OUTPUT_STRIP_TRAILING_WHITESPACE)
+            endif()
+            set(MODELSIM_FLAGS ${MODELSIM_FLAGS} +incdir+${inc})
+        endforeach()
+    endif()
+
     get_filename_component(MODELSIM_MODULE ${src} NAME_WE)
+
+    if (CYGWIN)
+        execute_process(COMMAND cygpath -m ${src}
+            OUTPUT_VARIABLE hdl_source OUTPUT_STRIP_TRAILING_WHITESPACE)
+    else()
+        set(hdl_source ${src})
+    endif()
 
     add_custom_command(OUTPUT
             ${CMAKE_BINARY_DIR}/modelsim/.modules/${MODELSIM_MODULE}
         COMMAND ${CMAKE_COMMAND} -E touch .modules/${MODELSIM_MODULE}
-        COMMAND ${MODELSIM_COMPILER} ${MODELSIM_FLAGS} ${src}
+        COMMAND ${MODELSIM_COMPILER} ${MODELSIM_FLAGS} ${hdl_source}
         DEPENDS ${src}
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/modelsim
     )

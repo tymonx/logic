@@ -54,7 +54,7 @@ add_test(NAME ${TEST_MODULE_NAME}
 
 target_link_libraries(${TEST_MODULE_NAME}
     logic
-    ${GTEST_LIBRARIES}
     ${MODULE_LIBRARIES}
     logic-gtest-main
+    ${GTEST_LIBRARIES}
 )
