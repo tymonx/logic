@@ -15,10 +15,10 @@ These 3rd party tools and libraries must be installed to build and run tests:
   * [SystemC Verification 2.0](http://accellera.org/downloads/standards/systemc) - SystemC data randomization
   * [UVM-SystemC 1.0](http://www.eda.org/activities/working-groups/systemc-verification) - UVM for SystemC
   * [Natural Docs](http://www.naturaldocs.org/) - code documentation generator
-  * [GoogleTest](ihttps://github.com/google/googletest) - C++ unit test framework
+  * [GoogleTest](https://github.com/google/googletest) - C++ unit test framework
   * [SVUnit](http://agilesoc.com/open-source-projects/svunit/) - SystemVerilog unit test framework
   * [GTKWave](http://gtkwave.sourceforge.net/) - waveform viewer
-  * [WaveDrom](ihttp://wavedrom.com/) - digital timing diagram
+  * [WaveDrom](http://wavedrom.com/) - digital timing diagram
 
 Workspace
 ---------
