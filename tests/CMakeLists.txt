@@ -22,16 +22,14 @@ endif()
 
 add_hdl_source(${QUARTUS_MEGA_FUNCTIONS}
     LIBRARY intel-sim
+    VERILATOR_CONFIGURATIONS
+        "lint_off -msg STMTDLY      -file \"${QUARTUS_MEGA_FUNCTIONS}\""
+        "lint_off -msg PINMISSING   -file \"${QUARTUS_MEGA_FUNCTIONS}\""
 )
 
 add_hdl_source(${SVUNIT_HDL_SOURCES}
     LIBRARY svunit
     INCLUDES ${SVUNIT_INCLUDE_DIRS}
-)
-
-set(HDL_VERILATOR_CONFIGURATION
-    "lint_off -msg STMTDLY      -file \"${QUARTUS_MEGA_FUNCTIONS}\""
-    "lint_off -msg PINMISSING   -file \"${QUARTUS_MEGA_FUNCTIONS}\""
 )
 
 add_subdirectory(logic)

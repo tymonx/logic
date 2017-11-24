@@ -167,6 +167,12 @@ function(add_hdl_source)
             endforeach()
 
             foreach (inc ${hdl_includes})
+                if (CYGWIN)
+                    execute_process(COMMAND cygpath -m ${inc}
+                        OUTPUT_VARIABLE inc
+                        OUTPUT_STRIP_TRAILING_WHITESPACE)
+                endif()
+
                 set(modelsim_flags ${modelsim_flags} +incdir+${inc})
             endforeach()
         elseif (hdl_type MATCHES VHDL)
@@ -323,6 +329,9 @@ function(get_hdl_properties hdl_name)
         elseif (state MATCHES GET_INCLUDES)
             set(${arg} ${hdl_includes} PARENT_SCOPE)
             set(state UNKNOWN)
+        elseif (state MATCHES GET_VERILATOR_CONFIGURATIONS)
+            set(${arg} ${hdl_verilator_configurations} PARENT_SCOPE)
+            set(state UNKNOWN)
         else ()
             message(FATAL_ERROR "Invalid argument: ${arg}")
         endif()
@@ -358,6 +367,7 @@ function(add_hdl_systemc target_name)
     set(target_top_module ${target_name})
     set(target_output_directory
         ${CMAKE_BINARY_DIR}/systemc/${target_top_module})
+    set(target_verilator_configurations "")
 
     foreach (arg ${ARGN})
         # Handle argument
@@ -401,11 +411,14 @@ function(add_hdl_systemc target_name)
             DEFINES hdl_defines
             DEPENDS hdl_depends
             INCLUDES hdl_includes
+            VERILATOR_CONFIGURATIONS hdl_verilator_configurations
         )
 
         list(APPEND target_sources ${hdl_source})
         list(APPEND target_defines ${hdl_defines})
         list(APPEND target_includes ${hdl_includes})
+        list(APPEND target_verilator_configurations
+            ${hdl_verilator_configurations})
     endforeach()
 
     list(REMOVE_DUPLICATES target_defines)
@@ -425,6 +438,17 @@ function(add_hdl_systemc target_name)
 
     file(MAKE_DIRECTORY ${target_output_directory})
 
+    set(target_configuration_file
+        ${target_output_directory}/${target_top_module}.vlt)
+
+    set(verilator_config)
+    foreach (config ${target_verilator_configurations})
+        set(verilator_config "${verilator_config}\n${config}")
+    endforeach()
+
+    configure_file(${CMAKE_SOURCE_DIR}/cmake/VerilatorConfig.cmake.in
+        ${target_configuration_file})
+
     add_custom_command(
         OUTPUT
             ${target_output_directory}/${target_library}
@@ -441,6 +465,7 @@ function(add_hdl_systemc target_name)
             -Mdir ${target_output_directory}
             ${target_defines_expand}
             ${target_includes_expand}
+            ${target_configuration_file}
             ${target_sources}
         COMMAND
             $(MAKE)
@@ -450,6 +475,7 @@ function(add_hdl_systemc target_name)
             ${target_depends}
             ${target_sources}
             ${target_includes}
+            ${target_configuration_file}
         WORKING_DIRECTORY ${target_output_directory}
         COMMENT
             "Creating SystemC ${target_top_module} module"
