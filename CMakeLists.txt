@@ -28,7 +28,7 @@ include(AddThreads)
 include(AddGnuCompiler)
 include(AddMsvcCompiler)
 include(AddClangCompiler)
-include(AddLogic)
+include(AddHDL)
 
 find_package(SVUnit)
 find_package(ModelSim)

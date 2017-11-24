@@ -20,39 +20,18 @@ if (CMAKE_CXX_COMPILER_ID MATCHES Clang)
     )
 endif()
 
-function(add_systemc_module)
-    verilator_add_systemc_module(${ARGV})
-endfunction()
-
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/output)
-
-add_rtl_sources(
-    ${QUARTUS_MEGA_FUNCTIONS}
+add_hdl_source(${QUARTUS_MEGA_FUNCTIONS}
+    LIBRARY intel-sim
 )
 
-add_hdl_includes(
-    ${SVUNIT_INCLUDE_DIRS}
+add_hdl_source(${SVUNIT_HDL_SOURCES}
+    LIBRARY svunit
+    INCLUDES ${SVUNIT_INCLUDE_DIRS}
 )
 
-add_hdl_sources(
-    ${SVUNIT_HDL_SOURCES}
-)
-
-add_verilator_configurations(
+set(HDL_VERILATOR_CONFIGURATION
     "lint_off -msg STMTDLY      -file \"${QUARTUS_MEGA_FUNCTIONS}\""
     "lint_off -msg PINMISSING   -file \"${QUARTUS_MEGA_FUNCTIONS}\""
 )
 
-if (VERILATOR_FOUND)
-    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/coverage)
-
-    add_custom_target(coverage
-        ${VERILATOR_COVERAGE_EXECUTABLE}
-            --annotate ${CMAKE_BINARY_DIR}/coverage
-            ${CMAKE_BINARY_DIR}/output/*.dat
-    )
-endif()
-
 add_subdirectory(logic)
-
-create_simulation()

@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_rtl_sources(
-    logic_axi4_stream_buffered.sv
-    logic_axi4_stream_buffered_top.sv
+add_hdl_source(logic_axi4_stream_buffered.sv)
+
+add_hdl_source(logic_axi4_stream_buffered_top.sv
+    DEPENDS
+        logic_axi4_stream_buffered
 )

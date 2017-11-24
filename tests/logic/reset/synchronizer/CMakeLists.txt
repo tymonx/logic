@@ -14,9 +14,20 @@
 
 # Create SystemVerilog with SVUnit
 
-add_hdl_sources(
-    logic_reset_synchronizer_unit_test.sv
-    logic_reset_synchronizer_testrunner.sv
+add_hdl_source(logic_reset_synchronizer_unit_test.sv
+    DEPENDS
+        svunit_pkg
+        logic_reset_synchronizer
+    LIBRARY unit_test
+    INCLUDES ${SVUNIT_INCLUDE_DIRS}
+)
+
+add_hdl_source(logic_reset_synchronizer_testrunner.sv
+    DEPENDS
+        svunit_pkg
+        logic_reset_synchronizer_unit_test
+    LIBRARY unit_test
+    INCLUDES ${SVUNIT_INCLUDE_DIRS}
 )
 
 add_hdl_test(logic_reset_synchronizer_testrunner)
@@ -24,35 +35,31 @@ add_hdl_test(logic_reset_synchronizer_testrunner)
 # Create SystemC with GTest
 
 set(MODULE_NAME logic_reset_synchronizer)
-set(MODULE_TOP ${MODULE_NAME})
 
-add_systemc_module(${MODULE_TOP}
-    ${RTL_SOURCES}
-    INCLUDE_DIRECTORIES ${RTL_INCLUDES}
-)
+add_hdl_systemc(${MODULE_NAME})
 
-get_target_property(MODULE_LIBRARIES ${MODULE_TOP} LIBRARIES)
-get_target_property(MODULE_INCLUDE_DIRS ${MODULE_TOP} INCLUDE_DIRECTORIES)
+get_target_property(MODULE_LIBRARIES ${MODULE_NAME} LIBRARIES)
+get_target_property(MODULE_INCLUDE_DIRS ${MODULE_NAME} INCLUDE_DIRECTORIES)
 
 include_directories(SYSTEM
     ${MODULE_INCLUDE_DIRS}
     ${GTEST_INCLUDE_DIRS}
 )
 
-set(TEST_MODULE_NAME ${MODULE_NAME}_test)
+set(MODULE_NAME_TEST ${MODULE_NAME}_test)
 
-add_executable(${TEST_MODULE_NAME}
+add_executable(${MODULE_NAME_TEST}
     main.cpp
     test.cpp
     dut.cpp
 )
 
-add_test(NAME ${TEST_MODULE_NAME}
-    COMMAND ${TEST_MODULE_NAME}
+add_test(NAME ${MODULE_NAME_TEST}
+    COMMAND ${MODULE_NAME_TEST}
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/output
 )
 
-target_link_libraries(${TEST_MODULE_NAME}
+target_link_libraries(${MODULE_NAME_TEST}
     logic
     ${MODULE_LIBRARIES}
     logic-gtest-main

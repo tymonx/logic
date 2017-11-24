@@ -22,10 +22,8 @@ set(MODULE_DEFINITIONS
     LOGIC_AXI4_STREAM_TUSER_WIDTH=1
 )
 
-add_systemc_module(${MODULE_TOP}
-    ${RTL_SOURCES}
-    DEFINITIONS ${MODULE_DEFINITIONS}
-    INCLUDE_DIRECTORIES ${RTL_INCLUDES}
+add_hdl_systemc(${MODULE_TOP}
+    DEFINES ${MODULE_DEFINITIONS}
 )
 
 get_target_property(MODULE_LIBRARIES ${MODULE_TOP} LIBRARIES)
@@ -39,19 +37,19 @@ set_source_files_properties(main.cpp PROPERTIES
     COMPILE_DEFINITIONS "${MODULE_DEFINITIONS}"
 )
 
-set(TEST_MODULE_NAME ${MODULE_NAME}_test)
+set(MODULE_NAME_TEST ${MODULE_NAME}_test)
 
-add_executable(${TEST_MODULE_NAME}
+add_executable(${MODULE_NAME_TEST}
     main.cpp
     test.cpp
 )
 
-add_test(NAME ${TEST_MODULE_NAME}
-    COMMAND ${TEST_MODULE_NAME}
+add_test(NAME ${MODULE_NAME_TEST}
+    COMMAND ${MODULE_NAME_TEST}
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/output
 )
 
-target_link_libraries(${TEST_MODULE_NAME}
+target_link_libraries(${MODULE_NAME_TEST}
     logic
     ${MODULE_LIBRARIES}
 )

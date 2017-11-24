@@ -14,4 +14,4 @@
  */
 
 `verilator_config
-@VERILATOR_CONFIGURATIONS_SEPERATE@
+@hdl_verilator_config@
