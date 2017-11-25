@@ -211,8 +211,8 @@ function(add_hdl_source)
 
         add_custom_command(
             OUTPUT ${CMAKE_BINARY_DIR}/modelsim/.modules/${hdl_name}
-            COMMAND ${CMAKE_COMMAND} -E touch ./.modules/${hdl_name}
             COMMAND ${modelsim_compiler} ${modelsim_flags} ${modelsim_source}
+            COMMAND ${CMAKE_COMMAND} -E touch ./.modules/${hdl_name}
             DEPENDS ${hdl_source} ${modelsim_depends}
             WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/modelsim
             COMMENT "ModelSim compiling HDL: ${hdl_name}"
