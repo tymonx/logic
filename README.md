@@ -123,7 +123,7 @@ Clone and add logic repository as git submodule:
 
     git submodule add git@github.com:tymonx/logic.git
 
-Add these line to CMakeLists.txt root file:
+Add these lines to CMakeLists.txt root file:
 
     enable_testing()
     add_subdirectory(logic)
