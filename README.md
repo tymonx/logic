@@ -1,12 +1,20 @@
 Logic
 =====
 
-Modern C++11 framework for testing RTL modules using SystemC and UVM.
+SystemVerilog, SystemC and CMake utilities for creating, building and testing
+RTL projects for FPGAs and ASICs.
+
+Includes:
+
+  * SystemVerilog modules for creating high quality RTL projects
+  * CMake utilities for rapid building and testing RTL projects
+  * Modern C++ framework for UVM with SystemC for creating high quality and
+    performance efficient tests for RTL projects
 
 Requirements
 ------------
 
-These 3rd party tools and libraries must be installed to build and run tests:
+These 3rd party tools and libraries must be installed to build project and run tests:
 
   * [CMake](https://cmake.org/) - build, test and package project
   * [Intel FPGA Quartus](https://www.altera.com/downloads/download-center.html) - synthesis tool for Intel FPGAs

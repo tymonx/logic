@@ -17,6 +17,57 @@
 `ifndef LOGIC_AXI4_STREAM_SVH
 `define LOGIC_AXI4_STREAM_SVH
 
+/* Define: LOGIC_AXI4_STREAM_IF_PARAMETERS
+ *
+ * Copy SystemVerilog interface parameters from another interface instance.
+ *
+ * Parameters:
+ *  _interface  - SystemVerilog interface.
+ */
+`define LOGIC_AXI4_STREAM_IF_PARAMETERS(_interface) \
+    .TDATA_BYTES($bits(_interface``.tdata) / 8), \
+    .TUSER_WIDTH($bits(_interface``.tuser)), \
+    .TDEST_WIDTH($bits(_interface``.tdest)), \
+    .TID_WIDTH($bits(_interface``.tid))
+
+/* Define: LOGIC_AXI4_STREAM_IF_RX_ASSIGN
+ *
+ * Assign standalone signals to signals in SystemVerilog interface.
+ *
+ * Parameters:
+ *  lhs       - SystemVerilog interface.
+ *  rhs       - Standalone SystemVerilog signals.
+ */
+`define LOGIC_AXI4_STREAM_IF_RX_ASSIGN(lhs, rhs) \
+    always_comb lhs``.tvalid = rhs``_tvalid; \
+    always_comb lhs``.tlast = rhs``_tlast; \
+    always_comb lhs``.tdata = rhs``_tdata; \
+    always_comb lhs``.tstrb = rhs``_tstrb; \
+    always_comb lhs``.tkeep = rhs``_tkeep; \
+    always_comb lhs``.tdest = rhs``_tdest; \
+    always_comb lhs``.tuser = rhs``_tuser; \
+    always_comb lhs``.tid = rhs``_tid; \
+    always_comb rhs``_tready = lhs``.tready
+
+/* Define: LOGIC_AXI4_STREAM_IF_TX_ASSIGN
+ *
+ * Assign signals in SystemVerilog interface to standalone signals.
+ *
+ * Parameters:
+ *  lhs       - Standalone SystemVerilog signals.
+ *  rhs       - SystemVerilog interface.
+ */
+`define LOGIC_AXI4_STREAM_IF_TX_ASSIGN(lhs, rhs) \
+    always_comb lhs``_tvalid = rhs``.tvalid; \
+    always_comb lhs``_tlast = rhs``.tlast; \
+    always_comb lhs``_tdata = rhs``.tdata; \
+    always_comb lhs``_tstrb = rhs``.tstrb; \
+    always_comb lhs``_tkeep = rhs``.tkeep; \
+    always_comb lhs``_tdest = rhs``.tdest; \
+    always_comb lhs``_tuser = rhs``.tuser; \
+    always_comb lhs``_tid = rhs``.tid; \
+    always_comb rhs``.tready = lhs``_tready
+
 `ifndef LOGIC_AXI4_STREAM_TDATA_BYTES
     `define LOGIC_AXI4_STREAM_TDATA_BYTES 1
 `endif
