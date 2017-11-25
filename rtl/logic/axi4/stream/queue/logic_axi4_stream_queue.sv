@@ -41,7 +41,7 @@ module logic_axi4_stream_queue #(
 );
     generate
         case (TARGET)
-        logic_pkg::GENERIC: begin: generic
+        logic_pkg::TARGET_GENERIC: begin: generic
             logic_axi4_stream_queue_generic #(
                 .CAPACITY(CAPACITY)
             )
@@ -49,7 +49,8 @@ module logic_axi4_stream_queue #(
                 .*
             );
         end
-        logic_pkg::INTEL_ARRIA_10: begin: intel
+        logic_pkg::TARGET_INTEL,
+        logic_pkg::TARGET_INTEL_ARRIA_10: begin: intel
             logic_axi4_stream_queue_intel #(
                 .CAPACITY(CAPACITY)
             )

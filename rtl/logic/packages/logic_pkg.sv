@@ -23,12 +23,15 @@ package logic_pkg;
      *
      * Optimize project using dedicated target.
      *
-     * GENERIC          - Generic target not related to any vendor or device.
-     * INTEL_ARRIA_10   - Optimized for Intel Arria 10 without HPS.
+     * TARGET_GENERIC          - Generic target not related to any vendor or
+     *                           device.
+     * TARGET_INTEL            - Optimized for non-specific Intel FPGAs.
+     * TARGET_INTEL_ARRIA_10   - Optimized for Intel Arria 10 without HPS.
      */
     typedef enum {
-        GENERIC,
-        INTEL_ARRIA_10
+        TARGET_GENERIC,
+        TARGET_INTEL,
+        TARGET_INTEL_ARRIA_10
     } target_t;
 
 endpackage

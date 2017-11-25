@@ -127,3 +127,15 @@ Add these lines to CMakeLists.txt root file:
 
     enable_testing()
     add_subdirectory(logic)
+
+Creating Intel FPGA Quartus project
+-----------------------------------
+
+Use add_quartus_project() function to create Quartus project.
+Project Quartus will be created under:
+
+    quartus/<top_level_entity>
+
+RTL analysis and elaboration in Intel FPGA Quartus:
+
+    quartus_map --analysis_and_elaboration quartus<top_level_entity>/logic.qpf

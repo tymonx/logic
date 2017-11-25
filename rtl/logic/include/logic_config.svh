@@ -22,7 +22,7 @@
  * Defines default target device for all RTL sources
  */
 `ifndef LOGIC_CONFIG_TARGET
-`define LOGIC_CONFIG_TARGET logic_pkg::GENERIC
+`define LOGIC_CONFIG_TARGET logic_pkg::TARGET_GENERIC
 `endif
 
 `endif /* LOGIC_CONFIG_SVH */

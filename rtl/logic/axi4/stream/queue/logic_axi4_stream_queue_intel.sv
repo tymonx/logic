@@ -39,7 +39,6 @@ module logic_axi4_stream_queue_intel #(
     logic [$bits(rx.read())-1:0] read_data;
 
     logic [ADDRESS_WIDTH-1:0] usedw;
-    logic [1:0] eccstatus;
 
     enum logic [0:0] {
         FSM_IDLE,
@@ -86,7 +85,9 @@ module logic_axi4_stream_queue_intel #(
         .aclr(!areset_n),
         .sclr(1'b0),
         .q(read_data),
-        .*
+        .usedw(usedw),
+        .empty(empty),
+        .almost_full(almost_full)
     );
 
     always_ff @(posedge aclk or negedge areset_n) begin
