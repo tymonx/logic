@@ -9,7 +9,7 @@ Requirements
 These 3rd party tools and libraries must be installed to build and run tests:
 
   * [CMake](https://cmake.org/) - build, test and package project
-  * [IntelFPGA Quartus](https://www.altera.com/downloads/download-center.html) - synthesis tool for Intel FPGAs
+  * [Intel FPGA Quartus](https://www.altera.com/downloads/download-center.html) - synthesis tool for Intel FPGAs
   * [Verilator](https://www.veripool.org/wiki/verilator/) - simulator, lint and coverage tool
   * [SystemC 2.3.1](http://accellera.org/downloads/standards/systemc) - SystemC C++ library
   * [SystemC Verification 2.0](http://accellera.org/downloads/standards/systemc) - SystemC data randomization
@@ -38,7 +38,11 @@ Workspace
 Build
 -----
 
-After cloning this repository, change current location to repository directory:
+Clone project repository:
+
+    git clone git@github.com:tymonx/logic.git
+
+Change current location to project directory:
 
     cd logic
 
