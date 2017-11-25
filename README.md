@@ -138,4 +138,4 @@ Quartus project will be created under:
 
 RTL analysis and elaboration in Intel FPGA Quartus:
 
-    quartus_map --analysis_and_elaboration quartus<top_level_entity>/logic.qpf
+    quartus_map --analysis_and_elaboration quartus/<top_level_entity>/logic.qpf
