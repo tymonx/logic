@@ -131,8 +131,8 @@ Add these lines to CMakeLists.txt root file:
 Creating Intel FPGA Quartus project
 -----------------------------------
 
-Use add_quartus_project() function to create Quartus project.
-Project Quartus will be created under:
+Use `add_quartus_project()` function to create Quartus project.
+Quartus project will be created under:
 
     quartus/<top_level_entity>
 
