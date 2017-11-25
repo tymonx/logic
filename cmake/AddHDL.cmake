@@ -18,6 +18,18 @@ find_package(Verilator REQUIRED)
 
 set(HDL_TARGETS "" CACHE INTERNAL "RTL targets" FORCE)
 
+set(HDL_CONFIGURATION_FILE
+    ${CMAKE_CURRENT_LIST_DIR}/AddHDL.cmake.in
+    CACHE INTERNAL "HDL configuration file" FORCE)
+
+set(VERILATOR_CONFIGURATION_FILE
+    ${CMAKE_CURRENT_LIST_DIR}/VerilatorConfig.cmake.in
+    CACHE INTERNAL "Verilator configuration file" FORCE)
+
+set(MODELSIM_RUN_TCL
+    ${CMAKE_CURRENT_LIST_DIR}/../scripts/modelsim_run.tcl
+    CACHE INTERNAL "ModelSim run script" FORCE)
+
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/.hdl)
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/output)
 
@@ -145,7 +157,7 @@ function(add_hdl_source)
     set(HDL_TARGETS ${HDL_TARGETS} ${hdl_name}
         CACHE INTERNAL "RTL targets" FORCE)
 
-    configure_file(${CMAKE_SOURCE_DIR}/cmake/AddHDL.cmake.in
+    configure_file(${HDL_CONFIGURATION_FILE}
         ${CMAKE_BINARY_DIR}/.hdl/${hdl_name})
 
     if (MODELSIM_FOUND)
@@ -446,7 +458,7 @@ function(add_hdl_systemc target_name)
         set(verilator_config "${verilator_config}\n${config}")
     endforeach()
 
-    configure_file(${CMAKE_SOURCE_DIR}/cmake/VerilatorConfig.cmake.in
+    configure_file(${VERILATOR_CONFIGURATION_FILE}
         ${target_configuration_file})
 
     add_custom_command(
@@ -512,11 +524,15 @@ endfunction()
 
 function(add_hdl_test test_name)
     if (MODELSIM_FOUND)
-        set(MODELSIM_RUN_TCL ${CMAKE_SOURCE_DIR}/scripts/modelsim_run.tcl)
+        set(MODELSIM_WAVEFORM ${CMAKE_BINARY_DIR}/output/${test_name}.wlf)
 
         if (CYGWIN)
             execute_process(COMMAND cygpath -m ${MODELSIM_RUN_TCL}
                 OUTPUT_VARIABLE MODELSIM_RUN_TCL
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+            execute_process(COMMAND cygpath -m ${MODELSIM_WAVEFORM}
+                OUTPUT_VARIABLE MODELSIM_WAVEFORM
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
         endif()
 
@@ -525,7 +541,7 @@ function(add_hdl_test test_name)
         set(modelsim_flags "")
 
         list(APPEND modelsim_flags -c)
-        list(APPEND modelsim_flags -wlf ../output/${test_name}.wlf)
+        list(APPEND modelsim_flags -wlf ${MODELSIM_WAVEFORM})
         list(APPEND modelsim_flags -do ${MODELSIM_RUN_TCL})
 
         get_hdl_depends(${test_name} hdl_depends)
