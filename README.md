@@ -111,3 +111,19 @@ Verilator Coverage
 Run Verilator coverage after running all tests:
 
     cmake --build . --target verilator-coverage
+
+Using with other CMake projects
+-------------------------------
+
+Change current location to another RTL project root directory:
+
+    cd <rtl_project_root_directory>
+
+Clone and add logic repository as git submodule:
+
+    git submodule add git@github.com:tymonx/logic.git
+
+Add these line to CMakeLists.txt root file:
+
+    enable_testing()
+    add_subdirectory(logic)
