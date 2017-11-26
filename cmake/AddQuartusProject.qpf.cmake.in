@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(HDL_SYNTHESIZABLE TRUE)
+QUARTUS_VERSION = "@QUARTUS_VERSION@"
+DATE = "22:52:48  November 25, 2017"
 
-add_subdirectory(logic)
+# Revisions
+
+PROJECT_REVISION = "@QUARTUS_PROJECT_REVISION@"

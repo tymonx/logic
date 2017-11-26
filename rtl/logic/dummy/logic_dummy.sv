@@ -6,7 +6,6 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * @copyright
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,15 +13,7 @@
  * limitations under the License.
  */
 
-`ifndef LOGIC_CONFIG_SVH
-`define LOGIC_CONFIG_SVH
+/* Used only for Vim syntastic plugin */
+module logic_dummy;
 
-/* Define: LOGIC_CONFIG_TARGET
- *
- * Defines default target device for all RTL sources
- */
-`ifndef LOGIC_CONFIG_TARGET
-`define LOGIC_CONFIG_TARGET logic_pkg::TARGET_GENERIC
-`endif
-
-`endif /* LOGIC_CONFIG_SVH */
+endmodule

@@ -5,4 +5,5 @@ LIBRARY;@hdl_library@
 DEFINES;@hdl_defines@
 DEPENDS;@hdl_depends@
 INCLUDES;@hdl_includes@
+SYNTHESIZABLE;@hdl_synthesizable@
 VERILATOR_CONFIGURATIONS;@hdl_verilator_configurations@

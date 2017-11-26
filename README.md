@@ -1,15 +1,23 @@
 Logic
 =====
 
-Modern C++11 framework for testing RTL modules using SystemC and UVM.
+SystemVerilog, SystemC and CMake utilities for creating, building and testing
+RTL projects for FPGAs and ASICs.
+
+Includes:
+
+  * SystemVerilog modules for creating high quality RTL projects
+  * CMake utilities for rapid building and testing RTL projects
+  * Modern C++ framework for UVM with SystemC for creating high quality and
+    performance efficient tests for RTL projects
 
 Requirements
 ------------
 
-These 3rd party tools and libraries must be installed to build and run tests:
+These 3rd party tools and libraries must be installed to build project and run tests:
 
   * [CMake](https://cmake.org/) - build, test and package project
-  * [IntelFPGA Quartus](https://www.altera.com/downloads/download-center.html) - synthesis tool for Intel FPGAs
+  * [Intel FPGA Quartus](https://www.altera.com/downloads/download-center.html) - synthesis tool for Intel FPGAs
   * [Verilator](https://www.veripool.org/wiki/verilator/) - simulator, lint and coverage tool
   * [SystemC 2.3.1](http://accellera.org/downloads/standards/systemc) - SystemC C++ library
   * [SystemC Verification 2.0](http://accellera.org/downloads/standards/systemc) - SystemC data randomization
@@ -38,7 +46,11 @@ Workspace
 Build
 -----
 
-After cloning this repository, change current location to repository directory:
+Clone project repository:
+
+    git clone git@github.com:tymonx/logic.git
+
+Change current location to project directory:
 
     cd logic
 
@@ -99,3 +111,34 @@ Verilator Coverage
 Run Verilator coverage after running all tests:
 
     cmake --build . --target verilator-coverage
+
+Using with other CMake projects
+-------------------------------
+
+Change current location to another RTL project root directory:
+
+    cd <rtl_project_root_directory>
+
+Clone and add logic repository as git submodule:
+
+    git submodule add git@github.com:tymonx/logic.git
+
+Add these lines to CMakeLists.txt root file:
+
+    enable_testing()
+    add_subdirectory(logic)
+
+Creating Intel FPGA Quartus project
+-----------------------------------
+
+Use `add_quartus_project()` function to create Quartus project:
+
+    add_quartus_project(<top_level_entity>)
+
+Quartus project will be created under:
+
+    quartus/<top_level_entity>
+
+RTL analysis and elaboration in Intel FPGA Quartus:
+
+    cmake --build . --target quartus-analysis-and-elaboration-<top_level_entity>

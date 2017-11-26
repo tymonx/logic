@@ -28,6 +28,7 @@ include(AddThreads)
 include(AddGnuCompiler)
 include(AddMsvcCompiler)
 include(AddClangCompiler)
+include(AddQuartusProject)
 include(AddHDL)
 
 find_package(SVUnit)
@@ -43,6 +44,9 @@ include_directories(SYSTEM ${SYSTEMC_INCLUDE_DIRS})
 
 add_subdirectory(src)
 add_subdirectory(rtl)
+
+add_quartus_project(logic_axi4_stream_queue_top
+    DEFINES "LOGIC_CONFIG_TARGET=logic_pkg::TARGET_INTEL")
 
 if (TESTS)
     include(CTest)

@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set(HDL_SYNTHESIZABLE FALSE)
+
 if (CMAKE_CXX_COMPILER_ID MATCHES Clang)
     set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS}
         -Wno-global-constructors

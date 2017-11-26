@@ -13,7 +13,7 @@
 # limitations under the License.
 
 set(HDL_LIBRARY logic)
-set(HDL_INCLUDES ${CMAKE_SOURCE_DIR}/rtl/logic/include)
+set(HDL_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_subdirectory(packages)
 add_subdirectory(interfaces)

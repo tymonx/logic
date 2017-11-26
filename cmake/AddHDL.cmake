@@ -18,6 +18,18 @@ find_package(Verilator REQUIRED)
 
 set(HDL_TARGETS "" CACHE INTERNAL "RTL targets" FORCE)
 
+set(HDL_CONFIGURATION_FILE
+    ${CMAKE_CURRENT_LIST_DIR}/AddHDL.cmake.in
+    CACHE INTERNAL "HDL configuration file" FORCE)
+
+set(VERILATOR_CONFIGURATION_FILE
+    ${CMAKE_CURRENT_LIST_DIR}/VerilatorConfig.cmake.in
+    CACHE INTERNAL "Verilator configuration file" FORCE)
+
+set(MODELSIM_RUN_TCL
+    ${CMAKE_CURRENT_LIST_DIR}/../scripts/modelsim_run.tcl
+    CACHE INTERNAL "ModelSim run script" FORCE)
+
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/.hdl)
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/output)
 
@@ -43,6 +55,7 @@ function(add_hdl_source)
     set(hdl_name FALSE)
     set(hdl_type FALSE)
     set(hdl_source FALSE)
+    set(hdl_synthesizable FALSE)
     set(hdl_library work)
     set(hdl_depends "")
     set(hdl_defines "")
@@ -51,6 +64,10 @@ function(add_hdl_source)
 
     if (HDL_LIBRARY)
         set(hdl_library ${HDL_LIBRARY})
+    endif()
+
+    if (HDL_SYNTHESIZABLE)
+        set(hdl_synthesizable ${HDL_SYNTHESIZABLE})
     endif()
 
     if (HDL_DEPENDS)
@@ -88,6 +105,8 @@ function(add_hdl_source)
             set(state GET_DEFINES)
         elseif (arg MATCHES INCLUDES)
             set(state GET_INCLUDES)
+        elseif (arg MATCHES SYNTHESIZABLE)
+            set(state GET_SYNTHESIZABLE)
         elseif (arg MATCHES VERILATOR_CONFIGURATIONS)
             set(state GET_VERILATOR_CONFIGURATIONS)
 
@@ -111,6 +130,9 @@ function(add_hdl_source)
         elseif (state MATCHES GET_INCLUDES)
             get_filename_component(arg ${arg} REALPATH)
             list(APPEND hdl_includes ${arg})
+        elseif (state MATCHES GET_SYNTHESIZABLE)
+            set(hdl_synthesizable ${arg})
+            set(state UNKNOWN)
         elseif (state MATCHES GET_VERILATOR_CONFIGURATIONS)
             list(APPEND hdl_verilator_configurations ${arg})
         else ()
@@ -145,7 +167,7 @@ function(add_hdl_source)
     set(HDL_TARGETS ${HDL_TARGETS} ${hdl_name}
         CACHE INTERNAL "RTL targets" FORCE)
 
-    configure_file(${CMAKE_SOURCE_DIR}/cmake/AddHDL.cmake.in
+    configure_file(${HDL_CONFIGURATION_FILE}
         ${CMAKE_BINARY_DIR}/.hdl/${hdl_name})
 
     if (MODELSIM_FOUND)
@@ -233,6 +255,7 @@ function(get_hdl_properties hdl_name)
     set(hdl_depends "")
     set(hdl_defines "")
     set(hdl_includes "")
+    set(hdl_synthesizable FALSE)
     set(hdl_verilator_configurations "")
 
     file(READ ${CMAKE_BINARY_DIR}/.hdl/${hdl_name} hdl_file)
@@ -257,6 +280,8 @@ function(get_hdl_properties hdl_name)
             set(state GET_DEFINES)
         elseif (arg MATCHES INCLUDES)
             set(state GET_INCLUDES)
+        elseif (arg MATCHES SYNTHESIZABLE)
+            set(state GET_SYNTHESIZABLE)
         elseif (arg MATCHES VERILATOR_CONFIGURATIONS)
             set(state GET_VERILATOR_CONFIGURATIONS)
 
@@ -279,6 +304,9 @@ function(get_hdl_properties hdl_name)
             list(APPEND hdl_defines ${arg})
         elseif (state MATCHES GET_INCLUDES)
             list(APPEND hdl_includes ${arg})
+        elseif (state MATCHES GET_SYNTHESIZABLE)
+            set(hdl_synthesizable ${arg})
+            set(state UNKNOWN)
         elseif (state MATCHES GET_VERILATOR_CONFIGURATIONS)
             list(APPEND hdl_verilator_configurations ${arg})
         else ()
@@ -304,6 +332,8 @@ function(get_hdl_properties hdl_name)
             set(state GET_DEFINES)
         elseif (arg MATCHES INCLUDES)
             set(state GET_INCLUDES)
+        elseif (arg MATCHES SYNTHESIZABLE)
+            set(state GET_SYNTHESIZABLE)
         elseif (arg MATCHES VERILATOR_CONFIGURATIONS)
             set(state GET_VERILATOR_CONFIGURATIONS)
 
@@ -328,6 +358,9 @@ function(get_hdl_properties hdl_name)
             set(state UNKNOWN)
         elseif (state MATCHES GET_INCLUDES)
             set(${arg} ${hdl_includes} PARENT_SCOPE)
+            set(state UNKNOWN)
+        elseif (state MATCHES GET_SYNTHESIZABLE)
+            set(${arg} ${hdl_synthesizable} PARENT_SCOPE)
             set(state UNKNOWN)
         elseif (state MATCHES GET_VERILATOR_CONFIGURATIONS)
             set(${arg} ${hdl_verilator_configurations} PARENT_SCOPE)
@@ -446,7 +479,7 @@ function(add_hdl_systemc target_name)
         set(verilator_config "${verilator_config}\n${config}")
     endforeach()
 
-    configure_file(${CMAKE_SOURCE_DIR}/cmake/VerilatorConfig.cmake.in
+    configure_file(${VERILATOR_CONFIGURATION_FILE}
         ${target_configuration_file})
 
     add_custom_command(
@@ -512,11 +545,15 @@ endfunction()
 
 function(add_hdl_test test_name)
     if (MODELSIM_FOUND)
-        set(MODELSIM_RUN_TCL ${CMAKE_SOURCE_DIR}/scripts/modelsim_run.tcl)
+        set(MODELSIM_WAVEFORM ${CMAKE_BINARY_DIR}/output/${test_name}.wlf)
 
         if (CYGWIN)
             execute_process(COMMAND cygpath -m ${MODELSIM_RUN_TCL}
                 OUTPUT_VARIABLE MODELSIM_RUN_TCL
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+            execute_process(COMMAND cygpath -m ${MODELSIM_WAVEFORM}
+                OUTPUT_VARIABLE MODELSIM_WAVEFORM
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
         endif()
 
@@ -525,7 +562,7 @@ function(add_hdl_test test_name)
         set(modelsim_flags "")
 
         list(APPEND modelsim_flags -c)
-        list(APPEND modelsim_flags -wlf ../output/${test_name}.wlf)
+        list(APPEND modelsim_flags -wlf ${MODELSIM_WAVEFORM})
         list(APPEND modelsim_flags -do ${MODELSIM_RUN_TCL})
 
         get_hdl_depends(${test_name} hdl_depends)
