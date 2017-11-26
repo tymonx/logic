@@ -131,17 +131,6 @@ Add these lines to CMakeLists.txt root file:
 Creating Intel FPGA Quartus project
 -----------------------------------
 
-Set CMake module path to logic CMake module path:
-
-    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
-      ${CMAKE_CURRENT_LIST_DIR}/cmake
-      ${CMAKE_CURRENT_LIST_DIR}/logic/cmake
-    )
-
-Include `AddQuartusProject` in project CMakeLists.txt root file:
-
-    include(AddQuartusProject)
-
 Use `add_quartus_project()` function to create Quartus project:
 
     add_quartus_project(<top_level_entity>)

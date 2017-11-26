@@ -14,7 +14,7 @@
 
 set_global_assignment -name FAMILY "@QUARTUS_FAMILY@"
 set_global_assignment -name DEVICE @QUARTUS_DEVICE@
-set_global_assignment -name TOP_LEVEL_ENTITY @QUARTUS_TOP_LEVEL_ENTITY@
+set_global_assignment -name TOP_LEVEL_ENTITY @quartus_top_level_entity@
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 17.0.0
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "22:52:48  NOVEMBER 25, 2017"
 set_global_assignment -name LAST_QUARTUS_VERSION "17.0.0 Lite Edition"

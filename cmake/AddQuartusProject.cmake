@@ -29,14 +29,9 @@ set(QUARTUS_FAMILY "Cyclone V"
 set(QUARTUS_DEVICE 5CGXFC7C7F23C8
     CACHE STRING "Quartus device")
 
-set(QUARTUS_TOP_LEVEL_ENTITY logic_axi4_stream_queue_top
-    CACHE STRING "Quartus top level entity")
-
-set(QUARTUS_PROJECT_DIRECTORY
-    ${CMAKE_BINARY_DIR}/quartus/${QUARTUS_TOP_LEVEL_ENTITY}
-    CACHE STRING "Quartus project directory")
-
-add_custom_target(quartus-analysis-and-elaboration-all)
+if (NOT TARGET quartus-analysis-and-elaboration-all)
+    add_custom_target(quartus-analysis-and-elaboration-all)
+endif()
 
 function(add_quartus_project target_name)
     set(state GET_SOURCES)
@@ -45,7 +40,7 @@ function(add_quartus_project target_name)
     set(quartus_defines "")
     set(quartus_includes "")
     set(quartus_top_level_entity ${target_name})
-    set(quartus_project_directory ${QUARTUS_PROJECT_DIRECTORY})
+    set(quartus_project_directory ${CMAKE_BINARY_DIR}/quartus/${target_name})
     set(quartus_assignments "")
 
     if (QUARTUS_INCLUDES)
@@ -66,6 +61,8 @@ function(add_quartus_project target_name)
             list(APPEND quartus_assignments ${quartus_assignment})
         endforeach()
     endif()
+
+    message(STATUS "${target_name}")
 
     foreach (arg ${ARGN})
         # Handle argument
