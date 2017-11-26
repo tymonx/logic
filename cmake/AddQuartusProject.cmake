@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+if (COMMAND add_quartus_project)
+    return()
+endif()
+
 find_package(Quartus REQUIRED)
 
 set(ADD_QUARTUS_PROJECT_CURRENT_DIR ${CMAKE_CURRENT_LIST_DIR}
@@ -61,8 +65,6 @@ function(add_quartus_project target_name)
             list(APPEND quartus_assignments ${quartus_assignment})
         endforeach()
     endif()
-
-    message(STATUS "${target_name}")
 
     foreach (arg ${ARGN})
         # Handle argument

@@ -12,9 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+if (ADD_MSVC_COMPILER)
+    return()
+endif()
+
 if (NOT CMAKE_CXX_COMPILER_ID MATCHES MSVC)
     return()
 endif ()
+
+set(ADD_MSVC_COMPILER TRUE)
 
 set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} /std:c++latest)
 set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} /W4)

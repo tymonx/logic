@@ -12,6 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+if (COMMAND add_hdl_source)
+    return()
+endif()
+
+set(ADD_HDL_INCLUDED TRUE CACHE INTERNAL "AddHDL included")
+
 find_package(ModelSim)
 find_package(SystemC REQUIRED COMPONENTS SCV UVM)
 find_package(Verilator REQUIRED)
@@ -47,7 +53,9 @@ if (MODELSIM_FOUND)
             WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/modelsim)
     endif()
 
-    add_custom_target(modelsim-compile-all ALL)
+    if (NOT TARGET modelsim-compile-all)
+        add_custom_target(modelsim-compile-all ALL)
+    endif()
 endif()
 
 function(add_hdl_source)
