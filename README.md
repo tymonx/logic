@@ -28,6 +28,10 @@ These 3rd party tools and libraries must be installed to build project and run t
   * [GTKWave](http://gtkwave.sourceforge.net/) - waveform viewer
   * [WaveDrom](http://wavedrom.com/) - digital timing diagram
 
+Environment setup guides:
+
+  * [Environment setup for Linux](doc/environment-setup-linux.md)
+
 Workspace
 ---------
 
@@ -112,22 +116,6 @@ Run Verilator coverage after running all tests:
 
     cmake --build . --target verilator-coverage
 
-Using with other CMake projects
--------------------------------
-
-Change current location to another RTL project root directory:
-
-    cd <rtl_project_root_directory>
-
-Clone and add logic repository as git submodule:
-
-    git submodule add git@github.com:tymonx/logic.git
-
-Add these lines to CMakeLists.txt root file:
-
-    enable_testing()
-    add_subdirectory(logic)
-
 Creating Intel FPGA Quartus project
 -----------------------------------
 
@@ -142,3 +130,39 @@ Quartus project will be created under:
 RTL analysis and elaboration in Intel FPGA Quartus:
 
     cmake --build . --target quartus-analysis-and-elaboration-<top_level_entity>
+
+Using with other CMake projects
+-------------------------------
+
+Change current location to another RTL project root directory:
+
+    cd <rtl_project_root_directory>
+
+Clone and add logic repository to RTL project as git submodule:
+
+    git submodule add git@github.com:tymonx/logic.git
+
+Add these lines to CMakeLists.txt root file:
+
+    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
+        ${CMAKE_CURRENT_LIST_DIR}/cmake
+        ${CMAKE_CURRENT_LIST_DIR}/logic/cmake
+    )
+
+    include(AddThreads)
+    include(AddGnuCompiler)
+    include(AddMsvcCompiler)
+    include(AddClangCompiler)
+    include(AddQuartusProject)
+    include(AddHDL)
+
+    find_package(SVUnit)
+    find_package(ModelSim)
+    find_package(NaturalDocs)
+    find_package(SystemC REQUIRED COMPONENTS SCV UVM)
+    find_package(Verilator REQUIRED)
+    find_package(Quartus REQUIRED)
+    find_package(GTest)
+
+    enable_testing()
+    add_subdirectory(logic)
