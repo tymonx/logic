@@ -78,6 +78,9 @@ Or build project using make:
 
     make -j`nproc`
 
+Documentation
+-------------
+
 To build documentation:
 
     cmake --build . target doc
