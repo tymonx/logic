@@ -66,7 +66,7 @@ function(add_hdl_source)
         set(hdl_library ${HDL_LIBRARY})
     endif()
 
-    if (DEFINED HDL_SYNTHESIZABLE)
+    if (HDL_SYNTHESIZABLE)
         set(hdl_synthesizable ${HDL_SYNTHESIZABLE})
     endif()
 

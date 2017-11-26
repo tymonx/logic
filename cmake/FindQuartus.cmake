@@ -20,8 +20,9 @@
 #
 # ::
 #
-#   QUARTUS_EXECUTABLE    - Quartus
-#   QUARTUS_FOUND         - true if Quartus found
+#   QUARTUS_EXECUTABLE      - Quartus
+#   QUARTUS_MAP_EXECUTABLE  - Quartus Map
+#   QUARTUS_FOUND           - true if Quartus found
 
 if (QUARTUS_FOUND)
     return()
@@ -40,6 +41,17 @@ find_program(QUARTUS_EXECUTABLE quartus
     DOC "Path to the Quartus executable"
 )
 
+find_program(QUARTUS_MAP_EXECUTABLE quartus_map
+    HINTS
+        $ENV{QUARTUS_ROOTDIR}
+        $ENV{QUARTUS_HOME}
+        $ENV{QUARTUS_ROOT}
+        $ENV{QUARTUS_DIR}
+        $ENV{QUARTUS}
+    PATH_SUFFIXES bin
+    DOC "Path to the Quartus map executable"
+)
+
 get_filename_component(QUARTUS_EXECUTABLE_DIR ${QUARTUS_EXECUTABLE}
     DIRECTORY)
 
@@ -50,7 +62,8 @@ find_file(QUARTUS_MEGA_FUNCTIONS altera_mf.v
 )
 
 mark_as_advanced(QUARTUS_EXECUTABLE)
+mark_as_advanced(QUARTUS_MAP_EXECUTABLE)
 mark_as_advanced(QUARTUS_MEGA_FUNCTIONS)
 
 find_package_handle_standard_args(Quartus REQUIRED_VARS
-    QUARTUS_EXECUTABLE QUARTUS_MEGA_FUNCTIONS)
+    QUARTUS_EXECUTABLE QUARTUS_MAP_EXECUTABLE QUARTUS_MEGA_FUNCTIONS)
