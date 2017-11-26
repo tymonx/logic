@@ -17,8 +17,8 @@
 
 /* Module: logic_axi4_stream_buffered
  *
- * Improve timings between modules by adding register to ready signal from tx to
- * rx.
+ * Improve timings between modules by adding register to ready signal path from
+ * tx to rx ports and it keeps zero latency bus transcation on both sides.
  *
  * Ports:
  *  aclk        - Clock.
@@ -85,22 +85,22 @@ module logic_axi4_stream_buffered (
 
     always_comb begin
         unique case (fsm_state)
+        FSM_IDLE: begin
+            tx.tvalid = rx.tvalid && rx.tready;
+        end
         FSM_BUFFERED: begin
             tx.tvalid = 1'b1;
-        end
-        default: begin
-            tx.tvalid = rx.tvalid && rx.tready;
         end
         endcase
     end
 
     always_comb begin
         unique case (fsm_state)
+        FSM_IDLE: begin
+            tx.comb_write(rx.read());
+        end
         FSM_BUFFERED: begin
             tx.comb_write(buffered);
-        end
-        default: begin
-            tx.comb_write(rx.read());
         end
         endcase
     end

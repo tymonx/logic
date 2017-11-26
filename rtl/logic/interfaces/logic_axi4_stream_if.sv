@@ -74,11 +74,11 @@ interface logic_axi4_stream_if #(
         return '{tuser, tdest, tid, tlast, tkeep, tstrb, tdata};
     endfunction
 
-    task write(packet_t packet);
+    task write(input packet_t packet);
         {tuser, tdest, tid, tlast, tkeep, tstrb, tdata} <= packet;
     endtask
 
-    task comb_write(packet_t packet);
+    task comb_write(input packet_t packet);
         {tuser, tdest, tid, tlast, tkeep, tstrb, tdata} = packet;
     endtask
 

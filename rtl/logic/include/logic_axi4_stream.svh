@@ -30,6 +30,25 @@
     .TDEST_WIDTH($bits(_interface``.tdest)), \
     .TID_WIDTH($bits(_interface``.tid))
 
+/* Define: LOGIC_AXI4_STREAM_IF_ASSIGN
+ *
+ * Assign SystemVerilog interface to another SystemVerilog interface.
+ *
+ * Parameters:
+ *  lhs       - SystemVerilog interface.
+ *  rhs       - SystemVerilog interface.
+ */
+`define LOGIC_AXI4_STREAM_IF_ASSIGN(lhs, rhs) \
+    always_comb lhs``.tvalid = rhs``.tvalid; \
+    always_comb lhs``.tlast = rhs``.tlast; \
+    always_comb lhs``.tdata = rhs``.tdata; \
+    always_comb lhs``.tstrb = rhs``.tstrb; \
+    always_comb lhs``.tkeep = rhs``.tkeep; \
+    always_comb lhs``.tdest = rhs``.tdest; \
+    always_comb lhs``.tuser = rhs``.tuser; \
+    always_comb lhs``.tid = rhs``.tid; \
+    always_comb rhs``.tready = lhs``.tready
+
 /* Define: LOGIC_AXI4_STREAM_IF_RX_ASSIGN
  *
  * Assign standalone signals to signals in SystemVerilog interface.

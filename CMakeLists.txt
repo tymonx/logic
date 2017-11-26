@@ -48,6 +48,8 @@ add_subdirectory(rtl)
 add_quartus_project(logic_axi4_stream_queue_top
     DEFINES "LOGIC_CONFIG_TARGET=logic_pkg::TARGET_INTEL")
 
+add_quartus_project(logic_reset_synchronizer)
+
 if (TESTS)
     include(CTest)
     add_subdirectory(tests)

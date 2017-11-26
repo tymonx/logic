@@ -58,25 +58,9 @@ module logic_axi4_stream_buffered_top #(
         .TID_WIDTH(TID_WIDTH)
     ) tx (.*);
 
+    `LOGIC_AXI4_STREAM_IF_RX_ASSIGN(rx, rx);
+
     logic_axi4_stream_buffered unit (.*);
 
-    always_comb rx.tvalid = rx_tvalid;
-    always_comb rx.tlast = rx_tlast;
-    always_comb rx.tdata = rx_tdata;
-    always_comb rx.tstrb = rx_tstrb;
-    always_comb rx.tkeep = rx_tkeep;
-    always_comb rx.tdest = rx_tdest;
-    always_comb rx.tuser = rx_tuser;
-    always_comb rx.tid = rx_tid;
-    always_comb rx_tready = rx.tready;
-
-    always_comb tx_tvalid = tx.tvalid;
-    always_comb tx_tlast = tx.tlast;
-    always_comb tx_tdata = tx.tdata;
-    always_comb tx_tstrb = tx.tstrb;
-    always_comb tx_tkeep = tx.tkeep;
-    always_comb tx_tdest = tx.tdest;
-    always_comb tx_tuser = tx.tuser;
-    always_comb tx_tid = tx.tid;
-    always_comb tx.tready = tx_tready;
+    `LOGIC_AXI4_STREAM_IF_TX_ASSIGN(tx, tx);
 endmodule
