@@ -1,13 +1,13 @@
 Logic
 =====
 
-SystemVerilog, SystemC and CMake utilities for creating, building and testing
+CMake, SystemVerilog and SystemC utilities for creating, building and testing
 RTL projects for FPGAs and ASICs.
 
 Includes:
 
-  * SystemVerilog modules for creating high quality RTL projects
   * CMake utilities for rapid building and testing RTL projects
+  * SystemVerilog modules for creating high quality RTL projects
   * Modern C++ framework for UVM with SystemC for creating high quality and
     performance efficient tests for RTL projects
 
