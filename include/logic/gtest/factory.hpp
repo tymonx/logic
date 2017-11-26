@@ -37,7 +37,7 @@ public:
     };
 
     template<typename T>
-    static T* get(const std::string& name = "");
+    static T* get(const std::string& name = {});
 
     void create();
 
@@ -63,7 +63,7 @@ private:
 
 template<typename T, typename ...Args>
 factory::add<T, Args...>::add(Args&&... args) :
-    add{"", args...}
+    add{{}, args...}
 { }
 
 template<typename T, typename ...Args>

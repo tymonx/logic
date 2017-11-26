@@ -39,10 +39,10 @@ Timestamp: d month year
 # Source Code
 # ------------------------------------------------------------------------
 
-Source Folder: ..\include
+Source Folder: ../include
    Name: include
 
-Source Folder 2: ..\rtl
+Source Folder 2: ../rtl
    Name: rtl
 
 
@@ -88,7 +88,7 @@ Source Folder 2: ..\rtl
 # Generated Documentation
 # ------------------------------------------------------------------------
 
-HTML Output Folder: ..\build\doc\html
+HTML Output Folder: ../build/doc/html
 
 
 # This is where you specify what kind of documentation you want Natural Docs
