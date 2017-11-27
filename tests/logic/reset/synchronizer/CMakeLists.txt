@@ -54,14 +54,14 @@ add_executable(${MODULE_NAME_TEST}
     dut.cpp
 )
 
-add_test(NAME ${MODULE_NAME_TEST}
-    COMMAND ${MODULE_NAME_TEST}
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/output
-)
-
 target_link_libraries(${MODULE_NAME_TEST}
     logic
     ${MODULE_LIBRARIES}
     logic-gtest-main
     ${GTEST_LIBRARIES}
+)
+
+add_test(NAME ${MODULE_NAME_TEST}
+    COMMAND ${MODULE_NAME_TEST}
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/output
 )
