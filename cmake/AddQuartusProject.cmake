@@ -27,11 +27,15 @@ set(QUARTUS_VERSION 17.0
 set(QUARTUS_PROJECT_REVISION logic
     CACHE STRING "Quartus project revision")
 
-set(QUARTUS_FAMILY "Cyclone V"
-    CACHE STRING "Quartus family")
-
-set(QUARTUS_DEVICE 5CGXFC7C7F23C8
-    CACHE STRING "Quartus device")
+if (QUARTUS_EDITION MATCHES Pro)
+    set(QUARTUS_FAMILY "Arria 10" CACHE STRING "Quartus family")
+    set(QUARTUS_DEVICE 10AS057H3F34E2SG CACHE STRING "Quartus device")
+    set(QUARTUS_ANALYSIS_AND_ELABORATION ${QUARTUS_SYN_EXECUTABLE})
+else()
+    set(QUARTUS_FAMILY "Cyclone V" CACHE STRING "Quartus family")
+    set(QUARTUS_DEVICE 5CGXFC7C7F23C8 CACHE STRING "Quartus device")
+    set(QUARTUS_ANALYSIS_AND_ELABORATION ${QUARTUS_MAP_EXECUTABLE})
+endif()
 
 if (NOT TARGET quartus-analysis-and-elaboration-all)
     add_custom_target(quartus-analysis-and-elaboration-all)
@@ -169,7 +173,8 @@ function(add_quartus_project target_name)
         ${quartus_project_directory}/logic.qsf)
 
     add_custom_target(quartus-analysis-and-elaboration-${target_name}
-        COMMAND ${QUARTUS_MAP_EXECUTABLE} --analysis_and_elaboration logic
+        COMMAND ${QUARTUS_ANALYSIS_AND_ELABORATION}
+            --analysis_and_elaboration logic
         DEPENDS
             ${quartus_project_directory}/logic.qpf
             ${quartus_project_directory}/logic.qsf
