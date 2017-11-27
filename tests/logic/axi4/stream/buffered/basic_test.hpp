@@ -13,32 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef LOGIC_TRACE_SYSTEMC_HPP
-#define LOGIC_TRACE_SYSTEMC_HPP
+#ifndef BASIC_TEST_HPP
+#define BASIC_TEST_HPP
 
-#include "trace_base.hpp"
+#include "logic/axi4/stream/test.hpp"
 
-#include <systemc>
+class basic_test : public logic::axi4::stream::test {
+public:
+    UVM_COMPONENT_UTILS(basic_test)
 
-#include <string>
-#include <cstddef>
+    basic_test(const uvm::uvm_component_name& name);
 
-namespace logic {
-
-class trace_systemc : public trace_base {
+    virtual ~basic_test() override;
 protected:
-    trace_systemc(const sc_core::sc_object& object,
-            const std::string& filename, std::size_t level);
-
-    virtual ~trace_systemc() override;
-private:
-    trace_systemc(const trace_systemc&) = delete;
-
-    trace_systemc& operator=(const trace_systemc&) = delete;
-
-    sc_core::sc_trace_file* m_trace_file{nullptr};
+    virtual void build_phase(uvm::uvm_phase& phase) override;
 };
 
-}
-
-#endif /* LOGIC_TRACE_SYSTEMC_HPP */
+#endif /* BASIC_TEST_HPP */

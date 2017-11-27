@@ -47,7 +47,8 @@ public:
 class trace_verilated : public trace_base {
 protected:
     template<typename T>
-    trace_verilated(const T& object, const char* filename, std::size_t level);
+    trace_verilated(const T& object, const std::string& filename,
+            std::size_t level);
 
     virtual ~trace_verilated() override;
 private:
@@ -55,7 +56,7 @@ private:
 
     trace_verilated& operator=(const trace_verilated&) = delete;
 
-    trace_verilated(const std::string& name, const char* filename);
+    trace_verilated(const std::string& name, const std::string& filename);
 
     void open();
 
@@ -64,7 +65,7 @@ private:
 };
 
 template<typename T>
-trace_verilated::trace_verilated(const T& object, const char* filename,
+trace_verilated::trace_verilated(const T& object, const std::string& filename,
         std::size_t level) :
     trace_verilated{object.basename(), filename}
 {

@@ -41,15 +41,24 @@ set(MODULE_NAME_TEST ${MODULE_NAME}_test)
 
 add_executable(${MODULE_NAME_TEST}
     main.cpp
-    test.cpp
-)
-
-add_test(NAME ${MODULE_NAME_TEST}
-    COMMAND ${MODULE_NAME_TEST}
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/output
+    long_test.cpp
+    basic_test.cpp
 )
 
 target_link_libraries(${MODULE_NAME_TEST}
     logic
     ${MODULE_LIBRARIES}
 )
+
+set(TESTS
+    basic_test
+    long_test
+)
+
+foreach (test ${TESTS})
+    add_test(NAME ${MODULE_NAME}_${test}
+        COMMAND ${MODULE_NAME_TEST} +UVM_TESTNAME=${test}
+            +uvm_set_config_string=*,trace_filename,${MODULE_NAME}_${test}
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/output
+    )
+endforeach()

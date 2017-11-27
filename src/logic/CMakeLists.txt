@@ -27,6 +27,8 @@ add_library(logic-core OBJECT
     bitstream_const_iterator.cpp
     bitstream_reference.cpp
     bitstream_const_reference.cpp
+    command_line.cpp
+    command_line_argument.cpp
 )
 
 add_library(logic STATIC

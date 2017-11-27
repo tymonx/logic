@@ -28,7 +28,7 @@ namespace logic {
 template<typename T, typename enable = void>
 class trace final : public trace_systemc {
 public:
-    trace(const T& module, const char* filename = nullptr, std::size_t level =
+    trace(const T& module, const std::string& filename = {}, std::size_t level =
             std::numeric_limits<std::size_t>::max()) :
         trace_systemc{module, filename, level}
     { }
@@ -40,7 +40,7 @@ template<typename T>
 class trace<T, typename std::enable_if<has_verilated_vcd_trace_method<T>::value
     >::type> final : public trace_verilated {
 public:
-    trace(const T& module, const char* filename = nullptr, std::size_t level =
+    trace(const T& module, const std::string& filename = {}, std::size_t level =
             std::numeric_limits<std::size_t>::max()) :
         trace_verilated{module, filename, level}
     { }

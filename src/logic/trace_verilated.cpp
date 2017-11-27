@@ -22,9 +22,9 @@
 using logic::trace_verilated;
 
 trace_verilated::trace_verilated(const std::string& name,
-        const char* filename) :
+        const std::string& filename) :
     m_trace_file{new VerilatedVcdSc},
-    m_filename{filename ? filename : name}
+    m_filename{filename.empty() ? name : filename}
 {
     Verilated::traceEverOn(true);
 }

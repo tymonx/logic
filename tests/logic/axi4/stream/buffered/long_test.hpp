@@ -13,20 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef LOGIC_AXI4_STREAM_BUFFERED_TEST_HPP
-#define LOGIC_AXI4_STREAM_BUFFERED_TEST_HPP
+#ifndef BASIC_TEST_HPP
+#define BASIC_TEST_HPP
 
 #include "logic/axi4/stream/test.hpp"
 
-class logic_axi4_stream_buffered_test : public logic::axi4::stream::test {
+class long_test : public logic::axi4::stream::test {
 public:
-    UVM_COMPONENT_UTILS(logic_axi4_stream_buffered_test)
+    UVM_COMPONENT_UTILS(long_test)
 
-    logic_axi4_stream_buffered_test(const uvm::uvm_component_name& name);
+    long_test(const uvm::uvm_component_name& name);
 
-    virtual ~logic_axi4_stream_buffered_test() override;
+    virtual ~long_test() override;
 protected:
     virtual void build_phase(uvm::uvm_phase& phase) override;
 };
 
-#endif /* LOGIC_AXI4_STREAM_BUFFERED_TEST_HPP */
+#endif /* BASIC_TEST_HPP */

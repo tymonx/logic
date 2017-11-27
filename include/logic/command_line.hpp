@@ -13,32 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef LOGIC_TRACE_SYSTEMC_HPP
-#define LOGIC_TRACE_SYSTEMC_HPP
-
-#include "trace_base.hpp"
-
-#include <systemc>
-
-#include <string>
-#include <cstddef>
+#ifndef LOGIC_COMMAND_LINE_HPP
+#define LOGIC_COMMAND_LINE_HPP
 
 namespace logic {
 
-class trace_systemc : public trace_base {
-protected:
-    trace_systemc(const sc_core::sc_object& object,
-            const std::string& filename, std::size_t level);
-
-    virtual ~trace_systemc() override;
-private:
-    trace_systemc(const trace_systemc&) = delete;
-
-    trace_systemc& operator=(const trace_systemc&) = delete;
-
-    sc_core::sc_trace_file* m_trace_file{nullptr};
+class command_line {
+public:
+    command_line(int argc, char* argv[]);
 };
 
 }
 
-#endif /* LOGIC_TRACE_SYSTEMC_HPP */
+#endif /* LOGIC_COMMAND_LINE_HPP */

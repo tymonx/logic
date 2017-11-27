@@ -94,10 +94,10 @@ static void trace(sc_trace_file* trace_file, const sc_object* parent,
     }
 }
 
-trace_systemc::trace_systemc(const sc_object& object, const char* filename,
-        std::size_t level) :
-    m_trace_file{sc_core::sc_create_vcd_trace_file(filename ? filename :
-            object.basename())}
+trace_systemc::trace_systemc(const sc_object& object,
+        const std::string& filename, std::size_t level) :
+    m_trace_file{sc_core::sc_create_vcd_trace_file(
+            filename.empty() ? object.basename() : filename.c_str())}
 {
     trace(m_trace_file, &object, level);
 }
