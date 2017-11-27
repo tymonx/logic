@@ -131,6 +131,12 @@ function(add_quartus_project target_name)
     endforeach()
 
     foreach (quartus_include ${quartus_includes})
+        if (CYGWIN)
+            execute_process(COMMAND cygpath -m ${quartus_include}
+                OUTPUT_VARIABLE quartus_include
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+        endif()
+
         list(APPEND quartus_assignments
             "set_global_assignment -name SEARCH_PATH ${quartus_include}")
     endforeach()
@@ -142,6 +148,12 @@ function(add_quartus_project target_name)
             set(quartus_type_file VHDL_FILE)
         elseif (quartus_source MATCHES .v)
             set(quartus_type_file VERILOG_FILE)
+        endif()
+
+        if (CYGWIN)
+            execute_process(COMMAND cygpath -m ${quartus_source}
+                OUTPUT_VARIABLE quartus_source
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
         endif()
 
         list(APPEND quartus_assignments
