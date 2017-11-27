@@ -16,13 +16,16 @@
 #include "logic_axi4_stream_queue_top.h"
 
 #include <logic/trace.hpp>
+#include <logic/command_line.hpp>
 #include <logic/axi4/stream/bus_if.hpp>
 #include <logic/axi4/stream/reset_if.hpp>
 
 #include <uvm>
 #include <systemc>
 
-int sc_main(int /* argc */, char** /* argv */) {
+int sc_main(int argc, char* argv[]) {
+    logic::command_line{argc, argv};
+
     bool test_passed{false};
 
     sc_core::sc_clock aclk{"aclk"};
@@ -34,7 +37,12 @@ int sc_main(int /* argc */, char** /* argv */) {
 
     logic_axi4_stream_queue_top dut{"logic_axi4_stream_queue_top"};
 
-    logic::trace<decltype(dut)> trace{dut};
+    std::string trace_filename{dut.name()};
+
+    uvm::uvm_config_db<std::string>::get(nullptr, "*", "trace_filename",
+            trace_filename);
+
+    logic::trace<decltype(dut)> trace{dut, trace_filename};
 
     uvm::uvm_config_db<logic::axi4::stream::bus_if_base*>::set(
             nullptr, "*.rx_agent.*", "vif", &rx);
@@ -76,7 +84,7 @@ int sc_main(int /* argc */, char** /* argv */) {
     dut.tx_tdest(tx.tdest);
     dut.tx_tid(tx.tid);
 
-    uvm::run_test("logic_axi4_stream_queue_test");
+    uvm::run_test();
 
     uvm::uvm_config_db<bool>::get(nullptr, "*", "test_passed", test_passed);
 
