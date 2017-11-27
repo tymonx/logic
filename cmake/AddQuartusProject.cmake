@@ -51,6 +51,10 @@ function(add_quartus_project target_name)
     set(quartus_project_directory ${CMAKE_BINARY_DIR}/quartus/${target_name})
     set(quartus_assignments "")
 
+    if (QUARTUS_EDITION MATCHES Pro)
+        list(APPEND quartus_defines LOGIC_MODPORT_DISABLED)
+    endif()
+
     if (QUARTUS_INCLUDES)
         foreach (quartus_include ${QUARTUS_INCLUDES})
             get_filename_component(quartus_include ${quartus_include} REALPATH)
