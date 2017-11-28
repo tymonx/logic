@@ -4,7 +4,10 @@ Environment Setup - Linux
 CMake
 -----
 
+Required: Yes
+
 Minimum required version: 3.1
+
 
 `CMake` is an open-source, cross-platform family of tools designed to build, test
 and package software.
@@ -21,6 +24,8 @@ Ubuntu:
 
 Intel FPGA Quartus
 ------------------
+
+Required: No. It is used for RTL analysis and elaboration check
 
 Minimum required version: 17.0 Lite, Standard or Pro
 
@@ -50,8 +55,14 @@ edit `~/.bashrc` file and add:
         export PATH=$MODELSIM_ROOTDIR/bin:$PATH
     fi
 
+Reload your environment variables:
+
+    source ~/.bashrc
+
 SystemC
 -------
+
+Required: Yes
 
 Required version: 2.3.1a
 
@@ -131,8 +142,14 @@ directory. For Bash shells edit `~/.bashrc` file and add:
 
     export SYSTEMC_HOME=/usr/local/systemc/2.3.1
 
+Reload your environment variables:
+
+    source ~/.bashrc
+
 UVM-SystemC
 -----------
+
+Required: Yes
 
 Required version: 1.0-alpha1
 
@@ -179,6 +196,8 @@ Install UVM-SystemC to `$SYSTEM_HOME`
 SystemC Verification (SCV)
 --------------------------
 
+Required: Yes
+
 Required version: 2.0a
 
 Download SystemC Verification library using wget command line tool:
@@ -223,6 +242,8 @@ Install SystemC Verification to `$SYSTEM_HOME`
 
 Verilator
 ---------
+
+Required: Yes
 
 Minimum required version: 3.914
 
@@ -283,6 +304,8 @@ Install Verilator:
 Google Test
 -----------
 
+Required: No to build logic library. Required for unit tests
+
 Download `Google Test` source code:
 
     git clone https://github.com/google/googletest.git
@@ -322,6 +345,8 @@ Install Google Test:
 SVUnit
 ------
 
+Required: No to build logic library. Required for unit tests
+
 Download `SVUnit` source code:
 
     git clone https://github.com/nosnhojn/svunit-code.git
@@ -335,8 +360,14 @@ For Bash shells edit `~/.bashrc` file and add:
         export PATH=$SVUNIT_INSTALL/bin:$PATH
     fi
 
+Reload your environment variables:
+
+    source ~/.bashrc
+
 Natural Docs
 ------------
+
+Required: No. It is used for generating code documentation from comments
 
 Minimum required version: 2.0.1
 
@@ -371,8 +402,14 @@ Docs` directory. For Bash shells edit `~/.bashrc` file and add:
         export PATH=$NATURAL_DOCS_ROOTDIR:$PATH
     fi
 
+Reload your environment variables:
+
+    source ~/.bashrc
+
 GTKWave
 -------
+
+Required: No
 
 A VCD waveform viewer based on the GTK library. This viewer support VCD and LXT
 formats for signal dumps. It also supports ModelSim `*.wlf` files using
@@ -389,7 +426,7 @@ Ubuntu:
 WaveDrom
 --------
 
-Optionally.
+Required: No
 
 `WaveDrom` draws your Timing Diagram or Waveform from simple textual
 description.  It comes with description language, rendering engine and the
