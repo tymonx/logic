@@ -36,6 +36,11 @@ trace_verilated::~trace_verilated() {
         VerilatedCov::write((m_filename + ".dat").c_str());
 }
 
+auto trace_verilated::get(
+        VerilatedVcdSc* verilated_vcd) const noexcept -> VerilatedVcdC* {
+    return verilated_vcd;
+}
+
 void trace_verilated::open() {
     m_trace_file->open((m_filename + ".vcd").c_str());
 }

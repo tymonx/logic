@@ -19,10 +19,12 @@
 #include "trace_base.hpp"
 
 #include <systemc>
-#include <verilated_vcd_sc.h>
 
 #include <string>
 #include <cstddef>
+
+class VerilatedVcdC;
+class VerilatedVcdSc;
 
 namespace logic {
 
@@ -60,6 +62,8 @@ private:
 
     void open();
 
+    VerilatedVcdC* get(VerilatedVcdSc* verilated_vcd) const noexcept;
+
     VerilatedVcdSc* m_trace_file{nullptr};
     std::string m_filename{};
 };
@@ -69,7 +73,7 @@ trace_verilated::trace_verilated(const T& object, const std::string& filename,
         std::size_t level) :
     trace_verilated{object.basename(), filename}
 {
-    const_cast<T&>(object).trace(m_trace_file, int(level));
+    const_cast<T&>(object).trace(get(m_trace_file), int(level));
     open();
 }
 

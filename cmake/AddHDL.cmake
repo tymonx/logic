@@ -465,90 +465,92 @@ function(add_hdl_systemc target_name)
     list(REMOVE_DUPLICATES target_defines)
     list(REMOVE_DUPLICATES target_includes)
 
-    set(target_library ${target_top_module}__ALL.a)
+    if (VERILATOR_FOUND)
+        set(target_library ${target_top_module}__ALL.a)
 
-    set(target_includes_expand "")
-    foreach (inc ${target_includes})
-        list(APPEND target_includes_expand -I${inc})
-    endforeach()
+        set(target_includes_expand "")
+        foreach (inc ${target_includes})
+            list(APPEND target_includes_expand -I${inc})
+        endforeach()
 
-    set(target_defines_expand "")
-    foreach (def ${target_defines})
-        list(APPEND target_defines_expand -D${def})
-    endforeach()
+        set(target_defines_expand "")
+        foreach (def ${target_defines})
+            list(APPEND target_defines_expand -D${def})
+        endforeach()
 
-    file(MAKE_DIRECTORY ${target_output_directory})
+        file(MAKE_DIRECTORY ${target_output_directory})
 
-    set(target_configuration_file
-        ${target_output_directory}/${target_top_module}.vlt)
+        set(target_configuration_file
+            ${target_output_directory}/${target_top_module}.vlt)
 
-    set(verilator_config)
-    foreach (config ${target_verilator_configurations})
-        set(verilator_config "${verilator_config}\n${config}")
-    endforeach()
+        set(verilator_config)
+        foreach (config ${target_verilator_configurations})
+            set(verilator_config "${verilator_config}\n${config}")
+        endforeach()
 
-    configure_file(${VERILATOR_CONFIGURATION_FILE}
-        ${target_configuration_file})
+        configure_file(${VERILATOR_CONFIGURATION_FILE}
+            ${target_configuration_file})
 
-    add_custom_command(
-        OUTPUT
-            ${target_output_directory}/${target_library}
-        COMMAND
-            ${VERILATOR_EXECUTABLE}
-        ARGS
-            --sc
-            -O2
-            -CFLAGS '-std=c++11 -O2 -fdata-sections -ffunction-sections'
-            --trace
-            --coverage
-            --prefix ${target_top_module}
-            --top-module ${target_top_module}
-            -Mdir ${target_output_directory}
-            ${target_defines_expand}
-            ${target_includes_expand}
-            ${target_configuration_file}
-            ${target_sources}
-        COMMAND
-            $(MAKE)
-        ARGS
-            -f ${target_output_directory}/${target_top_module}.mk
-        DEPENDS
-            ${target_depends}
-            ${target_sources}
-            ${target_includes}
-            ${target_configuration_file}
-        WORKING_DIRECTORY ${target_output_directory}
-        COMMENT
-            "Creating SystemC ${target_top_module} module"
-    )
+        add_custom_command(
+            OUTPUT
+                ${target_output_directory}/${target_library}
+            COMMAND
+                ${VERILATOR_EXECUTABLE}
+            ARGS
+                --sc
+                -O2
+                -CFLAGS '-std=c++11 -O2 -fdata-sections -ffunction-sections'
+                --trace
+                --coverage
+                --prefix ${target_top_module}
+                --top-module ${target_top_module}
+                -Mdir ${target_output_directory}
+                ${target_defines_expand}
+                ${target_includes_expand}
+                ${target_configuration_file}
+                ${target_sources}
+            COMMAND
+                $(MAKE)
+            ARGS
+                -f ${target_output_directory}/${target_top_module}.mk
+            DEPENDS
+                ${target_depends}
+                ${target_sources}
+                ${target_includes}
+                ${target_configuration_file}
+            WORKING_DIRECTORY ${target_output_directory}
+            COMMENT
+                "Creating SystemC ${target_top_module} module"
+        )
 
-    add_custom_target(${target_name}
-        DEPENDS ${target_output_directory}/${target_library})
+        add_custom_target(${target_name}
+            DEPENDS ${target_output_directory}/${target_library})
 
-    add_library(verilated_${target_name} STATIC IMPORTED)
+        add_library(verilated_${target_name} STATIC IMPORTED)
 
-    add_dependencies(verilated_${target_name} ${target_name})
+        add_dependencies(verilated_${target_name} ${target_name})
 
-    set_target_properties(verilated_${target_name} PROPERTIES
-        IMPORTED_LOCATION ${target_output_directory}/${target_library}
-    )
+        set_target_properties(verilated_${target_name} PROPERTIES
+            IMPORTED_LOCATION ${target_output_directory}/${target_library}
+        )
 
-    set(module_libraries
-        verilated_${target_name}
-        verilated
-        ${SYSTEMC_LIBRARIES}
-    )
+        set(module_libraries
+            verilated_${target_name}
+            verilated
+            ${SYSTEMC_LIBRARIES}
+        )
 
-    set(module_include_directories
-        ${VERILATOR_INCLUDE_DIR}
-        ${SYSTEMC_INCLUDE_DIRS}
-        ${target_output_directory}
-    )
+        set(module_include_directories
+            ${VERILATOR_INCLUDE_DIR}
+            ${SYSTEMC_INCLUDE_DIRS}
+            ${target_output_directory}
+        )
 
-    set_target_properties(${target_name} PROPERTIES
-        LIBRARIES "${module_libraries}"
-        INCLUDE_DIRECTORIES "${module_include_directories}"
-    )
+        set_target_properties(${target_name} PROPERTIES
+            LIBRARIES "${module_libraries}"
+            INCLUDE_DIRECTORIES "${module_include_directories}"
+        )
+    endif()
 endfunction()
 
 function(add_hdl_test test_name)

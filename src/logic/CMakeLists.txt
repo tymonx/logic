@@ -15,13 +15,19 @@
 add_subdirectory(axi4)
 add_subdirectory(gtest)
 
-include_directories(SYSTEM ${VERILATOR_INCLUDE_DIR})
+if (VERILATOR_FOUND)
+    include_directories(SYSTEM ${VERILATOR_INCLUDE_DIR})
+
+    set(LOGIC_CORE_SOURCES ${LOGIC_CORE_SOURCES}
+        trace_verilated.cpp
+    )
+endif()
 
 add_library(logic-core OBJECT
+    ${LOGIC_CORE_SOURCES}
     range.cpp
     trace_base.cpp
     trace_systemc.cpp
-    trace_verilated.cpp
     bitstream.cpp
     bitstream_iterator.cpp
     bitstream_const_iterator.cpp
