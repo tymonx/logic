@@ -87,6 +87,33 @@ Force GNU C++ compiler to use gnu++11 standard for C++ sources:
 
     export CXX='g++ -std=gnu++11'
 
+Edit `tlm_analysis_fifo.h` file located in:
+
+    ../src/tlm_core/tlm_1/tlm_analysis/tlm_analysis_fifo.h
+
+Change lines 43 and 47 containing:
+
+    nb_put( T );
+
+To:
+
+    this->nb_put( T );
+
+Otherwise you will get compilation error from GCC or Clang during logic library
+compilation:
+
+    error: ‘nb_put’ was not declared in this scope, and no declarations were
+      found by argument-dependent lookup at the point of instantiation
+      [-fpermissive]
+
+    nb_put( t );
+    ~~~~~~^~~~~
+
+    note: declarations in dependent base
+      ‘tlm::tlm_fifo<logic::axi4::stream::packet>’ are not found by unqualified
+      lookup
+    note: use ‘this->nb_put’ instead
+
 Create build scripts:
 
     ../configure --enable-pthreads --enable-shared --prefix=/usr/local/systemc/2.3.1/
