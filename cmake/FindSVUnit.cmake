@@ -20,8 +20,8 @@
 #
 # ::
 #
-#   SVUNIT_HDL_SOURCES      - SVUnit HDL sources
-#   SVUNIT_INCLUDE_DIRS     - SVUnit include directory
+#   SVUNIT_HDL_PACKAGE      - SVUnit SystemVerilog package
+#   SVUNIT_INCLUDE_DIR      - SVUnit include directory
 #   SVUNIT_FOUND            - true if SVUnit found
 
 if (SVUNIT_FOUND)
@@ -37,12 +37,12 @@ find_path(SVUNIT_HDL_SOURCES_DIR svunit_base.sv
 )
 
 if (SVUNIT_HDL_SOURCES_DIR)
-    set(SVUNIT_HDL_SOURCES ${SVUNIT_HDL_SOURCES_DIR}/svunit_pkg.sv)
-    set(SVUNIT_INCLUDE_DIRS ${SVUNIT_HDL_SOURCES_DIR})
+    set(SVUNIT_HDL_PACKAGE ${SVUNIT_HDL_SOURCES_DIR}/svunit_pkg.sv)
+    set(SVUNIT_INCLUDE_DIR ${SVUNIT_HDL_SOURCES_DIR})
 endif()
 
-mark_as_advanced(SVUNIT_HDL_SOURCES)
-mark_as_advanced(SVUNIT_INCLUDE_DIRS)
+mark_as_advanced(SVUNIT_HDL_PACKAGE)
+mark_as_advanced(SVUNIT_INCLUDE_DIR)
 
 find_package_handle_standard_args(SVUnit REQUIRED_VARS
-    SVUNIT_HDL_SOURCES_DIR SVUNIT_HDL_SOURCES SVUNIT_INCLUDE_DIRS)
+    SVUNIT_HDL_PACKAGE SVUNIT_INCLUDE_DIR)

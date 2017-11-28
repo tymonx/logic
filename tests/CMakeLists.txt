@@ -12,6 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+if (NOT VERILATOR_FOUND)
+    message(WARNING "Tests enabled but cannot find Verilator")
+    return()
+endif()
+
+if (NOT GTEST_FOUND)
+    message(WARNING "Tests enabled but cannot find Google Test")
+    return()
+endif()
+
+if (NOT SVUNIT_FOUND)
+    message(WARNING "Tests enabled but cannot find SVUnit")
+    return()
+endif()
+
 set(HDL_SYNTHESIZABLE FALSE)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES Clang)
@@ -22,16 +37,20 @@ if (CMAKE_CXX_COMPILER_ID MATCHES Clang)
     )
 endif()
 
-add_hdl_source(${QUARTUS_MEGA_FUNCTIONS}
-    LIBRARY intel-sim
-    VERILATOR_CONFIGURATIONS
-        "lint_off -msg STMTDLY      -file \"${QUARTUS_MEGA_FUNCTIONS}\""
-        "lint_off -msg PINMISSING   -file \"${QUARTUS_MEGA_FUNCTIONS}\""
-)
+if (QUARTUS_FOUND)
+    add_hdl_source(${QUARTUS_MEGA_FUNCTIONS}
+        LIBRARY intel-sim
+        VERILATOR_CONFIGURATIONS
+            "lint_off -msg STMTDLY      -file \"${QUARTUS_MEGA_FUNCTIONS}\""
+            "lint_off -msg PINMISSING   -file \"${QUARTUS_MEGA_FUNCTIONS}\""
+    )
+endif()
 
-add_hdl_source(${SVUNIT_HDL_SOURCES}
-    LIBRARY svunit
-    INCLUDES ${SVUNIT_INCLUDE_DIRS}
-)
+if (SVUNIT_FOUND)
+    add_hdl_source(${SVUNIT_HDL_PACKAGE}
+        LIBRARY svunit
+        INCLUDES ${SVUNIT_INCLUDE_DIR}
+    )
+endif()
 
 add_subdirectory(logic)

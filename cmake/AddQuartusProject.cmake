@@ -12,11 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+find_package(Quartus)
+
+if (NOT QUARTUS_FOUND)
+    function(add_quartus_project)
+    endfunction()
+endif()
+
 if (COMMAND add_quartus_project)
     return()
 endif()
-
-find_package(Quartus REQUIRED)
 
 set(ADD_QUARTUS_PROJECT_CURRENT_DIR ${CMAKE_CURRENT_LIST_DIR}
     CACHE INTERNAL "Add Quartus project current directory" FORCE)
@@ -30,11 +35,11 @@ set(QUARTUS_PROJECT_REVISION logic
 if (QUARTUS_EDITION MATCHES Pro)
     set(QUARTUS_FAMILY "Arria 10" CACHE STRING "Quartus family")
     set(QUARTUS_DEVICE 10AS057H3F34E2SG CACHE STRING "Quartus device")
-    set(QUARTUS_ANALYSIS_AND_ELABORATION ${QUARTUS_SYN_EXECUTABLE})
+    set(QUARTUS_ANALYSIS_AND_ELABORATION ${QUARTUS_SYN})
 else()
     set(QUARTUS_FAMILY "Cyclone V" CACHE STRING "Quartus family")
     set(QUARTUS_DEVICE 5CGXFC7C7F23C8 CACHE STRING "Quartus device")
-    set(QUARTUS_ANALYSIS_AND_ELABORATION ${QUARTUS_MAP_EXECUTABLE})
+    set(QUARTUS_ANALYSIS_AND_ELABORATION ${QUARTUS_MAP})
 endif()
 
 if (NOT TARGET quartus-analysis-and-elaboration-all)

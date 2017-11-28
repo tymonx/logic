@@ -32,14 +32,14 @@ set(VERILATOR_CONFIGURATION_FILE
     ${CMAKE_CURRENT_LIST_DIR}/VerilatorConfig.cmake.in
     CACHE INTERNAL "Verilator configuration file" FORCE)
 
-set(MODELSIM_RUN_TCL
-    ${CMAKE_CURRENT_LIST_DIR}/../scripts/modelsim_run.tcl
-    CACHE INTERNAL "ModelSim run script" FORCE)
-
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/.hdl)
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/output)
 
 if (MODELSIM_FOUND)
+    set(MODELSIM_RUN_TCL
+        ${CMAKE_CURRENT_LIST_DIR}/../scripts/modelsim_run.tcl
+        CACHE INTERNAL "ModelSim run script" FORCE)
+
     file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/modelsim)
     file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/modelsim/.modules)
 

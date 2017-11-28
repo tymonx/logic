@@ -31,7 +31,12 @@ find_package(PackageHandleStandardArgs REQUIRED)
 
 find_program(NATURAL_DOCS_EXECUTABLE
     NAMES NaturalDocs.exe NaturalDocs
-    HINTS $ENV{NATURAL_DOCS_ROOT}
+    HINTS
+        $ENV{NATURAL_DOCS_ROOT}
+        $ENV{NATURAL_DOCS_ROOTDIR}
+        $ENV{NATURAL_DOCS_HOME}
+        $ENV{NATURAL_DOCS_DIR}
+        $ENV{NATURAL_DOCS}
     PATH_SUFFIXES bin
     DOC "Path to the Natural Docs executable"
 )

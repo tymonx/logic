@@ -36,7 +36,7 @@ find_package(ModelSim)
 find_package(NaturalDocs)
 find_package(SystemC REQUIRED COMPONENTS SCV UVM)
 find_package(Verilator REQUIRED)
-find_package(Quartus REQUIRED)
+find_package(Quartus)
 find_package(GTest)
 
 include_directories(include)
