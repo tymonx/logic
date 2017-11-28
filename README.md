@@ -17,13 +17,13 @@ Requirements
 These 3rd party tools and libraries must be installed to build logic library:
 
   * [CMake](https://cmake.org/) - build, test and package project
-  * [Verilator](https://www.veripool.org/wiki/verilator/) - simulator, lint and coverage tool
   * [SystemC 2.3.1](http://accellera.org/downloads/standards/systemc) - SystemC C++ library
   * [UVM-SystemC 1.0](http://www.eda.org/activities/working-groups/systemc-verification) - UVM for SystemC
   * [SystemC Verification 2.0](http://accellera.org/downloads/standards/systemc) - SystemC data randomization
 
 These 3rd party tools and libraries must be installed to build and run tests:
 
+  * [Verilator](https://www.veripool.org/wiki/verilator/) - simulator, lint and coverage tool
   * [GoogleTest](https://github.com/google/googletest) - C++ unit test framework
   * [SVUnit](http://agilesoc.com/open-source-projects/svunit/) - SystemVerilog unit test framework
 

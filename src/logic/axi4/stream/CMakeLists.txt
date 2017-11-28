@@ -14,6 +14,12 @@
 
 include_directories(SYSTEM ${VERILATOR_INCLUDE_DIR})
 
+if (VERILATOR_FOUND)
+    set_source_files_properties(test.cpp PROPERTIES
+        COMPILE_DEFINITIONS VERILATOR_ENABLED
+    )
+endif()
+
 add_library(logic-axi4-stream OBJECT
     bus_if_base.cpp
     monitor.cpp

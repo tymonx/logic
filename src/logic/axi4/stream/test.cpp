@@ -21,7 +21,9 @@
 #include "logic/axi4/stream/scoreboard.hpp"
 #include "logic/axi4/stream/rx_sequencer.hpp"
 
+#if defined(VERILATOR_ENABLED)
 #include <verilated.h>
+#endif
 
 using logic::axi4::stream::test;
 
@@ -68,12 +70,16 @@ void test::build_phase(uvm::uvm_phase& phase) {
 void test::run_phase(uvm::uvm_phase& phase) {
     phase.raise_objection(this);
 
+#if defined(VERILATOR_ENABLED)
     if (!Verilated::gotFinish()) {
         m_sequence->start(m_testbench->sequencer);
     }
     else {
         m_testbench = nullptr;
     }
+#else
+    m_sequence->start(m_testbench->sequencer);
+#endif
 
     phase.drop_objection(this);
 }

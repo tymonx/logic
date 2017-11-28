@@ -243,7 +243,8 @@ Install SystemC Verification to `$SYSTEM_HOME`
 Verilator
 ---------
 
-Required: Yes
+Required: No to build logic library only for SystemC not for HDL.
+Required for unit tests
 
 Minimum required version: 3.914
 

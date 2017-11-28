@@ -20,7 +20,7 @@ set(ADD_HDL_INCLUDED TRUE CACHE INTERNAL "AddHDL included")
 
 find_package(ModelSim)
 find_package(SystemC REQUIRED COMPONENTS SCV UVM)
-find_package(Verilator REQUIRED)
+find_package(Verilator)
 
 set(HDL_TARGETS "" CACHE INTERNAL "RTL targets" FORCE)
 
