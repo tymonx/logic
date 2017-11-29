@@ -19,6 +19,7 @@
 
 #include <uvm>
 
+#include <array>
 #include <string>
 #include <cstddef>
 #include <cstdint>
@@ -26,6 +27,25 @@
 #include <stdexcept>
 
 using logic::command_line;
+
+static auto
+split_3(const std::string& arg) -> std::array<std::string, 3> {
+    auto pos1 = arg.find(',');
+    if (pos1 == std::string::npos) {
+        throw std::runtime_error(arg + " invalid format");
+    }
+
+    auto pos2 = arg.find(',', pos1 + 1);
+    if (pos2 == std::string::npos) {
+        throw std::runtime_error(arg + " invalid format");
+    }
+
+    return {{
+        arg.substr(0, pos1),
+        arg.substr(pos1 + 1, pos2 - pos1 - 1),
+        arg.substr(pos2 + 1)
+    }};
+}
 
 static const logic::command_line_argument g_arguments[] = {
     {
@@ -36,23 +56,8 @@ static const logic::command_line_argument g_arguments[] = {
     },
     {
         "+uvm_set_config_string=", [] (const std::string& arg) {
-            auto comp_end = arg.find(',');
-            if (comp_end == std::string::npos) {
-                throw std::runtime_error("+uvm_set_config_string=" + arg +
-                        " invalid format");
-            }
-
-            auto field_end = arg.find(',', comp_end + 1);
-            if (field_end == std::string::npos) {
-                throw std::runtime_error("+uvm_set_config_string=" + arg +
-                        " invalid format");
-            }
-
-            auto comp = arg.substr(0, comp_end);
-            auto field = arg.substr(comp_end + 1, field_end - comp_end - 1);
-            auto value = arg.substr(field_end + 1);
-
-            uvm::uvm_set_config_string(comp, field, value);
+            auto value = split_3(arg);
+            uvm::uvm_set_config_string(value[0], value[1], value[2]);
         }
     }
 };
