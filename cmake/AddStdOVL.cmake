@@ -15,9 +15,11 @@
 find_package(StdOVL)
 include(AddHDL)
 
-if (NOT STD_OVL_FOUND)
+if (NOT STD_OVL_FOUND OR ADD_STD_OVL_INCLUDED)
     return()
 endif()
+
+set(ADD_STD_OVL_INCLUDED TRUE)
 
 set(STD_OVL_SOURCES
     ovl_always.v
