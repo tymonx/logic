@@ -23,10 +23,21 @@
 #include <string>
 #include <cstddef>
 #include <cstdint>
+#include <utility>
 #include <algorithm>
 #include <stdexcept>
 
 using logic::command_line;
+
+using verbosity_item = std::pair<uvm::uvm_verbosity, const char*>;
+
+static const std::array<verbosity_item, 5> g_verbosity{{
+    {uvm::UVM_NONE,     "UVM_NONE"},
+    {uvm::UVM_LOW,      "UVM_LOW"},
+    {uvm::UVM_MEDIUM,   "UVM_MEDIUM"},
+    {uvm::UVM_HIGH,     "UVM_HIGH"},
+    {uvm::UVM_FULL,     "UVM_FULL"}
+}};
 
 static auto
 split_3(const std::string& arg) -> std::array<std::string, 3> {
@@ -47,11 +58,27 @@ split_3(const std::string& arg) -> std::array<std::string, 3> {
     }};
 }
 
-static const logic::command_line_argument g_arguments[] = {
+static const std::array<logic::command_line_argument, 3> g_argument{{
     {
         "+UVM_TESTNAME=", [] (const std::string& arg) {
             uvm::uvm_factory::get()->create_component_by_name(
                     arg, "", "uvm_test_top");
+        },
+    },
+    {
+        "+UVM_VERBOSITY=", [] (const std::string& arg) {
+            auto it = std::find_if(g_verbosity.cbegin(), g_verbosity.cend(),
+                [&arg] (const verbosity_item& item) {
+                    return (arg == item.second);
+                }
+            );
+
+            if (g_verbosity.cend() != it) {
+                uvm::uvm_set_verbosity_level(it->first);
+            }
+            else {
+                throw std::runtime_error(arg + " invalid verbosity level");
+            }
         },
     },
     {
@@ -60,7 +87,7 @@ static const logic::command_line_argument g_arguments[] = {
             uvm::uvm_set_config_string(value[0], value[1], value[2]);
         }
     }
-};
+}};
 
 template<typename T, std::size_t N> static auto
 length(const T (&)[N]) noexcept -> std::size_t {
@@ -75,18 +102,16 @@ command_line::command_line(int argc, char* argv[]) {
     --argc;
     ++argv;
 
-    auto arguments_end = g_arguments + length(g_arguments);
-
     for (int i = 0; i < argc; ++i) {
         auto arg = argv[i];
 
-        auto it = std::find_if(g_arguments, arguments_end,
+        auto it = std::find_if(g_argument.cbegin(), g_argument.cend(),
             [arg] (const command_line_argument& argument) {
                 return argument.match(arg);
             }
         );
 
-        if (it != arguments_end) {
+        if (it != g_argument.cend()) {
             (*it)(arg + it->length());
         }
     }
