@@ -58,7 +58,7 @@ split_3(const std::string& arg) -> std::array<std::string, 3> {
     }};
 }
 
-static const std::array<logic::command_line_argument, 3> g_argument{{
+static const std::array<logic::command_line_argument, 4> g_argument{{
     {
         "+UVM_TESTNAME=", [] (const std::string& arg) {
             uvm::uvm_factory::get()->create_component_by_name(
@@ -85,6 +85,12 @@ static const std::array<logic::command_line_argument, 3> g_argument{{
         "+uvm_set_config_string=", [] (const std::string& arg) {
             auto value = split_3(arg);
             uvm::uvm_set_config_string(value[0], value[1], value[2]);
+        }
+    },
+    {
+        "+uvm_set_config_int=", [] (const std::string& arg) {
+            auto value = split_3(arg);
+            uvm::uvm_set_config_int(value[0], value[1], std::stoi(value[2]));
         }
     }
 }};
