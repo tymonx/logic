@@ -246,7 +246,7 @@ Verilator
 Required: No to build logic library only for SystemC not for HDL.
 Required for unit tests
 
-Minimum required version: 3.914
+Minimum required version: 3.916
 
 Install required packages for Verilator tool.
 
@@ -284,7 +284,7 @@ Set `SYSTEMC_LIBDIR` environment variable for Verilator:
 
 Change the newest development version to stable version:
 
-    git checkout verilator_3_914
+    git checkout verilator_3_916
 
 Create configure script:
 
@@ -360,6 +360,29 @@ For Bash shells edit `~/.bashrc` file and add:
     if [[ ! $PATH =~ $SVUNIT_INSTALL/bin ]]; then
         export PATH=$SVUNIT_INSTALL/bin:$PATH
     fi
+
+Reload your environment variables:
+
+    source ~/.bashrc
+
+Open Verification Library
+-------------------------
+
+Required: No but desired to enable internal assertion checkers for
+SystemVerilog modules
+
+Download `Open Verification Library` source code:
+
+    wget http://accellera.org/images/downloads/standards/ovl/std_ovl_v2p8.1_Apr2014.tgz
+
+Unpack `Open Verification Library` archive:
+
+    tar xvf std_ovl_v2p8.1_Apr2014.tgz
+
+Create `STD_OVL_DIR` environment variable that points to OVL directory.
+For Bash shells edit `~/.bashrc` file and add:
+
+    export STD_OVL_DIR=<path-to-std_ovl>
 
 Reload your environment variables:
 

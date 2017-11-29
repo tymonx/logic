@@ -30,6 +30,7 @@ include(AddMsvcCompiler)
 include(AddClangCompiler)
 include(AddQuartusProject)
 include(AddHDL)
+include(AddStdOVL)
 
 find_package(SVUnit)
 find_package(ModelSim)
@@ -38,6 +39,7 @@ find_package(SystemC REQUIRED COMPONENTS SCV UVM)
 find_package(Verilator)
 find_package(Quartus)
 find_package(GTest)
+find_package(StdOVL)
 
 include_directories(include)
 include_directories(SYSTEM ${SYSTEMC_INCLUDE_DIRS})
@@ -46,9 +48,15 @@ add_subdirectory(src)
 add_subdirectory(rtl)
 
 add_quartus_project(logic_axi4_stream_queue_top
-    DEFINES "LOGIC_CONFIG_TARGET=logic_pkg::TARGET_INTEL")
+    DEFINES
+        "LOGIC_CONFIG_TARGET=logic_pkg::TARGET_INTEL"
+        "LOGIC_STD_OVL_DISABLED"
+)
 
-add_quartus_project(logic_reset_synchronizer)
+add_quartus_project(logic_reset_synchronizer
+    DEFINES
+        "LOGIC_STD_OVL_DISABLED"
+)
 
 if (TESTS)
     include(CTest)

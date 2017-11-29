@@ -109,6 +109,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES GNU)
         -Wno-undef
         -Wno-inline
         -Wno-variadic-macros
+        -Wno-suggest-attribute=format
         -Wno-zero-as-null-pointer-constant
     )
 elseif (CMAKE_CXX_COMPILER_ID MATCHES Clang)

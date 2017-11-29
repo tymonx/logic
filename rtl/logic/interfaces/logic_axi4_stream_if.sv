@@ -15,6 +15,10 @@
 
 `include "logic.svh"
 
+`ifndef LOGIC_STD_OVL_DISABLED
+`include "std_ovl_defines.h"
+`endif
+
 /* Interface: logic_axi4_stream_if
  *
  * AXI4-Stream interface.
@@ -121,5 +125,207 @@ interface logic_axi4_stream_if #(
         input tready,
         import read
     );
+`endif
+
+`ifndef LOGIC_STD_OVL_DISABLED
+    genvar k;
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_tvalid_always_reset_fire;
+
+    ovl_always #(
+        .severity_level(`OVL_FATAL),
+        .property_type(`OVL_ASSERT),
+        .msg("tvalid signal must be low during reset phase")
+    )
+    assert_tvalid_always_reset (
+        .clock(aclk),
+        .reset(1'b1),
+        .enable(1'b1),
+        .test_expr(areset_n || (!areset_n && !tvalid)),
+        .fire(assert_tvalid_always_reset_fire)
+    );
+
+    generate
+        for (k = 0; k < TDATA_BYTES; ++k) begin: tdata_bytes
+            logic [`OVL_FIRE_WIDTH-1:0] assert_tkeep_tstrb_always_valid_fire;
+
+            ovl_always #(
+                .severity_level(`OVL_FATAL),
+                .property_type(`OVL_ASSERT),
+                .msg("tstrb cannot be high when tkeep is low")
+            )
+            assert_tkeep_tstrb_always_valid (
+                .clock(aclk),
+                .reset(areset_n),
+                .enable(tvalid),
+                .test_expr(tkeep[k] || (!tkeep[k] && !tstrb[k])),
+                .fire(assert_tkeep_tstrb_always_valid_fire)
+            );
+
+            logic _unused_assert_fires = &{
+                1'b0,
+                assert_tkeep_tstrb_always_valid_fire,
+                1'b0
+            };
+        end
+    endgenerate
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_tvalid_unchange_fire;
+
+    ovl_win_unchange #(
+        .severity_level(`OVL_FATAL),
+        .width($bits(tvalid)),
+        .property_type(`OVL_ASSERT),
+        .msg("tvalid signal cannot change value during bus hold")
+    )
+    assert_tvalid_unchange (
+        .clock(aclk),
+        .reset(areset_n),
+        .enable(1'b1),
+        .start_event(tvalid && !tready),
+        .test_expr(tvalid),
+        .end_event(tvalid && tready),
+        .fire(assert_tvalid_unchange_fire)
+    );
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_tlast_unchange_fire;
+
+    ovl_win_unchange #(
+        .severity_level(`OVL_FATAL),
+        .width($bits(tlast)),
+        .property_type(`OVL_ASSERT),
+        .msg("tlast signal cannot change value during bus hold")
+    )
+    assert_tlast_unchange (
+        .clock(aclk),
+        .reset(areset_n),
+        .enable(1'b1),
+        .start_event(tvalid && !tready),
+        .test_expr(tlast),
+        .end_event(tvalid && tready),
+        .fire(assert_tlast_unchange_fire)
+    );
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_tdata_unchange_fire;
+
+    ovl_win_unchange #(
+        .severity_level(`OVL_FATAL),
+        .width($bits(tdata)),
+        .property_type(`OVL_ASSERT),
+        .msg("tdata signal cannot change value during bus hold")
+    )
+    assert_tdata_unchange (
+        .clock(aclk),
+        .reset(areset_n),
+        .enable(1'b1),
+        .start_event(tvalid && !tready),
+        .test_expr(tdata),
+        .end_event(tvalid && tready),
+        .fire(assert_tdata_unchange_fire)
+    );
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_tkeep_unchange_fire;
+
+    ovl_win_unchange #(
+        .severity_level(`OVL_FATAL),
+        .width($bits(tkeep)),
+        .property_type(`OVL_ASSERT),
+        .msg("tkeep signal cannot change value during bus hold")
+    )
+    assert_tkeep_unchange (
+        .clock(aclk),
+        .reset(areset_n),
+        .enable(1'b1),
+        .start_event(tvalid && !tready),
+        .test_expr(tkeep),
+        .end_event(tvalid && tready),
+        .fire(assert_tkeep_unchange_fire)
+    );
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_tstrb_unchange_fire;
+
+    ovl_win_unchange #(
+        .severity_level(`OVL_FATAL),
+        .width($bits(tstrb)),
+        .property_type(`OVL_ASSERT),
+        .msg("tstrb signal cannot change value during bus hold")
+    )
+    assert_tstrb_unchange (
+        .clock(aclk),
+        .reset(areset_n),
+        .enable(1'b1),
+        .start_event(tvalid && !tready),
+        .test_expr(tstrb),
+        .end_event(tvalid && tready),
+        .fire(assert_tstrb_unchange_fire)
+    );
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_tuser_unchange_fire;
+
+    ovl_win_unchange #(
+        .severity_level(`OVL_FATAL),
+        .width($bits(tuser)),
+        .property_type(`OVL_ASSERT),
+        .msg("tuser signal cannot change value during bus hold")
+    )
+    assert_tuser_unchange (
+        .clock(aclk),
+        .reset(areset_n),
+        .enable(1'b1),
+        .start_event(tvalid && !tready),
+        .test_expr(tuser),
+        .end_event(tvalid && tready),
+        .fire(assert_tuser_unchange_fire)
+    );
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_tdest_unchange_fire;
+
+    ovl_win_unchange #(
+        .severity_level(`OVL_FATAL),
+        .width($bits(tdest)),
+        .property_type(`OVL_ASSERT),
+        .msg("tdest signal cannot change value during bus hold")
+    )
+    assert_tdest_unchange (
+        .clock(aclk),
+        .reset(areset_n),
+        .enable(1'b1),
+        .start_event(tvalid && !tready),
+        .test_expr(tdest),
+        .end_event(tvalid && tready),
+        .fire(assert_tdest_unchange_fire)
+    );
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_tid_unchange_fire;
+
+    ovl_win_unchange #(
+        .severity_level(`OVL_FATAL),
+        .width($bits(tid)),
+        .property_type(`OVL_ASSERT),
+        .msg("tid signal cannot change value during bus hold")
+    )
+    assert_tid_unchange (
+        .clock(aclk),
+        .reset(areset_n),
+        .enable(1'b1),
+        .start_event(tvalid && !tready),
+        .test_expr(tid),
+        .end_event(tvalid && tready),
+        .fire(assert_tid_unchange_fire)
+    );
+
+    logic _unused_assert_fires = &{
+        1'b0,
+        assert_tvalid_always_reset_fire,
+        assert_tvalid_unchange_fire,
+        assert_tlast_unchange_fire,
+        assert_tdata_unchange_fire,
+        assert_tkeep_unchange_fire,
+        assert_tstrb_unchange_fire,
+        assert_tuser_unchange_fire,
+        assert_tdest_unchange_fire,
+        assert_tid_unchange_fire,
+        1'b0
+    };
 `endif
 endinterface

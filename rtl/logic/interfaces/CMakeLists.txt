@@ -12,4 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+if (STD_OVL_FOUND)
+    set(HDL_DEPENDS ${HDL_DEPENDS}
+        ovl_always
+        ovl_win_unchange
+    )
+
+    set(HDL_INCLUDES ${HDL_INCLUDES}
+        ${STD_OVL_DIR}
+    )
+else()
+    set(HDL_DEFINES ${HDL_DEFINES}
+        LOGIC_STD_OVL_DISABLED
+    )
+endif()
+
 add_hdl_source(logic_axi4_stream_if.sv)

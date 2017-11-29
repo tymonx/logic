@@ -67,6 +67,8 @@ module logic_axi4_stream_queue_intel #(
         write_data <= rx.read();
     end
 
+    /* verilator lint_off PINMISSING */
+
     scfifo #(
         .lpm_width($bits(write_data)),
         .lpm_widthu(ADDRESS_WIDTH),
@@ -87,8 +89,12 @@ module logic_axi4_stream_queue_intel #(
         .q(read_data),
         .usedw(usedw),
         .empty(empty),
+        .full(full),
+        .almost_empty(almost_empty),
         .almost_full(almost_full)
     );
+
+    /* verilator lint_on PINMISSING */
 
     always_ff @(posedge aclk or negedge areset_n) begin
         if (!areset_n) begin

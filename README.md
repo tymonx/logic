@@ -32,6 +32,7 @@ build and run tests:
 These 3rd party tools and libraries are optional:
 
   * [Intel FPGA Quartus](https://www.altera.com/downloads/download-center.html) - synthesis tool for Intel FPGAs
+  * [Open Verification Library](http://accellera.org/activities/working-groups/ovl) - library of assertion checkers
   * [Natural Docs](http://www.naturaldocs.org/) - code documentation generator
   * [GTKWave](http://gtkwave.sourceforge.net/) - waveform viewer
   * [WaveDrom](http://wavedrom.com/) - digital timing diagram

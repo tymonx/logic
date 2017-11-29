@@ -45,7 +45,7 @@ module logic_axi4_stream_queue #(
             logic_axi4_stream_queue_generic #(
                 .CAPACITY(CAPACITY)
             )
-            queue (
+            unit (
                 .*
             );
         end
@@ -54,7 +54,7 @@ module logic_axi4_stream_queue #(
             logic_axi4_stream_queue_intel #(
                 .CAPACITY(CAPACITY)
             )
-            queue (
+            unit (
                 .*
             );
         end

@@ -12,18 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(HDL_DEPENDS)
-set(HDL_DEFINES)
-set(HDL_LIBRARY logic)
-set(HDL_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/include)
+#.rst:
+# FindStdOVL
+# ----------
+#
+# Find Open Verification Library
+#
+# ::
+#
+#   STD_OVL_DIR             - Open Verification Library directory
 
-add_subdirectory(packages)
-add_subdirectory(interfaces)
+if (STD_OVL_FOUND)
+    return()
+endif()
 
-set(HDL_DEPENDS
-    logic_pkg
-    logic_axi4_stream_if
+find_package(PackageHandleStandardArgs REQUIRED)
+
+find_path(STD_OVL_DIR std_ovl_defines.h
+    HINTS $ENV{STD_OVL_DIR} $ENV{STD_OVL}
+    DOC "Path to the Open Verification Library directory"
 )
 
-add_subdirectory(reset)
-add_subdirectory(axi4)
+mark_as_advanced(STD_OVL_DIR)
+
+find_package_handle_standard_args(STD_OVL REQUIRED_VARS STD_OVL_DIR)
