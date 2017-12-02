@@ -32,7 +32,7 @@ set(VERILATOR_CONFIGURATION_FILE
     ${CMAKE_CURRENT_LIST_DIR}/VerilatorConfig.cmake.in
     CACHE INTERNAL "Verilator configuration file" FORCE)
 
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/.hdl)
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/hdl)
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/output)
 
 if (MODELSIM_FOUND)
@@ -55,6 +55,12 @@ if (MODELSIM_FOUND)
 
     if (NOT TARGET modelsim-compile-all)
         add_custom_target(modelsim-compile-all ALL)
+    endif()
+endif()
+
+if (VERILATOR_FOUND)
+    if (NOT TARGET verilator-compile-all)
+        add_custom_target(verilator-compile-all ALL)
     endif()
 endif()
 
@@ -176,7 +182,7 @@ function(add_hdl_source)
         CACHE INTERNAL "RTL targets" FORCE)
 
     configure_file(${HDL_CONFIGURATION_FILE}
-        ${CMAKE_BINARY_DIR}/.hdl/${hdl_name})
+        ${CMAKE_BINARY_DIR}/hdl/${hdl_name})
 
     if (MODELSIM_FOUND)
         set(modelsim_compiler)
@@ -266,7 +272,7 @@ function(get_hdl_properties hdl_name)
     set(hdl_synthesizable FALSE)
     set(hdl_verilator_configurations "")
 
-    file(READ ${CMAKE_BINARY_DIR}/.hdl/${hdl_name} hdl_file)
+    file(READ ${CMAKE_BINARY_DIR}/hdl/${hdl_name} hdl_file)
 
     string(REGEX REPLACE "\n" ";" hdl_file "${hdl_file}")
 
@@ -407,7 +413,7 @@ function(add_hdl_systemc target_name)
     set(target_includes "")
     set(target_top_module ${target_name})
     set(target_output_directory
-        ${CMAKE_BINARY_DIR}/systemc/${target_top_module})
+        ${CMAKE_BINARY_DIR}/verilator/${target_top_module})
     set(target_verilator_configurations "")
 
     foreach (arg ${ARGN})
@@ -524,12 +530,16 @@ function(add_hdl_systemc target_name)
                 "Creating SystemC ${target_top_module} module"
         )
 
-        add_custom_target(${target_name}
+        add_custom_target(verilator-compile-${target_name}
             DEPENDS ${target_output_directory}/${target_library})
 
         add_library(verilated_${target_name} STATIC IMPORTED)
 
-        add_dependencies(verilated_${target_name} ${target_name})
+        add_dependencies(verilated_${target_name}
+            verilator-compile-${target_name})
+
+        add_dependencies(verilator-compile-all
+            verilator-compile-${target_name})
 
         set_target_properties(verilated_${target_name} PROPERTIES
             IMPORTED_LOCATION ${target_output_directory}/${target_library}
@@ -547,11 +557,37 @@ function(add_hdl_systemc target_name)
             ${target_output_directory}
         )
 
-        set_target_properties(${target_name} PROPERTIES
+        set_target_properties(verilator-compile-${target_name} PROPERTIES
             LIBRARIES "${module_libraries}"
             INCLUDE_DIRECTORIES "${module_include_directories}"
         )
     endif()
+endfunction()
+
+function(get_hdl_systemc hdl_name)
+    set(state UNKNOWN)
+
+    foreach (arg ${ARGN})
+        # Handle argument
+        if (arg STREQUAL LIBRARIES)
+            set(state GET_LIBRARIES)
+        elseif (arg STREQUAL INCLUDES)
+            set(state GET_INCLUDES)
+        # Handle state
+        elseif (state STREQUAL GET_LIBRARIES)
+            get_target_property(libraries verilator-compile-${hdl_name}
+                LIBRARIES)
+            set(${arg} ${libraries} PARENT_SCOPE)
+            set(state UNKNOWN)
+        elseif (state STREQUAL GET_INCLUDES)
+            get_target_property(includes verilator-compile-${hdl_name}
+                INCLUDE_DIRECTORIES)
+            set(${arg} ${includes} PARENT_SCOPE)
+            set(state UNKNOWN)
+        else()
+            message(FATAL_ERROR "Unknown argument")
+        endif()
+    endforeach()
 endfunction()
 
 function(add_hdl_test test_name)

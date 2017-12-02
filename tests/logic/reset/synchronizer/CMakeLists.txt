@@ -38,11 +38,13 @@ set(MODULE_NAME logic_reset_synchronizer)
 
 add_hdl_systemc(${MODULE_NAME})
 
-get_target_property(MODULE_LIBRARIES ${MODULE_NAME} LIBRARIES)
-get_target_property(MODULE_INCLUDE_DIRS ${MODULE_NAME} INCLUDE_DIRECTORIES)
+get_hdl_systemc(${MODULE_NAME}
+    LIBRARIES MODULE_LIBRARIES
+    INCLUDES MODULE_INCLUDES
+)
 
 include_directories(SYSTEM
-    ${MODULE_INCLUDE_DIRS}
+    ${MODULE_INCLUDES}
     ${GTEST_INCLUDE_DIRS}
 )
 

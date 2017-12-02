@@ -26,11 +26,13 @@ add_hdl_systemc(${MODULE_TOP}
     DEFINES ${MODULE_DEFINITIONS}
 )
 
-get_target_property(MODULE_LIBRARIES ${MODULE_TOP} LIBRARIES)
-get_target_property(MODULE_INCLUDE_DIRS ${MODULE_TOP} INCLUDE_DIRECTORIES)
+get_hdl_systemc(${MODULE_TOP}
+    LIBRARIES MODULE_LIBRARIES
+    INCLUDES MODULE_INCLUDES
+)
 
 include_directories(SYSTEM
-    ${MODULE_INCLUDE_DIRS}
+    ${MODULE_INCLUDES}
 )
 
 set_source_files_properties(main.cpp PROPERTIES
@@ -44,6 +46,8 @@ add_executable(${MODULE_NAME_TEST}
     long_test.cpp
     basic_test.cpp
 )
+
+message(STATUS "${MODULE_LIBRARIES}")
 
 target_link_libraries(${MODULE_NAME_TEST}
     logic
