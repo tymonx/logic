@@ -66,7 +66,7 @@ find_program(QUARTUS_SH quartus_sh
 
 if (QUARTUS_SH)
     execute_process(COMMAND ${QUARTUS_SH}
-        --tcl_eval puts "$quartus(version)"
+        --tcl_eval puts "$::quartus(version)"
         OUTPUT_VARIABLE quartus_version
         OUTPUT_STRIP_TRAILING_WHITESPACE
     )
