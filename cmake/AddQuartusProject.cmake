@@ -181,14 +181,21 @@ function(add_quartus_project target_name)
     configure_file(${ADD_QUARTUS_PROJECT_CURRENT_DIR}/AddQuartusProject.qsf.cmake.in
         ${quartus_project_directory}/logic.qsf)
 
-    add_custom_target(quartus-compile-${target_name}
+    add_custom_command(
+        OUTPUT ${quartus_project_directory}/output_files/logic.flow.rpt
         COMMAND ${QUARTUS_ANALYSIS_AND_ELABORATION}
             --analysis_and_elaboration logic
         DEPENDS
             ${quartus_project_directory}/logic.qpf
             ${quartus_project_directory}/logic.qsf
+            ${quartus_includes}
+            ${quartus_sources}
         WORKING_DIRECTORY ${quartus_project_directory}
-        COMMENT "Quartus is compiling ${quartus_top_level_entity}"
+        COMMENT "Quartus compiling ${quartus_top_level_entity}"
+    )
+
+    add_custom_target(quartus-compile-${target_name}
+        DEPENDS ${quartus_project_directory}/output_files/logic.flow.rpt
     )
 
     add_dependencies(quartus-compile-all quartus-compile-${target_name})
