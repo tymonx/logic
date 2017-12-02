@@ -139,9 +139,14 @@ Quartus project will be created under:
 
     quartus/<top_level_entity>
 
-RTL analysis and elaboration in Intel FPGA Quartus:
+RTL analysis and elaboration in `Intel FPGA Quartus` for top level entity:
 
     cmake --build . --target quartus-compile-<top_level_entity>
+
+RTL analysis and elaboration in `Intel FPGA Quartus` for all top level
+entities:
+
+    cmake --build . --target quartus-compile-all
 
 Using with other CMake projects
 -------------------------------
