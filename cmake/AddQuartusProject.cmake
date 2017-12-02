@@ -42,8 +42,8 @@ else()
     set(QUARTUS_ANALYSIS_AND_ELABORATION ${QUARTUS_MAP})
 endif()
 
-if (NOT TARGET quartus-analysis-and-elaboration-all)
-    add_custom_target(quartus-analysis-and-elaboration-all)
+if (NOT TARGET quartus-compile-all)
+    add_custom_target(quartus-compile-all)
 endif()
 
 function(add_quartus_project target_name)
@@ -181,16 +181,15 @@ function(add_quartus_project target_name)
     configure_file(${ADD_QUARTUS_PROJECT_CURRENT_DIR}/AddQuartusProject.qsf.cmake.in
         ${quartus_project_directory}/logic.qsf)
 
-    add_custom_target(quartus-analysis-and-elaboration-${target_name}
+    add_custom_target(quartus-compile-${target_name}
         COMMAND ${QUARTUS_ANALYSIS_AND_ELABORATION}
             --analysis_and_elaboration logic
         DEPENDS
             ${quartus_project_directory}/logic.qpf
             ${quartus_project_directory}/logic.qsf
         WORKING_DIRECTORY ${quartus_project_directory}
-        COMMENT "Quartus analysis and elaboration: ${quartus_top_level_entity}"
+        COMMENT "Quartus is compiling ${quartus_top_level_entity}"
     )
 
-    add_dependencies(quartus-analysis-and-elaboration-all
-        quartus-analysis-and-elaboration-${target_name})
+    add_dependencies(quartus-compile-all quartus-compile-${target_name})
 endfunction()
