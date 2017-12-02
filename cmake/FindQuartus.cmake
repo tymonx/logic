@@ -73,6 +73,8 @@ if (QUARTUS_SH)
 
     if (quartus_version MATCHES Pro)
         set(QUARTUS_EDITION Pro)
+    elseif (quartus_version MATCHES Lite)
+        set(QUARTUS_EDITION Lite)
     else ()
         set(QUARTUS_EDITION Standard)
     endif()
