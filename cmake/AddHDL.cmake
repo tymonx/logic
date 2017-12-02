@@ -506,6 +506,16 @@ function(add_hdl_systemc target_name)
         configure_file(${VERILATOR_CONFIGURATION_FILE}
             ${target_configuration_file})
 
+        if (CMAKE_CXX_COMPILER_ID MATCHES GNU OR
+                CMAKE_CXX_COMPILER_ID MATCHES Clang)
+            set(verilator_c_flags
+                -std=c++11
+                -O2
+                -fdata-sections
+                -ffunction-sections
+            )
+        endif()
+
         add_custom_command(
             OUTPUT
                 ${target_output_directory}/${target_library}
@@ -515,7 +525,7 @@ function(add_hdl_systemc target_name)
                 --sc
                 -O2
                 -Wall
-                -CFLAGS '-std=c++11 -O2 -fdata-sections -ffunction-sections'
+                -CFLAGS '${verilator_c_flags}'
                 --trace
                 --coverage
                 --prefix ${target_top_module}
