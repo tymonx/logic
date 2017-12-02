@@ -46,17 +46,7 @@ include_directories(SYSTEM ${SYSTEMC_INCLUDE_DIRS})
 
 add_subdirectory(src)
 add_subdirectory(rtl)
-
-add_quartus_project(logic_axi4_stream_queue_top
-    DEFINES
-        "LOGIC_CONFIG_TARGET=logic_pkg::TARGET_INTEL"
-        "LOGIC_STD_OVL_DISABLED"
-)
-
-add_quartus_project(logic_reset_synchronizer
-    DEFINES
-        "LOGIC_STD_OVL_DISABLED"
-)
+add_subdirectory(quartus)
 
 if (TESTS)
     include(CTest)

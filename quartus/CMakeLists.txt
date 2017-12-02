@@ -12,10 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set_global_assignment -name TOP_LEVEL_ENTITY @quartus_top_level_entity@
-set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
-set_global_assignment -name VERILOG_INPUT_VERSION SYSTEMVERILOG_2005
-set_global_assignment -name RBCGEN_CRITICAL_WARNING_TO_ERROR ON
-set_global_assignment -name NUM_PARALLEL_PROCESSORS ALL
+set(QUARTUS_DEFINES
+    LOGIC_STD_OVL_DISABLED
+)
 
-@quartus_assignments@
+if (QUARTUS_EDITION MATCHES Pro)
+    set(QUARTUS_DEFINES ${QUARTUS_DEFINES}
+        LOGIC_MODPORT_DISABLED
+    )
+endif()
+
+add_quartus_project(logic_axi4_stream_queue_top)
+add_quartus_project(logic_reset_synchronizer)
