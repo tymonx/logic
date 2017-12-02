@@ -87,6 +87,7 @@ target_include_directories(verilated SYSTEM PRIVATE
 
 if (CMAKE_CXX_COMPILER_ID MATCHES GNU)
     target_compile_options(verilated PRIVATE
+        -Wno-attributes
         -Wno-cast-qual
         -Wno-cast-equal
         -Wno-float-equal
