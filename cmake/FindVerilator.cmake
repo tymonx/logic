@@ -115,11 +115,3 @@ if (CMAKE_CXX_COMPILER_ID MATCHES GNU)
 elseif (CMAKE_CXX_COMPILER_ID MATCHES Clang)
     target_compile_options(verilated PRIVATE -Wno-everything)
 endif()
-
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/verilator-coverage)
-
-add_custom_target(verilator-coverage
-    ${VERILATOR_COVERAGE_EXECUTABLE}
-        --annotate ${CMAKE_BINARY_DIR}/verilator-coverage
-        ${CMAKE_BINARY_DIR}/output/*.dat
-)

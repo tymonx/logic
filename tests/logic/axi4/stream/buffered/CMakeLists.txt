@@ -47,8 +47,6 @@ add_executable(${MODULE_NAME_TEST}
     basic_test.cpp
 )
 
-message(STATUS "${MODULE_LIBRARIES}")
-
 target_link_libraries(${MODULE_NAME_TEST}
     logic
     ${MODULE_LIBRARIES}

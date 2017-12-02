@@ -59,6 +59,15 @@ if (MODELSIM_FOUND)
 endif()
 
 if (VERILATOR_FOUND)
+    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/verilator-coverage)
+
+    add_custom_target(verilator-coverage
+        ${VERILATOR_COVERAGE_EXECUTABLE}
+            --annotate-all
+            --annotate ${CMAKE_BINARY_DIR}/verilator-coverage
+            ${CMAKE_BINARY_DIR}/output/*.dat
+    )
+
     if (NOT TARGET verilator-compile-all)
         add_custom_target(verilator-compile-all ALL)
     endif()
