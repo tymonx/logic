@@ -12,16 +12,36 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(QUARTUS_DEFINES
-    LOGIC_STD_OVL_DISABLED
-)
+#.rst:
+# FindVivado
+# --------
+#
+# Find Vivado
+#
+# ::
+#
+#   VIVADO_EXECUTABLE   - Vivado executable
 
-if (QUARTUS_EDITION MATCHES Pro)
-    set(QUARTUS_DEFINES ${QUARTUS_DEFINES}
-        LOGIC_MODPORT_DISABLED
-    )
+if (VIVADO_FOUND)
+    return()
 endif()
 
-add_quartus_project(logic_axi4_stream_queue_top)
-add_quartus_project(logic_axi4_stream_buffered_top)
-add_quartus_project(logic_reset_synchronizer)
+find_package(PackageHandleStandardArgs REQUIRED)
+
+set(VIVADO_HINTS
+    $ENV{VIVADO_ROOTDIR}
+    $ENV{VIVADO_HOME}
+    $ENV{VIVADO_ROOT}
+    $ENV{VIVADO_DIR}
+    $ENV{VIVADO}
+)
+
+find_program(VIVADO_EXECUTABLE vivado
+    HINTS ${VIVADO_HINTS}
+    PATH_SUFFIXES bin bin64
+    DOC "Path to the Vivado executable"
+)
+
+mark_as_advanced(VIVADO_EXECUTABLE)
+
+find_package_handle_standard_args(Vivado REQUIRED_VARS VIVADO_EXECUTABLE)

@@ -12,16 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(QUARTUS_DEFINES
+set(VIVADO_DEFINES
     LOGIC_STD_OVL_DISABLED
 )
 
-if (QUARTUS_EDITION MATCHES Pro)
-    set(QUARTUS_DEFINES ${QUARTUS_DEFINES}
-        LOGIC_MODPORT_DISABLED
-    )
-endif()
-
-add_quartus_project(logic_axi4_stream_queue_top)
-add_quartus_project(logic_axi4_stream_buffered_top)
-add_quartus_project(logic_reset_synchronizer)
+add_vivado_project(logic_axi4_stream_queue_top)
+add_vivado_project(logic_axi4_stream_buffered_top)
+add_vivado_project(logic_reset_synchronizer)

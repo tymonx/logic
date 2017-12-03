@@ -59,6 +59,34 @@ Reload your environment variables:
 
     source ~/.bashrc
 
+Xilinx Vivado
+-------------
+
+Required: No. It is used for RTL analysis and elaboration check
+
+Minimum required version: 2017.3.1
+
+`Xilinx Vivado` enables analysis and synthesis of HDL designs, which
+enables the developer to compile their designs, perform timing analysis,
+examine RTL diagrams.
+
+Download `Xilinx Vivado HLx` from:
+
+    https://www.xilinx.com/support/download.html
+
+Add `Xilinx Vivado HLx` to *PATH* environment variable. For Bash shells edit
+`~/.bashrc` file and add:
+
+    export VIVADO_ROOTDIR=<path_to_vivado>
+
+    if [[ ! $PATH =~ $VIVADO_ROOTDIR ]]; then
+        export PATH=$VIVADO_ROOTDIR/bin:$PATH
+    fi
+
+Reload your environment variables:
+
+    source ~/.bashrc
+
 SystemC
 -------
 

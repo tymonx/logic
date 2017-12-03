@@ -12,16 +12,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(QUARTUS_DEFINES
-    LOGIC_STD_OVL_DISABLED
-)
+create_project @vivado_top_level_entity@ -in_memory
 
-if (QUARTUS_EDITION MATCHES Pro)
-    set(QUARTUS_DEFINES ${QUARTUS_DEFINES}
-        LOGIC_MODPORT_DISABLED
-    )
-endif()
+set includes []
+set defines []
+set sources []
 
-add_quartus_project(logic_axi4_stream_queue_top)
-add_quartus_project(logic_axi4_stream_buffered_top)
-add_quartus_project(logic_reset_synchronizer)
+@vivado_defines_list@
+
+@vivado_includes_list@
+
+@vivado_sources_list@
+
+add_files $sources
+
+set synth_arguments []
+
+lappend synth_arguments -name @vivado_top_level_entity@
+lappend synth_arguments -top @vivado_top_level_entity@
+lappend synth_arguments -rtl
+
+foreach def {*}$defines {
+    lappend synth_arguments -verilog_define $def
+}
+
+if [llength includes] {
+    lappend synth_arguments -include_dirs $includes
+}
+
+synth_design {*}$synth_arguments

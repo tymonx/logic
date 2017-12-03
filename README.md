@@ -32,6 +32,7 @@ build and run tests:
 These 3rd party tools and libraries are optional:
 
   * [Intel FPGA Quartus](https://www.altera.com/downloads/download-center.html) - synthesis tool for Intel FPGAs
+  * [Xilinx Vivado](https://www.xilinx.com/products/design-tools/vivado.html) - synthesis tools for Xilinx FPGAs
   * [Open Verification Library](http://accellera.org/activities/working-groups/ovl) - library of assertion checkers
   * [Natural Docs](http://www.naturaldocs.org/) - code documentation generator
   * [GTKWave](http://gtkwave.sourceforge.net/) - waveform viewer
@@ -147,6 +148,26 @@ RTL analysis and elaboration in `Intel FPGA Quartus` for all top level
 entities:
 
     cmake --build . --target quartus-compile-all
+
+Creating Xilinx Vivado project
+------------------------------
+
+Use `add_vivado_project()` function to create Vivado project:
+
+    add_vivado_project(<top_level_entity>)
+
+Quartus project will be created under:
+
+    vivado/<top_level_entity>
+
+RTL analysis and elaboration in `Xilinx Vivado` for top level entity:
+
+    cmake --build . --target vivado-compile-<top_level_entity>
+
+RTL analysis and elaboration in `Xilinx Vivado` for all top level
+entities:
+
+    cmake --build . --target vivado-compile-all
 
 Using with other CMake projects
 -------------------------------
