@@ -26,22 +26,6 @@ endif()
 set(ADD_QUARTUS_PROJECT_CURRENT_DIR ${CMAKE_CURRENT_LIST_DIR}
     CACHE INTERNAL "Add Quartus project current directory" FORCE)
 
-set(QUARTUS_VERSION 17.0
-    CACHE STRING "Quartus version")
-
-set(QUARTUS_PROJECT_REVISION logic
-    CACHE STRING "Quartus project revision")
-
-if (QUARTUS_EDITION MATCHES Pro)
-    set(QUARTUS_FAMILY "Arria 10" CACHE STRING "Quartus family")
-    set(QUARTUS_DEVICE 10AS057H3F34E2SG CACHE STRING "Quartus device")
-    set(QUARTUS_ANALYSIS_AND_ELABORATION ${QUARTUS_SYN})
-else()
-    set(QUARTUS_FAMILY "Cyclone V" CACHE STRING "Quartus family")
-    set(QUARTUS_DEVICE 5CGXFC7C7F23C8 CACHE STRING "Quartus device")
-    set(QUARTUS_ANALYSIS_AND_ELABORATION ${QUARTUS_MAP})
-endif()
-
 if (NOT TARGET quartus-compile-all)
     add_custom_target(quartus-compile-all)
 endif()
@@ -55,6 +39,16 @@ function(add_quartus_project target_name)
     set(quartus_top_level_entity ${target_name})
     set(quartus_project_directory ${CMAKE_BINARY_DIR}/quartus/${target_name})
     set(quartus_assignments "")
+    set(quartus_revision ${target_name})
+    set(quartus_family "")
+    set(quartus_device "")
+    set(quartus_flow "analysis and elaboration")
+    set(quartus_command ${QUARTUS_MAP})
+    set(quartus_arguments "")
+    set(quartus_ip_files "")
+    set(quartus_sdc_files "")
+    set(quartus_qsys_files "")
+    set(quartus_tcl_script_files "")
 
     if (QUARTUS_INCLUDES)
         foreach (quartus_include ${QUARTUS_INCLUDES})
@@ -77,7 +71,9 @@ function(add_quartus_project target_name)
 
     foreach (arg ${ARGN})
         # Handle argument
-        if (arg STREQUAL PROJECT_DIRECTORY)
+        if (arg STREQUAL SOURCES)
+            set(state GET_SOURCES)
+        elseif (arg STREQUAL PROJECT_DIRECTORY)
             set(state GET_PROJECT_DIRECTORY)
         elseif (arg STREQUAL DEFINES)
             set(state GET_DEFINES)
@@ -89,6 +85,23 @@ function(add_quartus_project target_name)
             set(state GET_TOP_LEVEL_ENTITY)
         elseif (arg STREQUAL ASSIGNMENTS)
             set(state GET_ASSIGNMENTS)
+        elseif (arg STREQUAL DEVICE)
+            set(state GET_DEVICE)
+        elseif (arg STREQUAL FAMILY)
+            set(state GET_FAMILY)
+        elseif (arg STREQUAL REVISION)
+            set(state GET_REVISION)
+        elseif (arg STREQUAL FLOW)
+            set(state GET_FLOW)
+        elseif (arg STREQUAL IP_FILES)
+            set(state GET_IP_FILES)
+        elseif (arg STREQUAL SDC_FILES)
+            set(state GET_SDC_FILES)
+        elseif (arg STREQUAL QSYS_FILES)
+            set(state GET_QSYS_FILES)
+        elseif (arg STREQUAL TCL_SCRIPT_FILES)
+            set(state GET_TCL_SCRIPT_FILES)
+
         # Handle state
         elseif (state STREQUAL GET_SOURCES)
             get_filename_component(arg ${arg} REALPATH)
@@ -107,9 +120,86 @@ function(add_quartus_project target_name)
             set(state UNKNOWN)
         elseif (state STREQUAL GET_ASSIGNMENTS)
             list(APPEND quartus_assignments ${arg})
+        elseif (state STREQUAL GET_DEVICE)
+            set(quartus_device ${arg})
+            set(state UNKNOWN)
+        elseif (state STREQUAL GET_FAMILY)
+            set(quartus_family "${arg}")
+            set(state UNKNOWN)
+        elseif (state STREQUAL GET_REVISION)
+            set(quartus_revision ${arg})
+            set(state UNKNOWN)
+        elseif (state STREQUAL GET_FLOW)
+            set(quartus_flow ${arg})
+            set(state UNKNOWN)
+        elseif (state STREQUAL GET_IP_FILES)
+            get_filename_component(arg ${arg} REALPATH)
+            list(APPEND quartus_ip_files ${arg})
+        elseif (state STREQUAL GET_SDC_FILES)
+            get_filename_component(arg ${arg} REALPATH)
+            list(APPEND quartus_sdc_files ${arg})
+        elseif (state STREQUAL GET_QSYS_FILES)
+            get_filename_component(arg ${arg} REALPATH)
+            list(APPEND quartus_qsys_files ${arg})
+        elseif (state STREQUAL GET_TCL_SCRIPT_FILES)
+            get_filename_component(arg ${arg} REALPATH)
+            list(APPEND quartus_tcl_script_files ${arg})
         else()
             message(FATAL_ERROR "Unknown argument")
         endif()
+    endforeach()
+
+    if (quartus_family)
+        list(APPEND quartus_assignments
+            "set_global_assignment -name FAMILY \"${quartus_family}\"")
+    endif()
+
+    if (quartus_device)
+        list(APPEND quartus_assignments
+            "set_global_assignment -name DEVICE \"${quartus_device}\"")
+    endif()
+
+    if (quartus_flow STREQUAL "analysis and elaboration")
+        if (QUARTUS_EDITION MATCHES Pro)
+            set(quartus_command ${QUARTUS_SYN})
+        else ()
+            set(quartus_command ${QUARTUS_MAP})
+        endif()
+
+        list(APPEND quartus_arguments --analysis_and_elaboration)
+        list(APPEND quartus_arguments ${target_name})
+    elseif (quartus_flow STREQUAL "compile")
+        set(quartus_command ${QUARTUS_SH})
+        list(APPEND quartus_arguments --flow compile)
+        list(APPEND quartus_arguments ${target_name})
+        list(APPEND quartus_arguments -c ${quartus_revision})
+    elseif (quartus_flow STREQUAL "implement")
+        set(quartus_command ${QUARTUS_SH})
+        list(APPEND quartus_arguments --flow implement)
+        list(APPEND quartus_arguments ${target_name})
+        list(APPEND quartus_arguments -c ${quartus_revision})
+    else()
+        message(FATAL_ERROR "Not supported Quartus flow: ${qaurtus_flow}")
+    endif()
+
+    foreach (ip_file ${quartus_ip_files})
+        list(APPEND quartus_assignments
+            "set_global_assignment -name IP_FILE ${ip_file}")
+    endforeach()
+
+    foreach (sdc_file ${quartus_sdc_files})
+        list(APPEND quartus_assignments
+            "set_global_assignment -name SDC_FILE ${sdc_file}")
+    endforeach()
+
+    foreach (qsys_file ${quartus_qsys_files})
+        list(APPEND quartus_assignments
+            "set_global_assignment -name QSYS_FILE ${qsys_file}")
+    endforeach()
+
+    foreach (tcl_script_file ${quartus_tcl_script_files})
+        list(APPEND quartus_assignments
+            "set_global_assignment -name TCL_SCRIPT_FILE ${tcl_script_file}")
     endforeach()
 
     file(MAKE_DIRECTORY ${quartus_project_directory})
@@ -171,27 +261,28 @@ function(add_quartus_project target_name)
 
     string(REGEX REPLACE ";" "\n" quartus_assignments "${quartus_assignments}")
 
-    configure_file(${ADD_QUARTUS_PROJECT_CURRENT_DIR}/AddQuartusProject.qpf.cmake.in
-        ${quartus_project_directory}/logic.qpf)
+    configure_file(
+        ${ADD_QUARTUS_PROJECT_CURRENT_DIR}/AddQuartusProject.qpf.cmake.in
+        ${quartus_project_directory}/${target_name}.qpf)
 
-    configure_file(${ADD_QUARTUS_PROJECT_CURRENT_DIR}/AddQuartusProject.qsf.cmake.in
-        ${quartus_project_directory}/logic.qsf)
+    configure_file(
+        ${ADD_QUARTUS_PROJECT_CURRENT_DIR}/AddQuartusProject.qsf.cmake.in
+        ${quartus_project_directory}/${target_name}.qsf)
 
     add_custom_command(
-        OUTPUT ${quartus_project_directory}/output_files/logic.flow.rpt
-        COMMAND ${QUARTUS_ANALYSIS_AND_ELABORATION}
-            --analysis_and_elaboration logic
+        OUTPUT ${quartus_project_directory}/output_files/${target_name}.flow.rpt
+        COMMAND ${quartus_command} ${quartus_arguments}
         DEPENDS
-            ${quartus_project_directory}/logic.qpf
-            ${quartus_project_directory}/logic.qsf
+            ${quartus_project_directory}/${target_name}.qpf
+            ${quartus_project_directory}/${target_name}.qsf
             ${quartus_includes}
             ${quartus_sources}
         WORKING_DIRECTORY ${quartus_project_directory}
         COMMENT "Quartus compiling ${quartus_top_level_entity}"
     )
 
-    add_custom_target(quartus-compile-${target_name}
-        DEPENDS ${quartus_project_directory}/output_files/logic.flow.rpt
+    add_custom_target(quartus-compile-${target_name} DEPENDS
+        ${quartus_project_directory}/output_files/${target_name}.flow.rpt
     )
 
     add_dependencies(quartus-compile-all quartus-compile-${target_name})
