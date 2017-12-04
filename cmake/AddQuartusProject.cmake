@@ -275,6 +275,10 @@ function(add_quartus_project target_name)
         DEPENDS
             ${quartus_project_directory}/${target_name}.qpf
             ${quartus_project_directory}/${target_name}.qsf
+            ${quartus_ip_files}
+            ${quartus_sdc_files}
+            ${quartus_qsys_files}
+            ${quartus_tcl_script_files}
             ${quartus_includes}
             ${quartus_sources}
         WORKING_DIRECTORY ${quartus_project_directory}
