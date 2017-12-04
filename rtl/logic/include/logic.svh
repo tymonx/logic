@@ -16,6 +16,26 @@
 `ifndef LOGIC_SVH
 `define LOGIC_SVH
 
+`ifndef LOGIC_SYNTHESIS
+    `ifdef VERILATOR
+        /* Define: LOGIC_SYNTHESIS
+         *
+         * Enable only synthesizable parts of SystemVerilog
+         */
+        `define LOGIC_SYNTHESIS
+    `endif
+`endif
+
+`ifndef LOGIC_STD_OVL_DISABLED
+    `ifdef LOGIC_SYNTHESIS
+        /* Define: LOGIC_STD_OVL_DISABLED
+         *
+         * Disable OVL
+         */
+        `define LOGIC_STD_OVL_DISABLED
+    `endif
+`endif
+
 `include "logic_drc.svh"
 `include "logic_config.svh"
 `include "logic_axi4.svh"

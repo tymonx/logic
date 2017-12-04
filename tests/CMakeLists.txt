@@ -29,30 +29,4 @@ endif()
 
 set(HDL_SYNTHESIZABLE FALSE)
 
-if (CMAKE_CXX_COMPILER_ID MATCHES Clang)
-    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS}
-        -Wno-global-constructors
-        -Wno-zero-as-null-pointer-constant
-        -Wno-over-aligned
-    )
-endif()
-
-if (SVUNIT_FOUND)
-    add_hdl_source(${SVUNIT_HDL_PACKAGE}
-        LIBRARY svunit
-        INCLUDES ${SVUNIT_INCLUDE_DIR}
-    )
-endif()
-
-if (QUARTUS_FOUND)
-    add_hdl_source(${QUARTUS_MEGA_FUNCTIONS}
-        LIBRARY intel-sim
-        VERILATOR_CONFIGURATIONS
-            "lint_off -file \"${QUARTUS_MEGA_FUNCTIONS}\""
-            "lint_off -msg STMTDLY -file \"${QUARTUS_MEGA_FUNCTIONS}\""
-    )
-
-    set(HDL_DEPENDS ${HDL_DEPENDS} altera_mf)
-endif()
-
 add_subdirectory(logic)

@@ -127,6 +127,8 @@ interface logic_axi4_stream_if #(
     );
 `endif
 
+`ifndef LOGIC_SYNTHESIS
+
 `ifndef LOGIC_STD_OVL_DISABLED
     genvar k;
 
@@ -327,5 +329,8 @@ interface logic_axi4_stream_if #(
         assert_tid_unchange_fire,
         1'b0
     };
+`endif
+`else
+    logic _unused_ports = &{1'b0, aclk, areset_n, 1'b0};
 `endif
 endinterface

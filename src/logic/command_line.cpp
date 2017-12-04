@@ -95,11 +95,6 @@ static const std::array<logic::command_line_argument, 4> g_argument{{
     }
 }};
 
-template<typename T, std::size_t N> static auto
-length(const T (&)[N]) noexcept -> std::size_t {
-    return N;
-}
-
 command_line::command_line(int argc, char* argv[]) {
     if ((argc < 2) || (nullptr == argv)) {
         return;
