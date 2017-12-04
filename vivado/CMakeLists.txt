@@ -13,7 +13,7 @@
 # limitations under the License.
 
 set(VIVADO_DEFINES
-    LOGIC_STD_OVL_DISABLED
+    LOGIC_SYNTHESIS
 )
 
 add_vivado_project(logic_axi4_stream_queue_top)

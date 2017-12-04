@@ -128,8 +128,45 @@ interface logic_axi4_stream_if #(
 `endif
 
 `ifndef LOGIC_SYNTHESIS
+    clocking cb_rx @(posedge aclk);
+        input tvalid;
+        input tuser;
+        input tdest;
+        input tid;
+        input tlast;
+        input tkeep;
+        input tstrb;
+        input tdata;
+        output tready;
+    endclocking
+
+    clocking cb_tx @(posedge aclk);
+        output tvalid;
+        output tuser;
+        output tdest;
+        output tid;
+        output tlast;
+        output tkeep;
+        output tstrb;
+        output tdata;
+        input tready;
+    endclocking
+
+    clocking cb_mon @(posedge aclk);
+        input tvalid;
+        input tuser;
+        input tdest;
+        input tid;
+        input tlast;
+        input tkeep;
+        input tstrb;
+        input tdata;
+        input tready;
+    endclocking
+`endif
 
 `ifndef LOGIC_STD_OVL_DISABLED
+    /* verilator coverage_off */
     genvar k;
 
     logic [`OVL_FIRE_WIDTH-1:0] assert_tvalid_always_reset_fire;
@@ -329,7 +366,7 @@ interface logic_axi4_stream_if #(
         assert_tid_unchange_fire,
         1'b0
     };
-`endif
+    /* verilator coverage_on */
 `else
     logic _unused_ports = &{1'b0, aclk, areset_n, 1'b0};
 `endif

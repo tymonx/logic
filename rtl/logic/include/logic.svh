@@ -20,17 +20,15 @@
     `ifdef VERILATOR
         /* Define: LOGIC_SYNTHESIS
          *
-         * Enable only synthesizable parts of SystemVerilog
+         * Enable only synthesizable parts of HDL.
          */
         `define LOGIC_SYNTHESIS
     `endif
-`endif
-
-`ifndef LOGIC_STD_OVL_DISABLED
-    `ifdef LOGIC_SYNTHESIS
+`else
+    `ifndef LOGIC_STD_OVL_DISABLED
         /* Define: LOGIC_STD_OVL_DISABLED
          *
-         * Disable OVL
+         * Disable OVL assertions.
          */
         `define LOGIC_STD_OVL_DISABLED
     `endif
