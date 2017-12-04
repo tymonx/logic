@@ -1,0 +1,10 @@
+job1:
+  only:
+    - master
+  script:
+    - source /home/fpga/.bashrc
+    - mkdir build && cd build
+    - cmake ..
+    - cmake --build . --target all
+    - ctest
+    - cmake --build . --target quartus-compile-all
