@@ -12,6 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+if (ADD_LOGIC_INCLUDED)
+    return()
+endif()
+
+set(ADD_LOGIC_INCLUDED TRUE CACHE INTERNAL "Add logic included")
+
 include(AddThreads)
 include(AddGnuCompiler)
 include(AddMsvcCompiler)
@@ -30,3 +36,23 @@ find_package(Vivado)
 find_package(Quartus)
 find_package(GTest)
 find_package(StdOVL)
+
+if (SVUNIT_FOUND)
+    add_hdl_source(${SVUNIT_HDL_PACKAGE}
+        LIBRARY svunit
+        SYNTHESIZABLE FALSE
+        INCLUDES ${SVUNIT_INCLUDE_DIR}
+    )
+endif()
+
+if (QUARTUS_FOUND)
+    add_hdl_source(${QUARTUS_MEGA_FUNCTIONS}
+        LIBRARY intel-sim
+        SYNTHESIZABLE FALSE
+        VERILATOR_CONFIGURATIONS
+            "lint_off -file \"${QUARTUS_MEGA_FUNCTIONS}\""
+            "lint_off -msg STMTDLY -file \"${QUARTUS_MEGA_FUNCTIONS}\""
+    )
+
+    set(HDL_DEPENDS ${HDL_DEPENDS} altera_mf)
+endif()
