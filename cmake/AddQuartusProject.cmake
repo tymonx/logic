@@ -49,6 +49,7 @@ function(add_quartus_project target_name)
     set(quartus_sdc_files "")
     set(quartus_qsys_files "")
     set(quartus_tcl_script_files "")
+    set(quartus_ip_search_paths "")
 
     if (QUARTUS_INCLUDES)
         foreach (quartus_include ${QUARTUS_INCLUDES})
@@ -101,6 +102,8 @@ function(add_quartus_project target_name)
             set(state GET_QSYS_FILES)
         elseif (arg STREQUAL TCL_SCRIPT_FILES)
             set(state GET_TCL_SCRIPT_FILES)
+        elseif (arg STREQUAL IP_SEARCH_PATHS)
+            set(state GET_IP_SEARCH_PATHS)
 
         # Handle state
         elseif (state STREQUAL GET_SOURCES)
@@ -144,6 +147,9 @@ function(add_quartus_project target_name)
         elseif (state STREQUAL GET_TCL_SCRIPT_FILES)
             get_filename_component(arg ${arg} REALPATH)
             list(APPEND quartus_tcl_script_files ${arg})
+        elseif (state STREQUAL GET_IP_SEARCH_PATHS)
+            get_filename_component(arg ${arg} REALPATH)
+            list(APPEND quartus_ip_search_paths ${arg})
         else()
             message(FATAL_ERROR "Unknown argument")
         endif()
@@ -182,6 +188,11 @@ function(add_quartus_project target_name)
         message(FATAL_ERROR "Not supported Quartus flow: ${qaurtus_flow}")
     endif()
 
+    if (quartus_ip_search_paths)
+        set(quartus_ip_search_paths_assignment
+            "set_global_assignment -name IP_SEARCH_PATHS \"${quartus_ip_search_paths}\"")
+    endif()
+
     foreach (ip_file ${quartus_ip_files})
         list(APPEND quartus_assignments
             "set_global_assignment -name IP_FILE ${ip_file}")
@@ -199,7 +210,7 @@ function(add_quartus_project target_name)
 
     foreach (tcl_script_file ${quartus_tcl_script_files})
         list(APPEND quartus_assignments
-            "set_global_assignment -name TCL_SCRIPT_FILE ${tcl_script_file}")
+            "set_global_assignment -name SOURCE_TCL_SCRIPT_FILE ${tcl_script_file}")
     endforeach()
 
     file(MAKE_DIRECTORY ${quartus_project_directory})

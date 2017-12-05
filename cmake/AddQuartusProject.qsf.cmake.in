@@ -19,3 +19,4 @@ set_global_assignment -name RBCGEN_CRITICAL_WARNING_TO_ERROR ON
 set_global_assignment -name NUM_PARALLEL_PROCESSORS ALL
 
 @quartus_assignments@
+@quartus_ip_search_paths_assignment@

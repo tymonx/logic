@@ -1,4 +1,4 @@
-﻿Format: 2.0.1
+Format: 2.0.1
 
 # This is the file you use to provide information about your project.  It can
 # also be used to specify input and output settings so you don't have to
