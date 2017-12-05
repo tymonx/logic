@@ -41,3 +41,17 @@ TEST_F(logic_reset_synchronizer_test, deassertion) {
 
     EXPECT_FALSE(m_dut->areset_n_synced.read());
 }
+
+TEST_F(logic_reset_synchronizer_test, deassertion_repeat_10) {
+    for (auto i = 0u; i < 10u; ++i) {
+        m_dut->areset_n = 1;
+        sc_start(3, SC_NS);
+
+        EXPECT_TRUE(m_dut->areset_n_synced.read());
+
+        m_dut->areset_n = 0;
+        sc_start(1, SC_NS);
+
+        EXPECT_FALSE(m_dut->areset_n_synced.read());
+    }
+}

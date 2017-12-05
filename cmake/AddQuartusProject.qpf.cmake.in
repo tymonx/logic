@@ -14,4 +14,4 @@
 
 # Revisions
 
-PROJECT_REVISION = "@QUARTUS_PROJECT_REVISION@"
+PROJECT_REVISION = "@quartus_revision@"

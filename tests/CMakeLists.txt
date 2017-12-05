@@ -29,12 +29,4 @@ endif()
 
 set(HDL_SYNTHESIZABLE FALSE)
 
-if (CMAKE_CXX_COMPILER_ID MATCHES Clang)
-    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS}
-        -Wno-global-constructors
-        -Wno-zero-as-null-pointer-constant
-        -Wno-over-aligned
-    )
-endif()
-
 add_subdirectory(logic)
