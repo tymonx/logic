@@ -15,14 +15,20 @@
 cmake_minimum_required(VERSION 3.1)
 project(Logic CXX)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_LIST_DIR}/cmake)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
+    ${CMAKE_CURRENT_LIST_DIR}/cmake
+)
+
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
-option(TESTS "Enable/disable tests" ON)
-option(EXAMPLES "Enable/disable examples" OFF)
-option(WARNINGS_INTO_ERRORS "Enable/disable warnings as errors" OFF)
+option(LOGIC_TESTS "Enable/disable tests" ON)
+option(LOGIC_EXAMPLES "Enable/disable examples" OFF)
+option(LOGIC_WARNINGS_INTO_ERRORS "Enable/disable warnings as errors" OFF)
+option(LOGIC_RTL "Enable/disable RTL build" ON)
+option(LOGIC_QUARTUS "Enable/disable Intel FPGA Quartus projects" ON)
+option(LOGIC_VIVADO "Enable/disable Xilinx Vivado projects" ON)
 
 include(AddLogic)
 
@@ -30,11 +36,20 @@ include_directories(include)
 include_directories(SYSTEM ${SYSTEMC_INCLUDE_DIRS})
 
 add_subdirectory(src)
-add_subdirectory(rtl)
-add_subdirectory(quartus)
-add_subdirectory(vivado)
 
-if (TESTS)
-    include(CTest)
-    add_subdirectory(tests)
+if (LOGIC_RTL)
+    add_subdirectory(rtl)
+
+    if (LOGIC_QUARTUS)
+        add_subdirectory(quartus)
+    endif()
+
+    if (LOGIC_VIVADO)
+        add_subdirectory(vivado)
+    endif()
+
+    if (LOGIC_TESTS)
+        include(CTest)
+        add_subdirectory(tests)
+    endif()
 endif()

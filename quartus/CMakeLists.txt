@@ -13,7 +13,7 @@
 # limitations under the License.
 
 set(QUARTUS_DEFINES
-    LOGIC_STD_OVL_DISABLED
+    LOGIC_SYNTHESIS
 )
 
 if (QUARTUS_EDITION MATCHES Pro)

@@ -28,6 +28,7 @@
  */
 `define LOGIC_DRC_TRUE_FALSE(value) \
     if (!((0 == value) || (1 == value))) begin \
+        /*verilator coverage_block_off*/ \
         $display("DRC:%m:%s:%0d: %s (%0d) %s", \
             `__FILE__, `__LINE__, \
             `LOGIC_DRC_STRINGIFY(value), value, \
@@ -48,6 +49,7 @@
  */
 `define LOGIC_DRC_RANGE(value, value_min, value_max) \
     if (!((value >= value_min) && (value <= value_max))) begin \
+        /*verilator coverage_block_off*/ \
         $display("DRC:%m:%s:%0d: %s (%0d) %s %s (%0d) %s %s (%0d)", \
             `__FILE__, `__LINE__, \
             `LOGIC_DRC_STRINGIFY(value), value, \
@@ -69,6 +71,7 @@
  */
 `define LOGIC_DRC_POWER_OF_2(value) \
     if (!((0 != value) && !(value & (value - 1)))) begin \
+        /*verilator coverage_block_off*/ \
         $display("DRC:%m:%s:%0d: %s (%0d) %s", \
             `__FILE__, `__LINE__, \
             `LOGIC_DRC_STRINGIFY(value), value, \
@@ -102,7 +105,7 @@
  *  rhs       - Parameter integer type that will be checked.
  */
 `define LOGIC_DRC_EQUAL(lhs, rhs) \
-    if (!(lhs == rhs)) begin \
+    if (!(lhs == rhs)) begin /*verilator coverage_block_off*/ \
         $display("DRC:%m:%s:%0d: %s (%0d) %s %s (%0d)", \
             `__FILE__, `__LINE__, \
             `LOGIC_DRC_STRINGIFY(lhs), lhs, \
@@ -122,7 +125,7 @@
  *  rhs       - Parameter integer type that will be checked.
  */
 `define LOGIC_DRC_NOT_EQUAL(lhs, rhs) \
-    if (!(lhs != rhs)) begin \
+    if (!(lhs != rhs)) begin /*verilator coverage_block_off*/ \
         $display("DRC:%m:%s:%0d: %s (%0d) %s %s (%0d)", \
             `__FILE__, `__LINE__, \
             `LOGIC_DRC_STRINGIFY(lhs), lhs, \
@@ -142,7 +145,7 @@
  *  rhs       - Parameter integer type that will be checked.
  */
 `define LOGIC_DRC_EQUAL_OR_GREATER_THAN(lhs, rhs) \
-    if (!(lhs >= rhs)) begin \
+    if (!(lhs >= rhs)) begin /*verilator coverage_block_off*/ \
         $display("DRC:%m:%s:%0d: %s (%0d) %s %s (%0d)", \
             `__FILE__, `__LINE__, \
             `LOGIC_DRC_STRINGIFY(lhs), lhs, \
@@ -162,7 +165,7 @@
  *  rhs       - Parameter integer type that will be checked.
  */
 `define LOGIC_DRC_EQUAL_OR_LESS_THAN(lhs, rhs) \
-    if (!(lhs <= rhs)) begin \
+    if (!(lhs <= rhs)) begin /*verilator coverage_block_off*/ \
         $display("DRC:%m:%s:%0d: %s (%0d) %s %s (%0d)", \
             `__FILE__, `__LINE__, \
             `LOGIC_DRC_STRINGIFY(lhs), lhs, \
@@ -182,7 +185,7 @@
  *  rhs       - Parameter integer type that will be checked.
  */
 `define LOGIC_DRC_GREATER_THAN(lhs, rhs) \
-    if (!(lhs > rhs)) begin \
+    if (!(lhs > rhs)) begin /*verilator coverage_block_off*/ \
         $display("DRC:%m:%s:%0d: %s (%0d) %s %s (%0d)", \
             `__FILE__, `__LINE__, \
             `LOGIC_DRC_STRINGIFY(lhs), lhs, \
@@ -202,7 +205,7 @@
  *  rhs       - Parameter integer type that will be checked.
  */
 `define LOGIC_DRC_LESS_THAN(lhs, rhs) \
-    if (!(lhs < rhs)) begin \
+    if (!(lhs < rhs)) begin /*verilator coverage_block_off*/ \
         $display("DRC:%m:%s:%0d: %s (%0d) %s %s (%0d)", \
             `__FILE__, `__LINE__, \
             `LOGIC_DRC_STRINGIFY(lhs), lhs, \

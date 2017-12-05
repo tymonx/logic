@@ -16,7 +16,7 @@ if (ADD_LOGIC_INCLUDED)
     return()
 endif()
 
-set(ADD_LOGIC_INCLUDED TRUE CACHE INTERNAL "Add logic included")
+set(ADD_LOGIC_INCLUDED TRUE)
 
 include(AddThreads)
 include(AddGnuCompiler)

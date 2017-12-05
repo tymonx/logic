@@ -23,6 +23,12 @@ if (VERILATOR_FOUND)
     )
 endif()
 
+if (CMAKE_CXX_COMPILER_ID MATCHES Clang)
+    set_source_files_properties(command_line.cpp
+        PROPERTIES COMPILE_FLAGS -Wno-global-constructors
+    )
+endif()
+
 add_library(logic-core OBJECT
     ${LOGIC_CORE_SOURCES}
     range.cpp

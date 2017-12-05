@@ -28,3 +28,11 @@ add_library(logic-gtest-main STATIC
     factory.cpp
     main.cpp
 )
+
+if (CMAKE_CXX_COMPILER_ID MATCHES Clang)
+    target_compile_options(logic-gtest-main PUBLIC
+        -Wno-global-constructors
+        -Wno-zero-as-null-pointer-constant
+        -Wno-over-aligned
+    )
+endif()
