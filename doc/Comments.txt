@@ -1,4 +1,4 @@
-﻿Format: 2.0.1
+Format: 2.0.1
 
 # This is the Natural Docs comments file for this project.  If you change
 # anything here, it will apply to THIS PROJECT ONLY.  You can edit the version
