@@ -47,12 +47,10 @@ endif()
 
 if (QUARTUS_FOUND)
     add_hdl_source(${QUARTUS_MEGA_FUNCTIONS}
-        LIBRARY intel-sim
+        LIBRARY intel
         SYNTHESIZABLE FALSE
         VERILATOR_CONFIGURATIONS
             "lint_off -file \"${QUARTUS_MEGA_FUNCTIONS}\""
             "lint_off -msg STMTDLY -file \"${QUARTUS_MEGA_FUNCTIONS}\""
     )
-
-    set(HDL_DEPENDS ${HDL_DEPENDS} altera_mf)
 endif()

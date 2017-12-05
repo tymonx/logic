@@ -14,7 +14,10 @@
 
 add_hdl_source(logic_axi4_stream_queue_generic.sv)
 
-add_hdl_source(logic_axi4_stream_queue_intel.sv)
+add_hdl_source(logic_axi4_stream_queue_intel.sv
+    DEPENDS
+        altera_mf
+)
 
 add_hdl_source(logic_axi4_stream_queue.sv
     DEPENDS
