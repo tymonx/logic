@@ -424,6 +424,7 @@ function(add_hdl_systemc target_name)
     set(target_output_directory
         ${CMAKE_BINARY_DIR}/verilator/${target_top_module})
     set(target_verilator_configurations "")
+    set(target_parameters "")
 
     foreach (arg ${ARGN})
         # Handle argument
@@ -437,6 +438,9 @@ function(add_hdl_systemc target_name)
             set(state GET_DEPENDS)
         elseif (arg STREQUAL TOP_MODULE)
             set(state GET_TOP_MODULE)
+        elseif (arg STREQUAL PARAMETERS)
+            set(state GET_PARAMETERS)
+
         # Handle state
         elseif (state STREQUAL GET_SOURCES)
             list(APPEND target_sources ${arg})
@@ -452,6 +456,8 @@ function(add_hdl_systemc target_name)
         elseif (state STREQUAL GET_TOP_MODULE)
             set(target_top_module ${arg})
             set(state UNKNOWN)
+        elseif (state STREQUAL GET_PARAMETERS)
+            list(APPEND target_parameters ${arg})
         else()
             message(FATAL_ERROR "Unknown argument")
         endif()
@@ -482,6 +488,11 @@ function(add_hdl_systemc target_name)
 
     if (VERILATOR_FOUND)
         set(target_library ${target_top_module}__ALL.a)
+
+        set(target_parameters_expand "")
+        foreach (parameter ${target_parameters})
+            list(APPEND target_parameters_expand -G${parameter})
+        endforeach()
 
         set(target_includes_expand "")
         foreach (inc ${target_includes})
@@ -531,6 +542,7 @@ function(add_hdl_systemc target_name)
                 --prefix ${target_top_module}
                 --top-module ${target_top_module}
                 -Mdir ${target_output_directory}
+                ${target_parameters_expand}
                 ${target_defines_expand}
                 ${target_includes_expand}
                 ${target_configuration_file}
