@@ -60,6 +60,7 @@ endif()
 
 if (VERILATOR_FOUND)
     file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/verilator-coverage)
+    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/verilator-configs)
 
     add_custom_target(verilator-coverage
         ${VERILATOR_COVERAGE_EXECUTABLE}
@@ -70,6 +71,10 @@ if (VERILATOR_FOUND)
 
     if (NOT TARGET verilator-compile-all)
         add_custom_target(verilator-compile-all ALL)
+    endif()
+
+    if (NOT TARGET verilator-analysis-all)
+        add_custom_target(verilator-analysis-all)
     endif()
 endif()
 
@@ -84,6 +89,7 @@ function(add_hdl_source)
     set(hdl_defines "")
     set(hdl_includes "")
     set(hdl_verilator_configurations "")
+    set(hdl_verilator_check FALSE)
 
     if (HDL_LIBRARY)
         set(hdl_library ${HDL_LIBRARY})
@@ -132,6 +138,8 @@ function(add_hdl_source)
             set(state GET_SYNTHESIZABLE)
         elseif (arg STREQUAL VERILATOR_CONFIGURATIONS)
             set(state GET_VERILATOR_CONFIGURATIONS)
+        elseif (arg STREQUAL VERILATOR_CHECK)
+            set(state GET_VERILATOR_CHECK)
 
         # State
         elseif (state STREQUAL GET_NAME)
@@ -158,6 +166,9 @@ function(add_hdl_source)
             set(state UNKNOWN)
         elseif (state STREQUAL GET_VERILATOR_CONFIGURATIONS)
             list(APPEND hdl_verilator_configurations ${arg})
+        elseif (state STREQUAL GET_VERILATOR_CHECK)
+            set(hdl_verilator_check ${arg})
+            set(state UNKNOWN)
         else ()
             message(FATAL_ERROR "Invalid argument: ${arg}")
         endif()
@@ -267,6 +278,82 @@ function(add_hdl_source)
             DEPENDS ${CMAKE_BINARY_DIR}/modelsim/.modules/${hdl_name})
 
         add_dependencies(modelsim-compile-all modelsim-compile-${hdl_name})
+    endif()
+
+    if (VERILATOR_FOUND AND hdl_verilator_check)
+        set(verilator_sources "")
+        set(verilator_defines "")
+        set(verilator_includes "")
+        set(verilator_configurations "")
+
+        get_hdl_depends(${hdl_name} hdl_depends_all)
+
+        foreach (hdl_depend ${hdl_depends_all})
+            get_hdl_properties(${hdl_depend}
+                SOURCE source
+                DEFINES defines
+                INCLUDES includes
+                VERILATOR_CONFIGURATIONS verilator_configs
+            )
+
+            list(APPEND verilator_sources ${source})
+            list(APPEND verilator_defines ${defines})
+            list(APPEND verilator_includes ${includes})
+            list(APPEND verilator_configurations ${verilator_configs})
+        endforeach()
+
+        list(APPEND verilator_configurations
+            ${hdl_verilator_configurations})
+
+        list(APPEND verilator_includes ${hdl_includes})
+        list(APPEND verilator_defines ${hdl_defines})
+        list(APPEND verilator_sources ${hdl_source})
+
+        list(REMOVE_DUPLICATES verilator_defines)
+        list(REMOVE_DUPLICATES verilator_includes)
+        list(REMOVE_DUPLICATES verilator_configurations)
+
+        set(verilator_configuration_file
+            ${CMAKE_BINARY_DIR}/verilator-configs/${hdl_name}.vlt)
+
+        set(verilator_config)
+        foreach (config ${verilator_configurations})
+            set(verilator_config "${verilator_config}\n${config}")
+        endforeach()
+
+        configure_file(${VERILATOR_CONFIGURATION_FILE}
+            ${verilator_configuration_file})
+
+        set(verilator_includes_expand "")
+        foreach (inc ${verilator_includes})
+            list(APPEND verilator_includes_expand -I${inc})
+        endforeach()
+
+        set(verilator_defines_expand "")
+        foreach (def ${verilator_defines})
+            list(APPEND verilator_defines_expand -D${def})
+        endforeach()
+
+        add_custom_target(verilator-analysis-${hdl_name}
+                ${VERILATOR_EXECUTABLE}
+                -Wall
+                --lint-only
+                --top-module ${hdl_name}
+                ${verilator_defines_expand}
+                ${verilator_includes_expand}
+                ${verilator_configuration_file}
+                ${verilator_sources}
+            DEPENDS
+                ${verilator_sources}
+                ${verilator_includes}
+                ${verilator_configuration_file}
+            WORKING_DIRECTORY
+                ${CMAKE_BINARY_DIR}
+            COMMENT
+                "Verilator analysing ${hdl_name}"
+        )
+
+        add_dependencies(verilator-analysis-all verilator-analysis-${hdl_name})
     endif()
 endfunction()
 
