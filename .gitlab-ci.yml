@@ -7,4 +7,4 @@ job1:
     - cmake ..
     - cmake --build . --target all
     - ctest
-    - cmake --build . --target quartus-compile-all
+    - cmake --build . --target quartus-analysis-all

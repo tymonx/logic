@@ -20,11 +20,12 @@
 #
 # ::
 #
-#   QUARTUS_EXECUTABLE  - Quartus executable
-#   QUARTUS_SH          - Quartus sh
-#   QUARTUS_MAP         - Quartus map
-#   QUARTUS_SYN         - Quartus syn
-#   QUARTUS_FOUND       - true if Quartus found
+#   QUARTUS_EXECUTABLE      - Quartus executable
+#   QUARTUS_SH              - Quartus sh
+#   QUARTUS_MAP             - Quartus map
+#   QUARTUS_SYN             - Quartus syn
+#   QUARTUS_QSYS_GENERATE   - Quartus Qsys generate
+#   QUARTUS_FOUND           - true if Quartus found
 
 if (QUARTUS_FOUND)
     return()
@@ -64,6 +65,12 @@ find_program(QUARTUS_SH quartus_sh
     DOC "Path to the Quartus sh executable"
 )
 
+find_program(QUARTUS_QSYS_GENERATE qsys-generate
+    HINTS ${QUARTUS_HINTS}
+    PATH_SUFFIXES ../qsys/bin ../qsys/bin64
+    DOC "Path to the Quartus Qsys generate script"
+)
+
 if (QUARTUS_SH)
     execute_process(COMMAND ${QUARTUS_SH}
         --tcl_eval puts "$::quartus(version)"
@@ -92,8 +99,9 @@ mark_as_advanced(QUARTUS_EXECUTABLE)
 mark_as_advanced(QUARTUS_SH)
 mark_as_advanced(QUARTUS_MAP)
 mark_as_advanced(QUARTUS_SYN)
+mark_as_advanced(QUARTUS_QSYS_GENERATE)
 mark_as_advanced(QUARTUS_MEGA_FUNCTIONS)
 
 find_package_handle_standard_args(Quartus REQUIRED_VARS
     QUARTUS_EXECUTABLE QUARTUS_MAP QUARTUS_SYN
-    QUARTUS_SH QUARTUS_MEGA_FUNCTIONS)
+    QUARTUS_SH QUARTUS_QSYS_GENERATE QUARTUS_MEGA_FUNCTIONS)
