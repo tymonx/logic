@@ -129,6 +129,24 @@ Run Verilator coverage after running all tests:
 
     cmake --build . --target verilator-coverage
 
+Verilator analysis
+------------------
+
+Enable Verilator analysis:
+
+    add_hdl_source(<hdl-module-filename>
+        VERILATOR_ANALYSIS
+            TRUE
+    )
+
+Run Verilator analysis for `<hdl-module-name>`:
+
+    make verilator-analysis-<hdl-module-name>
+
+Rin Verilator analysis for all HDL modules:
+
+    make verilator-analysis-all
+
 Creating Intel FPGA Quartus project
 -----------------------------------
 
@@ -146,7 +164,7 @@ RTL analysis and elaboration in `Intel FPGA Quartus` for top level entity:
 
 RTL compilation in `Intel FPGA Quartus` for top level entity:
 
-    cmake --build . --target quartus-analysis-<top_level_entity>
+    cmake --build . --target quartus-compile-<top_level_entity>
 
 RTL analysis and elaboration in `Intel FPGA Quartus` for all top level
 entities:
