@@ -51,6 +51,11 @@ function(add_quartus_project target_name)
     set(quartus_qsys_files "")
     set(quartus_source_tcl_script_files "")
     set(quartus_ip_search_paths "")
+    set(quartus_num_parallel_processors ALL)
+
+    if (QUARTUS_NUM_PARALLEL_PROCESSORS)
+        set(quartus_num_parallel_processors ${QUARTUS_NUM_PARALLEL_PROCESSORS})
+    endif()
 
     if (QUARTUS_INCLUDES)
         foreach (quartus_include ${QUARTUS_INCLUDES})
