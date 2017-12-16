@@ -67,7 +67,7 @@ find_program(QUARTUS_SH quartus_sh
 
 find_program(QUARTUS_QSYS_GENERATE qsys-generate
     HINTS ${QUARTUS_HINTS}
-    PATH_SUFFIXES ../qsys/bin ../qsys/bin64
+    PATH_SUFFIXES ../qsys/bin ../qsys/bin64 ../sopc_builder/bin
     DOC "Path to the Quartus Qsys generate script"
 )
 

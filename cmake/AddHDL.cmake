@@ -16,23 +16,18 @@ if (COMMAND add_hdl_source)
     return()
 endif()
 
-set(ADD_HDL_INCLUDED TRUE CACHE INTERNAL "AddHDL included")
-
 find_package(ModelSim)
 find_package(SystemC REQUIRED COMPONENTS SCV UVM)
 find_package(Verilator)
 
-set(HDL_TARGETS "" CACHE INTERNAL "RTL targets" FORCE)
+include(CMakeParseArguments)
 
-set(HDL_CONFIGURATION_FILE
-    ${CMAKE_CURRENT_LIST_DIR}/AddHDL.cmake.in
-    CACHE INTERNAL "HDL configuration file" FORCE)
+set(HDL_TARGETS "" CACHE INTERNAL "RTL targets" FORCE)
 
 set(VERILATOR_CONFIGURATION_FILE
     ${CMAKE_CURRENT_LIST_DIR}/VerilatorConfig.cmake.in
     CACHE INTERNAL "Verilator configuration file" FORCE)
 
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/hdl)
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/output)
 
 if (MODELSIM_FOUND)
@@ -45,12 +40,12 @@ if (MODELSIM_FOUND)
 
     if (NOT EXISTS ${CMAKE_BINARY_DIR}/modelsim/work/_info)
         execute_process(COMMAND ${MODELSIM_VLIB} work
-            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/modelsim)
+            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/modelsim OUTPUT_QUIET)
     endif()
 
     if (NOT EXISTS ${CMAKE_BINARY_DIR}/modelsim/modelsim.ini)
         execute_process(COMMAND ${MODELSIM_VMAP} work work
-            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/modelsim)
+            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/modelsim OUTPUT_QUIET)
     endif()
 
     if (NOT TARGET modelsim-compile-all)
@@ -59,13 +54,13 @@ if (MODELSIM_FOUND)
 endif()
 
 if (VERILATOR_FOUND)
-    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/verilator-coverage)
-    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/verilator-configs)
+    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/verilator/.coverage)
+    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/verilator/.configs)
 
     add_custom_target(verilator-coverage
         ${VERILATOR_COVERAGE_EXECUTABLE}
             --annotate-all
-            --annotate ${CMAKE_BINARY_DIR}/verilator-coverage
+            --annotate ${CMAKE_BINARY_DIR}/verilator/.coverage
             ${CMAKE_BINARY_DIR}/output/*.dat
     )
 
@@ -78,422 +73,18 @@ if (VERILATOR_FOUND)
     endif()
 endif()
 
-function(add_hdl_source)
-    set(state GET_SOURCE)
-    set(hdl_name FALSE)
-    set(hdl_type FALSE)
-    set(hdl_source FALSE)
-    set(hdl_synthesizable FALSE)
-    set(hdl_library work)
+function(get_hdl_depends hdl_target hdl_depends_var)
     set(hdl_depends "")
-    set(hdl_defines "")
-    set(hdl_includes "")
-    set(hdl_verilator_configurations "")
-    set(hdl_verilator_analysis FALSE)
 
-    if (HDL_LIBRARY)
-        set(hdl_library ${HDL_LIBRARY})
-    endif()
+    get_target_property(hdl_target_depends ${hdl_target} HDL_DEPENDS)
 
-    if (HDL_SYNTHESIZABLE)
-        set(hdl_synthesizable ${HDL_SYNTHESIZABLE})
-    endif()
-
-    if (HDL_DEPENDS)
-        foreach (hdl_depend ${HDL_DEPENDS})
-            list(APPEND hdl_depends ${hdl_depend})
-        endforeach()
-    endif()
-
-    if (HDL_DEFINES)
-        foreach (hdl_define ${HDL_DEFINES})
-            list(APPEND hdl_defines ${hdl_define})
-        endforeach()
-    endif()
-
-    if (HDL_INCLUDES)
-        foreach (hdl_include ${HDL_INCLUDES})
-            get_filename_component(hdl_include ${hdl_include} REALPATH)
-            list(APPEND hdl_includes ${hdl_include})
-        endforeach()
-    endif()
-
-    foreach (arg ${ARGN})
-        # Argument
-        if (arg STREQUAL NAME)
-            set(state GET_NAME)
-        elseif (arg STREQUAL TYPE)
-            set(state GET_TYPE)
-        elseif (arg STREQUAL SOURCE)
-            set(state GET_SOURCE)
-        elseif (arg STREQUAL LIBRARY)
-            set(state GET_LIBRARY)
-        elseif (arg STREQUAL DEPENDS)
-            set(state GET_DEPENDS)
-        elseif (arg STREQUAL DEFINES)
-            set(state GET_DEFINES)
-        elseif (arg STREQUAL INCLUDES)
-            set(state GET_INCLUDES)
-        elseif (arg STREQUAL SYNTHESIZABLE)
-            set(state GET_SYNTHESIZABLE)
-        elseif (arg STREQUAL VERILATOR_CONFIGURATIONS)
-            set(state GET_VERILATOR_CONFIGURATIONS)
-        elseif (arg STREQUAL VERILATOR_ANALYSIS)
-            set(state GET_VERILATOR_ANALYSIS)
-
-        # State
-        elseif (state STREQUAL GET_NAME)
-            set(hdl_name ${arg})
-            set(state UNKNOWN)
-        elseif (state STREQUAL GET_TYPE)
-            set(hdl_type ${arg})
-            set(state UNKNOWN)
-        elseif (state STREQUAL GET_SOURCE)
-            set(hdl_source ${arg})
-            set(state UNKNOWN)
-        elseif (state STREQUAL GET_LIBRARY)
-            set(hdl_library ${arg})
-            set(state UNKNOWN)
-        elseif (state STREQUAL GET_DEPENDS)
-            list(APPEND hdl_depends ${arg})
-        elseif (state STREQUAL GET_DEFINES)
-            list(APPEND hdl_defines ${arg})
-        elseif (state STREQUAL GET_INCLUDES)
-            get_filename_component(arg ${arg} REALPATH)
-            list(APPEND hdl_includes ${arg})
-        elseif (state STREQUAL GET_SYNTHESIZABLE)
-            set(hdl_synthesizable ${arg})
-            set(state UNKNOWN)
-        elseif (state STREQUAL GET_VERILATOR_CONFIGURATIONS)
-            list(APPEND hdl_verilator_configurations ${arg})
-        elseif (state STREQUAL GET_VERILATOR_ANALYSIS)
-            set(hdl_verilator_analysis ${arg})
-            set(state UNKNOWN)
-        else ()
-            message(FATAL_ERROR "Invalid argument: ${arg}")
-        endif()
-    endforeach()
-
-    if (NOT hdl_source)
-        message(FATAL_ERROR "HDL source is not defined")
-    endif()
-
-    get_filename_component(hdl_source ${hdl_source} REALPATH)
-
-    if (NOT EXISTS ${hdl_source})
-        message(FATAL_ERROR "HDL source doesn't exist: ${hdl_source}")
-    endif()
-
-    if (NOT ${hdl_name})
-        get_filename_component(hdl_name ${hdl_source} NAME_WE)
-    endif()
-
-    if (NOT hdl_type)
-        if (hdl_source MATCHES .sv)
-            set(hdl_type SystemVerilog)
-        elseif (hdl_source MATCHES .vhd)
-            set(hdl_type VHDL)
-        elseif (hdl_source MATCHES .v)
-            set(hdl_type Verilog)
-        endif()
-    endif()
-
-    set(HDL_TARGETS ${HDL_TARGETS} ${hdl_name}
-        CACHE INTERNAL "RTL targets" FORCE)
-
-    configure_file(${HDL_CONFIGURATION_FILE}
-        ${CMAKE_BINARY_DIR}/hdl/${hdl_name})
-
-    if (MODELSIM_FOUND)
-        set(modelsim_compiler)
-        set(modelsim_flags -lint -pedanticerrors -work ${hdl_library})
-        set(modelsim_source ${hdl_source})
-        set(modelsim_depends)
-        set(modelsim_libraries "")
-
-        if (hdl_type STREQUAL SystemVerilog OR hdl_type STREQUAL Verilog)
-            set(modelsim_compiler ${MODELSIM_VLOG})
-
-            if (hdl_type STREQUAL SystemVerilog)
-                set(modelsim_flags ${modelsim_flags} -sv)
-            endif()
-
-            foreach (def ${hdl_defines})
-                set(modelsim_flags ${modelsim_flags} +define+${def})
-            endforeach()
-
-            foreach (inc ${hdl_includes})
-                if (CYGWIN)
-                    execute_process(COMMAND cygpath -m ${inc}
-                        OUTPUT_VARIABLE inc
-                        OUTPUT_STRIP_TRAILING_WHITESPACE)
-                endif()
-
-                set(modelsim_flags ${modelsim_flags} +incdir+${inc})
-            endforeach()
-        elseif (hdl_type STREQUAL VHDL)
-            set(modelsim_compiler ${MODELSIM_VCOM})
-            set(modelsim_flags ${modelsim_flags} -2008)
-        endif()
-
-        foreach (hdl_depend ${hdl_depends})
-            set(modelsim_depends ${modelsim_depends}
-                modelsim-compile-${hdl_depend})
-        endforeach()
-
-        if (NOT EXISTS ${CMAKE_BINARY_DIR}/modelsim/${hdl_library})
-            execute_process(COMMAND ${MODELSIM_VLIB} ${hdl_library}
-                WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/modelsim)
-        endif()
-
-        if (CYGWIN)
-            execute_process(COMMAND cygpath -m ${modelsim_source}
-                OUTPUT_VARIABLE modelsim_source
-                OUTPUT_STRIP_TRAILING_WHITESPACE)
-        endif()
-
-        get_hdl_depends(${hdl_name} hdl_depends_all)
-
-        foreach (hdl_depend ${hdl_depends_all})
-            get_hdl_properties(${hdl_depend} LIBRARY modelsim_library)
-            list(APPEND modelsim_libraries ${modelsim_library})
-        endforeach()
-
-        list(REMOVE_DUPLICATES modelsim_libraries)
-
-        foreach (modelsim_library ${modelsim_libraries})
-            set(modelsim_flags ${modelsim_flags} -L ${modelsim_library})
-        endforeach()
-
-        add_custom_command(
-            OUTPUT ${CMAKE_BINARY_DIR}/modelsim/.modules/${hdl_name}
-            COMMAND ${modelsim_compiler} ${modelsim_flags} ${modelsim_source}
-            COMMAND ${CMAKE_COMMAND} -E touch ./.modules/${hdl_name}
-            DEPENDS ${hdl_source} ${modelsim_depends}
-            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/modelsim
-            COMMENT "ModelSim compiling HDL: ${hdl_name}"
-        )
-
-        add_custom_target(modelsim-compile-${hdl_name}
-            DEPENDS ${CMAKE_BINARY_DIR}/modelsim/.modules/${hdl_name})
-
-        add_dependencies(modelsim-compile-all modelsim-compile-${hdl_name})
-    endif()
-
-    if (VERILATOR_FOUND AND hdl_verilator_analysis)
-        set(verilator_sources "")
-        set(verilator_defines "")
-        set(verilator_includes "")
-        set(verilator_configurations "")
-
-        get_hdl_depends(${hdl_name} hdl_depends_all)
-
-        foreach (hdl_depend ${hdl_depends_all})
-            get_hdl_properties(${hdl_depend}
-                SOURCE source
-                DEFINES defines
-                INCLUDES includes
-                VERILATOR_CONFIGURATIONS verilator_configs
-            )
-
-            list(APPEND verilator_sources ${source})
-            list(APPEND verilator_defines ${defines})
-            list(APPEND verilator_includes ${includes})
-            list(APPEND verilator_configurations ${verilator_configs})
-        endforeach()
-
-        list(APPEND verilator_configurations
-            ${hdl_verilator_configurations})
-
-        list(APPEND verilator_includes ${hdl_includes})
-        list(APPEND verilator_defines ${hdl_defines})
-        list(APPEND verilator_sources ${hdl_source})
-
-        list(REMOVE_DUPLICATES verilator_defines)
-        list(REMOVE_DUPLICATES verilator_includes)
-        list(REMOVE_DUPLICATES verilator_configurations)
-
-        set(verilator_configuration_file
-            ${CMAKE_BINARY_DIR}/verilator-configs/${hdl_name}.vlt)
-
-        set(verilator_config)
-        foreach (config ${verilator_configurations})
-            set(verilator_config "${verilator_config}\n${config}")
-        endforeach()
-
-        configure_file(${VERILATOR_CONFIGURATION_FILE}
-            ${verilator_configuration_file})
-
-        set(verilator_includes_expand "")
-        foreach (inc ${verilator_includes})
-            list(APPEND verilator_includes_expand -I${inc})
-        endforeach()
-
-        set(verilator_defines_expand "")
-        foreach (def ${verilator_defines})
-            list(APPEND verilator_defines_expand -D${def})
-        endforeach()
-
-        add_custom_target(verilator-analysis-${hdl_name}
-                ${VERILATOR_EXECUTABLE}
-                -Wall
-                --lint-only
-                --top-module ${hdl_name}
-                ${verilator_defines_expand}
-                ${verilator_includes_expand}
-                ${verilator_configuration_file}
-                ${verilator_sources}
-            DEPENDS
-                ${verilator_sources}
-                ${verilator_includes}
-                ${verilator_configuration_file}
-            WORKING_DIRECTORY
-                ${CMAKE_BINARY_DIR}
-            COMMENT
-                "Verilator analysing ${hdl_name}"
-        )
-
-        add_dependencies(verilator-analysis-all verilator-analysis-${hdl_name})
-    endif()
-endfunction()
-
-function(get_hdl_properties hdl_name)
-    set(state UNKNOWN)
-    set(hdl_type FALSE)
-    set(hdl_source FALSE)
-    set(hdl_library work)
-    set(hdl_depends "")
-    set(hdl_defines "")
-    set(hdl_includes "")
-    set(hdl_synthesizable FALSE)
-    set(hdl_verilator_configurations "")
-
-    file(READ ${CMAKE_BINARY_DIR}/hdl/${hdl_name} hdl_file)
-
-    string(REGEX REPLACE "\n" ";" hdl_file "${hdl_file}")
-
-    foreach (arg ${hdl_file})
-        # Argument
-        if (arg STREQUAL "")
-            # Empty argument
-        elseif (arg STREQUAL NAME)
-            set(state GET_NAME)
-        elseif (arg STREQUAL TYPE)
-            set(state GET_TYPE)
-        elseif (arg STREQUAL SOURCE)
-            set(state GET_SOURCE)
-        elseif (arg STREQUAL LIBRARY)
-            set(state GET_LIBRARY)
-        elseif (arg STREQUAL DEPENDS)
-            set(state GET_DEPENDS)
-        elseif (arg STREQUAL DEFINES)
-            set(state GET_DEFINES)
-        elseif (arg STREQUAL INCLUDES)
-            set(state GET_INCLUDES)
-        elseif (arg STREQUAL SYNTHESIZABLE)
-            set(state GET_SYNTHESIZABLE)
-        elseif (arg STREQUAL VERILATOR_CONFIGURATIONS)
-            set(state GET_VERILATOR_CONFIGURATIONS)
-
-        # State
-        elseif (state STREQUAL GET_NAME)
-            set(hdl_name ${arg})
-            set(state UNKNOWN)
-        elseif (state STREQUAL GET_TYPE)
-            set(hdl_type ${arg})
-            set(state UNKNOWN)
-        elseif (state STREQUAL GET_SOURCE)
-            set(hdl_source ${arg})
-            set(state UNKNOWN)
-        elseif (state STREQUAL GET_LIBRARY)
-            set(hdl_library ${arg})
-            set(state UNKNOWN)
-        elseif (state STREQUAL GET_DEPENDS)
-            list(APPEND hdl_depends ${arg})
-        elseif (state STREQUAL GET_DEFINES)
-            list(APPEND hdl_defines ${arg})
-        elseif (state STREQUAL GET_INCLUDES)
-            list(APPEND hdl_includes ${arg})
-        elseif (state STREQUAL GET_SYNTHESIZABLE)
-            set(hdl_synthesizable ${arg})
-            set(state UNKNOWN)
-        elseif (state STREQUAL GET_VERILATOR_CONFIGURATIONS)
-            list(APPEND hdl_verilator_configurations ${arg})
-        else ()
-            message(FATAL_ERROR "Invalid argument: ${arg}")
-        endif()
-    endforeach()
-
-    set(state UNKNOWN)
-
-    foreach (arg ${ARGN})
-        # Argument
-        if (arg STREQUAL NAME)
-            set(state GET_NAME)
-        elseif (arg STREQUAL TYPE)
-            set(state GET_TYPE)
-        elseif (arg STREQUAL SOURCE)
-            set(state GET_SOURCE)
-        elseif (arg STREQUAL LIBRARY)
-            set(state GET_LIBRARY)
-        elseif (arg STREQUAL DEPENDS)
-            set(state GET_DEPENDS)
-        elseif (arg STREQUAL DEFINES)
-            set(state GET_DEFINES)
-        elseif (arg STREQUAL INCLUDES)
-            set(state GET_INCLUDES)
-        elseif (arg STREQUAL SYNTHESIZABLE)
-            set(state GET_SYNTHESIZABLE)
-        elseif (arg STREQUAL VERILATOR_CONFIGURATIONS)
-            set(state GET_VERILATOR_CONFIGURATIONS)
-
-        # State
-        elseif (state STREQUAL GET_NAME)
-            set(${arg} ${hdl_name} PARENT_SCOPE)
-            set(state UNKNOWN)
-        elseif (state STREQUAL GET_TYPE)
-            set(${arg} ${hdl_type} PARENT_SCOPE)
-            set(state UNKNOWN)
-        elseif (state STREQUAL GET_SOURCE)
-            set(${arg} ${hdl_source} PARENT_SCOPE)
-            set(state UNKNOWN)
-        elseif (state STREQUAL GET_LIBRARY)
-            set(${arg} ${hdl_library} PARENT_SCOPE)
-            set(state UNKNOWN)
-        elseif (state STREQUAL GET_DEPENDS)
-            set(${arg} ${hdl_depends} PARENT_SCOPE)
-            set(state UNKNOWN)
-        elseif (state STREQUAL GET_DEFINES)
-            set(${arg} ${hdl_defines} PARENT_SCOPE)
-            set(state UNKNOWN)
-        elseif (state STREQUAL GET_INCLUDES)
-            set(${arg} ${hdl_includes} PARENT_SCOPE)
-            set(state UNKNOWN)
-        elseif (state STREQUAL GET_SYNTHESIZABLE)
-            set(${arg} ${hdl_synthesizable} PARENT_SCOPE)
-            set(state UNKNOWN)
-        elseif (state STREQUAL GET_VERILATOR_CONFIGURATIONS)
-            set(${arg} ${hdl_verilator_configurations} PARENT_SCOPE)
-            set(state UNKNOWN)
-        else ()
-            message(FATAL_ERROR "Invalid argument: ${arg}")
-        endif()
-    endforeach()
-endfunction()
-
-function(get_hdl_depends hdl_name hdl_depends_var)
-    set(hdl_depends "")
-    set(hdl_depends_list)
-
-    get_hdl_properties(${hdl_name} DEPENDS hdl_depends_list)
-
-    foreach (hdl_name ${hdl_depends_list})
+    foreach (hdl_target_depend ${hdl_target_depends})
         set(hdl_depends_next)
 
-        get_hdl_depends(${hdl_name} hdl_depends_next)
+        get_hdl_depends(${hdl_target_depend} depends)
 
-        list(APPEND hdl_depends ${hdl_name})
-        list(APPEND hdl_depends ${hdl_depends_next})
+        list(APPEND hdl_depends ${hdl_target_depend})
+        list(APPEND hdl_depends ${depends})
     endforeach()
 
     list(REMOVE_DUPLICATES hdl_depends)
@@ -501,170 +92,330 @@ function(get_hdl_depends hdl_name hdl_depends_var)
     set(${hdl_depends_var} ${hdl_depends} PARENT_SCOPE)
 endfunction()
 
-function(add_hdl_systemc target_name)
-    set(state GET_SOURCES)
-    set(target_sources "")
-    set(target_depends "")
-    set(target_defines "")
-    set(target_includes "")
-    set(target_top_module ${target_name})
-    set(target_output_directory
-        ${CMAKE_BINARY_DIR}/verilator/${target_top_module})
-    set(target_verilator_configurations "")
-    set(target_parameters "")
+function(add_hdl_modelsim hdl_target)
+    if (NOT MODELSIM_FOUND)
+        return()
+    endif()
 
-    foreach (arg ${ARGN})
-        # Handle argument
-        if (arg STREQUAL OUTPUT_DIRECTORY)
-            set(state GET_OUTPUT_DIRECTORY)
-        elseif (arg STREQUAL DEFINES)
-            set(state GET_DEFINES)
-        elseif (arg STREQUAL INCLUDES)
-            set(state GET_INCLUDES)
-        elseif (arg STREQUAL DEPENDS)
-            set(state GET_DEPENDS)
-        elseif (arg STREQUAL TOP_MODULE)
-            set(state GET_TOP_MODULE)
-        elseif (arg STREQUAL PARAMETERS)
-            set(state GET_PARAMETERS)
+    set(modelsim_compiler)
+    set(modelsim_flags "")
 
-        # Handle state
-        elseif (state STREQUAL GET_SOURCES)
-            list(APPEND target_sources ${arg})
-        elseif (state STREQUAL GET_DEFINES)
-            list(APPEND target_defines ${arg})
-        elseif (state STREQUAL GET_DEPENDS)
-            list(APPEND target_depends ${arg})
-        elseif (state STREQUAL GET_INCLUDES)
-            list(APPEND target_includes ${arg})
-        elseif (state STREQUAL GET_OUTPUT_DIRECTORY)
-            set(target_output_directory ${arg})
-            set(state UNKNOWN)
-        elseif (state STREQUAL GET_TOP_MODULE)
-            set(target_top_module ${arg})
-            set(state UNKNOWN)
-        elseif (state STREQUAL GET_PARAMETERS)
-            list(APPEND target_parameters ${arg})
-        else()
-            message(FATAL_ERROR "Unknown argument")
+    get_target_property(hdl_type ${hdl_target} HDL_TYPE)
+    if (hdl_type MATCHES SystemVerilog)
+        set(modelsim_compiler ${MODELSIM_VLOG})
+    elseif (hdl_type MATCHES Verilog)
+        set(modelsim_compiler ${MODELSIM_VLOG})
+    elseif (hdl_type MATCHES VHDL)
+        set(modelsim_compiler ${MODELSIM_VCOM})
+    else()
+        return()
+    endif()
+
+    get_target_property(hdl_option ${hdl_target} HDL_MODELSIM_LINT)
+    if (hdl_option)
+        list(APPEND modelsim_flags -lint)
+    endif()
+
+    get_target_property(hdl_option ${hdl_target} HDL_MODELSIM_PEDANTICERRORS)
+    if (hdl_option)
+        list(APPEND modelsim_flags -pedanticerrors)
+    endif()
+
+    get_target_property(hdl_library ${hdl_target} HDL_LIBRARY)
+    if (NOT hdl_library)
+        set(hdl_library ${hdl_target})
+    endif()
+
+    list(APPEND modelsim_flags -work ${hdl_library})
+
+    if (hdl_type MATCHES Verilog)
+        if (hdl_type MATCHES SystemVerilog)
+            list(APPEND modelsim_flags -sv)
         endif()
+
+        get_target_property(hdl_defines ${hdl_target} HDL_DEFINES)
+        foreach (hdl_define ${hdl_defines})
+            list(APPEND modelsim_flags +define+${hdl_define})
+        endforeach()
+
+        get_target_property(hdl_includes ${hdl_target} HDL_INCLUDES)
+        foreach (hdl_include ${hdl_includes})
+            if (CYGWIN)
+                execute_process(COMMAND cygpath -m ${hdl_include}
+                    OUTPUT_VARIABLE hdl_include
+                    OUTPUT_STRIP_TRAILING_WHITESPACE)
+            endif()
+
+            list(APPEND modelsim_flags +incdir+${hdl_include})
+        endforeach()
+    elseif (hdl_type MATCHES VHDL)
+        list(APPEND modelsim_flags -2008)
+    endif()
+
+    if (NOT EXISTS ${CMAKE_BINARY_DIR}/modelsim/${hdl_library})
+        execute_process(COMMAND ${MODELSIM_VLIB} ${hdl_library}
+            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/modelsim OUTPUT_QUIET)
+    endif()
+
+    get_target_property(hdl_source ${hdl_target} HDL_SOURCE)
+    set(modelsim_source ${hdl_source})
+
+    if (CYGWIN)
+        execute_process(COMMAND cygpath -m ${hdl_source}
+            OUTPUT_VARIABLE modelsim_source
+            OUTPUT_STRIP_TRAILING_WHITESPACE)
+    endif()
+
+    get_target_property(modelsim_depends ${hdl_target} HDL_DEPENDS)
+
+    set(modelsim_libraries ${hdl_library})
+
+    foreach (modelsim_depend ${modelsim_depends})
+        get_target_property(modelsim_library ${modelsim_depend} HDL_LIBRARY)
+        if (NOT modelsim_library)
+            set(modelsim_library ${modelsim_depend})
+        endif()
+
+        list(APPEND modelsim_libraries ${modelsim_library})
     endforeach()
 
-    get_hdl_depends(${target_top_module} hdl_depends)
+    list(REMOVE_DUPLICATES modelsim_libraries)
 
-    foreach (hdl_name ${HDL_DEPENDS} ${hdl_depends} ${target_top_module})
-        get_hdl_properties(${hdl_name}
-            NAME hdl_name
-            TYPE hdl_type
-            SOURCE hdl_source
-            DEFINES hdl_defines
-            DEPENDS hdl_depends
-            INCLUDES hdl_includes
-            VERILATOR_CONFIGURATIONS hdl_verilator_configurations
+    foreach (modelsim_library ${modelsim_libraries})
+        set(modelsim_flags ${modelsim_flags} -L ${modelsim_library})
+    endforeach()
+
+    add_custom_command(
+        OUTPUT
+            ${CMAKE_BINARY_DIR}/modelsim/.modules/${hdl_target}
+        COMMAND
+            ${modelsim_compiler} ${modelsim_flags} ${modelsim_source}
+        COMMAND
+            ${CMAKE_COMMAND} -E touch ./.modules/${hdl_target}
+        DEPENDS
+            ${hdl_source} ${modelsim_depends}
+        WORKING_DIRECTORY
+            ${CMAKE_BINARY_DIR}/modelsim
+        COMMENT
+            "ModelSim compiling HDL: ${hdl_target}"
+    )
+
+    add_custom_target(modelsim-compile-${hdl_target}
+        DEPENDS ${CMAKE_BINARY_DIR}/modelsim/.modules/${hdl_target})
+
+    add_dependencies(${hdl_target} modelsim-compile-${hdl_target})
+    add_dependencies(modelsim-compile-all modelsim-compile-${hdl_target})
+endfunction()
+
+function(add_hdl_verilator hdl_target)
+    if (NOT VERILATOR_FOUND)
+        return()
+    endif()
+
+    set(options)
+
+    set(one_value_arguments
+        PREFIX
+        ANALYSIS
+        COMPILE
+    )
+
+    set(multi_value_arguments
+        DEFINES
+        PARAMETERS
+    )
+
+    cmake_parse_arguments(ARG "${options}" "${one_value_arguments}"
+        "${multi_value_arguments}" ${ARGN})
+
+    get_target_property(verilator_analysis ${hdl_target} HDL_VERILATOR_ANALYSIS)
+    get_target_property(verilator_compile ${hdl_target} HDL_VERILATOR_COMPILE)
+
+    if (ARG_ANALYSIS)
+        set(verilator_analysis ${ARG_ANALYSIS})
+    endif()
+
+    if (ARG_COMPILE)
+        set(verilator_compile ${ARG_COMPILE})
+    endif()
+
+    if (verilator_compile)
+        set(verilator_analysis TRUE)
+    endif()
+
+    if (NOT verilator_analysis AND NOT verilator_compile)
+        return()
+    endif()
+
+    set(verilator_sources "")
+    set(verilator_defines "")
+    set(verilator_includes "")
+    set(verilator_parameters "")
+    set(verilator_configurations "")
+
+    list(APPEND verilator_defines ${ARG_DEFINES})
+    list(APPEND verilator_parameters ${ARG_PARAMETERS})
+
+    get_hdl_depends(${hdl_target} hdl_depends)
+
+    foreach (hdl_depend ${hdl_depends} ${hdl_target})
+        get_target_property(source ${hdl_depend} HDL_SOURCE)
+        list(APPEND verilator_sources ${source})
+
+        get_target_property(defines ${hdl_depend} HDL_DEFINES)
+        list(APPEND verilator_defines ${defines})
+
+        get_target_property(includes ${hdl_depend} HDL_INCLUDES)
+        list(APPEND verilator_includes ${includes})
+
+        get_target_property(configs ${hdl_depend} HDL_VERILATOR_CONFIGURATIONS)
+        list(APPEND verilator_configurations ${configs})
+    endforeach()
+
+    list(REMOVE_DUPLICATES verilator_defines)
+    list(REMOVE_DUPLICATES verilator_includes)
+    list(REMOVE_DUPLICATES verilator_parameters)
+    list(REMOVE_DUPLICATES verilator_configurations)
+
+    set(verilator_configuration_file
+        ${CMAKE_BINARY_DIR}/verilator/.configs/${hdl_target}.vlt)
+
+    set(verilator_config "")
+    foreach (config ${verilator_configurations})
+        set(verilator_config "${verilator_config}${config}\n")
+    endforeach()
+
+    configure_file(${VERILATOR_CONFIGURATION_FILE}
+        ${verilator_configuration_file})
+
+    get_target_property(hdl_name ${hdl_target} HDL_NAME)
+
+    set(verilator_flags "")
+
+    list(APPEND verilator_flags --top-module ${hdl_name})
+
+    foreach (verilator_parameter ${verilator_parameters})
+        list(APPEND verilator_parameters -G${verilator_parameter})
+    endforeach()
+
+    foreach (verilator_define ${verilator_defines})
+        list(APPEND verilator_flags -D${verilator_define})
+    endforeach()
+
+    foreach (verilator_include ${verilator_includes})
+        list(APPEND verilator_flags -I${verilator_include})
+    endforeach()
+
+    list(APPEND verilator_flags ${verilator_configuration_file})
+    list(APPEND verilator_flags ${verilator_sources})
+
+    set(verilator_target ${hdl_target})
+
+    if (ARG_PREFIX)
+        set(verilator_target ${ARG_PREFIX})
+    endif()
+
+    if (verilator_analysis AND
+            NOT TARGET verilator-analysis-${verilator_target})
+        set(analysis_flags "")
+        list(APPEND analysis_flags -Wall)
+        list(APPEND analysis_flags --lint-only)
+
+        add_custom_target(verilator-analysis-${verilator_target}
+                ${VERILATOR_EXECUTABLE}
+                ${analysis_flags}
+                ${verilator_flags}
+            DEPENDS
+                ${verilator_sources}
+                ${verilator_includes}
+                ${verilator_configuration_file}
         )
 
-        list(APPEND target_sources ${hdl_source})
-        list(APPEND target_defines ${hdl_defines})
-        list(APPEND target_includes ${hdl_includes})
-        list(APPEND target_verilator_configurations
-            ${hdl_verilator_configurations})
-    endforeach()
+        add_dependencies(verilator-analysis-all
+            verilator-analysis-${verilator_target})
 
-    list(REMOVE_DUPLICATES target_defines)
-    list(REMOVE_DUPLICATES target_includes)
+        if (TARGET ${hdl_target})
+            add_dependencies(${hdl_target}
+                verilator-analysis-${verilator_target})
+        endif()
+    endif()
 
-    if (VERILATOR_FOUND)
-        set(target_library ${target_top_module}__ALL.a)
+    if (verilator_compile AND NOT TARGET verilator-compile-${verilator_target})
+        set(compile_flags "")
 
-        set(target_parameters_expand "")
-        foreach (parameter ${target_parameters})
-            list(APPEND target_parameters_expand -G${parameter})
-        endforeach()
-
-        set(target_includes_expand "")
-        foreach (inc ${target_includes})
-            list(APPEND target_includes_expand -I${inc})
-        endforeach()
-
-        set(target_defines_expand "")
-        foreach (def ${target_defines})
-            list(APPEND target_defines_expand -D${def})
-        endforeach()
-
-        file(MAKE_DIRECTORY ${target_output_directory})
-
-        set(target_configuration_file
-            ${target_output_directory}/${target_top_module}.vlt)
-
-        set(verilator_config)
-        foreach (config ${target_verilator_configurations})
-            set(verilator_config "${verilator_config}\n${config}")
-        endforeach()
-
-        configure_file(${VERILATOR_CONFIGURATION_FILE}
-            ${target_configuration_file})
+        list(APPEND compile_flags --sc)
+        list(APPEND compile_flags -O2)
+        list(APPEND compile_flags -Wall)
+        list(APPEND compile_flags --trace)
+        list(APPEND compile_flags --coverage)
+        list(APPEND compile_flags --prefix ${verilator_target})
+        list(APPEND compile_flags -Mdir .)
 
         if (CMAKE_CXX_COMPILER_ID MATCHES GNU OR
                 CMAKE_CXX_COMPILER_ID MATCHES Clang)
-            set(verilator_c_flags
+            set(flags
                 -std=c++11
                 -O2
                 -fdata-sections
                 -ffunction-sections
             )
+
+            list(APPEND compile_flags -CFLAGS '${flags}')
         endif()
+
+        set(verilator_output_directory
+            ${CMAKE_BINARY_DIR}/verilator/${verilator_target})
+
+        file(MAKE_DIRECTORY ${verilator_output_directory})
+
+        set(verilator_library ${verilator_target}__ALL.a)
 
         add_custom_command(
             OUTPUT
-                ${target_output_directory}/${target_library}
+                ${verilator_output_directory}/${verilator_library}
             COMMAND
                 ${VERILATOR_EXECUTABLE}
             ARGS
-                --sc
-                -O2
-                -Wall
-                -CFLAGS '${verilator_c_flags}'
-                --trace
-                --coverage
-                --prefix ${target_top_module}
-                --top-module ${target_top_module}
-                -Mdir ${target_output_directory}
-                ${target_parameters_expand}
-                ${target_defines_expand}
-                ${target_includes_expand}
-                ${target_configuration_file}
-                ${target_sources}
+                ${compile_flags}
+                ${verilator_flags}
             COMMAND
                 $(MAKE)
             ARGS
-                -f ${target_output_directory}/${target_top_module}.mk
+                -f ${verilator_target}.mk
             DEPENDS
-                ${target_depends}
-                ${target_sources}
-                ${target_includes}
-                ${target_configuration_file}
-            WORKING_DIRECTORY ${target_output_directory}
+                ${verilator_depends}
+                ${verilator_sources}
+                ${verilator_includes}
+                ${verilaotr_configuration_file}
+            WORKING_DIRECTORY
+                ${verilator_output_directory}
             COMMENT
-                "Creating SystemC ${target_top_module} module"
+                "Creating SystemC ${verilator_target} module"
         )
 
-        add_custom_target(verilator-compile-${target_name}
-            DEPENDS ${target_output_directory}/${target_library})
-
-        add_library(verilated_${target_name} STATIC IMPORTED)
-
-        add_dependencies(verilated_${target_name}
-            verilator-compile-${target_name})
+        add_custom_target(verilator-compile-${verilator_target}
+            DEPENDS ${verilator_output_directory}/${verilator_library})
 
         add_dependencies(verilator-compile-all
-            verilator-compile-${target_name})
+            verilator-compile-${verilator_target})
 
-        set_target_properties(verilated_${target_name} PROPERTIES
-            IMPORTED_LOCATION ${target_output_directory}/${target_library}
+        if (TARGET ${hdl_target})
+            add_dependencies(${hdl_target}
+                verilator-compile-${verilator_target})
+        endif()
+
+        add_library(verilated_${verilator_target} STATIC IMPORTED)
+
+        add_dependencies(verilated_${verilator_target}
+            verilator-compile-${verilator_target})
+
+        set_target_properties(verilated_${verilator_target} PROPERTIES
+            IMPORTED_LOCATION
+                ${verilator_output_directory}/${verilator_library}
         )
 
         set(module_libraries
-            verilated_${target_name}
+            verilated_${verilator_target}
             verilated
             ${SYSTEMC_LIBRARIES}
         )
@@ -672,53 +423,193 @@ function(add_hdl_systemc target_name)
         set(module_include_directories
             ${VERILATOR_INCLUDE_DIR}
             ${SYSTEMC_INCLUDE_DIRS}
-            ${target_output_directory}
+            ${verilator_output_directory}
         )
 
-        set_target_properties(verilator-compile-${target_name} PROPERTIES
+        set_target_properties(${verilator_target} PROPERTIES
             LIBRARIES "${module_libraries}"
             INCLUDE_DIRECTORIES "${module_include_directories}"
         )
     endif()
 endfunction()
 
-function(get_hdl_systemc hdl_name)
-    set(state UNKNOWN)
+function(add_hdl_source hdl_source_or_target)
+    set(options)
 
-    foreach (arg ${ARGN})
-        # Handle argument
-        if (arg STREQUAL LIBRARIES)
-            set(state GET_LIBRARIES)
-        elseif (arg STREQUAL INCLUDES)
-            set(state GET_INCLUDES)
-        # Handle state
-        elseif (state STREQUAL GET_LIBRARIES)
-            get_target_property(libraries verilator-compile-${hdl_name}
-                LIBRARIES)
-            set(${arg} ${libraries} PARENT_SCOPE)
-            set(state UNKNOWN)
-        elseif (state STREQUAL GET_INCLUDES)
-            get_target_property(includes verilator-compile-${hdl_name}
-                INCLUDE_DIRECTORIES)
-            set(${arg} ${includes} PARENT_SCOPE)
-            set(state UNKNOWN)
-        else()
-            message(FATAL_ERROR "Unknown argument")
-        endif()
+    set(one_value_arguments
+        NAME
+        TYPE
+        SOURCE
+        LIBRARY
+        SYNTHESIZABLE
+        MODELSIM_LINT
+        MODELSIM_PEDANTICERRORS
+        VERILATOR_ANALYSIS
+        VERILATOR_COMPILE
+    )
+
+    set(multi_value_arguments
+        DEPENDS
+        DEFINES
+        INCLUDES
+        VERILATOR_CONFIGURATIONS
+    )
+
+    cmake_parse_arguments(ARG "${options}" "${one_value_arguments}"
+        "${multi_value_arguments}" ${ARGN})
+
+    if (ARG_SYNTHESIZABLE STREQUAL "")
+        set(ARG_SYNTHESIZABLE FALSE)
+    endif()
+
+    if (ARG_MODELSIM_LINT STREQUAL "")
+        set(ARG_MODELSIM_LINT TRUE)
+    endif()
+
+    if (ARG_MODELSIM_PEDANTICERRORS STREQUAL "")
+        set(ARG_MODELSIM_PEDANTICERRORS TRUE)
+    endif()
+
+    if (ARG_VERILATOR_ANALYSIS STREQUAL "")
+        set(ARG_VERILATOR_ANALYSIS FALSE)
+    endif()
+
+    if (ARG_VERILATOR_COMPILE STREQUAL "")
+        set(ARG_VERILATOR_COMPILE FALSE)
+    endif()
+
+    if (DEFINED HDL_LIBRARY)
+        set(ARG_LIBRARY ${HDL_LIBRARY})
+    endif()
+
+    if (DEFINED HDL_SYNTHESIZABLE)
+        set(ARG_SYNTHESIZABLE ${HDL_SYNTHESIZABLE})
+    endif()
+
+    if (DEFINED HDL_DEPENDS)
+        set(ARG_DEPENDS ${HDL_DEPENDS} ${ARG_DEPENDS})
+    endif()
+
+    if (DEFINED HDL_DEFINES)
+        set(ARG_DEFINES ${HDL_DEFINES} ${ARG_DEFINES})
+    endif()
+
+    if (DEFINED HDL_INCLUDES)
+        set(ARG_INCLUDES ${HDL_INCLUDES} ${ARG_INCLUDES})
+    endif()
+
+    if (ARG_DEPENDS)
+        list(REMOVE_DUPLICATES ARG_DEPENDS)
+    endif()
+
+    if (ARG_DEFINES)
+        list(REMOVE_DUPLICATES ARG_DEFINES)
+    endif()
+
+    if (ARG_INCLUDES)
+        list(REMOVE_DUPLICATES ARG_INCLUDES)
+    endif()
+
+    set(arg_includes "")
+
+    foreach (arg_include ${ARG_INCLUDES})
+        get_filename_component(arg_include ${arg_include} REALPATH)
+        list(APPEND arg_includes ${arg_include})
     endforeach()
+
+    set(ARG_INCLUDES ${arg_includes})
+
+    if (NOT ARG_SOURCE)
+        get_filename_component(hdl_source ${hdl_source_or_target} REALPATH)
+        if (EXISTS ${hdl_source})
+            set(ARG_SOURCE ${hdl_source})
+        endif()
+    endif()
+
+    if (NOT ARG_SOURCE)
+        message(FATAL_ERROR "HDL source is not defined")
+    endif()
+
+    get_filename_component(ARG_SOURCE ${ARG_SOURCE} REALPATH)
+
+    if (NOT EXISTS ${ARG_SOURCE})
+        message(FATAL_ERROR "HDL source doesn't exist: ${ARG_SOURCE}")
+    endif()
+
+    if (NOT ARG_NAME)
+        get_filename_component(ARG_NAME ${ARG_SOURCE} NAME_WE)
+    endif()
+
+    if (NOT ARG_TYPE)
+        if (ARG_SOURCE MATCHES .sv)
+            set(ARG_TYPE SystemVerilog)
+        elseif (ARG_SOURCE MATCHES .vhd)
+            set(ARG_TYPE VHDL)
+        elseif (ARG_SOURCE MATCHES .v)
+            set(ARG_TYPE Verilog)
+        elseif (ARG_SOURCE MATCHES .qsys)
+            set(ARG_TYPE Qsys)
+        elseif (ARG_SOURCE MATCHES .ip)
+            set(ARG_TYPE IP)
+        elseif (ARG_SOURCE MATCHES .tcl)
+            set(ARG_TYPE Tcl)
+        endif()
+    endif()
+
+    get_filename_component(hdl_target ${hdl_source_or_target} NAME_WE)
+
+    if (NOT TARGET ${hdl_target})
+        add_custom_target(${hdl_target})
+    else()
+        message(FATAL_ERROR "Target already exists."
+            " Set different target name: "
+            " add_hdl_source(<target_name> SOURCE <file> ...)")
+    endif()
+
+    set_target_properties(${hdl_target} PROPERTIES
+        HDL_NAME ${ARG_NAME}
+        HDL_TYPE ${ARG_TYPE}
+        HDL_SOURCE ${ARG_SOURCE}
+        HDL_LIBRARY ${ARG_LIBRARY}
+        HDL_DEPENDS "${ARG_DEPENDS}"
+        HDL_DEFINES "${ARG_DEFINES}"
+        HDL_INCLUDES "${ARG_INCLUDES}"
+        HDL_SYNTHESIZABLE ${ARG_SYNTHESIZABLE}
+        HDL_MODELSIM_LINT ${MODELSIM_LINT}
+        HDL_MODELSIM_PEDANTICERRORS ${MODELSIM_PEDANTICERRORS}
+        HDL_VERILATOR_CONFIGURATIONS "${ARG_VERILATOR_CONFIGURATIONS}"
+    )
+
+    if (ARG_DEPENDS)
+        add_dependencies(${hdl_target} ${ARG_DEPENDS})
+    endif()
+
+    set(HDL_TARGETS ${HDL_TARGETS} ${hdl_target}
+        CACHE INTERNAL "HDL targets" FORCE)
+
+    add_hdl_modelsim(${hdl_target})
+    add_hdl_verilator(${hdl_target})
+endfunction()
+
+function(add_hdl_systemc target_name)
+    add_hdl_verilator(${target_name}
+        COMPILE TRUE
+        ANALYSIS TRUE
+        ${ARGN}
+    )
 endfunction()
 
 function(add_hdl_test test_name)
     if (MODELSIM_FOUND)
-        set(MODELSIM_WAVEFORM ${CMAKE_BINARY_DIR}/output/${test_name}.wlf)
+        set(modelsim_waveform ${CMAKE_BINARY_DIR}/output/${test_name}.wlf)
 
         if (CYGWIN)
             execute_process(COMMAND cygpath -m ${MODELSIM_RUN_TCL}
                 OUTPUT_VARIABLE MODELSIM_RUN_TCL
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-            execute_process(COMMAND cygpath -m ${MODELSIM_WAVEFORM}
-                OUTPUT_VARIABLE MODELSIM_WAVEFORM
+            execute_process(COMMAND cygpath -m ${modelsim_waveform}
+                OUTPUT_VARIABLE modelsim_waveform
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
         endif()
 
@@ -727,13 +618,13 @@ function(add_hdl_test test_name)
         set(modelsim_flags "")
 
         list(APPEND modelsim_flags -c)
-        list(APPEND modelsim_flags -wlf ${MODELSIM_WAVEFORM})
+        list(APPEND modelsim_flags -wlf ${modelsim_waveform})
         list(APPEND modelsim_flags -do ${MODELSIM_RUN_TCL})
 
         get_hdl_depends(${test_name} hdl_depends)
 
         foreach (hdl_name ${hdl_depends} ${test_name})
-            get_hdl_properties(${hdl_name} LIBRARY hdl_library)
+            get_target_property(hdl_library ${hdl_name} HDL_LIBRARY)
             list(APPEND hdl_libraries ${hdl_library})
         endforeach()
 
