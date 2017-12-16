@@ -33,5 +33,4 @@ package logic_pkg;
         TARGET_INTEL,
         TARGET_INTEL_ARRIA_10
     } target_t;
-
 endpackage

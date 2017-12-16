@@ -13,3 +13,4 @@
 # limitations under the License.
 
 add_hdl_source(logic_pkg.sv)
+add_hdl_source(logic_axi4_lite_pkg.sv)

@@ -28,3 +28,7 @@ else()
 endif()
 
 add_hdl_source(logic_axi4_stream_if.sv)
+add_hdl_source(logic_axi4_lite_if.sv
+    DEPENDS
+        logic_axi4_lite_pkg
+)

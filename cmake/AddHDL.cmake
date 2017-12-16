@@ -458,23 +458,23 @@ function(add_hdl_source hdl_source_or_target)
     cmake_parse_arguments(ARG "${options}" "${one_value_arguments}"
         "${multi_value_arguments}" ${ARGN})
 
-    if (ARG_SYNTHESIZABLE STREQUAL "")
+    if (NOT DEFINED ARG_SYNTHESIZABLE)
         set(ARG_SYNTHESIZABLE FALSE)
     endif()
 
-    if (ARG_MODELSIM_LINT STREQUAL "")
+    if (NOT DEFINED ARG_MODELSIM_LINT)
         set(ARG_MODELSIM_LINT TRUE)
     endif()
 
-    if (ARG_MODELSIM_PEDANTICERRORS STREQUAL "")
+    if (NOT DEFINED ARG_MODELSIM_PEDANTICERRORS)
         set(ARG_MODELSIM_PEDANTICERRORS TRUE)
     endif()
 
-    if (ARG_VERILATOR_ANALYSIS STREQUAL "")
+    if (NOT DEFINED ARG_VERILATOR_ANALYSIS)
         set(ARG_VERILATOR_ANALYSIS FALSE)
     endif()
 
-    if (ARG_VERILATOR_COMPILE STREQUAL "")
+    if (NOT DEFINED ARG_VERILATOR_COMPILE)
         set(ARG_VERILATOR_COMPILE FALSE)
     endif()
 
@@ -486,17 +486,9 @@ function(add_hdl_source hdl_source_or_target)
         set(ARG_SYNTHESIZABLE ${HDL_SYNTHESIZABLE})
     endif()
 
-    if (DEFINED HDL_DEPENDS)
-        set(ARG_DEPENDS ${HDL_DEPENDS} ${ARG_DEPENDS})
-    endif()
-
-    if (DEFINED HDL_DEFINES)
-        set(ARG_DEFINES ${HDL_DEFINES} ${ARG_DEFINES})
-    endif()
-
-    if (DEFINED HDL_INCLUDES)
-        set(ARG_INCLUDES ${HDL_INCLUDES} ${ARG_INCLUDES})
-    endif()
+    set(ARG_DEPENDS ${HDL_DEPENDS} ${ARG_DEPENDS})
+    set(ARG_DEFINES ${HDL_DEFINES} ${ARG_DEFINES})
+    set(ARG_INCLUDES ${HDL_INCLUDES} ${ARG_INCLUDES})
 
     if (ARG_DEPENDS)
         list(REMOVE_DUPLICATES ARG_DEPENDS)
@@ -575,8 +567,8 @@ function(add_hdl_source hdl_source_or_target)
         HDL_DEFINES "${ARG_DEFINES}"
         HDL_INCLUDES "${ARG_INCLUDES}"
         HDL_SYNTHESIZABLE ${ARG_SYNTHESIZABLE}
-        HDL_MODELSIM_LINT ${MODELSIM_LINT}
-        HDL_MODELSIM_PEDANTICERRORS ${MODELSIM_PEDANTICERRORS}
+        HDL_MODELSIM_LINT ${ARG_MODELSIM_LINT}
+        HDL_MODELSIM_PEDANTICERRORS ${ARG_MODELSIM_PEDANTICERRORS}
         HDL_VERILATOR_CONFIGURATIONS "${ARG_VERILATOR_CONFIGURATIONS}"
     )
 
