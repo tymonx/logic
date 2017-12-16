@@ -12,20 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(HDL_DEPENDS)
-set(HDL_DEFINES)
-set(HDL_LIBRARY logic)
-set(HDL_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/include)
+add_hdl_source(logic_axi4_lite_buffered_basic.sv)
 
-add_subdirectory(packages)
-add_subdirectory(interfaces)
-
-set(HDL_DEPENDS
-    logic_pkg
-    logic_axi4_lite_pkg
-    logic_axi4_lite_if
-    logic_axi4_stream_if
+add_hdl_source(logic_axi4_lite_buffered.sv
+    DEPENDS
+        logic_axi4_lite_buffered_basic
 )
 
-add_subdirectory(reset)
-add_subdirectory(axi4)
+add_hdl_source(logic_axi4_lite_buffered_top.sv
+    DEPENDS
+        logic_axi4_lite_buffered
+    VERILATOR_ANALYSIS
+        TRUE
+)

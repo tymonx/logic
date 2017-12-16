@@ -38,8 +38,10 @@ interface logic_axi4_lite_if #(
     int AWADDR_WIDTH = ADDRESS_WIDTH,
     int ARADDR_WIDTH = ADDRESS_WIDTH
 ) (
+    /* verilator lint_off UNUSED */
     input aclk,
     input areset_n
+    /* verilator lint_on UNUSED */
 );
     typedef logic [ARADDR_WIDTH-1:0] araddr_t;
     typedef logic [AWADDR_WIDTH-1:0] awaddr_t;
@@ -245,4 +247,5 @@ interface logic_axi4_lite_if #(
         input rresp;
     endclocking
 `endif
+
 endinterface

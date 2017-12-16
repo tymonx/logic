@@ -24,4 +24,5 @@ endif()
 
 add_quartus_project(logic_axi4_stream_queue_top)
 add_quartus_project(logic_axi4_stream_buffered_top)
+add_quartus_project(logic_axi4_lite_buffered_top)
 add_quartus_project(logic_reset_synchronizer)
