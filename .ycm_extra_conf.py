@@ -47,7 +47,7 @@ flags = [
 '-std=c++11',
 '-xc++',
 '-Iinclude',
-'-isystem/usr/local/systemc/2.3.1/include',
+'-isystem/usr/local/systemc/2.3.2/include',
 '-isystem/usr/local/share/verilator/include',
 ]
 

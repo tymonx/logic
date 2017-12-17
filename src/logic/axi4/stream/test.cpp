@@ -108,7 +108,7 @@ void test::report_phase(uvm::uvm_phase& phase) {
         UVM_ERROR(get_name(), "TEST FAILED");
     }
 
-    uvm::uvm_root::get()->finish_on_completion(false);
-    uvm::uvm_report_server::get_server()->summarize();
+    uvm::uvm_root::get()->set_finish_on_completion(true);
+    uvm::uvm_report_server::get_server()->report_summarize();
     sc_core::sc_stop();
 }

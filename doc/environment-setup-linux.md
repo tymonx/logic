@@ -27,7 +27,7 @@ Intel FPGA Quartus
 
 Required: No. It is used for RTL analysis and elaboration check
 
-Minimum required version: 17.0 Lite, Standard or Pro
+Minimum required version: 17.1 Lite, Standard or Pro
 
 `Intel FPGA Quartus` enables analysis and synthesis of HDL designs, which
 enables the developer to compile their designs, perform timing analysis,
@@ -92,19 +92,19 @@ SystemC
 
 Required: Yes
 
-Required version: 2.3.1a
+Required version: 2.3.2
 
 Download SystemC library using wget command line tool:
 
-    wget http://accellera.org/images/downloads/standards/systemc/systemc-2.3.1a.tar.gz
+    wget http://accellera.org/images/downloads/standards/systemc/systemc-2.3.2.tar.gz
 
 Unpack SystemC archive:
 
-    tar xvf systemc-2.3.1a.tar.gz
+    tar xvf systemc-2.3.2.tar.gz
 
 Change current location to SystemC source directory:
 
-    cd systemc-2.3.1a
+    cd systemc-2.3.2
 
 Create build directory:
 
@@ -116,7 +116,7 @@ Change current location to build directory:
 
 Create SystemC install destination directory:
 
-    mkdir -p /usr/local/systemc/2.3.1/
+    mkdir -p /usr/local/systemc/2.3.2/
 
 Force GNU C compiler to use gnu11 standard for C sources:
 
@@ -155,20 +155,20 @@ compilation:
 
 Create build scripts:
 
-    ../configure --enable-pthreads --enable-shared --prefix=/usr/local/systemc/2.3.1/
+    ../configure --enable-pthreads --enable-shared --prefix=/usr/local/systemc/2.3.2/
 
 Build SystemC:
 
     make -j`nproc`
 
-Install SystemC to `/usr/local/systemc/2.3.1/`
+Install SystemC to `/usr/local/systemc/2.3.2/`
 
     sudo make install
 
 Create `SYSTEMC_HOME` environment variable that points to SystemC install
 directory. For Bash shells edit `~/.bashrc` file and add:
 
-    export SYSTEMC_HOME=/usr/local/systemc/2.3.1
+    export SYSTEMC_HOME=/usr/local/systemc/2.3.2
 
 Reload your environment variables:
 
@@ -179,19 +179,19 @@ UVM-SystemC
 
 Required: Yes
 
-Required version: 1.0-alpha1
+Required version: 1.0-beta1
 
 Download UVM-SystemC library using wget command line tool:
 
-    wget http://www.eda.org/images/downloads/drafts-review/uvm-systemc-1.0-alpha1.tar.gz
+    wget http://www.accellera.org/images/downloads/standards/systemc/uvm-systemc-1.0-beta1.tar.gz
 
 Unpack UVM-SystemC archive:
 
-    tar xvf uvm-systemc-1.0-alpha1.tar.gz
+    tar xvf uvm-systemc-1.0-beta1.tar.gz
 
 Change current location to UVM-SystemC source directory:
 
-    cd uvm-systemc-1.0-alpha1
+    cd uvm-systemc-1.0-beta1
 
 Create build directory:
 
@@ -226,19 +226,19 @@ SystemC Verification (SCV)
 
 Required: Yes
 
-Required version: 2.0a
+Required version: 2.0.1
 
 Download SystemC Verification library using wget command line tool:
 
-    wget http://www.eda.org/images/downloads/standards/systemc/scv-2.0.0a.zip
+    wget http://www.accellera.org/images/downloads/standards/systemc/scv-2.0.1.tar.gz
 
 Unpack SystemC Verification archive:
 
-    unzip scv-2.0.0a.zip
+    tar xvf scv-2.0.1.tar.gz
 
 Change current location to SystemC Verification source directory:
 
-    cd scv-2.0.0a-20161019
+    cd scv-2.0.1
 
 Create build directory:
 
@@ -285,6 +285,10 @@ Fedora:
 Ubuntu:
 
     sudo apt-get install git make autoconf g++ bison flex
+
+Patch for SystemC 2.3.2:
+
+    https://www.veripool.org/issues/1251-Verilator-Compilation-error-for-SystemC-2-3-2
 
 Download Verilator source code from remote git repository:
 
