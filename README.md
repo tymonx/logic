@@ -18,9 +18,9 @@ These 3rd party tools and libraries are required. They must be installed to
 build logic library:
 
   * [CMake](https://cmake.org/) - build, test and package project
-  * [SystemC 2.3.1](http://accellera.org/downloads/standards/systemc) - SystemC C++ library
+  * [SystemC 2.3.2](http://accellera.org/downloads/standards/systemc) - SystemC C++ library
   * [UVM-SystemC 1.0](http://www.eda.org/activities/working-groups/systemc-verification) - UVM for SystemC
-  * [SystemC Verification 2.0](http://accellera.org/downloads/standards/systemc) - SystemC data randomization
+  * [SystemC Verification 2.0.1](http://accellera.org/downloads/standards/systemc) - SystemC data randomization
 
 These 3rd party tools and libraries are optional. They must be installed to
 build and run tests:
