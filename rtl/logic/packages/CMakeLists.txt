@@ -14,3 +14,4 @@
 
 add_hdl_source(logic_pkg.sv)
 add_hdl_source(logic_axi4_lite_pkg.sv)
+add_hdl_source(logic_avalon_mm_pkg.sv)

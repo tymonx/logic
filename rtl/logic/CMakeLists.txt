@@ -25,6 +25,9 @@ set(HDL_DEPENDS
     logic_axi4_lite_pkg
     logic_axi4_lite_if
     logic_axi4_stream_if
+    logic_avalon_mm_pkg
+    logic_avalon_mm_if
+    logic_avalon_st_if
 )
 
 add_subdirectory(reset)

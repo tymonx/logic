@@ -32,3 +32,9 @@ add_hdl_source(logic_axi4_lite_if.sv
     DEPENDS
         logic_axi4_lite_pkg
 )
+
+add_hdl_source(logic_avalon_st_if.sv)
+add_hdl_source(logic_avalon_mm_if.sv
+    DEPENDS
+        logic_avalon_mm_pkg
+)
