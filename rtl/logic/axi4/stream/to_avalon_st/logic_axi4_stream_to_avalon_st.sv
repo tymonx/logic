@@ -17,7 +17,7 @@
 
 /* Module: logic_axi4_stream_to_avalon_st
  *
- * Convert AXI4-Stream bus to Avalon-ST.
+ * AXI4-Stream interface to Avalon-ST interface bridge.
  *
  * Ports:
  *  aclk        - Clock.
@@ -42,7 +42,7 @@ module logic_axi4_stream_to_avalon_st (
             end
         end
 
-        tstrb_to_empty = count[$bits(tx.empty)-1:0];
+        return count[$bits(tx.empty)-1:0];
     endfunction
 
     always_comb rx.tready = tx.ready;
