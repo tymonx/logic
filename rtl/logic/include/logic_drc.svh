@@ -70,7 +70,7 @@
  *  value       - Parameter integer type that will be checked.
  */
 `define LOGIC_DRC_POWER_OF_2(value) \
-    if (!((0 != value) && (0 != (value & (value - 1))))) begin \
+    if (!((0 != value) && (0 == (value & (value - 1))))) begin \
         /*verilator coverage_block_off*/ \
         $display("DRC:%m:%s:%0d: %s (%0d) %s", \
             `__FILE__, `__LINE__, \

@@ -12,7 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(buffered)
-add_subdirectory(write_aligned)
-add_subdirectory(to_avalon_mm)
-add_subdirectory(from_avalon_mm)
+add_hdl_source(logic_axi4_lite_from_avalon_mm.sv)
+
+add_hdl_source(logic_axi4_lite_from_avalon_mm_top.sv
+    DEPENDS
+        logic_axi4_lite_from_avalon_mm
+    VERILATOR_ANALYSIS TRUE
+)

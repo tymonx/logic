@@ -94,7 +94,7 @@ package logic_axi4_lite_pkg;
      *
      * RESPONSE_OKAY    - Normal access success.
      * RESPONSE_EXOKAY  - Exclusive access okay.
-     * RESPONSE_SLERR   - Slave error.
+     * RESPONSE_SLVERR  - Slave error.
      * RESPONSE_DECERR  - Decode error.
      */
     typedef enum logic [1:0] {
