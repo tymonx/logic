@@ -43,6 +43,11 @@ interface logic_axi4_lite_if #(
     input areset_n
     /* verilator lint_on UNUSED */
 );
+    initial begin: design_rule_checks
+        `LOGIC_DRC_POWER_OF_2(DATA_BYTES)
+        `LOGIC_DRC_RANGE(DATA_BYTES, 4, 8)
+    end
+
     typedef logic [ARADDR_WIDTH-1:0] araddr_t;
     typedef logic [AWADDR_WIDTH-1:0] awaddr_t;
     typedef logic [DATA_BYTES-1:0][7:0] wdata_t;

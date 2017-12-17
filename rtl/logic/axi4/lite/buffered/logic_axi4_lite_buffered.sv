@@ -35,7 +35,6 @@ module logic_axi4_lite_buffered #(
     `LOGIC_MODPORT(logic_axi4_lite_if, slave) slave,
     `LOGIC_MODPORT(logic_axi4_lite_if, master) master
 );
-
     logic_axi4_lite_buffered_basic #(
         .WIDTH(ADDRESS_WIDTH + $bits(logic_axi4_lite_pkg::access_t))
     )

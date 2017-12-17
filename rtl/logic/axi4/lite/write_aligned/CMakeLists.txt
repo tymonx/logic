@@ -12,5 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(buffered)
-add_subdirectory(write_aligned)
+add_hdl_source(logic_axi4_lite_write_aligned.sv)
+
+add_hdl_source(logic_axi4_lite_write_aligned_top.sv
+    DEPENDS
+        logic_axi4_lite_write_aligned
+    VERILATOR_ANALYSIS
+        TRUE
+)
