@@ -274,7 +274,7 @@ Verilator
 Required: No to build logic library only for SystemC not for HDL.
 Required for unit tests
 
-Minimum required version: 3.916
+Minimum required version: master branch (51787d68)
 
 Install required packages for Verilator tool.
 
@@ -316,7 +316,7 @@ Set `SYSTEMC_LIBDIR` environment variable for Verilator:
 
 Change the newest development version to stable version:
 
-    git checkout verilator_3_916
+    git checkout HEAD
 
 Create configure script:
 

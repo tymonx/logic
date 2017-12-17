@@ -48,10 +48,6 @@ module logic_axi4_stream_buffered (
      */
     logic [$bits(rx.read())-1:0] buffered;
 
-    logic valid;
-
-    always_comb valid = rx.tvalid && rx.tready;
-
     always_ff @(posedge aclk or negedge areset_n) begin
         if (!areset_n) begin
             fsm_state <= FSM_IDLE;
@@ -90,7 +86,7 @@ module logic_axi4_stream_buffered (
     always_comb begin
         unique case (fsm_state)
         FSM_IDLE: begin
-            tx.tvalid = valid;
+            tx.tvalid = rx.tvalid && rx.tready;
         end
         FSM_BUFFERED: begin
             tx.tvalid = 1'b1;

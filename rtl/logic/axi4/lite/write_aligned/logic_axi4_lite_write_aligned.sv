@@ -147,7 +147,6 @@ module logic_axi4_lite_write_aligned #(
         end
     end
 
-    /* verilator lint_off ALWCOMBORDER */
     always_comb slave.bvalid = master.bvalid;
     always_comb slave.bresp = master.bresp;
     always_comb master.bready = slave.bready;
@@ -161,5 +160,4 @@ module logic_axi4_lite_write_aligned #(
     always_comb slave.rresp = master.rresp;
     always_comb slave.rdata = master.rdata;
     always_comb master.rready = slave.rready;
-    /* verilator lint_on ALWCOMBORDER */
 endmodule
