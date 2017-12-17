@@ -16,19 +16,6 @@
 `ifndef LOGIC_AXI4_STREAM_SVH
 `define LOGIC_AXI4_STREAM_SVH
 
-/* Define: LOGIC_AXI4_STREAM_IF_PARAMETERS
- *
- * Copy SystemVerilog interface parameters from another interface instance.
- *
- * Parameters:
- *  _interface  - SystemVerilog interface.
- */
-`define LOGIC_AXI4_STREAM_IF_PARAMETERS(_interface) \
-    .TDATA_BYTES($bits(_interface``.tdata) / 8), \
-    .TUSER_WIDTH($bits(_interface``.tuser)), \
-    .TDEST_WIDTH($bits(_interface``.tdest)), \
-    .TID_WIDTH($bits(_interface``.tid))
-
 /* Define: LOGIC_AXI4_STREAM_IF_ASSIGN
  *
  * Assign SystemVerilog interface to another SystemVerilog interface.

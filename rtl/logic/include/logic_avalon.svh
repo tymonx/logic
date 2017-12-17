@@ -13,31 +13,9 @@
  * limitations under the License.
  */
 
-`ifndef LOGIC_SVH
-`define LOGIC_SVH
+`ifndef LOGIC_AVALON_SVH
+`define LOGIC_AVALON_SVH
 
-`ifndef LOGIC_SYNTHESIS
-    `ifdef VERILATOR
-        /* Define: LOGIC_SYNTHESIS
-         *
-         * Enable only synthesizable parts of HDL.
-         */
-        `define LOGIC_SYNTHESIS
-    `endif
-`else
-    `ifndef LOGIC_STD_OVL_DISABLED
-        /* Define: LOGIC_STD_OVL_DISABLED
-         *
-         * Disable OVL assertions.
-         */
-        `define LOGIC_STD_OVL_DISABLED
-    `endif
-`endif
+`include "logic_avalon_st.svh"
 
-`include "logic_drc.svh"
-`include "logic_config.svh"
-`include "logic_axi4.svh"
-`include "logic_avalon.svh"
-`include "logic_modport.svh"
-
-`endif /* LOGIC_SVH */
+`endif /* LOGIC_AVALON_SVH */

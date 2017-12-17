@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(buffered)
-add_subdirectory(queue)
-add_subdirectory(to_avalon_st)
+add_hdl_source(logic_axi4_stream_to_avalon_st.sv)
+
+add_hdl_source(logic_axi4_stream_to_avalon_st_top.sv
+    DEPENDS
+        logic_axi4_stream_to_avalon_st
+    VERILATOR_ANALYSIS TRUE
+)

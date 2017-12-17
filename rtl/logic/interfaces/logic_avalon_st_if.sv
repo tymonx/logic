@@ -50,6 +50,7 @@
 interface logic_avalon_st_if #(
     int SYMBOLS_PER_BEAT = 1,
     int DATA_BITS_PER_SYMBOL = 8,
+    int EMPTY_WIDTH = (SYMBOLS_PER_BEAT >= 2) ? $clog2(SYMBOLS_PER_BEAT) : 1,
     int MAX_CHANNEL = 0,
     int CHANNEL_WIDTH = (MAX_CHANNEL >= 1) ? $clog2(MAX_CHANNEL + 1) : 1,
     int ERROR_WIDTH = 1,
@@ -70,7 +71,7 @@ interface logic_avalon_st_if #(
     end
 
     typedef logic [SYMBOLS_PER_BEAT-1:0][DATA_BITS_PER_SYMBOL-1:0] data_t;
-    typedef logic [$clog2(SYMBOLS_PER_BEAT)-1:0] empty_t;
+    typedef logic [EMPTY_WIDTH-1:0] empty_t;
     typedef logic [ERROR_WIDTH-1:0] error_t;
     typedef logic [CHANNEL_WIDTH-1:0] channel_t;
 
