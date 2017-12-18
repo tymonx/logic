@@ -50,6 +50,10 @@ module logic_clock_domain_crossing #(
     output logic tx_tvalid,
     output logic [WIDTH-1:0] tx_tdata
 );
+    initial begin: design_rule_checks
+        `LOGIC_DRC_EQUAL_OR_GREATER_THAN(CAPACITY, 4)
+    end
+
     generate
         case (TARGET)
         logic_pkg::TARGET_INTEL,
