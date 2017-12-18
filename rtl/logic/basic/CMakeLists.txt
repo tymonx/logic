@@ -15,3 +15,4 @@
 add_subdirectory(synchronizer)
 add_subdirectory(binary2gray)
 add_subdirectory(gray2binary)
+add_subdirectory(queue)
