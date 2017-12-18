@@ -12,8 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(synchronizer)
-add_subdirectory(binary2gray)
-add_subdirectory(gray2binary)
-add_subdirectory(buffered)
-add_subdirectory(queue)
+add_hdl_source(logic_basic_buffered.sv
+    VERILATOR_ANALYSIS
+        TRUE
+)
