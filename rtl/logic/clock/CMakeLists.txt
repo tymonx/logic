@@ -12,25 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(HDL_DEPENDS)
-set(HDL_DEFINES)
-set(HDL_LIBRARY logic)
-set(HDL_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/include)
-
-add_subdirectory(packages)
-add_subdirectory(interfaces)
-
-set(HDL_DEPENDS
-    logic_pkg
-    logic_axi4_lite_pkg
-    logic_axi4_lite_if
-    logic_axi4_stream_if
-    logic_avalon_mm_pkg
-    logic_avalon_mm_if
-    logic_avalon_st_if
-)
-
-add_subdirectory(basic)
-add_subdirectory(reset)
-add_subdirectory(clock)
-add_subdirectory(axi4)
+add_subdirectory(domain_crossing)
