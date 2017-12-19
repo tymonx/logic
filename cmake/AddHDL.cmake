@@ -25,8 +25,6 @@ include(AddQuartusProject)
 
 include(CMakeParseArguments)
 
-set(HDL_TARGETS "" CACHE INTERNAL "RTL targets" FORCE)
-
 set(VERILATOR_CONFIGURATION_FILE
     ${CMAKE_CURRENT_LIST_DIR}/VerilatorConfig.cmake.in
     CACHE INTERNAL "Verilator configuration file" FORCE)
@@ -580,6 +578,10 @@ function(add_hdl_source hdl_source_or_target)
         get_filename_component(ARG_NAME ${ARG_SOURCE} NAME_WE)
     endif()
 
+    if (NOT DEFINED ARG_LIBRARY)
+        set(ARG_LIBRARY ${ARG_NAME})
+    endif()
+
     if (NOT ARG_TYPE)
         if (ARG_SOURCE MATCHES .sv)
             set(ARG_TYPE SystemVerilog)
@@ -627,9 +629,6 @@ function(add_hdl_source hdl_source_or_target)
     if (ARG_DEPENDS)
         add_dependencies(${hdl_target} ${ARG_DEPENDS})
     endif()
-
-    set(HDL_TARGETS ${HDL_TARGETS} ${hdl_target}
-        CACHE INTERNAL "HDL targets" FORCE)
 
     add_hdl_modelsim(${hdl_target})
     add_hdl_verilator(${hdl_target})

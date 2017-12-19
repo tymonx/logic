@@ -46,11 +46,20 @@ if (SVUNIT_FOUND)
 endif()
 
 if (QUARTUS_FOUND)
-    add_hdl_source(${QUARTUS_MEGA_FUNCTIONS}
-        LIBRARY intel
-        SYNTHESIZABLE FALSE
-        VERILATOR_CONFIGURATIONS
-            "lint_off -file \"${QUARTUS_MEGA_FUNCTIONS}\""
-            "lint_off -msg STMTDLY -file \"${QUARTUS_MEGA_FUNCTIONS}\""
-    )
+    file(GLOB VERILOG_SOURCES "${QUARTUS_DIR}/eda/sim_lib/*.v")
+    file(GLOB SYSTEMVERILOG_SOURCES "${QUARTUS_DIR}/eda/sim_lib/*.sv")
+
+    foreach (hdl_source ${VERILOG_SOURCES} ${SYSTEMVERILOG_SOURCES})
+        get_filename_component(hdl_name ${hdl_source} NAME_WE)
+
+        add_hdl_source(${hdl_source}
+            LIBRARY intel_${hdl_name}
+            SYNTHESIZABLE FALSE
+            MODELSIM_LINT FALSE
+            MODELSIM_PEDANTICERRORS FALSE
+            VERILATOR_CONFIGURATIONS
+                "lint_off -file \"${hdl_source}\""
+                "lint_off -msg STMTDLY -file \"${hdl_source}\""
+        )
+    endforeach()
 endif()

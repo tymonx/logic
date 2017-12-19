@@ -18,7 +18,6 @@ add_hdl_source(logic_reset_synchronizer_unit_test.sv
     DEPENDS
         svunit_pkg
         logic_reset_synchronizer
-    LIBRARY unit_test
     INCLUDES ${SVUNIT_INCLUDE_DIR}
 )
 
@@ -26,7 +25,6 @@ add_hdl_source(logic_reset_synchronizer_testrunner.sv
     DEPENDS
         svunit_pkg
         logic_reset_synchronizer_unit_test
-    LIBRARY unit_test
     INCLUDES ${SVUNIT_INCLUDE_DIR}
 )
 

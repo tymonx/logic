@@ -92,20 +92,14 @@ if (QUARTUS_SH)
 endif()
 
 get_filename_component(QUARTUS_DIR ${QUARTUS_EXECUTABLE} DIRECTORY)
-
-find_file(QUARTUS_MEGA_FUNCTIONS altera_mf.v
-    HINTS ${QUARTUS_DIR}/..
-    PATH_SUFFIXES eda eda/sim_lib
-    DOC "Path to the Quartus Mega Functions"
-)
+get_filename_component(QUARTUS_DIR ${QUARTUS_DIR}/.. REALPATH)
 
 mark_as_advanced(QUARTUS_EXECUTABLE)
 mark_as_advanced(QUARTUS_SH)
 mark_as_advanced(QUARTUS_MAP)
 mark_as_advanced(QUARTUS_SYN)
 mark_as_advanced(QUARTUS_QSYS_GENERATE)
-mark_as_advanced(QUARTUS_MEGA_FUNCTIONS)
 
 find_package_handle_standard_args(Quartus REQUIRED_VARS
     QUARTUS_EXECUTABLE QUARTUS_MAP QUARTUS_SYN
-    QUARTUS_SH QUARTUS_QSYS_GENERATE QUARTUS_MEGA_FUNCTIONS)
+    QUARTUS_SH QUARTUS_QSYS_GENERATE)

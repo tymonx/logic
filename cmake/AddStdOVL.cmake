@@ -59,7 +59,6 @@ set(STD_OVL_SOURCES
 
 foreach (std_ovl_source ${STD_OVL_SOURCES})
     add_hdl_source(${STD_OVL_DIR}/${std_ovl_source}
-        LIBRARY std_ovl
         TYPE SystemVerilog
         DEFINES
             OVL_VERILOG
