@@ -39,7 +39,7 @@ module logic_axi4_stream_to_avalon_st #(
     function automatic bit [$bits(tx.empty)-1:0] tstrb_to_empty(
         input [$bits(rx.tstrb)-1:0] tstrb
     );
-        int count = 0;
+        bit [$bits(tx.empty)-1:0] count = '0;
 
         for (int i = 0; i < $bits(tstrb); ++i) begin
             if (tstrb[i]) begin
@@ -47,7 +47,7 @@ module logic_axi4_stream_to_avalon_st #(
             end
         end
 
-        return count[$bits(tx.empty)-1:0];
+        return count;
     endfunction
 
     always_comb rx.tready = tx.ready;

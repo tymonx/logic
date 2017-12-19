@@ -39,13 +39,15 @@ module logic_axi4_stream_from_avalon_st #(
     function automatic bit [$bits(tx.tstrb)-1:0] empty_to_tstrb(
         input [$bits(rx.empty)-1:0] empty
     );
-        int unsigned value = '1;
+        bit [$bits(tx.tstrb)-1:0] value = '1;
 
-        for (int i = 0; i < int'(empty); ++i) begin
-            value = value >> 1;
+        if ($bits(tx.tstrb) > 1) begin
+            for (bit [$bits(empty)-1:0] i = '0; i < empty; ++i) begin
+                value = value >> 1;
+            end
         end
 
-        return value[$bits(tx.tstrb)-1:0];
+        return value;
     endfunction
 
     always_comb rx.ready = tx.tready;
