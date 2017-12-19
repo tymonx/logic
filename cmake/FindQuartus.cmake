@@ -85,6 +85,10 @@ if (QUARTUS_SH)
     else ()
         set(QUARTUS_EDITION Standard)
     endif()
+
+    string(REGEX REPLACE " " ";" quartus_version ${quartus_version})
+
+    list(GET quartus_version 1 QUARTUS_VERSION)
 endif()
 
 get_filename_component(QUARTUS_DIR ${QUARTUS_EXECUTABLE} DIRECTORY)
