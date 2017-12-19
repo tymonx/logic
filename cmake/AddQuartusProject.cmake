@@ -245,7 +245,7 @@ function(add_quartus_project target_name)
 
     add_custom_command(
         OUTPUT
-            ${ARG_PROJECT_DIRECTORY}/output_files/${target_name}.flow.rpt
+            ${ARG_PROJECT_DIRECTORY}/output_files/${target_name}.syn.rpt
         COMMAND
             ${quartus_analysis} --analysis_and_elaboration ${target_name}
         DEPENDS
@@ -272,7 +272,7 @@ function(add_quartus_project target_name)
     )
 
     add_custom_target(quartus-analysis-${target_name} DEPENDS
-        ${ARG_PROJECT_DIRECTORY}/output_files/${target_name}.flow.rpt
+        ${ARG_PROJECT_DIRECTORY}/output_files/${target_name}.syn.rpt
     )
 
     add_dependencies(quartus-analysis-all quartus-analysis-${target_name})
