@@ -35,78 +35,83 @@ module logic_axi4_lite_buffered #(
     `LOGIC_MODPORT(logic_axi4_lite_if, slave) slave,
     `LOGIC_MODPORT(logic_axi4_lite_if, master) master
 );
-    logic_axi4_lite_buffered_basic #(
-        .WIDTH(ADDRESS_WIDTH + $bits(logic_axi4_lite_pkg::access_t))
+    localparam STRB_WIDTH = DATA_BYTES;
+    localparam DATA_WIDTH = 8 * DATA_BYTES;
+    localparam PROT_WIDTH = $bits(logic_axi4_lite_pkg::access_t);
+    localparam RESP_WIDTH = $bits(logic_axi4_lite_pkg::response_t);
+
+    logic_basic_buffered #(
+        .WIDTH(PROT_WIDTH + ADDRESS_WIDTH)
     )
     write_address_channel (
         /* Slave */
-        .slave_valid(slave.awvalid),
-        .slave_ready(slave.awready),
-        .slave_data({slave.awprot, slave.awaddr}),
+        .rx_tvalid(slave.awvalid),
+        .rx_tready(slave.awready),
+        .rx_tdata({slave.awprot, slave.awaddr}),
         /* Master */
-        .master_valid(master.awvalid),
-        .master_ready(master.awready),
-        .master_data({master.awprot, master.awaddr}),
+        .tx_tvalid(master.awvalid),
+        .tx_tready(master.awready),
+        .tx_tdata({master.awprot, master.awaddr}),
         .*
     );
 
-    logic_axi4_lite_buffered_basic #(
-        .WIDTH(DATA_BYTES * 8 + DATA_BYTES)
+    logic_basic_buffered #(
+        .WIDTH(STRB_WIDTH + DATA_WIDTH)
     )
     write_data_channel (
         /* Slave */
-        .slave_valid(slave.wvalid),
-        .slave_ready(slave.wready),
-        .slave_data({slave.wstrb, slave.wdata}),
+        .rx_tvalid(slave.wvalid),
+        .rx_tready(slave.wready),
+        .rx_tdata({slave.wstrb, slave.wdata}),
         /* Master */
-        .master_valid(master.wvalid),
-        .master_ready(master.wready),
-        .master_data({master.wstrb, master.wdata}),
+        .tx_tvalid(master.wvalid),
+        .tx_tready(master.wready),
+        .tx_tdata({master.wstrb, master.wdata}),
         .*
     );
 
-    logic_axi4_lite_buffered_basic #(
-        .WIDTH($bits(logic_axi4_lite_pkg::response_t))
+    logic_basic_buffered #(
+        .WIDTH(RESP_WIDTH)
     )
     write_response_channel (
         /* Slave */
-        .slave_valid(master.bvalid),
-        .slave_ready(master.bready),
-        .slave_data(master.bresp),
+        .rx_tvalid(master.bvalid),
+        .rx_tready(master.bready),
+        .rx_tdata(master.bresp),
         /* Master */
-        .master_valid(slave.bvalid),
-        .master_ready(slave.bready),
-        .master_data({slave.bresp}),
+        .tx_tvalid(slave.bvalid),
+        .tx_tready(slave.bready),
+        .tx_tdata({slave.bresp}),
         .*
     );
 
-    logic_axi4_lite_buffered_basic #(
-        .WIDTH(ADDRESS_WIDTH + $bits(logic_axi4_lite_pkg::access_t))
+    logic_basic_buffered #(
+        .WIDTH(PROT_WIDTH + ADDRESS_WIDTH)
     )
     read_address_channel (
         /* Slave */
-        .slave_valid(slave.arvalid),
-        .slave_ready(slave.arready),
-        .slave_data({slave.arprot, slave.araddr}),
+        .rx_tvalid(slave.arvalid),
+        .rx_tready(slave.arready),
+        .rx_tdata({slave.arprot, slave.araddr}),
         /* Master */
-        .master_valid(master.arvalid),
-        .master_ready(master.arready),
-        .master_data({master.arprot, master.araddr}),
+        .tx_tvalid(master.arvalid),
+        .tx_tready(master.arready),
+        .tx_tdata({master.arprot, master.araddr}),
         .*
     );
 
-    logic_axi4_lite_buffered_basic #(
-        .WIDTH(DATA_BYTES * 8 + $bits(logic_axi4_lite_pkg::response_t))
+    logic_basic_buffered #(
+        .WIDTH(RESP_WIDTH + DATA_WIDTH)
     )
     read_data_channel (
         /* Slave */
-        .slave_valid(master.rvalid),
-        .slave_ready(master.rready),
-        .slave_data({master.rresp, master.rdata}),
+        .rx_tvalid(master.rvalid),
+        .rx_tready(master.rready),
+        .rx_tdata({master.rresp, master.rdata}),
         /* Master */
-        .master_valid(slave.rvalid),
-        .master_ready(slave.rready),
-        .master_data({slave.rresp, slave.rdata}),
+        .tx_tvalid(slave.rvalid),
+        .tx_tready(slave.rready),
+        .tx_tdata({slave.rresp, slave.rdata}),
         .*
     );
 endmodule
