@@ -12,7 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_hdl_source(logic_axi4_lite_from_avalon_mm.sv)
+add_hdl_source(logic_axi4_lite_from_avalon_mm_buffered.sv
+    DEPENDS
+        logic_basic_buffered
+)
+
+add_hdl_source(logic_axi4_lite_from_avalon_mm_main.sv)
+add_hdl_source(logic_axi4_lite_from_avalon_mm.sv
+    DEPENDS
+        logic_reset_synchronizer
+        logic_axi4_lite_from_avalon_mm_buffered
+        logic_axi4_lite_from_avalon_mm_main
+)
 
 add_hdl_source(logic_axi4_lite_from_avalon_mm_top.sv
     DEPENDS

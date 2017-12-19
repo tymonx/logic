@@ -19,110 +19,55 @@
  *
  * Avalon-MM interface to AXI4-Lite interface bridge.
  *
+ * Parameters:
+ *  DATA_BYTES      - Number of bytes for writedata and readdata signals.
+ *  ADDRESS_WIDTH   - Number of bits for address signal.
+ *
  * Ports:
  *  aclk        - Clock.
  *  areset_n    - Asynchronous active-low reset.
  *  slave       - Avalon-MM interface.
  *  master      - AXI4-Lite interface.
  */
-module logic_axi4_lite_from_avalon_mm (
+module logic_axi4_lite_from_avalon_mm #(
+    int DATA_BYTES = 4,
+    int ADDRESS_WIDTH = 1
+) (
     input aclk,
     input areset_n,
     `LOGIC_MODPORT(logic_avalon_mm_if, slave) slave,
     `LOGIC_MODPORT(logic_axi4_lite_if, master) master
 );
-    function automatic logic_avalon_mm_pkg::response_t decode_response(
-        input logic_axi4_lite_pkg::response_t response
+    logic areset_n_synced;
+
+    logic_avalon_mm_if #(
+        .DATA_BYTES(DATA_BYTES),
+        .ADDRESS_WIDTH(ADDRESS_WIDTH)
+    )
+    buffered (
+        .clk(aclk),
+        .reset_n(areset_n)
     );
-        unique case (response)
-        logic_axi4_lite_pkg::RESPONSE_OKAY: begin
-            decode_response = logic_avalon_mm_pkg::RESPONSE_OKAY;
-        end
-        logic_axi4_lite_pkg::RESPONSE_DECERR: begin
-            decode_response = logic_avalon_mm_pkg::RESPONSE_DECODEERROR;
-        end
-        default: begin
-            decode_response = logic_avalon_mm_pkg::RESPONSE_SLAVEERROR;
-        end
-        endcase
-    endfunction
 
-    always_comb slave.waitrequest = !master.awready || !master.wready ||
-        !master.arready;
+    logic_reset_synchronizer
+    reset_service (
+        .*
+    );
 
-    always_comb master.awprot = logic_axi4_lite_pkg::DEFAULT_DATA_ACCESS;
-    always_comb master.arprot = logic_axi4_lite_pkg::DEFAULT_DATA_ACCESS;
+    logic_axi4_lite_from_avalon_mm_buffered #(
+        .DATA_BYTES(DATA_BYTES),
+        .ADDRESS_WIDTH(ADDRESS_WIDTH)
+    )
+    buffer_service (
+        .areset_n(areset_n_synced),
+        .master(buffered),
+        .*
+    );
 
-    always_comb master.bready = 1'b1;
-    always_comb master.rready = 1'b1;
-
-    always_ff @(posedge aclk or negedge areset_n) begin
-        if (!areset_n) begin
-            master.awvalid <= 1'b0;
-        end
-        else if (master.awready) begin
-            master.awvalid <= slave.write;
-        end
-    end
-
-    always_ff @(posedge aclk) begin
-        if (master.awready) begin
-            master.awaddr <= slave.address;
-        end
-    end
-
-    always_ff @(posedge aclk or negedge areset_n) begin
-        if (!areset_n) begin
-            master.wvalid <= 1'b0;
-        end
-        else if (master.wready) begin
-            master.wvalid <= slave.write;
-        end
-    end
-
-    always_ff @(posedge aclk) begin
-        if (master.wready) begin
-            master.wdata <= slave.writedata;
-            master.wstrb <= slave.byteenable;
-        end
-    end
-
-    always_ff @(posedge aclk or negedge areset_n) begin
-        if (!areset_n) begin
-            master.arvalid <= 1'b0;
-        end
-        else if (master.arready) begin
-            master.arvalid <= slave.read;
-        end
-    end
-
-    always_ff @(posedge aclk) begin
-        if (master.arready) begin
-            master.araddr <= slave.address;
-        end
-    end
-
-    always_ff @(posedge aclk or negedge areset_n) begin
-        if (!areset_n) begin
-            slave.writeresponsevalid <= 1'b0;
-        end
-        else begin
-            slave.writeresponsevalid <= master.bvalid;
-        end
-    end
-
-    always_ff @(posedge aclk or negedge areset_n) begin
-        if (!areset_n) begin
-            slave.readdatavalid <= 1'b0;
-        end
-        else begin
-            slave.readdatavalid <= master.rvalid;
-        end
-    end
-
-    always_ff @(posedge aclk) begin
-        slave.response <= decode_response(master.bvalid ?
-            master.bresp : master.rresp);
-        slave.readdata <= master.rdata;
-    end
+    logic_axi4_lite_from_avalon_mm_main
+    main (
+        .areset_n(areset_n_synced),
+        .slave(buffered),
+        .*
+    );
 endmodule
