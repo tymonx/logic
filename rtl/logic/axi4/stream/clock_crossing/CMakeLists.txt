@@ -12,8 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(buffered)
-add_subdirectory(queue)
-add_subdirectory(to_avalon_st)
-add_subdirectory(from_avalon_st)
-add_subdirectory(clock_crossing)
+add_hdl_source(logic_axi4_stream_clock_crossing.sv
+    DEPENDS
+        logic_clock_domain_crossing
+)
+
+add_hdl_source(logic_axi4_stream_clock_crossing_top.sv
+    DEPENDS
+        logic_axi4_stream_clock_crossing
+    VERILATOR_ANALYSIS
+        TRUE
+)
