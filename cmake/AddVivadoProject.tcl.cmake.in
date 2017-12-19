@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-create_project @vivado_top_level_entity@ -in_memory
+create_project @ARG_TOP_LEVEL_ENTITY@ -in_memory
 
 set includes []
 set defines []
@@ -28,8 +28,8 @@ add_files $sources
 
 set synth_arguments []
 
-lappend synth_arguments -name @vivado_top_level_entity@
-lappend synth_arguments -top @vivado_top_level_entity@
+lappend synth_arguments -name @ARG_TOP_LEVEL_ENTITY@
+lappend synth_arguments -top @ARG_TOP_LEVEL_ENTITY@
 lappend synth_arguments -rtl
 
 foreach def {*}$defines {

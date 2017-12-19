@@ -142,17 +142,17 @@ function(add_vivado_project target_name)
     string(REGEX REPLACE ";" "\n" vivado_sources_list "${vivado_sources_list}")
 
     configure_file(${ADD_VIVADO_PROJECT_CURRENT_DIR}/AddVivadoProject.tcl.cmake.in
-        ${ARG_PROJECT_DIRECTORY}/logic.tcl)
+        ${ARG_PROJECT_DIRECTORY}/${target_name}.tcl)
 
     add_custom_command(
         OUTPUT
             ${ARG_PROJECT_DIRECTORY}/vivado.jou
         COMMAND
-            ${VIVADO_EXECUTABLE} -notrace -mode batch -source logic.tcl
+            ${VIVADO_EXECUTABLE} -notrace -mode batch -source ${target_name}.tcl
         DEPENDS
-            ${ARG_PROJECT_DIRECTORY}/logic.tcl
+            ${ARG_PROJECT_DIRECTORY}/${target_name}.tcl
             ${ARG_INCLUDES}
-            ${ARG_DEFINES}
+            ${ARG_SOURCES}
         WORKING_DIRECTORY
             ${ARG_PROJECT_DIRECTORY}
         COMMENT

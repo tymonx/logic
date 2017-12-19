@@ -19,6 +19,8 @@ endif()
 find_package(ModelSim)
 find_package(SystemC REQUIRED COMPONENTS SCV UVM)
 find_package(Verilator)
+
+include(AddVivadoProject)
 include(AddQuartusProject)
 
 include(CMakeParseArguments)
@@ -89,6 +91,18 @@ function(add_hdl_quartus hdl_target)
 
     if (quartus_analysis)
         add_quartus_project(${hdl_target})
+    endif()
+endfunction()
+
+function(add_hdl_vivado hdl_target)
+    set(VIVADO_DEFINES ${VIVADO_DEFINES}
+        LOGIC_SYNTHESIS
+    )
+
+    get_target_property(vivado_analysis ${hdl_target} HDL_VIVADO_ANALYSIS)
+
+    if (vivado_analysis)
+        add_vivado_project(${hdl_target})
     endif()
 endfunction()
 
@@ -467,6 +481,7 @@ function(add_hdl_source hdl_source_or_target)
         VERILATOR_ANALYSIS
         VERILATOR_COMPILE
         QUARTUS_ANALYSIS
+        VIVADO_ANALYSIS
     )
 
     set(multi_value_arguments
@@ -505,6 +520,10 @@ function(add_hdl_source hdl_source_or_target)
 
     if (NOT DEFINED ARG_QUARTUS_ANALYSIS)
         set(ARG_QUARTUS_ANALYSIS ${ARG_ANALYSIS})
+    endif()
+
+    if (NOT DEFINED ARG_VIVADO_ANALYSIS)
+        set(ARG_VIVADO_ANALYSIS ${ARG_ANALYSIS})
     endif()
 
     if (DEFINED HDL_LIBRARY)
@@ -597,6 +616,7 @@ function(add_hdl_source hdl_source_or_target)
         HDL_INCLUDES "${ARG_INCLUDES}"
         HDL_SYNTHESIZABLE ${ARG_SYNTHESIZABLE}
         HDL_QUARTUS_ANALYSIS ${ARG_QUARTUS_ANALYSIS}
+        HDL_VIVADO_ANALYSIS ${ARG_VIVADO_ANALYSIS}
         HDL_MODELSIM_LINT ${ARG_MODELSIM_LINT}
         HDL_MODELSIM_PEDANTICERRORS ${ARG_MODELSIM_PEDANTICERRORS}
         HDL_VERILATOR_COMPILE ${ARG_VERILATOR_COMPILE}
@@ -614,6 +634,7 @@ function(add_hdl_source hdl_source_or_target)
     add_hdl_modelsim(${hdl_target})
     add_hdl_verilator(${hdl_target})
     add_hdl_quartus(${hdl_target})
+    add_hdl_vivado(${hdl_target})
 endfunction()
 
 function(add_hdl_systemc target_name)

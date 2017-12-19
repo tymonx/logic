@@ -39,14 +39,6 @@ if (NOT DEFINED LOGIC_WARNINGS_INTO_ERRORS)
     option(LOGIC_WARNINGS_INTO_ERRORS "Enable/disable warnings as errors" OFF)
 endif()
 
-if (NOT DEFINED LOGIC_QUARTUS)
-    option(LOGIC_QUARTUS "Enable/disable Intel FPGA Quartus projects" ON)
-endif()
-
-if (NOT DEFINED LOGIC_VIVADO)
-    option(LOGIC_VIVADO "Enable/disable Xilinx Vivado projects" ON)
-endif()
-
 include(AddLogic)
 
 include_directories(include)
@@ -56,10 +48,6 @@ add_subdirectory(src)
 
 if (LOGIC_RTL)
     add_subdirectory(rtl)
-
-    if (LOGIC_VIVADO)
-        add_subdirectory(vivado)
-    endif()
 
     if (LOGIC_TESTS)
         include(CTest)
