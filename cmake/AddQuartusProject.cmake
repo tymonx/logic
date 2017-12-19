@@ -227,8 +227,14 @@ function(add_quartus_project target_name)
 
     if (QUARTUS_EDITION MATCHES Pro)
         set(quartus_analysis ${QUARTUS_SYN})
+
+        set(quartus_analysis_file
+            ${ARG_PROJECT_DIRECTORY}/output_files/${target_name}.syn.rpt)
     else ()
         set(quartus_analysis ${QUARTUS_MAP})
+
+        set(quartus_analysis_file
+            ${ARG_PROJECT_DIRECTORY}/output_files/${target_name}.flow.rpt)
     endif()
 
     set(quartus_depends
@@ -245,7 +251,7 @@ function(add_quartus_project target_name)
 
     add_custom_command(
         OUTPUT
-            ${ARG_PROJECT_DIRECTORY}/output_files/${target_name}.syn.rpt
+            ${quartus_analysis_file}
         COMMAND
             ${quartus_analysis} --analysis_and_elaboration ${target_name}
         DEPENDS
@@ -271,15 +277,13 @@ function(add_quartus_project target_name)
             "Quartus compiling ${ARG_PROJECT_DIRECTORY}"
     )
 
-    add_custom_target(quartus-analysis-${target_name} DEPENDS
-        ${ARG_PROJECT_DIRECTORY}/output_files/${target_name}.syn.rpt
-    )
+    add_custom_target(quartus-analysis-${target_name}
+        DEPENDS ${quartus_analysis_file})
 
     add_dependencies(quartus-analysis-all quartus-analysis-${target_name})
 
-    add_custom_target(quartus-compile-${target_name} DEPENDS
-        ${ARG_PROJECT_DIRECTORY}/output_files/${target_name}.sof
-    )
+    add_custom_target(quartus-compile-${target_name}
+        DEPENDS ${ARG_PROJECT_DIRECTORY}/output_files/${target_name}.sof)
 
     add_dependencies(quartus-compile-all quartus-compile-${target_name})
 endfunction()
