@@ -12,17 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_hdl_source(logic_axi4_stream_queue_generic.sv)
-
-add_hdl_source(logic_axi4_stream_queue_intel.sv
-    DEPENDS
-        altera_mf
-)
-
 add_hdl_source(logic_axi4_stream_queue.sv
     DEPENDS
-        logic_axi4_stream_queue_intel
-        logic_axi4_stream_queue_generic
+        logic_basic_queue
 )
 
 add_hdl_source(logic_axi4_stream_queue_top.sv

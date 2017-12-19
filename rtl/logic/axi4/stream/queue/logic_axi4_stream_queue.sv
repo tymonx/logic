@@ -20,6 +20,10 @@
  * Stores data stream in queue (FIFO)
  *
  * Parameters:
+ *  TDATA_BYTES - Number of bytes for tdata signal.
+ *  TDEST_WIDTH - Number of bits for tdest signal.
+ *  TUSER_WIDTH - Number of bits for tuser signal.
+ *  TID_WIDTH   - Number of bits for tid signal.
  *  CAPACITY    - Number of single data transactions that can be store in
  *                internal queue memory (FIFO capacity).
  *  TARGET      - Target device.
@@ -31,6 +35,10 @@
  *  tx          - AXI4-Stream interface.
  */
 module logic_axi4_stream_queue #(
+    int TDATA_BYTES = 1,
+    int TDEST_WIDTH = 1,
+    int TUSER_WIDTH = 1,
+    int TID_WIDTH = 1,
     int CAPACITY = 256,
     logic_pkg::target_t TARGET = `LOGIC_CONFIG_TARGET
 ) (
@@ -39,30 +47,33 @@ module logic_axi4_stream_queue #(
     `LOGIC_MODPORT(logic_axi4_stream_if, rx) rx,
     `LOGIC_MODPORT(logic_axi4_stream_if, tx) tx
 );
-    generate
-        case (TARGET)
-        logic_pkg::TARGET_GENERIC: begin: generic
-            logic_axi4_stream_queue_generic #(
-                .CAPACITY(CAPACITY)
-            )
-            unit (
-                .*
-            );
-        end
-        logic_pkg::TARGET_INTEL,
-        logic_pkg::TARGET_INTEL_ARRIA_10: begin: intel
-            logic_axi4_stream_queue_intel #(
-                .CAPACITY(CAPACITY)
-            )
-            unit (
-                .*
-            );
-        end
-        default: begin: not_supported
-            initial begin
-                `LOGIC_DRC_NOT_SUPPORTED(TARGET)
-            end
-        end
-        endcase
-    endgenerate
+    localparam TLAST_WIDTH = 1;
+    localparam TDATA_WIDTH = TDATA_BYTES * 8;
+    localparam TSTRB_WIDTH = TDATA_BYTES;
+    localparam TKEEP_WIDTH = TDATA_BYTES;
+
+    localparam WIDTH = TUSER_WIDTH + TDEST_WIDTH + TID_WIDTH + TLAST_WIDTH +
+        TKEEP_WIDTH + TSTRB_WIDTH + TDATA_WIDTH;
+
+    logic [WIDTH-1:0] rx_tdata;
+    logic [WIDTH-1:0] tx_tdata;
+
+    always_comb rx_tdata = {rx.tuser, rx.tdest, rx.tid, rx.tlast, rx.tkeep,
+        rx.tstrb, rx.tdata};
+
+    always_comb {tx.tuser, tx.tdest, tx.tid, tx.tlast, tx.tkeep,
+        tx.tstrb, tx.tdata} = tx_tdata;
+
+    logic_basic_queue #(
+        .WIDTH(WIDTH),
+        .TARGET(TARGET),
+        .CAPACITY(CAPACITY)
+    )
+    unit (
+        .rx_tvalid(rx.tvalid),
+        .rx_tready(rx.tready),
+        .tx_tvalid(tx.tvalid),
+        .tx_tready(tx.tready),
+        .*
+    );
 endmodule

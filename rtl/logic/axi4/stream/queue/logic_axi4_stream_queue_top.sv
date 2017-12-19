@@ -63,6 +63,10 @@ module logic_axi4_stream_queue_top #(
     `LOGIC_AXI4_STREAM_IF_RX_ASSIGN(rx, rx);
 
     logic_axi4_stream_queue #(
+        .TDATA_BYTES(TDATA_BYTES),
+        .TDEST_WIDTH(TDEST_WIDTH),
+        .TUSER_WIDTH(TUSER_WIDTH),
+        .TID_WIDTH(TID_WIDTH),
         .CAPACITY(CAPACITY),
         .TARGET(TARGET)
     ) unit (.*);
