@@ -72,7 +72,10 @@ module logic_axi4_lite_to_avalon_mm_top #(
 
     `LOGIC_AXI4_LITE_IF_SLAVE_ASSIGN(slave, slave);
 
-    logic_axi4_lite_to_avalon_mm unit (.*);
+    logic_axi4_lite_to_avalon_mm #(
+        .DATA_BYTES(DATA_BYTES),
+        .ADDRESS_WIDTH(ADDRESS_WIDTH)
+    ) unit (.*);
 
     `LOGIC_AVALON_MM_IF_MASTER_ASSIGN(master, master);
 endmodule

@@ -19,99 +19,54 @@
  *
  * AXI4-Lite interface to Avalon-MM interface bridge.
  *
+ * Parameters:
+ *  DATA_BYTES      - Number of bytes for writedata and readdata signals.
+ *  ADDRESS_WIDTH   - Number of bits for address signal.
+ *
  * Ports:
  *  aclk        - Clock.
  *  areset_n    - Asynchronous active-low reset.
  *  slave       - AXI4-Lite interface.
  *  master      - Avalon-MM interface.
  */
-module logic_axi4_lite_to_avalon_mm (
+module logic_axi4_lite_to_avalon_mm #(
+    int DATA_BYTES = 4,
+    int ADDRESS_WIDTH = 1
+) (
     input aclk,
     input areset_n,
     `LOGIC_MODPORT(logic_axi4_lite_if, slave) slave,
     `LOGIC_MODPORT(logic_avalon_mm_if, master) master
 );
-    logic_axi4_lite_pkg::response_t response_decoded;
+    logic areset_n_synced;
 
-    always_comb slave.awready = !master.waitrequest;
-    always_comb slave.arready = !master.waitrequest;
-    always_comb slave.wready = !master.waitrequest;
+    logic_axi4_lite_if #(
+        .DATA_BYTES(DATA_BYTES),
+        .ADDRESS_WIDTH(ADDRESS_WIDTH)
+    )
+    buffered (
+        .*
+    );
 
-    always_comb begin
-        unique case (master.response)
-        logic_avalon_mm_pkg::RESPONSE_OKAY: begin
-            response_decoded = logic_axi4_lite_pkg::RESPONSE_OKAY;
-        end
-        logic_avalon_mm_pkg::RESPONSE_DECODEERROR: begin
-            response_decoded = logic_axi4_lite_pkg::RESPONSE_DECERR;
-        end
-        default: begin
-            response_decoded = logic_axi4_lite_pkg::RESPONSE_SLVERR;
-        end
-        endcase
-    end
+    logic_reset_synchronizer
+    reset_service (
+        .*
+    );
 
-    always_ff @(posedge aclk or negedge areset_n) begin
-        if (!areset_n) begin
-            master.write <= 1'b0;
-        end
-        else if (!master.waitrequest) begin
-            master.write <= slave.awvalid && slave.wvalid;
-        end
-    end
+    logic_axi4_lite_buffered #(
+        .DATA_BYTES(DATA_BYTES),
+        .ADDRESS_WIDTH(ADDRESS_WIDTH)
+    )
+    buffer_service (
+        .areset_n(areset_n_synced),
+        .master(buffered),
+        .*
+    );
 
-    always_ff @(posedge aclk or negedge areset_n) begin
-        if (!areset_n) begin
-            master.read <= 1'b0;
-        end
-        else if (!master.waitrequest) begin
-            master.read <= slave.arvalid;
-        end
-    end
-
-    always_ff @(posedge aclk) begin
-        if (!master.waitrequest) begin
-            master.byteenable <= slave.wvalid ? slave.wstrb : '1;
-            master.address <= slave.awvalid ? slave.awaddr : slave.araddr;
-            master.writedata <= slave.wdata;
-        end
-    end
-
-    always_ff @(posedge aclk or negedge areset_n) begin
-        if (!areset_n) begin
-            slave.bvalid <= 1'b0;
-        end
-        else if (slave.bready) begin
-            slave.bvalid <= master.writeresponsevalid;
-        end
-    end
-
-    always_ff @(posedge aclk) begin
-        if (slave.bready) begin
-            slave.bresp <= response_decoded;
-        end
-    end
-
-    always_ff @(posedge aclk or negedge areset_n) begin
-        if (!areset_n) begin
-            slave.rvalid <= 1'b0;
-        end
-        else if (slave.rready) begin
-            slave.rvalid <= master.readdatavalid;
-        end
-    end
-
-    always_ff @(posedge aclk) begin
-        if (slave.rready) begin
-            slave.rdata <= master.readdata;
-            slave.rresp <= response_decoded;
-        end
-    end
-
-    wire _unused_ports = &{
-        1'b0,
-        slave.awprot,
-        slave.arprot,
-        1'b0
-    };
+    logic_axi4_lite_to_avalon_mm_main
+    main (
+        .areset_n(areset_n_synced),
+        .slave(buffered),
+        .*
+    );
 endmodule
