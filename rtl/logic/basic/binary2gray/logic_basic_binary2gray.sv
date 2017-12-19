@@ -28,5 +28,12 @@ module logic_basic_binary2gray #(
     input [WIDTH-1:0] i,
     output logic [WIDTH-1:0] o
 );
-    always_comb o = i ^ (i >> 1);
+    generate
+        if (WIDTH > 1) begin: multi
+            always_comb o = i ^ {1'b0, i[WIDTH-1:1]};
+        end
+        else begin: single
+            always_comb o = i ^ 1'b0;
+        end
+    endgenerate
 endmodule

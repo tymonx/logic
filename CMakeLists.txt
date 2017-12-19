@@ -57,10 +57,6 @@ add_subdirectory(src)
 if (LOGIC_RTL)
     add_subdirectory(rtl)
 
-    if (LOGIC_QUARTUS)
-        add_subdirectory(quartus)
-    endif()
-
     if (LOGIC_VIVADO)
         add_subdirectory(vivado)
     endif()

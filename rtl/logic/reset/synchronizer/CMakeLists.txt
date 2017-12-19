@@ -13,6 +13,5 @@
 # limitations under the License.
 
 add_hdl_source(logic_reset_synchronizer.sv
-    VERILATOR_ANALYSIS
-        TRUE
+    ANALYSIS TRUE
 )

@@ -23,5 +23,5 @@ add_hdl_source(logic_axi4_lite_to_avalon_mm.sv
 add_hdl_source(logic_axi4_lite_to_avalon_mm_top.sv
     DEPENDS
         logic_axi4_lite_to_avalon_mm
-    VERILATOR_ANALYSIS TRUE
+    ANALYSIS TRUE
 )

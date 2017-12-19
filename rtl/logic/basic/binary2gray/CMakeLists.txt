@@ -13,5 +13,5 @@
 # limitations under the License.
 
 add_hdl_source(logic_basic_binary2gray.sv
-    VERILATOR_ANALYSIS TRUE
+    ANALYSIS TRUE
 )

@@ -23,8 +23,7 @@ add_hdl_source(logic_basic_queue_generic.sv
         logic_basic_queue_generic_write
         logic_basic_queue_generic_memory
         logic_basic_queue_generic_capacity
-    VERILATOR_ANALYSIS
-        TRUE
+    ANALYSIS TRUE
 )
 
 add_hdl_source(logic_basic_queue_intel.sv
@@ -42,6 +41,5 @@ add_hdl_source(logic_basic_queue.sv
     DEPENDS
         logic_reset_synchronizer
         logic_basic_queue_main
-    VERILATOR_ANALYSIS
-        TRUE
+    ANALYSIS TRUE
 )

@@ -36,8 +36,7 @@ add_hdl_source(logic_clock_domain_crossing_generic.sv
         logic_clock_domain_crossing_generic_read_sync
         logic_clock_domain_crossing_generic_write
         logic_clock_domain_crossing_generic_write_sync
-    VERILATOR_ANALYSIS
-        TRUE
+    ANALYSIS TRUE
 )
 
 add_hdl_source(logic_clock_domain_crossing_intel.sv
@@ -49,6 +48,5 @@ add_hdl_source(logic_clock_domain_crossing.sv
     DEPENDS
         logic_clock_domain_crossing_intel
         logic_clock_domain_crossing_generic
-    VERILATOR_ANALYSIS
-        TRUE
+    ANALYSIS TRUE
 )

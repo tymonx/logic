@@ -24,6 +24,5 @@ add_hdl_source(logic_axi4_lite_write_aligned.sv
 add_hdl_source(logic_axi4_lite_write_aligned_top.sv
     DEPENDS
         logic_axi4_lite_write_aligned
-    VERILATOR_ANALYSIS
-        TRUE
+    ANALYSIS TRUE
 )

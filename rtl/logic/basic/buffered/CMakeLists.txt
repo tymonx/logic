@@ -13,6 +13,5 @@
 # limitations under the License.
 
 add_hdl_source(logic_basic_buffered.sv
-    VERILATOR_ANALYSIS
-        TRUE
+    ANALYSIS TRUE
 )

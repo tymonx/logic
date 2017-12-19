@@ -19,6 +19,7 @@ endif()
 find_package(ModelSim)
 find_package(SystemC REQUIRED COMPONENTS SCV UVM)
 find_package(Verilator)
+include(AddQuartusProject)
 
 include(CMakeParseArguments)
 
@@ -72,6 +73,24 @@ if (VERILATOR_FOUND)
         add_custom_target(verilator-analysis-all)
     endif()
 endif()
+
+function(add_hdl_quartus hdl_target)
+    set(QUARTUS_DEFINES ${QUARTUS_DEFINES}
+        LOGIC_SYNTHESIS
+    )
+
+    if (QUARTUS_EDITION MATCHES Pro)
+        set(QUARTUS_DEFINES ${QUARTUS_DEFINES}
+            LOGIC_MODPORT_DISABLED
+        )
+    endif()
+
+    get_target_property(quartus_analysis ${hdl_target} HDL_QUARTUS_ANALYSIS)
+
+    if (quartus_analysis)
+        add_quartus_project(${hdl_target})
+    endif()
+endfunction()
 
 function(get_hdl_depends hdl_target hdl_depends_var)
     set(hdl_depends "")
@@ -441,11 +460,13 @@ function(add_hdl_source hdl_source_or_target)
         TYPE
         SOURCE
         LIBRARY
+        ANALYSIS
         SYNTHESIZABLE
         MODELSIM_LINT
         MODELSIM_PEDANTICERRORS
         VERILATOR_ANALYSIS
         VERILATOR_COMPILE
+        QUARTUS_ANALYSIS
     )
 
     set(multi_value_arguments
@@ -457,6 +478,10 @@ function(add_hdl_source hdl_source_or_target)
 
     cmake_parse_arguments(ARG "${options}" "${one_value_arguments}"
         "${multi_value_arguments}" ${ARGN})
+
+    if (NOT DEFINED ARG_ANALYSIS)
+        set(ARG_ANALYSIS FALSE)
+    endif()
 
     if (NOT DEFINED ARG_SYNTHESIZABLE)
         set(ARG_SYNTHESIZABLE FALSE)
@@ -471,11 +496,15 @@ function(add_hdl_source hdl_source_or_target)
     endif()
 
     if (NOT DEFINED ARG_VERILATOR_ANALYSIS)
-        set(ARG_VERILATOR_ANALYSIS FALSE)
+        set(ARG_VERILATOR_ANALYSIS ${ARG_ANALYSIS})
     endif()
 
     if (NOT DEFINED ARG_VERILATOR_COMPILE)
         set(ARG_VERILATOR_COMPILE FALSE)
+    endif()
+
+    if (NOT DEFINED ARG_QUARTUS_ANALYSIS)
+        set(ARG_QUARTUS_ANALYSIS ${ARG_ANALYSIS})
     endif()
 
     if (DEFINED HDL_LIBRARY)
@@ -567,6 +596,7 @@ function(add_hdl_source hdl_source_or_target)
         HDL_DEFINES "${ARG_DEFINES}"
         HDL_INCLUDES "${ARG_INCLUDES}"
         HDL_SYNTHESIZABLE ${ARG_SYNTHESIZABLE}
+        HDL_QUARTUS_ANALYSIS ${ARG_QUARTUS_ANALYSIS}
         HDL_MODELSIM_LINT ${ARG_MODELSIM_LINT}
         HDL_MODELSIM_PEDANTICERRORS ${ARG_MODELSIM_PEDANTICERRORS}
         HDL_VERILATOR_COMPILE ${ARG_VERILATOR_COMPILE}
@@ -583,6 +613,7 @@ function(add_hdl_source hdl_source_or_target)
 
     add_hdl_modelsim(${hdl_target})
     add_hdl_verilator(${hdl_target})
+    add_hdl_quartus(${hdl_target})
 endfunction()
 
 function(add_hdl_systemc target_name)

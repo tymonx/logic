@@ -20,6 +20,5 @@ add_hdl_source(logic_axi4_lite_clock_crossing.sv
 add_hdl_source(logic_axi4_lite_clock_crossing_top.sv
     DEPENDS
         logic_axi4_lite_clock_crossing
-    VERILATOR_ANALYSIS
-        TRUE
+    ANALYSIS TRUE
 )
