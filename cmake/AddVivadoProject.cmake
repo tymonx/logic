@@ -22,8 +22,8 @@ if (VIVADO_FOUND)
     set(ADD_VIVADO_PROJECT_CURRENT_DIR ${CMAKE_CURRENT_LIST_DIR}
         CACHE INTERNAL "Add Vivado project current directory" FORCE)
 
-    if (NOT TARGET vivado-compile-all)
-        add_custom_target(vivado-compile-all)
+    if (NOT TARGET vivado-analysis-all)
+        add_custom_target(vivado-analysis-all)
     endif()
 endif()
 
@@ -159,9 +159,9 @@ function(add_vivado_project target_name)
             "Vivado compiling ${ARG_PROJECT_DIRECTORY}"
     )
 
-    add_custom_target(vivado-compile-${target_name}
+    add_custom_target(vivado-analysis-${target_name}
         DEPENDS ${ARG_PROJECT_DIRECTORY}/vivado.jou
     )
 
-    add_dependencies(vivado-compile-all vivado-compile-${target_name})
+    add_dependencies(vivado-analysis-all vivado-analysis-${target_name})
 endfunction()

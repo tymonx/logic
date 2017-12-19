@@ -188,12 +188,7 @@ Quartus project will be created under:
 
 RTL analysis and elaboration in `Xilinx Vivado` for top level entity:
 
-    cmake --build . --target vivado-compile-<top_level_entity>
-
-RTL analysis and elaboration in `Xilinx Vivado` for all top level
-entities:
-
-    cmake --build . --target vivado-compile-all
+    cmake --build . --target vivado-analysis-<top_level_entity>
 
 Using with other CMake projects
 -------------------------------
