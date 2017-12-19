@@ -31,130 +31,47 @@ module logic_basic_queue_generic #(
     output logic tx_tvalid,
     output logic [WIDTH-1:0] tx_tdata
 );
-    localparam QUEUE_DEPTH = 2**ADDRESS_WIDTH;
-    localparam ALMOST_FULL = QUEUE_DEPTH - 3;
     localparam DATA_WIDTH = WIDTH;
 
-    initial begin: design_rule_checks
-        `LOGIC_DRC_EQUAL_OR_GREATER_THAN(CAPACITY, 4)
-    end
-
-    logic [DATA_WIDTH-1:0] queue[0:QUEUE_DEPTH-1];
-
-    logic write;
+    logic write_enable;
     logic [DATA_WIDTH-1:0] write_data;
     logic [ADDRESS_WIDTH-1:0] write_pointer;
 
-    logic read;
+    logic read_enable;
     logic [DATA_WIDTH-1:0] read_data;
     logic [ADDRESS_WIDTH-1:0] read_pointer;
 
-    struct packed {
-        logic valid;
-        logic [ADDRESS_WIDTH-1:0] capacity;
-    } status;
+    logic capacity_valid;
+    logic [ADDRESS_WIDTH-1:0] capacity_data;
 
-    enum logic [0:0] {
-        FSM_IDLE,
-        FSM_DATA
-    } fsm_state;
+    logic_basic_queue_generic_write #(
+        .DATA_WIDTH(DATA_WIDTH),
+        .ADDRESS_WIDTH(ADDRESS_WIDTH)
+    )
+    write_service (
+        .*
+    );
 
-    always_ff @(posedge aclk) begin
-        write_data <= rx_tdata;
-    end
+    logic_basic_queue_generic_read #(
+        .DATA_WIDTH(DATA_WIDTH),
+        .ADDRESS_WIDTH(ADDRESS_WIDTH)
+    )
+    read_service (
+        .*
+    );
 
-    always_ff @(posedge aclk or negedge areset_n) begin
-        if (!areset_n) begin
-            write <= '0;
-        end
-        else begin
-            write <= rx_tvalid && rx_tready;
-        end
-    end
+    logic_basic_queue_generic_capacity #(
+        .ADDRESS_WIDTH(ADDRESS_WIDTH)
+    )
+    capacity_service (
+        .*
+    );
 
-    always_ff @(posedge aclk or negedge areset_n) begin
-        if (!areset_n) begin
-            rx_tready <= '0;
-        end
-        else begin
-            rx_tready <= !status.valid ||
-                (status.capacity < ALMOST_FULL[ADDRESS_WIDTH-1:0]);
-        end
-    end
-
-    always_ff @(posedge aclk or negedge areset_n) begin
-        if (!areset_n) begin
-            write_pointer <= '0;
-        end
-        else if (write) begin
-            write_pointer <= write_pointer + 1'b1;
-        end
-    end
-
-    always_ff @(posedge aclk) begin
-        if (write) begin
-            queue[write_pointer] <= write_data;
-        end
-    end
-
-    always_ff @(posedge aclk or negedge areset_n) begin
-        if (!areset_n) begin
-            read_pointer <= '0;
-        end
-        else if (read) begin
-            read_pointer <= read_pointer + 1'b1;
-        end
-    end
-
-    always_ff @(posedge aclk or negedge areset_n) begin
-        if (!areset_n) begin
-            fsm_state <= FSM_IDLE;
-        end
-        else begin
-            unique case (fsm_state)
-            FSM_IDLE: begin
-                if (status.valid) begin
-                    fsm_state <= FSM_DATA;
-                end
-            end
-            FSM_DATA: begin
-                if (tx_tready && !status.valid) begin
-                    fsm_state <= FSM_IDLE;
-                end
-            end
-            endcase
-        end
-    end
-
-    always_comb begin
-        unique case (fsm_state)
-        FSM_IDLE: begin
-            read = status.valid;
-        end
-        FSM_DATA: begin
-            read = status.valid && tx_tready;
-        end
-        endcase
-    end
-
-    always_ff @(posedge aclk) begin
-        if (read) begin
-            read_data <= queue[read_pointer];
-        end
-    end
-
-    always_ff @(posedge aclk or negedge areset_n) begin
-        if (!areset_n) begin
-            status <= '{valid: 1'b0, capacity: '1};
-        end
-        else if (write && !read) begin
-            status <= status + 1'b1;
-        end
-        else if (!write && read) begin
-            status <= status - 1'b1;
-        end
-    end
-
-    always_comb tx_tvalid = (FSM_DATA == fsm_state);
-    always_comb tx_tdata = read_data;
+    logic_basic_queue_generic_memory #(
+        .DATA_WIDTH(DATA_WIDTH),
+        .ADDRESS_WIDTH(ADDRESS_WIDTH)
+    )
+    memory_service (
+        .*
+    );
 endmodule
