@@ -25,7 +25,12 @@
  *  rx          - Avalon-ST interface.
  *  tx          - AXI4-Stream interface.
  */
-module logic_axi4_stream_from_avalon_st (
+module logic_axi4_stream_from_avalon_st #(
+    int TDATA_BYTES = 1,
+    int TDEST_WIDTH = 1,
+    int TUSER_WIDTH = 1,
+    int TID_WIDTH = 1
+) (
     input aclk,
     input areset_n,
     `LOGIC_MODPORT(logic_avalon_st_if, rx) rx,
