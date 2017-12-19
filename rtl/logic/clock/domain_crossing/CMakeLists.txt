@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+add_hdl_source(logic_clock_domain_crossing_generic_read.sv)
+add_hdl_source(logic_clock_domain_crossing_generic_write.sv)
 add_hdl_source(logic_clock_domain_crossing_generic_memory.sv)
-add_hdl_source(logic_clock_domain_crossing_generic_read_service.sv)
-add_hdl_source(logic_clock_domain_crossing_generic_write_service.sv)
 
 add_hdl_source(logic_clock_domain_crossing_generic_read_sync.sv
     DEPENDS
@@ -32,10 +32,12 @@ add_hdl_source(logic_clock_domain_crossing_generic.sv
     DEPENDS
         logic_reset_synchronizer
         logic_clock_domain_crossing_generic_memory
+        logic_clock_domain_crossing_generic_read
         logic_clock_domain_crossing_generic_read_sync
-        logic_clock_domain_crossing_generic_read_service
+        logic_clock_domain_crossing_generic_write
         logic_clock_domain_crossing_generic_write_sync
-        logic_clock_domain_crossing_generic_write_service
+    VERILATOR_ANALYSIS
+        TRUE
 )
 
 add_hdl_source(logic_clock_domain_crossing_intel.sv

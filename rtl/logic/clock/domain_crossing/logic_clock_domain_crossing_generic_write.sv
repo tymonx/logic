@@ -15,7 +15,7 @@
 
 `include "logic.svh"
 
-/* Module: logic_clock_domain_crossing_genric_write_service
+/* Module: logic_clock_domain_crossing_genric_write
  *
  * Parameters:
  *  WIDTH       - Number of bits for input and output data signals.
@@ -32,7 +32,7 @@
  *  write_pointer   - Write pointer.
  *  read_pointer    - Read pointer.
  */
-module logic_clock_domain_crossing_generic_write_service #(
+module logic_clock_domain_crossing_generic_write #(
     int DATA_WIDTH = 1,
     int ADDRESS_WIDTH = 1
 ) (

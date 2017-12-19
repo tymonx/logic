@@ -86,7 +86,7 @@ module logic_clock_domain_crossing_generic #(
         .areset_n_synced(tx_areset_n)
     );
 
-    logic_clock_domain_crossing_generic_write_service #(
+    logic_clock_domain_crossing_generic_write #(
         .DATA_WIDTH(DATA_WIDTH),
         .ADDRESS_WIDTH(ADDRESS_WIDTH)
     )
@@ -94,7 +94,7 @@ module logic_clock_domain_crossing_generic #(
         .*
     );
 
-    logic_clock_domain_crossing_generic_read_service #(
+    logic_clock_domain_crossing_generic_read #(
         .DATA_WIDTH(DATA_WIDTH),
         .ADDRESS_WIDTH(ADDRESS_WIDTH)
     )
