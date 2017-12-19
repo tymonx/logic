@@ -15,27 +15,33 @@
 
 `include "logic.svh"
 
-/* Module: logic_axi4_lite_buffered
+/* Module: logic_axi4_lite_clock_crossing
  *
- * Improve timings between modules by adding register to ready signal path from
- * tx to rx ports and it keeps zero latency bus transcation on both sides.
+ * Clock domain crossing module between slave_aclk and master_aclk.
  *
  * Parameters:
  *  DATA_BYTES      - Number of bytes for wdata and rdata signals.
  *  ADDRESS_WIDTH   - Number of bits for awaddr and araddr signals.
+ *  CAPACITY        - Number of single data transactions that can be store in
+ *                    internal queue memory (FIFO capacity).
+ *  TARGET          - Target implementation.
  *
  * Ports:
- *  aclk        - Clock.
  *  areset_n    - Asynchronous active-low reset.
+ *  slave_aclk  - Clock for AXI4-Lite slave interface.
+ *  master_aclk - Clock for AXI4-Lite master interface.
  *  slave       - AXI4-Lite slave interface.
- *  master      - AXI$-Lite master interface.
+ *  master      - AXI4-Lite master interface.
  */
-module logic_axi4_lite_buffered #(
+module logic_axi4_lite_clock_crossing #(
     int DATA_BYTES = 4,
-    int ADDRESS_WIDTH = 1
+    int ADDRESS_WIDTH = 1,
+    int CAPACITY = 256,
+    logic_pkg::target_t TARGET = `LOGIC_CONFIG_TARGET
 ) (
-    input aclk,
     input areset_n,
+    input slave_aclk,
+    input master_aclk,
     `LOGIC_MODPORT(logic_axi4_lite_if, slave) slave,
     `LOGIC_MODPORT(logic_axi4_lite_if, master) master
 );
@@ -44,8 +50,16 @@ module logic_axi4_lite_buffered #(
     localparam PROT_WIDTH = $bits(logic_axi4_lite_pkg::access_t);
     localparam RESP_WIDTH = $bits(logic_axi4_lite_pkg::response_t);
 
-    logic_basic_buffered #(
-        .WIDTH(PROT_WIDTH + ADDRESS_WIDTH)
+    logic rx_aclk;
+    logic tx_aclk;
+
+    always_comb rx_aclk = slave_aclk;
+    always_comb tx_aclk = master_aclk;
+
+    logic_clock_domain_crossing #(
+        .WIDTH(PROT_WIDTH + ADDRESS_WIDTH),
+        .CAPACITY(CAPACITY),
+        .TARGET(TARGET)
     )
     write_address_channel (
         /* Slave */
@@ -59,8 +73,10 @@ module logic_axi4_lite_buffered #(
         .*
     );
 
-    logic_basic_buffered #(
-        .WIDTH(STRB_WIDTH + DATA_WIDTH)
+    logic_clock_domain_crossing #(
+        .WIDTH(STRB_WIDTH + DATA_WIDTH),
+        .CAPACITY(CAPACITY),
+        .TARGET(TARGET)
     )
     write_data_channel (
         /* Slave */
@@ -74,8 +90,10 @@ module logic_axi4_lite_buffered #(
         .*
     );
 
-    logic_basic_buffered #(
-        .WIDTH(RESP_WIDTH)
+    logic_clock_domain_crossing #(
+        .WIDTH(RESP_WIDTH),
+        .CAPACITY(CAPACITY),
+        .TARGET(TARGET)
     )
     write_response_channel (
         /* Slave */
@@ -89,8 +107,10 @@ module logic_axi4_lite_buffered #(
         .*
     );
 
-    logic_basic_buffered #(
-        .WIDTH(PROT_WIDTH + ADDRESS_WIDTH)
+    logic_clock_domain_crossing #(
+        .WIDTH(PROT_WIDTH + ADDRESS_WIDTH),
+        .CAPACITY(CAPACITY),
+        .TARGET(TARGET)
     )
     read_address_channel (
         /* Slave */
@@ -104,8 +124,10 @@ module logic_axi4_lite_buffered #(
         .*
     );
 
-    logic_basic_buffered #(
-        .WIDTH(RESP_WIDTH + DATA_WIDTH)
+    logic_clock_domain_crossing #(
+        .WIDTH(RESP_WIDTH + DATA_WIDTH),
+        .CAPACITY(CAPACITY),
+        .TARGET(TARGET)
     )
     read_data_channel (
         /* Slave */

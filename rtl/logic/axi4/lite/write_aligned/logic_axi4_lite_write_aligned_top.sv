@@ -82,7 +82,10 @@ module logic_axi4_lite_write_aligned_top #(
 
     `LOGIC_AXI4_LITE_IF_SLAVE_ASSIGN(slave, slave);
 
-    logic_axi4_lite_write_aligned unit (.*);
+    logic_axi4_lite_write_aligned #(
+        .DATA_BYTES(DATA_BYTES),
+        .ADDRESS_WIDTH(ADDRESS_WIDTH)
+    ) unit (.*);
 
     `LOGIC_AXI4_LITE_IF_MASTER_ASSIGN(master, master);
 endmodule

@@ -15,12 +15,15 @@
 
 `include "logic.svh"
 
-module logic_axi4_lite_buffered_top #(
+module logic_axi4_lite_clock_crossing_top #(
     int DATA_BYTES = 4,
-    int ADDRESS_WIDTH = 1
+    int ADDRESS_WIDTH = 1,
+    int CAPACITY = 256,
+    logic_pkg::target_t TARGET = `LOGIC_CONFIG_TARGET
 ) (
-    input aclk,
     input areset_n,
+    input slave_aclk,
+    input master_aclk,
     /* Slave - write address channel */
     input slave_awvalid,
     input [ADDRESS_WIDTH-1:0] slave_awaddr,
@@ -73,16 +76,24 @@ module logic_axi4_lite_buffered_top #(
     logic_axi4_lite_if #(
         .DATA_BYTES(DATA_BYTES),
         .ADDRESS_WIDTH(ADDRESS_WIDTH)
-    ) slave (.*);
+    ) slave (
+        .aclk(slave_aclk),
+        .*
+    );
 
     logic_axi4_lite_if #(
         .DATA_BYTES(DATA_BYTES),
         .ADDRESS_WIDTH(ADDRESS_WIDTH)
-    ) master (.*);
+    ) master (
+        .aclk(master_aclk),
+        .*
+    );
 
     `LOGIC_AXI4_LITE_IF_SLAVE_ASSIGN(slave, slave);
 
-    logic_axi4_lite_buffered #(
+    logic_axi4_lite_clock_crossing #(
+        .TARGET(TARGET),
+        .CAPACITY(CAPACITY),
         .DATA_BYTES(DATA_BYTES),
         .ADDRESS_WIDTH(ADDRESS_WIDTH)
     ) unit (.*);
