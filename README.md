@@ -116,11 +116,11 @@ Run only unit tests for AXI4-Stream:
 
 All waveforms generated from unit tests are located in:
 
-    build/output
+    output
 
 All unit tests logs are stored in:
 
-    build/Testing/Temporary/LastTest.log
+    Testing/Temporary/LastTest.log
 
 Verilator Coverage
 ------------------
