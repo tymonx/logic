@@ -34,130 +34,35 @@ module logic_axi4_lite_write_aligned #(
     `LOGIC_MODPORT(logic_axi4_lite_if, slave) slave,
     `LOGIC_MODPORT(logic_axi4_lite_if, master) master
 );
-    enum logic [1:0] {
-        FSM_IDLE,
-        FSM_WAIT_FOR_DATA,
-        FSM_WAIT_FOR_ADDRESS
-    } fsm_state;
+    logic areset_n_synced;
 
-    logic data_ready;
-    logic address_ready;
+    logic_axi4_lite_if #(
+        .DATA_BYTES(DATA_BYTES),
+        .ADDRESS_WIDTH(ADDRESS_WIDTH)
+    ) buffered (.*);
 
-    always_comb data_ready = slave.wvalid && master.wready;
-    always_comb address_ready = slave.awvalid && master.awready;
+    logic_reset_synchronizer
+    reset_service (
+        .*
+    );
 
-    always_ff @(posedge aclk or negedge areset_n) begin
-        if (!areset_n) begin
-            fsm_state <= FSM_IDLE;
-        end
-        else begin
-            unique case (fsm_state)
-            FSM_IDLE: begin
-                if (address_ready && !data_ready) begin
-                    fsm_state <= FSM_WAIT_FOR_DATA;
-                end
-                else if (!address_ready && data_ready) begin
-                    fsm_state <= FSM_WAIT_FOR_ADDRESS;
-                end
-            end
-            FSM_WAIT_FOR_DATA: begin
-                if (address_ready && data_ready) begin
-                    fsm_state <= FSM_IDLE;
-                end
-            end
-            FSM_WAIT_FOR_ADDRESS: begin
-                if (address_ready && data_ready) begin
-                    fsm_state <= FSM_IDLE;
-                end
-            end
-            default: begin
-                fsm_state <= FSM_IDLE;
-            end
-            endcase
-        end
-    end
+    logic_axi4_lite_buffered #(
+        .DATA_BYTES(DATA_BYTES),
+        .ADDRESS_WIDTH(ADDRESS_WIDTH)
+    )
+    buffer_service (
+        .areset_n(areset_n_synced),
+        .master(buffered),
+        .*
+    );
 
-    always_comb begin
-        unique case (fsm_state)
-        FSM_IDLE: begin
-            if (address_ready && !data_ready) begin
-                slave.awready = 1'b0;
-            end
-            else begin
-                slave.awready = master.awready;
-            end
-        end
-        FSM_WAIT_FOR_DATA: begin
-            slave.awready = 1'b0;
-        end
-        default: begin
-            slave.awready = master.awready;
-        end
-        endcase
-    end
-
-    always_comb begin
-        unique case (fsm_state)
-        FSM_IDLE: begin
-            if (!address_ready && data_ready) begin
-                slave.wready = 1'b0;
-            end
-            else begin
-                slave.wready = master.wready;
-            end
-        end
-        FSM_WAIT_FOR_ADDRESS: begin
-            slave.wready = 1'b0;
-        end
-        default: begin
-            slave.wready = master.wready;
-        end
-        endcase
-    end
-
-    always_ff @(posedge aclk or negedge areset_n) begin
-        if (!areset_n) begin
-            master.awvalid <= 1'b0;
-        end
-        else if (master.awready) begin
-            master.awvalid <= slave.awvalid && slave.wvalid && master.wready;
-        end
-    end
-
-    always_ff @(posedge aclk or negedge areset_n) begin
-        if (!areset_n) begin
-            master.wvalid <= 1'b0;
-        end
-        else if (master.wready) begin
-            master.wvalid <= slave.wvalid && slave.awvalid && master.awready;
-        end
-    end
-
-    always_ff @(posedge aclk) begin
-        if (master.wready) begin
-            master.wstrb <= slave.wstrb;
-            master.wdata <= slave.wdata;
-        end
-    end
-
-    always_ff @(posedge aclk) begin
-        if (master.awready) begin
-            master.awprot <= slave.awprot;
-            master.awaddr <= slave.awaddr;
-        end
-    end
-
-    always_comb slave.bvalid = master.bvalid;
-    always_comb slave.bresp = master.bresp;
-    always_comb master.bready = slave.bready;
-
-    always_comb master.arvalid = slave.arvalid;
-    always_comb master.araddr = slave.araddr;
-    always_comb master.arprot = slave.arprot;
-    always_comb slave.arready = master.arready;
-
-    always_comb slave.rvalid = master.rvalid;
-    always_comb slave.rresp = master.rresp;
-    always_comb slave.rdata = master.rdata;
-    always_comb master.rready = slave.rready;
+    logic_axi4_lite_write_aligned_main #(
+        .DATA_BYTES(DATA_BYTES),
+        .ADDRESS_WIDTH(ADDRESS_WIDTH)
+    )
+    write_align_service (
+        .areset_n(areset_n_synced),
+        .slave(buffered),
+        .*
+    );
 endmodule

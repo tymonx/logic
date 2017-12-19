@@ -12,7 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_hdl_source(logic_axi4_lite_write_aligned.sv)
+add_hdl_source(logic_axi4_lite_write_aligned_main.sv)
+
+add_hdl_source(logic_axi4_lite_write_aligned.sv
+    DEPENDS
+        logic_reset_synchronizer
+        logic_axi4_lite_buffered
+        logic_axi4_lite_write_aligned_main
+)
 
 add_hdl_source(logic_axi4_lite_write_aligned_top.sv
     DEPENDS
