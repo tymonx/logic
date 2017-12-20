@@ -202,6 +202,7 @@ function(add_quartus_project target_name)
 
     set(quartus_qsys_depends "")
     foreach (qsys_file ${ARG_QSYS_FILES})
+        get_filename_component(qsys_file ${qsys_file} REALPATH)
         get_filename_component(qsys_name ${qsys_file} NAME_WE)
         get_filename_component(qsys_dir ${qsys_file} DIRECTORY)
 
