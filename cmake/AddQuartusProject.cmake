@@ -95,21 +95,25 @@ function(add_quartus_project target_name)
     endif()
 
     foreach (ip_file ${ARG_IP_FILES})
+        get_filename_component(ip_file ${ip_file} REALPATH)
         list(APPEND quartus_assignments
             "set_global_assignment -name IP_FILE ${ip_file}")
     endforeach()
 
     foreach (sdc_file ${ARG_SDC_FILES})
+        get_filename_component(sdc_file ${sdc_file} REALPATH)
         list(APPEND quartus_assignments
             "set_global_assignment -name SDC_FILE ${sdc_file}")
     endforeach()
 
     foreach (qsys_file ${ARG_QSYS_FILE})
+        get_filename_component(qsys_file ${qsys_file} REALPATH)
         list(APPEND quartus_assignments
             "set_global_assignment -name QSYS_FILE ${qsys_file}")
     endforeach()
 
     foreach (tcl_file ${ARG_SOURCE_TCL_SCRIPT_FILES})
+        get_filename_component(tcl_file ${tcl_file} REALPATH)
         list(APPEND quartus_assignments
             "set_global_assignment -name SOURCE_TCL_SCRIPT_FILE ${tcl_file}")
     endforeach()
