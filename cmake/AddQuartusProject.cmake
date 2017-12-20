@@ -106,7 +106,7 @@ function(add_quartus_project target_name)
             "set_global_assignment -name SDC_FILE ${sdc_file}")
     endforeach()
 
-    foreach (qsys_file ${ARG_QSYS_FILE})
+    foreach (qsys_file ${ARG_QSYS_FILES})
         get_filename_component(qsys_file ${qsys_file} REALPATH)
         list(APPEND quartus_assignments
             "set_global_assignment -name QSYS_FILE ${qsys_file}")
