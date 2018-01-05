@@ -49,7 +49,15 @@ if (QUARTUS_FOUND)
     file(GLOB VERILOG_SOURCES "${QUARTUS_DIR}/eda/sim_lib/*.v")
     file(GLOB SYSTEMVERILOG_SOURCES "${QUARTUS_DIR}/eda/sim_lib/*.sv")
 
-    foreach (hdl_source ${VERILOG_SOURCES} ${SYSTEMVERILOG_SOURCES})
+    set(HDL_SOURCES
+        ${VERILOG_SOURCES}
+        ${SYSTEMVERILOG_SOURCES}
+        ${QUARTUS_DIR}/eda/sim_lib/mentor/twentynm_atoms_ncrypt.v
+        ${QUARTUS_DIR}/eda/sim_lib/mentor/twentynm_hip_atoms_ncrypt.v
+        ${QUARTUS_DIR}/eda/sim_lib/mentor/twentynm_hssi_atoms_ncrypt.v
+    )
+
+    foreach (hdl_source ${HDL_SOURCES})
         get_filename_component(hdl_name ${hdl_source} NAME_WE)
 
         add_hdl_source(${hdl_source}
