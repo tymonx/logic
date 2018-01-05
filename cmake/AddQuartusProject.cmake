@@ -90,26 +90,72 @@ function(add_quartus_project target_name)
     endif()
 
     if (ARG_IP_SEARCH_PATHS)
+        set(ip_search_paths "")
+
+        foreach(ip_path ${ARG_IP_SEARCH_PATHS})
+            get_filename_component(ip_path ${ip_path} REALPATH)
+
+            if (CYGWIN)
+                execute_process(COMMAND cygpath -m ${ip_path}
+                    OUTPUT_VARIABLE ip_path
+                    OUTPUT_STRIP_TRAILING_WHITESPACE)
+            endif()
+
+            list(APPEND ip_search_paths ${ip_path})
+        endforeach()
+
         set(quartus_ip_search_paths_assignment
-            "set_global_assignment -name IP_SEARCH_PATHS \"${ARG_IP_SEARCH_PATHS}\"")
+            "set_global_assignment -name IP_SEARCH_PATHS \"${ip_search_paths}\"")
     endif()
 
     foreach (ip_file ${ARG_IP_FILES})
+        get_filename_component(ip_file ${ip_file} REALPATH)
+
+        if (CYGWIN)
+            execute_process(COMMAND cygpath -m ${ip_file}
+                OUTPUT_VARIABLE ip_file
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+        endif()
+
         list(APPEND quartus_assignments
             "set_global_assignment -name IP_FILE ${ip_file}")
     endforeach()
 
     foreach (sdc_file ${ARG_SDC_FILES})
+        get_filename_component(sdc_file ${sdc_file} REALPATH)
+
+        if (CYGWIN)
+            execute_process(COMMAND cygpath -m ${sdc_file}
+                OUTPUT_VARIABLE sdc_file
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+        endif()
+
         list(APPEND quartus_assignments
             "set_global_assignment -name SDC_FILE ${sdc_file}")
     endforeach()
 
-    foreach (qsys_file ${ARG_QSYS_FILE})
+    foreach (qsys_file ${ARG_QSYS_FILES})
+        get_filename_component(qsys_file ${qsys_file} REALPATH)
+
+        if (CYGWIN)
+            execute_process(COMMAND cygpath -m ${qsys_file}
+                OUTPUT_VARIABLE qsys_file
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+        endif()
+
         list(APPEND quartus_assignments
             "set_global_assignment -name QSYS_FILE ${qsys_file}")
     endforeach()
 
     foreach (tcl_file ${ARG_SOURCE_TCL_SCRIPT_FILES})
+        get_filename_component(tcl_file ${tcl_file} REALPATH)
+
+        if (CYGWIN)
+            execute_process(COMMAND cygpath -m ${tcl_file}
+                OUTPUT_VARIABLE tcl_file
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+        endif()
+
         list(APPEND quartus_assignments
             "set_global_assignment -name SOURCE_TCL_SCRIPT_FILE ${tcl_file}")
     endforeach()
@@ -202,6 +248,7 @@ function(add_quartus_project target_name)
 
     set(quartus_qsys_depends "")
     foreach (qsys_file ${ARG_QSYS_FILES})
+        get_filename_component(qsys_file ${qsys_file} REALPATH)
         get_filename_component(qsys_name ${qsys_file} NAME_WE)
         get_filename_component(qsys_dir ${qsys_file} DIRECTORY)
 

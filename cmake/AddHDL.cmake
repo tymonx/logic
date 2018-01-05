@@ -663,6 +663,7 @@ function(add_hdl_test test_name)
         set(modelsim_flags "")
 
         list(APPEND modelsim_flags -c)
+        list(APPEND modelsim_flags -suppress 3009,7033)
         list(APPEND modelsim_flags -wlf ${modelsim_waveform})
         list(APPEND modelsim_flags -do ${MODELSIM_RUN_TCL})
 
