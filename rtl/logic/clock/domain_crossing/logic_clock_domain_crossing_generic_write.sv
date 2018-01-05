@@ -52,7 +52,7 @@ module logic_clock_domain_crossing_generic_write #(
         `LOGIC_DRC_EQUAL_OR_GREATER_THAN(ADDRESS_WIDTH, 2)
     end
 
-    localparam ALMOST_FULL = 2**ADDRESS_WIDTH - 3;
+    localparam ALMOST_FULL = (2**ADDRESS_WIDTH) - 3;
 
     logic [ADDRESS_WIDTH-1:0] difference;
 

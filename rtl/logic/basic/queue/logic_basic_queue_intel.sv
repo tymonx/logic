@@ -36,6 +36,7 @@ module logic_basic_queue_intel #(
     end
 
     localparam DATA_WIDTH = WIDTH;
+    localparam ALMOST_FULL = (2**ADDRESS_WIDTH) - 3;
 
     logic full;
     logic almost_full;
@@ -84,7 +85,7 @@ module logic_basic_queue_intel #(
         .lpm_numwords(2**ADDRESS_WIDTH),
         .lpm_type("scfifo"),
         .lpm_showahead("OFF"),
-        .almost_full_value(2**ADDRESS_WIDTH - 2),
+        .almost_full_value(ALMOST_FULL),
         .overflow_checking("OFF"),
         .underflow_checking("OFF")
     )

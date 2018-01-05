@@ -54,7 +54,7 @@ module logic_clock_domain_crossing_intel #(
     end
 
     localparam DATA_WIDTH = WIDTH;
-    localparam ALMOST_FULL = 2**ADDRESS_WIDTH - 3;
+    localparam ALMOST_FULL = (2**ADDRESS_WIDTH) - 3;
 
     logic wrfull;
     logic wrempty;

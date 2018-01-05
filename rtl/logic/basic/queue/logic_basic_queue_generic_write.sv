@@ -33,7 +33,7 @@ module logic_basic_queue_generic_write #(
     input capacity_valid,
     input [ADDRESS_WIDTH-1:0] capacity_data
 );
-    localparam ALMOST_FULL = 2**ADDRESS_WIDTH - 3;
+    localparam ALMOST_FULL = (2**ADDRESS_WIDTH) - 3;
 
     always_ff @(posedge aclk) begin
         write_data <= rx_tdata;
