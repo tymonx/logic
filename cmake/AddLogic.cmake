@@ -53,7 +53,7 @@ if (QUARTUS_FOUND)
         get_filename_component(hdl_name ${hdl_source} NAME_WE)
 
         add_hdl_source(${hdl_source}
-            LIBRARY intel_${hdl_name}
+            LIBRARY intel
             SYNTHESIZABLE FALSE
             MODELSIM_LINT FALSE
             MODELSIM_PEDANTICERRORS FALSE

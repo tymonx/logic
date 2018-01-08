@@ -25,13 +25,34 @@ include(AddQuartusProject)
 include(CMakeParseArguments)
 
 foreach (hdl_entry ${_HDL_LIST})
-    foreach (n RANGE ${_HDL_${hdl_entry}_LAST})
-        unset(_HDL_${hdl_entry}_KEY${n} CACHE)
-    endforeach()
-    unset(_HDL_${hdl_entry}_LAST CACHE)
+    unset(_HDL_${hdl_entry} CACHE)
 endforeach()
 
 set(_HDL_LIST "" CACHE INTERNAL "" FORCE)
+
+set(_HDL_ONE_VALUE_ARGUMENTS
+    NAME
+    TYPE
+    SOURCE
+    TARGET
+    LIBRARY
+    SYNTHESIZABLE
+    MODELSIM_LINT
+    MODELSIM_PEDANTICERRORS
+)
+
+set(_HDL_MULTI_VALUE_ARGUMENTS
+    COMPILE
+    COMPILE_EXCLUDE
+    DEFINES
+    INCLUDES
+    ANALYSIS
+    SOURCES
+    LIBRARIES
+    PARAMETERS
+    VERILATOR_CONFIGURATIONS
+    DEPENDS
+)
 
 set(VERILATOR_CONFIGURATION_FILE
     ${CMAKE_CURRENT_LIST_DIR}/VerilatorConfig.cmake.in
@@ -115,15 +136,14 @@ endfunction()
 function(get_hdl_depends hdl_target hdl_depends_var)
     set(hdl_depends "")
 
-    cmake_parse_arguments(ARG "" "" "DEPENDS" ${hdl_target})
+    cmake_parse_arguments(ARG "" "${_HDL_ONE_VALUE_ARGUMENTS}"
+        "${_HDL_MULTI_VALUE_ARGUMENTS}" ${_HDL_${hdl_target}})
 
     foreach (name ${ARG_DEPENDS})
-        foreach (n RANGE ${_HDL_${name}_LAST})
-            get_hdl_depends(_HDL_${name}_KEY${n} depends)
+        get_hdl_depends(${name} depends)
 
-            list(APPEND hdl_depends ${name})
-            list(APPEND hdl_depends ${depends})
-        endforeach()
+        list(APPEND hdl_depends ${name})
+        list(APPEND hdl_depends ${depends})
     endforeach()
 
     list(REMOVE_DUPLICATES hdl_depends)
@@ -131,44 +151,24 @@ function(get_hdl_depends hdl_target hdl_depends_var)
     set(${hdl_depends_var} ${hdl_depends} PARENT_SCOPE)
 endfunction()
 
-function(add_hdl_modelsim)
+function(add_hdl_modelsim hdl_name)
     if (NOT MODELSIM_FOUND)
         return()
     endif()
 
-    set(options)
+    cmake_parse_arguments(ARG "" "${_HDL_ONE_VALUE_ARGUMENTS}"
+        "${_HDL_MULTI_VALUE_ARGUMENTS}" ${_HDL_${hdl_name}} ${ARGN})
 
-    set(one_value_arguments
-        ID
-        NAME
-        TYPE
-        LIBRARY
-        SYNTHESIZABLE
-        MODELSIM_LINT
-        MODELSIM_PEDANTICERRORS
-    )
-
-    set(multi_value_arguments
-        COMPILE
-        COMPILE_EXCLUDE
-        DEPENDS
-        DEFINES
-        INCLUDES
-        ANALYSIS
-        VERILATOR_CONFIGURATIONS
-    )
-
-    cmake_parse_arguments(ARG "${options}" "${one_value_arguments}"
-        "${multi_value_arguments}" ${ARGN})
-
-    if (NOT ARG_COMPILE MATCHES ALL)
-        if (NOT ARG_COMPILE MATCHES ModelSim)
+    if (DEFINED ARG_COMPILE)
+        if (NOT ARG_COMPILE MATCHES ALL AND NOT ARG_COMPILE MATCHES ModelSim)
             return()
         endif()
     endif()
 
-    if (ARG_COMPILE_EXCLUDE MATCHES ModelSim)
-        return()
+    if (DEFINED ARG_COMPILE_EXCLUDE)
+        if (ARG_COMPILE_EXCLUDE MATCHES ModelSim)
+            return()
+        endif()
     endif()
 
     set(modelsim_compiler)
@@ -227,38 +227,44 @@ function(add_hdl_modelsim)
         file(MAKE_DIRECTORY ${modelsim_modules_dir}/${ARG_LIBRARY})
     endif()
 
-    set(modelsim_source ${ARG_SOURCE})
+    set(modelsim_sources "")
 
-    if (CYGWIN)
-        execute_process(COMMAND cygpath -m ${ARG_SOURCE}
-            OUTPUT_VARIABLE modelsim_source
-            OUTPUT_STRIP_TRAILING_WHITESPACE)
-    endif()
+    foreach (modelsim_source ${ARG_SOURCES} ${ARG_SOURCE})
+        if (CYGWIN)
+            execute_process(COMMAND cygpath -m ${modelsim_source}
+                OUTPUT_VARIABLE modelsim_source
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+        endif()
+
+        list(APPEND modelsim_sources ${modelsim_source})
+    endforeach()
+
+    list(REMOVE_DUPLICATES modelsim_sources)
 
     set(modelsim_depends "")
     set(modelsim_libraries "")
 
-    foreach (hdl_depend ${ARG_DEPENDS})
-        foreach (n RANGE ${_HDL_${hdl_depend}_LAST})
-            cmake_parse_arguments(DEP "" "LIBRARY;NAME"
-                "COMPILE;COMPILE_EXCLUDE" ${_HDL_${hdl_depend}_KEY${n}})
+    foreach (name ${ARG_DEPENDS})
+        cmake_parse_arguments(DEP "" "${_HDL_ONE_VALUE_ARGUMENTS}"
+            "${_HDL_MULTI_VALUE_ARGUMENTS}" ${_HDL_${name}})
 
-            if (NOT DEP_COMPILE_EXCLUDE MATCHES ModelSim)
-                if (DEP_COMPILE MATCHES ALL OR DEP_COMPILE MATCHES ModelSim)
-                    list(APPEND modelsim_libraries ${DEP_LIBRARY})
-                    list(APPEND modelsim_depends
-                        ${modelsim_modules_dir}/${DEP_LIBRARY}/${DEP_NAME}_${n})
-                endif()
+        if (DEFINED DEP_COMPILE_EXCLUDE)
+            if (DEP_COMPILE_EXCLUDE MATCHES ModelSim)
+                continue()
             endif()
-        endforeach()
-    endforeach()
+        endif()
 
-    if (_HDL_MODELSIM_LAST_${ARG_LIBRARY})
-        set(hdl_name ${_HDL_MODELSIM_LAST_${ARG_LIBRARY}})
+        if (DEFINED DEP_COMPILE)
+            if (NOT DEP_COMPILE MATCHES ALL AND
+                    NOT DEP_COMPILE MATCHES ModelSim)
+                continue()
+            endif()
+        endif()
 
+        list(APPEND modelsim_libraries ${DEP_LIBRARY})
         list(APPEND modelsim_depends
-            ${modelsim_modules_dir}/${ARG_LIBRARY}/${hdl_name})
-    endif()
+            modelsim-compile-${DEP_LIBRARY}-${DEP_NAME})
+    endforeach()
 
     list(REMOVE_DUPLICATES modelsim_depends)
     list(REMOVE_DUPLICATES modelsim_libraries)
@@ -267,25 +273,18 @@ function(add_hdl_modelsim)
         set(modelsim_flags ${modelsim_flags} -L ${modelsim_library})
     endforeach()
 
-    set(hdl_module_file
-        ${modelsim_modules_dir}/${ARG_LIBRARY}/${ARG_NAME}_${ARG_ID})
-
-    if (TARGET modelsim-compile-${ARG_LIBRARY})
-        get_target_property(hdl_depend modelsim-compile-${ARG_LIBRARY}
-            HDL_DEPEND)
-
-        list(APPEND modelsim_depends ${hdl_depend})
-    endif()
+    set(hdl_module_file ${modelsim_modules_dir}/${ARG_LIBRARY}/${ARG_NAME})
 
     add_custom_command(
         OUTPUT
             ${hdl_module_file}
         COMMAND
-            ${modelsim_compiler} ${modelsim_flags} ${modelsim_source}
+            ${modelsim_compiler} ${modelsim_flags} ${modelsim_sources}
         COMMAND
             ${CMAKE_COMMAND} -E touch ${hdl_module_file}
         DEPENDS
             ${ARG_SOURCE}
+            ${ARG_SOURCES}
             ${ARG_INCLUDES}
             ${modelsim_depends}
         WORKING_DIRECTORY
@@ -294,45 +293,40 @@ function(add_hdl_modelsim)
             "ModelSim compiling HDL ${ARG_NAME} to ${ARG_LIBRARY} library"
     )
 
+    add_custom_target(modelsim-compile-${ARG_LIBRARY}-${ARG_NAME}
+        DEPENDS ${hdl_module_file}
+    )
+
     if (NOT TARGET modelsim-compile-${ARG_LIBRARY})
-        add_custom_target(modelsim-compile-${ARG_LIBRARY}
-            DEPENDS ${hdl_module_file}
-        )
+        add_custom_target(modelsim-compile-${ARG_LIBRARY})
 
         add_dependencies(modelsim-compile-all modelsim-compile-${ARG_LIBRARY})
+    else()
+        get_target_property(prev_target modelsim-compile-${ARG_LIBRARY}
+            HDL_PREV_TARGET)
+
+        add_dependencies(modelsim-compile-${ARG_LIBRARY}-${ARG_NAME}
+            ${prev_target})
     endif()
+
+    add_dependencies(modelsim-compile-${ARG_LIBRARY}
+        modelsim-compile-${ARG_LIBRARY}-${ARG_NAME})
+
+    set_target_properties(modelsim-compile-${ARG_LIBRARY} PROPERTIES
+        HDL_PREV_TARGET modelsim-compile-${ARG_LIBRARY}-${ARG_NAME})
 endfunction()
 
-function(add_hdl_verilator)
+function(add_hdl_verilator hdl_name)
     if (NOT VERILATOR_FOUND)
         return()
     endif()
 
-    set(options)
+    cmake_parse_arguments(ARG "" "${_HDL_ONE_VALUE_ARGUMENTS}"
+        "${_HDL_MULTI_VALUE_ARGUMENTS}" ${_HDL_${hdl_name}} ${ARGN})
 
-    set(one_value_arguments
-        ID
-        NAME
-        TYPE
-        PREFIX
-        LIBRARY
-        SYNTHESIZABLE
-    )
-
-    set(multi_value_arguments
-        COMPILE
-        COMPILE_EXCLUDE
-        DEPENDS
-        DEFINES
-        INCLUDES
-        PARAMETERS
-        ANALYSIS
-        COMPILE
-        VERILATOR_CONFIGURATIONS
-    )
-
-    cmake_parse_arguments(ARG "${options}" "${one_value_arguments}"
-        "${multi_value_arguments}" ${ARGN})
+    if (NOT DEFINED ARG_SYNTHESIZABLE OR NOT ARG_SYNTHESIZABLE)
+        return()
+    endif()
 
     if (DEFINED ARG_ANALYSIS)
         if (ARG_ANALYSIS MATCHES ALL OR ARG_ANALYSIS MATCHES Verilator)
@@ -366,6 +360,10 @@ function(add_hdl_verilator)
         return()
     endif()
 
+    if (NOT DEFINED ARG_TARGET)
+        set(ARG_TARGET ${ARG_NAME})
+    endif()
+
     set(verilator_sources "")
     set(verilator_defines "")
     set(verilator_includes "")
@@ -375,20 +373,17 @@ function(add_hdl_verilator)
     list(APPEND verilator_defines ${ARG_DEFINES})
     list(APPEND verilator_parameters ${ARG_PARAMETERS})
 
-    get_hdl_depends(_HDL_${ARG_NAME}_KEY${ARG_ID} hdl_depends)
+    get_hdl_depends(${ARG_NAME} hdl_depends)
 
-    foreach (hdl_depend ${hdl_depends} _HDL_${ARG_NAME}_KEY${ARG_ID})
-        get_target_property(source ${hdl_depend} HDL_SOURCE)
-        list(APPEND verilator_sources ${source})
+    foreach (name ${hdl_depends} ${ARG_NAME})
+        cmake_parse_arguments(TMP "" "${_HDL_ONE_VALUE_ARGUMENTS}"
+            "${_HDL_MULTI_VALUE_ARGUMENTS}" ${_HDL_${name}})
 
-        get_target_property(defines ${hdl_depend} HDL_DEFINES)
-        list(APPEND verilator_defines ${defines})
-
-        get_target_property(includes ${hdl_depend} HDL_INCLUDES)
-        list(APPEND verilator_includes ${includes})
-
-        get_target_property(configs ${hdl_depend} HDL_VERILATOR_CONFIGURATIONS)
-        list(APPEND verilator_configurations ${configs})
+        list(APPEND verilator_sources ${TMP_SOURCES})
+        list(APPEND verilator_sources ${TMP_SOURCE})
+        list(APPEND verilator_defines ${TMP_DEFINES})
+        list(APPEND verilator_includes ${TMP_INCLUDES})
+        list(APPEND verilator_configurations ${TMP_VERILATOR_CONFIGURATIONS})
     endforeach()
 
     list(REMOVE_DUPLICATES verilator_defines)
@@ -397,7 +392,7 @@ function(add_hdl_verilator)
     list(REMOVE_DUPLICATES verilator_configurations)
 
     set(verilator_configuration_file
-        ${CMAKE_BINARY_DIR}/verilator/.configs/${hdl_target}.vlt)
+        ${CMAKE_BINARY_DIR}/verilator/.configs/${ARG_TARGET}.vlt)
 
     set(verilator_config "")
     foreach (config ${verilator_configurations})
@@ -426,7 +421,7 @@ function(add_hdl_verilator)
     list(APPEND verilator_flags ${verilator_configuration_file})
     list(APPEND verilator_flags ${verilator_sources})
 
-    set(verilator_target ${hdl_target})
+    set(verilator_target ${ARG_TARGET})
 
     if (ARG_PREFIX)
         set(verilator_target ${ARG_PREFIX})
@@ -451,8 +446,8 @@ function(add_hdl_verilator)
         add_dependencies(verilator-analysis-all
             verilator-analysis-${verilator_target})
 
-        if (TARGET ${hdl_target})
-            add_dependencies(${hdl_target}
+        if (TARGET ${ARG_TARGET})
+            add_dependencies(${ARG_TARGET}
                 verilator-analysis-${verilator_target})
         endif()
     endif()
@@ -516,8 +511,8 @@ function(add_hdl_verilator)
         add_dependencies(verilator-compile-all
             verilator-compile-${verilator_target})
 
-        if (TARGET ${hdl_target})
-            add_dependencies(${hdl_target}
+        if (TARGET ${ARG_TARGET})
+            add_dependencies(${ARG_TARGET}
                 verilator-compile-${verilator_target})
         endif()
 
@@ -543,6 +538,10 @@ function(add_hdl_verilator)
             ${verilator_output_directory}
         )
 
+        if (NOT TARGET ${verilator_target})
+            add_custom_target(${verilator_target})
+        endif()
+
         set_target_properties(${verilator_target} PROPERTIES
             LIBRARIES "${module_libraries}"
             INCLUDE_DIRECTORIES "${module_include_directories}"
@@ -550,41 +549,9 @@ function(add_hdl_verilator)
     endif()
 endfunction()
 
-function(add_hdl_source hdl_file)
-    if (NOT hdl_file)
-        message(FATAL_ERROR "HDL file not provided as first argument")
-    endif()
-
-    get_filename_component(hdl_file "${hdl_file}" REALPATH)
-
-    if (NOT EXISTS "${hdl_file}")
-        message(FATAL_ERROR "HDL file doesn't exist: ${hdl_file}")
-    endif()
-
-    get_filename_component(hdl_name "${hdl_file}" NAME_WE)
-
-    set(options)
-
-    set(one_value_arguments
-        NAME
-        TYPE
-        LIBRARY
-        SYNTHESIZABLE
-        MODELSIM_LINT
-        MODELSIM_PEDANTICERRORS
-    )
-
-    set(multi_value_arguments
-        COMPILE
-        DEPENDS
-        DEFINES
-        INCLUDES
-        ANALYSIS
-        VERILATOR_CONFIGURATIONS
-    )
-
-    cmake_parse_arguments(ARG "${options}" "${one_value_arguments}"
-        "${multi_value_arguments}" ${ARGN})
+function(add_hdl_source)
+    cmake_parse_arguments(ARG "" "${_HDL_ONE_VALUE_ARGUMENTS}"
+        "${_HDL_MULTI_VALUE_ARGUMENTS}" ${ARGN})
 
     macro(set_default_value name value)
         if (NOT DEFINED ARG_${name})
@@ -592,12 +559,36 @@ function(add_hdl_source hdl_file)
         endif()
     endmacro()
 
+    if (NOT DEFINED ARG_SOURCES)
+        set(ARG_SOURCES "")
+    endif()
+
+    foreach (hdl_file ${ARG_UNPARSED_ARGUMENTS})
+        if (NOT ARG_SOURCE)
+            set(ARG_SOURCE ${hdl_file})
+        else()
+            list(APPEND ARG_SOURCES ${hdl_file})
+        endif()
+    endforeach()
+
+    if (NOT ARG_SOURCE)
+        message(FATAL_ERROR "HDL file not provided as first argument")
+    endif()
+
+    get_filename_component(ARG_SOURCE "${ARG_SOURCE}" REALPATH)
+
+    if (NOT EXISTS "${ARG_SOURCE}")
+        message(FATAL_ERROR "HDL file doesn't exist: ${ARG_SOURCE}")
+    endif()
+
+    get_filename_component(hdl_name "${ARG_SOURCE}" NAME_WE)
+
     set_default_value(NAME ${hdl_name})
     set_default_value(DEPENDS "")
     set_default_value(DEFINES "")
     set_default_value(INCLUDES "")
     set_default_value(LIBRARY work)
-    set_default_value(COMPILE ALL)
+    set_default_value(COMPILE ModelSim Quartus)
     set_default_value(ANALYSIS FALSE)
     set_default_value(SYNTHESIZABLE FALSE)
     set_default_value(MODELSIM_LINT TRUE)
@@ -637,68 +628,62 @@ function(add_hdl_source hdl_file)
 
     set(ARG_INCLUDES ${arg_includes})
 
+    set(arg_sources "")
+
+    foreach (arg_source ${ARG_SOURCES})
+        get_filename_component(arg_source "${arg_source}" REALPATH)
+        list(APPEND arg_sources ${arg_source})
+    endforeach()
+
+    set(ARG_SOURCES ${arg_sources})
+
     if (NOT ARG_TYPE)
-        if (hdl_file MATCHES .sv)
+        if (ARG_SOURCE MATCHES .sv)
             set(ARG_TYPE SystemVerilog)
-        elseif (hdl_file MATCHES .vhd)
+        elseif (ARG_SOURCE MATCHES .vhd)
             set(ARG_TYPE VHDL)
-        elseif (hdl_file MATCHES .v)
+        elseif (ARG_SOURCE MATCHES .v)
             set(ARG_TYPE Verilog)
-        elseif (hdl_file MATCHES .qsys)
+        elseif (ARG_SOURCE MATCHES .qsys)
             set(ARG_TYPE Qsys)
-        elseif (hdl_file MATCHES .ip)
+        elseif (ARG_SOURCE MATCHES .ip)
             set(ARG_TYPE IP)
-        elseif (hdl_file MATCHES .tcl)
+        elseif (ARG_SOURCE MATCHES .tcl)
             set(ARG_TYPE Tcl)
         else()
-            message(FATAL_ERROR "HDL type is unknown for file ${hdl_file}")
+            message(FATAL_ERROR "HDL type is unknown for file ${ARG_SOURCE}")
         endif()
     endif()
 
-    if (NOT DEFINED _HDL_${ARG_NAME}_KEY0)
-        set(_HDL_${ARG_NAME}_KEY0 "" CACHE INTERNAL "" FORCE)
-        set(_HDL_${ARG_NAME}_LAST 0 CACHE INTERNAL "" FORCE)
-        set(n 0)
-
+    if (NOT DEFINED _HDL_${ARG_NAME})
         set(hdl_list ${_HDL_LIST})
         list(APPEND hdl_list ${ARG_NAME})
         set(_HDL_LIST "${hdl_list}" CACHE INTERNAL "" FORCE)
-    else()
-        math(EXPR n "${_HDL_${ARG_NAME}_LAST}+1")
-
-        set(_HDL_${ARG_NAME}_KEY${n} "" CACHE INTERNAL "" FORCE)
-        set(_HDL_${ARG_NAME}_LAST ${n} CACHE INTERNAL "" FORCE)
     endif()
 
     set(hdl_entry "")
 
-    list(APPEND hdl_entry SOURCE "${hdl_file}")
-
-    foreach (argument ${one_value_arguments})
+    foreach (argument ${_HDL_ONE_VALUE_ARGUMENTS})
         list(APPEND hdl_entry ${argument} ${ARG_${argument}})
     endforeach()
 
-    foreach (argument ${multi_value_arguments})
+    foreach (argument ${_HDL_MULTI_VALUE_ARGUMENTS})
         list(APPEND hdl_entry ${argument} ${ARG_${argument}})
     endforeach()
 
-    list(APPEND hdl_entry ID ${n})
+    set(_HDL_${ARG_NAME} "${hdl_entry}" CACHE INTERNAL "" FORCE)
 
-    set(_HDL_${ARG_NAME}_KEY${_HDL_${ARG_NAME}_LAST} "${hdl_entry}"
-        CACHE INTERNAL "" FORCE)
-
-    add_hdl_modelsim(${hdl_entry})
-    #add_hdl_verilator(${hdl_entry})
+    add_hdl_modelsim(${ARG_NAME})
+    add_hdl_verilator(${ARG_NAME})
     #add_hdl_quartus(${hdl_target})
     #add_hdl_vivado(${hdl_target})
 endfunction()
 
 function(add_hdl_systemc target_name)
-    return()
-
     add_hdl_verilator(${target_name}
-        COMPILE TRUE
-        ANALYSIS TRUE
+        COMPILE Verilator
+        ANALYSIS Verilator
+        SYNTHESIZABLE TRUE
         ${ARGN}
     )
 endfunction()
@@ -728,8 +713,9 @@ function(add_hdl_test test_name)
         get_hdl_depends(${test_name} hdl_depends)
 
         foreach (hdl_name ${hdl_depends} ${test_name})
-            get_target_property(hdl_library ${hdl_name} HDL_LIBRARY)
-            list(APPEND hdl_libraries ${hdl_library})
+            cmake_parse_arguments(TMP "" "${_HDL_ONE_VALUE_ARGUMENTS}"
+                "${_HDL_MULTI_VALUE_ARGUMENTS}" ${_HDL_${hdl_name}})
+            list(APPEND hdl_libraries ${TMP_LIBRARY})
         endforeach()
 
         list(REMOVE_DUPLICATES hdl_libraries)
