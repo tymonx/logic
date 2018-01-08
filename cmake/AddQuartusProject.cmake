@@ -271,9 +271,9 @@ function(add_quartus_project target_name)
             COMMAND
                 ${QUARTUS_QSYS_GENERATE}
             ARGS
-                --upgrade-ip-cores
                 --quartus-project=${target_name}.qpf
-                ${target_name}.ip
+                --upgrade-ip-cores
+                ${name}.ip
             DEPENDS
                 ${tcl_file}
             WORKING_DIRECTORY
