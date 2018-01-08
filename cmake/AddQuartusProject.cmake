@@ -57,6 +57,7 @@ function(add_quartus_project target_name)
         IP_FILES
         SDC_FILES
         QSYS_FILES
+        QSYS_TCL_FILES
         IP_SEARCH_PATHS
         NUM_PARALLEL_PROCESSORS
         SOURCE_TCL_SCRIPT_FILES
@@ -245,6 +246,40 @@ function(add_quartus_project target_name)
     configure_file(
         ${ADD_QUARTUS_PROJECT_CURRENT_DIR}/AddQuartusProject.qsf.cmake.in
         ${ARG_PROJECT_DIRECTORY}/${target_name}.qsf)
+
+    foreach (tcl_file ${ARG_QSYS_TCL_FILES})
+        get_filename_component(tcl_file ${tcl_file} REALPATH)
+        get_filename_component(name ${tcl_file} NAME_WE)
+        get_filename_component(dir ${tcl_file} DIRECTORY)
+
+        if (CYGWIN)
+            execute_process(COMMAND cygpath -m ${tcl_file}
+                OUTPUT_VARIABLE qsys_tcl_file
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+        endif()
+
+        add_custom_command(
+            OUTPUT
+                ${dir}/${name}.ip
+            COMMAND
+                ${QUARTUS_QSYS_SCRIPT}
+            ARGS
+                --quartus-project=${target_name}.qpf
+                --script=${qsys_tcl_file}
+            COMMAND
+                ${QUARTUS_QSYS_GENERATE}
+            ARGS
+                --upgrade-ip-cores
+                --quartus-project=${target_name}.qpf
+                ${target_name}.ip
+            DEPENDS
+                ${tcl_file}
+            WORKING_DIRECTORY
+                ${output_directory}
+        )
+
+        list(APPEND quartus_ip_files ${dir}/${name}.ip)
+    endforeach()
 
     set(quartus_qsys_depends "")
     foreach (qsys_file ${ARG_QSYS_FILES})
