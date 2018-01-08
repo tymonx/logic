@@ -252,8 +252,10 @@ function(add_quartus_project target_name)
         get_filename_component(name ${tcl_file} NAME_WE)
         get_filename_component(dir ${tcl_file} DIRECTORY)
 
+        set(qsys_tcl_file ${tcl_file})
+
         if (CYGWIN)
-            execute_process(COMMAND cygpath -m ${tcl_file}
+            execute_process(COMMAND cygpath -m ${qsys_tcl_file}
                 OUTPUT_VARIABLE qsys_tcl_file
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
         endif()
