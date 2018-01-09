@@ -57,6 +57,7 @@ function(add_quartus_project target_name)
         IP_FILES
         SDC_FILES
         QSYS_FILES
+        QSYS_TCL_FILES
         IP_SEARCH_PATHS
         NUM_PARALLEL_PROCESSORS
         SOURCE_TCL_SCRIPT_FILES
@@ -65,6 +66,7 @@ function(add_quartus_project target_name)
     cmake_parse_arguments(ARG "${options}" "${one_value_arguments}"
         "${multi_value_arguments}" ${ARGN})
 
+    set(quartus_depends "")
     set(quartus_assignments "")
 
     if (DEFINED QUARTUS_NUM_PARALLEL_PROCESSORS)
@@ -110,6 +112,7 @@ function(add_quartus_project target_name)
 
     foreach (ip_file ${ARG_IP_FILES})
         get_filename_component(ip_file ${ip_file} REALPATH)
+        list(APPEND quartus_depends ${ip_file})
 
         if (CYGWIN)
             execute_process(COMMAND cygpath -m ${ip_file}
@@ -121,8 +124,48 @@ function(add_quartus_project target_name)
             "set_global_assignment -name IP_FILE ${ip_file}")
     endforeach()
 
+    foreach (tcl_file ${ARG_QSYS_TCL_FILES})
+        get_filename_component(tcl_file ${tcl_file} REALPATH)
+        get_filename_component(name ${tcl_file} NAME_WE)
+        get_filename_component(dir ${tcl_file} DIRECTORY)
+
+        set(ip_file ${dir}/${name}.ip)
+        list(APPEND quartus_depends ${ip_file})
+
+        if (CYGWIN)
+            execute_process(COMMAND cygpath -m ${ip_file}
+                OUTPUT_VARIABLE ip_file
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+        endif()
+
+        add_custom_command(
+            OUTPUT
+                ${dir}/${name}.ip
+            COMMAND
+                ${QUARTUS_QSYS_SCRIPT}
+            ARGS
+                --quartus-project=${target_name}.qpf
+                --script=${tcl_file}
+            COMMAND
+                ${QUARTUS_QSYS_GENERATE}
+            ARGS
+                --quartus-project=${target_name}.qpf
+                --update-ip-cores
+                ${dir}/${name}.ip
+
+            COMMENT
+                "Quartus is creating IP file: ${name}.ip"
+            WORKING_DIRECTORY
+                ${ARG_PROJECT_DIRECTORY}
+        )
+
+        list(APPEND quartus_assignments
+            "set_global_assignment -name IP_FILE ${ip_file}")
+    endforeach()
+
     foreach (sdc_file ${ARG_SDC_FILES})
         get_filename_component(sdc_file ${sdc_file} REALPATH)
+        list(APPEND quartus_depends ${sdc_file})
 
         if (CYGWIN)
             execute_process(COMMAND cygpath -m ${sdc_file}
@@ -136,6 +179,7 @@ function(add_quartus_project target_name)
 
     foreach (qsys_file ${ARG_QSYS_FILES})
         get_filename_component(qsys_file ${qsys_file} REALPATH)
+        list(APPEND quartus_depends ${qsys_file})
 
         if (CYGWIN)
             execute_process(COMMAND cygpath -m ${qsys_file}
@@ -149,6 +193,7 @@ function(add_quartus_project target_name)
 
     foreach (tcl_file ${ARG_SOURCE_TCL_SCRIPT_FILES})
         get_filename_component(tcl_file ${tcl_file} REALPATH)
+        list(APPEND quartus_depends ${tcl_file})
 
         if (CYGWIN)
             execute_process(COMMAND cygpath -m ${tcl_file}

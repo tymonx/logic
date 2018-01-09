@@ -39,19 +39,22 @@ set(_HDL_ONE_VALUE_ARGUMENTS
     SYNTHESIZABLE
     MODELSIM_LINT
     MODELSIM_PEDANTICERRORS
+    OUTPUT_LIBRARIES
+    OUTPUT_INCLUDES
 )
 
 set(_HDL_MULTI_VALUE_ARGUMENTS
     COMPILE
     COMPILE_EXCLUDE
     DEFINES
+    DEPENDS
     INCLUDES
     ANALYSIS
     SOURCES
     LIBRARIES
     PARAMETERS
+    MODELSIM_FLAGS
     VERILATOR_CONFIGURATIONS
-    DEPENDS
 )
 
 set(VERILATOR_CONFIGURATION_FILE
@@ -159,14 +162,14 @@ function(add_hdl_modelsim hdl_name)
     cmake_parse_arguments(ARG "" "${_HDL_ONE_VALUE_ARGUMENTS}"
         "${_HDL_MULTI_VALUE_ARGUMENTS}" ${_HDL_${hdl_name}} ${ARGN})
 
-    if (DEFINED ARG_COMPILE)
-        if (NOT ARG_COMPILE MATCHES ALL AND NOT ARG_COMPILE MATCHES ModelSim)
+    if (DEFINED ARG_COMPILE_EXCLUDE)
+        if (ARG_COMPILE_EXCLUDE MATCHES ModelSim)
             return()
         endif()
     endif()
 
-    if (DEFINED ARG_COMPILE_EXCLUDE)
-        if (ARG_COMPILE_EXCLUDE MATCHES ModelSim)
+    if (DEFINED ARG_COMPILE)
+        if (NOT ARG_COMPILE MATCHES ALL AND NOT ARG_COMPILE MATCHES ModelSim)
             return()
         endif()
     endif()
@@ -215,6 +218,8 @@ function(add_hdl_modelsim hdl_name)
     elseif (ARG_TYPE MATCHES VHDL)
         list(APPEND modelsim_flags -2008)
     endif()
+
+    list(APPEND modelsim_flags ${ARG_MODELSIM_FLAGS})
 
     set(modelsim_modules_dir ${CMAKE_BINARY_DIR}/modelsim/.modules)
 
@@ -511,11 +516,6 @@ function(add_hdl_verilator hdl_name)
         add_dependencies(verilator-compile-all
             verilator-compile-${verilator_target})
 
-        if (TARGET ${ARG_TARGET})
-            add_dependencies(${ARG_TARGET}
-                verilator-compile-${verilator_target})
-        endif()
-
         add_library(verilated_${verilator_target} STATIC IMPORTED)
 
         add_dependencies(verilated_${verilator_target}
@@ -526,30 +526,39 @@ function(add_hdl_verilator hdl_name)
                 ${verilator_output_directory}/${verilator_library}
         )
 
-        set(module_libraries
-            verilated_${verilator_target}
-            verilated
-            ${SYSTEMC_LIBRARIES}
-        )
-
-        set(module_include_directories
-            ${VERILATOR_INCLUDE_DIR}
-            ${SYSTEMC_INCLUDE_DIRS}
-            ${verilator_output_directory}
-        )
-
-        if (NOT TARGET ${verilator_target})
-            add_custom_target(${verilator_target})
+        if (ARG_OUTPUT_LIBRARIES)
+            set(${ARG_OUTPUT_LIBRARIES}
+                verilated_${verilator_target}
+                verilated
+                ${SYSTEMC_LIBRARIES}
+                PARENT_SCOPE
+            )
         endif()
 
-        set_target_properties(${verilator_target} PROPERTIES
-            LIBRARIES "${module_libraries}"
-            INCLUDE_DIRECTORIES "${module_include_directories}"
-        )
+        if (ARG_OUTPUT_INCLUDES)
+            set(${ARG_OUTPUT_INCLUDES}
+                ${VERILATOR_INCLUDE_DIR}
+                ${SYSTEMC_INCLUDE_DIRS}
+                ${verilator_output_directory}
+                PARENT_SCOPE
+            )
+        endif()
     endif()
 endfunction()
 
-function(add_hdl_source)
+function(add_hdl_source hdl_file)
+    if (NOT hdl_file)
+        message(FATAL_ERROR "HDL file not provided as first argument")
+    endif()
+
+    get_filename_component(hdl_file "${hdl_file}" REALPATH)
+
+    if (NOT EXISTS "${hdl_file}")
+        message(FATAL_ERROR "HDL file doesn't exist: ${hdl_file}")
+    endif()
+
+    get_filename_component(hdl_name "${hdl_file}" NAME_WE)
+
     cmake_parse_arguments(ARG "" "${_HDL_ONE_VALUE_ARGUMENTS}"
         "${_HDL_MULTI_VALUE_ARGUMENTS}" ${ARGN})
 
@@ -559,34 +568,13 @@ function(add_hdl_source)
         endif()
     endmacro()
 
-    if (NOT DEFINED ARG_SOURCES)
-        set(ARG_SOURCES "")
-    endif()
-
-    foreach (hdl_file ${ARG_UNPARSED_ARGUMENTS})
-        if (NOT ARG_SOURCE)
-            set(ARG_SOURCE ${hdl_file})
-        else()
-            list(APPEND ARG_SOURCES ${hdl_file})
-        endif()
-    endforeach()
-
-    if (NOT ARG_SOURCE)
-        message(FATAL_ERROR "HDL file not provided as first argument")
-    endif()
-
-    get_filename_component(ARG_SOURCE "${ARG_SOURCE}" REALPATH)
-
-    if (NOT EXISTS "${ARG_SOURCE}")
-        message(FATAL_ERROR "HDL file doesn't exist: ${ARG_SOURCE}")
-    endif()
-
-    get_filename_component(hdl_name "${ARG_SOURCE}" NAME_WE)
-
     set_default_value(NAME ${hdl_name})
+    set_default_value(SOURCE ${hdl_file})
+    set_default_value(SOURCES "")
     set_default_value(DEPENDS "")
     set_default_value(DEFINES "")
     set_default_value(INCLUDES "")
+    set_default_value(LIBRARIES "")
     set_default_value(LIBRARY work)
     set_default_value(COMPILE ModelSim Quartus)
     set_default_value(ANALYSIS FALSE)
@@ -689,6 +677,15 @@ function(add_hdl_systemc target_name)
 endfunction()
 
 function(add_hdl_test test_name)
+    set(one_value_arguments)
+
+    set(multi_value_arguments
+        MODELSIM_FLAGS
+    )
+
+    cmake_parse_arguments(ARG "" "${one_value_arguments}"
+        "${multi_value_arguments}" ${ARGN})
+
     if (MODELSIM_FOUND)
         set(modelsim_waveform ${CMAKE_BINARY_DIR}/output/${test_name}.wlf)
 
@@ -709,6 +706,7 @@ function(add_hdl_test test_name)
         list(APPEND modelsim_flags -c)
         list(APPEND modelsim_flags -wlf ${modelsim_waveform})
         list(APPEND modelsim_flags -do ${MODELSIM_RUN_TCL})
+        list(APPEND modelsim_flags ${ARG_MODELSIM_FLAGS})
 
         get_hdl_depends(${test_name} hdl_depends)
 
