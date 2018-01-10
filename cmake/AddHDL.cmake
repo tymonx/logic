@@ -727,6 +727,7 @@ function(add_hdl_unit_test hdl_file)
         INCLUDES
         MODELSIM_FLAGS
         MODELSIM_SUPPRESS
+        MODELSIM_WARNING_AS_ERROR
     )
 
     cmake_parse_arguments(ARG "" "${one_value_arguments}"
@@ -747,6 +748,7 @@ function(add_hdl_unit_test hdl_file)
     set_default_value(LIBRARY unit_test)
     set_default_value(MODELSIM_FLAGS "")
     set_default_value(MODELSIM_SUPPRESS "")
+    set_default_value(MODELSIM_WARNING_AS_ERROR TRUE)
 
     configure_file("${SVUNIT_TEST_RUNNER_FILE}"
         "${CMAKE_CURRENT_BINARY_DIR}/${ARG_NAME}_testrunner.sv")
@@ -810,6 +812,11 @@ function(add_hdl_unit_test hdl_file)
             endif()
         endif()
 
+        if (ARG_MODELSIM_WARNING_AS_ERROR)
+            list(APPEND modelsim_flags -warning error)
+        endif()
+
+        list(APPEND modelsim_flags +nowarn3116)
         list(APPEND modelsim_flags -c)
         list(APPEND modelsim_flags -wlf "${modelsim_waveform}")
         list(APPEND modelsim_flags -do "${MODELSIM_RUN_TCL}")
