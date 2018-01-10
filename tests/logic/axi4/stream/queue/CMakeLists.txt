@@ -24,13 +24,12 @@ set(MODULE_DEFINITIONS
 
 add_hdl_systemc(${MODULE_TOP}
     DEFINES ${MODULE_DEFINITIONS}
+    OUTPUT_INCLUDES module_includes
+    OUTPUT_LIBRARIES module_libraries
 )
 
-get_target_property(MODULE_LIBRARIES ${MODULE_TOP} LIBRARIES)
-get_target_property(MODULE_INCLUDES ${MODULE_TOP} INCLUDE_DIRECTORIES)
-
 include_directories(SYSTEM
-    ${MODULE_INCLUDES}
+    ${module_includes}
 )
 
 set_source_files_properties(main.cpp PROPERTIES
@@ -47,7 +46,7 @@ add_executable(${MODULE_NAME_TEST}
 
 target_link_libraries(${MODULE_NAME_TEST}
     logic
-    ${MODULE_LIBRARIES}
+    ${module_libraries}
 )
 
 set(TESTS

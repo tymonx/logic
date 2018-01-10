@@ -41,7 +41,7 @@ if (SVUNIT_FOUND)
     add_hdl_source(${SVUNIT_HDL_PACKAGE}
         LIBRARY svunit
         SYNTHESIZABLE FALSE
-        INCLUDES ${SVUNIT_INCLUDE_DIR}
+        INCLUDES "${SVUNIT_INCLUDE_DIR}"
     )
 endif()
 
@@ -50,9 +50,9 @@ if (QUARTUS_FOUND)
     file(GLOB SYSTEMVERILOG_SOURCES "${QUARTUS_DIR}/eda/sim_lib/*.sv")
 
     foreach (hdl_source ${VERILOG_SOURCES} ${SYSTEMVERILOG_SOURCES})
-        get_filename_component(hdl_name ${hdl_source} NAME_WE)
+        get_filename_component(hdl_name "${hdl_source}" NAME_WE)
 
-        add_hdl_source(${hdl_source}
+        add_hdl_source("${hdl_source}"
             LIBRARY intel
             SYNTHESIZABLE FALSE
             MODELSIM_LINT FALSE
@@ -62,4 +62,24 @@ if (QUARTUS_FOUND)
                 "lint_off -msg STMTDLY -file \"${hdl_source}\""
         )
     endforeach()
+
+    if (MODELSIM_FOUND)
+        file(GLOB VERILOG_SOURCES "${QUARTUS_DIR}/eda/sim_lib/mentor/*.v")
+        file(GLOB SYSTEMVERILOG_SOURCES "${QUARTUS_DIR}/eda/sim_lib/mentor/*.sv")
+
+        foreach (hdl_source ${VERILOG_SOURCES} ${SYSTEMVERILOG_SOURCES})
+            get_filename_component(hdl_name "${hdl_source}" NAME_WE)
+
+            add_hdl_source("${hdl_source}"
+                LIBRARY intel
+                SYNTHESIZABLE FALSE
+                MODELSIM_LINT FALSE
+                MODELSIM_PEDANTICERRORS FALSE
+                COMPILE ModelSim
+                VERILATOR_CONFIGURATIONS
+                    "lint_off -file \"${hdl_source}\""
+                    "lint_off -msg STMTDLY -file \"${hdl_source}\""
+            )
+        endforeach()
+    endif()
 endif()
