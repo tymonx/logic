@@ -274,7 +274,7 @@ Verilator
 Required: No to build logic library only for SystemC not for HDL.
 Required for unit tests
 
-Minimum required version: master branch (51787d68)
+Minimum required version: 3.918
 
 Install required packages for Verilator tool.
 
@@ -285,10 +285,6 @@ Fedora:
 Ubuntu:
 
     sudo apt-get install git make autoconf g++ bison flex
-
-Patch for SystemC 2.3.2:
-
-    https://www.veripool.org/issues/1251-Verilator-Compilation-error-for-SystemC-2-3-2
 
 Download Verilator source code from remote git repository:
 
@@ -316,7 +312,7 @@ Set `SYSTEMC_LIBDIR` environment variable for Verilator:
 
 Change the newest development version to stable version:
 
-    git checkout HEAD
+    git checkout verilator_3_918
 
 Create configure script:
 

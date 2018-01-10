@@ -135,7 +135,7 @@ Verilator analysis
 Enable Verilator analysis:
 
     add_hdl_source(<hdl-module-filename>
-        VERILATOR_ANALYSIS
+        ANALYSIS
             TRUE
     )
 
