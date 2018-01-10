@@ -28,11 +28,11 @@ module logic_basic_gray2binary #(
     input [WIDTH-1:0] i,
     output logic [WIDTH-1:0] o
 );
-    genvar k;
+    always_comb begin
+        o[WIDTH-1] = i[WIDTH-1];
 
-    generate
-        for (k = 0; k < WIDTH; ++k) begin: conversion
-            always_comb o[k] = ^i[WIDTH-1:k];
+        for (int k = 0; k < (WIDTH - 1); ++k) begin
+            o[k] = i[k] ^ o[k + 1];
         end
-    endgenerate
+    end
 endmodule

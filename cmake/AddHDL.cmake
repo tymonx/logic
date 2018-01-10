@@ -39,6 +39,7 @@ set(_HDL_ONE_VALUE_ARGUMENTS
     SYNTHESIZABLE
     MODELSIM_LINT
     MODELSIM_PEDANTICERRORS
+    MODELSIM_WARNING_AS_ERROR
     OUTPUT_LIBRARIES
     OUTPUT_INCLUDES
 )
@@ -208,6 +209,10 @@ function(add_hdl_modelsim hdl_name)
 
     if (ARG_MODELSIM_PEDANTICERRORS)
         list(APPEND modelsim_flags -pedanticerrors)
+    endif()
+
+    if (ARG_MODELSIM_WARNING_AS_ERROR)
+        list(APPEND modelsim_flags -warning error)
     endif()
 
     list(APPEND modelsim_flags -work ${ARG_LIBRARY})
@@ -596,6 +601,7 @@ function(add_hdl_source hdl_file)
     set_default_value(SYNTHESIZABLE FALSE)
     set_default_value(MODELSIM_LINT TRUE)
     set_default_value(MODELSIM_PEDANTICERRORS TRUE)
+    set_default_value(MODELSIM_WARNING_AS_ERROR TRUE)
     set_default_value(VERILATOR_CONFIGURATIONS "")
 
     if (HDL_LIBRARY)

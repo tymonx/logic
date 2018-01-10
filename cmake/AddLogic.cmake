@@ -57,6 +57,7 @@ if (QUARTUS_FOUND)
             SYNTHESIZABLE FALSE
             MODELSIM_LINT FALSE
             MODELSIM_PEDANTICERRORS FALSE
+            MODELSIM_WARNING_AS_ERROR FALSE
             VERILATOR_CONFIGURATIONS
                 "lint_off -file \"${hdl_source}\""
                 "lint_off -msg STMTDLY -file \"${hdl_source}\""
@@ -75,6 +76,7 @@ if (QUARTUS_FOUND)
                 SYNTHESIZABLE FALSE
                 MODELSIM_LINT FALSE
                 MODELSIM_PEDANTICERRORS FALSE
+                MODELSIM_WARNING_AS_ERROR FALSE
                 COMPILE ModelSim
                 VERILATOR_CONFIGURATIONS
                     "lint_off -file \"${hdl_source}\""
