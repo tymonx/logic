@@ -12,6 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# SVUnit unit test
+
+add_hdl_unit_test(logic_axi4_stream_queue_unit_test.sv
+    DEPENDS
+        logic_axi4_stream_queue
+        #MODELSIM_SUPPRESS
+    #7033
+)
+
+# UVM-SystemC unit test
+
 set(MODULE_NAME logic_axi4_stream_queue)
 set(MODULE_TOP ${MODULE_NAME}_top)
 

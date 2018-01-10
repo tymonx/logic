@@ -48,7 +48,6 @@ add_subdirectory(src)
 
 if (LOGIC_RTL)
     add_subdirectory(rtl)
-    add_subdirectory(quartus)
 
     if (LOGIC_TESTS)
         include(CTest)
