@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-module logic_reset_synchronizer_testrunner;
+module @ARG_NAME@_testrunner;
     logic test_passed = 0;
 
     import svunit_pkg::svunit_testrunner;
@@ -22,7 +22,7 @@ module logic_reset_synchronizer_testrunner;
     svunit_testrunner svunit_tr;
     svunit_testsuite svunit_ts;
 
-    logic_reset_synchronizer_unit_test ut();
+    @ARG_NAME@ ut();
 
     initial begin
         build();

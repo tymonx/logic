@@ -14,33 +14,22 @@
 
 # Create SystemVerilog with SVUnit
 
-add_hdl_source(logic_reset_synchronizer_unit_test.sv
+add_hdl_unit_test(logic_reset_synchronizer_unit_test.sv
     DEPENDS
-        svunit_pkg
         logic_reset_synchronizer
-    INCLUDES ${SVUNIT_INCLUDE_DIR}
 )
-
-add_hdl_source(logic_reset_synchronizer_testrunner.sv
-    DEPENDS
-        svunit_pkg
-        logic_reset_synchronizer_unit_test
-    INCLUDES ${SVUNIT_INCLUDE_DIR}
-)
-
-add_hdl_test(logic_reset_synchronizer_testrunner)
 
 # Create SystemC with GTest
 
 set(MODULE_NAME logic_reset_synchronizer)
 
-add_hdl_systemc(${MODULE_NAME})
-
-get_target_property(MODULE_LIBRARIES ${MODULE_NAME} LIBRARIES)
-get_target_property(MODULE_INCLUDES ${MODULE_NAME} INCLUDE_DIRECTORIES)
+add_hdl_systemc(${MODULE_NAME}
+    OUTPUT_INCLUDES module_includes
+    OUTPUT_LIBRARIES module_libraries
+)
 
 include_directories(SYSTEM
-    ${MODULE_INCLUDES}
+    ${module_includes}
     ${GTEST_INCLUDE_DIRS}
 )
 
@@ -54,7 +43,7 @@ add_executable(${MODULE_NAME_TEST}
 
 target_link_libraries(${MODULE_NAME_TEST}
     logic
-    ${MODULE_LIBRARIES}
+    ${module_libraries}
     logic-gtest-main
     ${GTEST_LIBRARIES}
 )

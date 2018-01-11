@@ -41,7 +41,7 @@ if (SVUNIT_FOUND)
     add_hdl_source(${SVUNIT_HDL_PACKAGE}
         LIBRARY svunit
         SYNTHESIZABLE FALSE
-        INCLUDES ${SVUNIT_INCLUDE_DIR}
+        INCLUDES "${SVUNIT_INCLUDE_DIR}"
     )
 endif()
 
@@ -49,25 +49,46 @@ if (QUARTUS_FOUND)
     file(GLOB VERILOG_SOURCES "${QUARTUS_DIR}/eda/sim_lib/*.v")
     file(GLOB SYSTEMVERILOG_SOURCES "${QUARTUS_DIR}/eda/sim_lib/*.sv")
 
-    set(HDL_SOURCES
-        ${VERILOG_SOURCES}
-        ${SYSTEMVERILOG_SOURCES}
-        ${QUARTUS_DIR}/eda/sim_lib/mentor/twentynm_atoms_ncrypt.v
-        ${QUARTUS_DIR}/eda/sim_lib/mentor/twentynm_hip_atoms_ncrypt.v
-        ${QUARTUS_DIR}/eda/sim_lib/mentor/twentynm_hssi_atoms_ncrypt.v
-    )
+    foreach (hdl_source ${VERILOG_SOURCES} ${SYSTEMVERILOG_SOURCES})
+        get_filename_component(hdl_name "${hdl_source}" NAME_WE)
 
-    foreach (hdl_source ${HDL_SOURCES})
-        get_filename_component(hdl_name ${hdl_source} NAME_WE)
-
-        add_hdl_source(${hdl_source}
-            LIBRARY intel_${hdl_name}
+        add_hdl_source("${hdl_source}"
+            LIBRARY intel
             SYNTHESIZABLE FALSE
             MODELSIM_LINT FALSE
             MODELSIM_PEDANTICERRORS FALSE
+            MODELSIM_WARNING_AS_ERROR FALSE
             VERILATOR_CONFIGURATIONS
                 "lint_off -file \"${hdl_source}\""
                 "lint_off -msg STMTDLY -file \"${hdl_source}\""
         )
     endforeach()
+
+    if (MODELSIM_FOUND)
+        file(GLOB VERILOG_SOURCES "${QUARTUS_DIR}/eda/sim_lib/mentor/*.v")
+        file(GLOB SYSTEMVERILOG_SOURCES "${QUARTUS_DIR}/eda/sim_lib/mentor/*.sv")
+
+        foreach (hdl_source ${VERILOG_SOURCES} ${SYSTEMVERILOG_SOURCES})
+            if (hdl_source MATCHES for_vhdl OR
+                    hdl_source MATCHES ct1_hssi_atoms_ncrypt OR
+                    hdl_source MATCHES tennm_atoms_ncrypt OR
+                    hdl_source MATCHES fourteennm_atoms_ncrypt)
+                continue()
+            endif()
+
+            get_filename_component(hdl_name "${hdl_source}" NAME_WE)
+
+            add_hdl_source("${hdl_source}"
+                LIBRARY intel
+                SYNTHESIZABLE FALSE
+                MODELSIM_LINT FALSE
+                MODELSIM_PEDANTICERRORS FALSE
+                MODELSIM_WARNING_AS_ERROR FALSE
+                COMPILE ModelSim
+                VERILATOR_CONFIGURATIONS
+                    "lint_off -file \"${hdl_source}\""
+                    "lint_off -msg STMTDLY -file \"${hdl_source}\""
+            )
+        endforeach()
+    endif()
 endif()

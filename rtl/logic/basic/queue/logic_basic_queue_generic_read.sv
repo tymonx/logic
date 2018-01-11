@@ -74,6 +74,9 @@ module logic_basic_queue_generic_read #(
         FSM_DATA: begin
             read_enable = capacity_valid && tx_tready;
         end
+        default: begin
+            read_enable = '0;
+        end
         endcase
     end
 

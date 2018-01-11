@@ -32,6 +32,8 @@ onbreak {
                 if ![exa test_passed] {
                     set broken 2
                 }
+            } else {
+                set broken 2
             }
             resume
         }

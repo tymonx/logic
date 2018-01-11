@@ -19,7 +19,7 @@ endif()
 find_package(Vivado)
 
 if (VIVADO_FOUND)
-    set(ADD_VIVADO_PROJECT_CURRENT_DIR ${CMAKE_CURRENT_LIST_DIR}
+    set(ADD_VIVADO_PROJECT_CURRENT_DIR "${CMAKE_CURRENT_LIST_DIR}"
         CACHE INTERNAL "Add Vivado project current directory" FORCE)
 
     if (NOT TARGET vivado-analysis-all)
@@ -60,29 +60,32 @@ function(add_vivado_project target_name)
 
     if (NOT DEFINED ARG_PROJECT_DIRECTORY)
         set(ARG_PROJECT_DIRECTORY
-            ${CMAKE_BINARY_DIR}/vivado/${target_name})
+            "${CMAKE_BINARY_DIR}/vivado/${target_name}")
     endif()
 
     if (NOT DEFINED ARG_TOP_LEVEL_ENTITY)
         set(ARG_TOP_LEVEL_ENTITY ${target_name})
     endif()
 
-    file(MAKE_DIRECTORY ${ARG_PROJECT_DIRECTORY})
+    file(MAKE_DIRECTORY "${ARG_PROJECT_DIRECTORY}")
 
     get_hdl_depends(${ARG_TOP_LEVEL_ENTITY} hdl_depends)
 
     foreach (hdl_name ${hdl_depends} ${ARG_TOP_LEVEL_ENTITY})
-        get_target_property(hdl_synthesizable ${hdl_name} HDL_SYNTHESIZABLE)
+        get_hdl_property(hdl_synthesizable ${hdl_name} SYNTHESIZABLE)
 
         if (hdl_synthesizable)
-            get_target_property(hdl_source ${hdl_name} HDL_SOURCE)
-            list(APPEND ARG_SOURCES ${hdl_source})
+            get_hdl_property(hdl_sources ${hdl_name} SOURCES)
+            list(APPEND ARG_SOURCES "${hdl_sources}")
 
-            get_target_property(hdl_defines ${hdl_name} HDL_DEFINES)
-            list(APPEND ARG_DEFINES ${hdl_defines})
+            get_hdl_property(hdl_source ${hdl_name} SOURCE)
+            list(APPEND ARG_SOURCES "${hdl_source}")
 
-            get_target_property(hdl_includes ${hdl_name} HDL_INCLUDES)
-            list(APPEND ARG_INCLUDES ${hdl_includes})
+            get_hdl_property(hdl_defines ${hdl_name} DEFINES)
+            list(APPEND ARG_DEFINES "${hdl_defines}")
+
+            get_hdl_property(hdl_includes ${hdl_name} INCLUDES)
+            list(APPEND ARG_INCLUDES "${hdl_includes}")
         endif()
     endforeach()
 
@@ -103,7 +106,7 @@ function(add_vivado_project target_name)
     set(vivado_includes_list "")
 
     foreach (vivado_include ${ARG_INCLUDES})
-        get_filename_component(vivado_include ${vivado_include} REALPATH)
+        get_filename_component(vivado_include "${vivado_include}" REALPATH)
 
         if (CYGWIN)
             execute_process(COMMAND cygpath -m ${vivado_include}
@@ -117,16 +120,16 @@ function(add_vivado_project target_name)
     set(vivado_sources_list "")
 
     foreach (vivado_source ${ARG_SOURCES})
-        if (vivado_source MATCHES .sv)
+        if (vivado_source MATCHES "\.sv$")
             set(vivado_type_file SYSTEMVERILOG_FILE)
-        elseif (vivado_source MATCHES .vhd)
+        elseif (vivado_source MATCHES "\.vhd$")
             set(vivado_type_file VHDL_FILE)
-        elseif (vivado_source MATCHES .v)
+        elseif (vivado_source MATCHES "\.v$")
             set(vivado_type_file VERILOG_FILE)
         endif()
 
         if (CYGWIN)
-            execute_process(COMMAND cygpath -m ${vivado_source}
+            execute_process(COMMAND cygpath -m "${vivado_source}"
                 OUTPUT_VARIABLE vivado_source
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
         endif()
@@ -146,15 +149,15 @@ function(add_vivado_project target_name)
 
     add_custom_command(
         OUTPUT
-            ${ARG_PROJECT_DIRECTORY}/vivado.jou
+            "${ARG_PROJECT_DIRECTORY}/vivado.jou"
         COMMAND
             ${VIVADO_EXECUTABLE} -notrace -mode batch -source ${target_name}.tcl
         DEPENDS
-            ${ARG_PROJECT_DIRECTORY}/${target_name}.tcl
+            "${ARG_PROJECT_DIRECTORY}/${target_name}.tcl"
             ${ARG_INCLUDES}
             ${ARG_SOURCES}
         WORKING_DIRECTORY
-            ${ARG_PROJECT_DIRECTORY}
+            "${ARG_PROJECT_DIRECTORY}"
         COMMENT
             "Vivado compiling ${ARG_PROJECT_DIRECTORY}"
     )

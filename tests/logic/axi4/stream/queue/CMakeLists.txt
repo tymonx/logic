@@ -12,6 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# SVUnit unit test
+
+add_hdl_unit_test(logic_axi4_stream_queue_unit_test.sv
+    DEPENDS
+        logic_axi4_stream_queue
+        #MODELSIM_SUPPRESS
+    #7033
+)
+
+# UVM-SystemC unit test
+
 set(MODULE_NAME logic_axi4_stream_queue)
 set(MODULE_TOP ${MODULE_NAME}_top)
 
@@ -24,13 +35,12 @@ set(MODULE_DEFINITIONS
 
 add_hdl_systemc(${MODULE_TOP}
     DEFINES ${MODULE_DEFINITIONS}
+    OUTPUT_INCLUDES module_includes
+    OUTPUT_LIBRARIES module_libraries
 )
 
-get_target_property(MODULE_LIBRARIES ${MODULE_TOP} LIBRARIES)
-get_target_property(MODULE_INCLUDES ${MODULE_TOP} INCLUDE_DIRECTORIES)
-
 include_directories(SYSTEM
-    ${MODULE_INCLUDES}
+    ${module_includes}
 )
 
 set_source_files_properties(main.cpp PROPERTIES
@@ -47,7 +57,7 @@ add_executable(${MODULE_NAME_TEST}
 
 target_link_libraries(${MODULE_NAME_TEST}
     logic
-    ${MODULE_LIBRARIES}
+    ${module_libraries}
 )
 
 set(TESTS

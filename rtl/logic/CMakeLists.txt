@@ -14,6 +14,7 @@
 
 set(HDL_DEPENDS)
 set(HDL_DEFINES)
+set(HDL_LIBRARY logic)
 set(HDL_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_subdirectory(packages)

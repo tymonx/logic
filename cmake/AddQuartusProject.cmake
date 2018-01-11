@@ -21,7 +21,7 @@ find_package(Quartus)
 include(CMakeParseArguments)
 
 if (QUARTUS_FOUND)
-    set(ADD_QUARTUS_PROJECT_CURRENT_DIR ${CMAKE_CURRENT_LIST_DIR}
+    set(ADD_QUARTUS_PROJECT_CURRENT_DIR "${CMAKE_CURRENT_LIST_DIR}"
         CACHE INTERNAL "Add Quartus project current directory" FORCE)
 
     if (NOT TARGET quartus-analysis-all)
@@ -66,6 +66,7 @@ function(add_quartus_project target_name)
     cmake_parse_arguments(ARG "${options}" "${one_value_arguments}"
         "${multi_value_arguments}" ${ARGN})
 
+    set(quartus_depends "")
     set(quartus_assignments "")
 
     if (DEFINED QUARTUS_NUM_PARALLEL_PROCESSORS)
@@ -94,15 +95,15 @@ function(add_quartus_project target_name)
         set(ip_search_paths "")
 
         foreach(ip_path ${ARG_IP_SEARCH_PATHS})
-            get_filename_component(ip_path ${ip_path} REALPATH)
+            get_filename_component(ip_path "${ip_path}" REALPATH)
 
             if (CYGWIN)
-                execute_process(COMMAND cygpath -m ${ip_path}
+                execute_process(COMMAND cygpath -m "${ip_path}"
                     OUTPUT_VARIABLE ip_path
                     OUTPUT_STRIP_TRAILING_WHITESPACE)
             endif()
 
-            list(APPEND ip_search_paths ${ip_path})
+            list(APPEND ip_search_paths "${ip_path}")
         endforeach()
 
         set(quartus_ip_search_paths_assignment
@@ -110,10 +111,11 @@ function(add_quartus_project target_name)
     endif()
 
     foreach (ip_file ${ARG_IP_FILES})
-        get_filename_component(ip_file ${ip_file} REALPATH)
+        get_filename_component(ip_file "${ip_file}" REALPATH)
+        list(APPEND quartus_depends "${ip_file}")
 
         if (CYGWIN)
-            execute_process(COMMAND cygpath -m ${ip_file}
+            execute_process(COMMAND cygpath -m "${ip_file}"
                 OUTPUT_VARIABLE ip_file
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
         endif()
@@ -122,11 +124,42 @@ function(add_quartus_project target_name)
             "set_global_assignment -name IP_FILE ${ip_file}")
     endforeach()
 
-    foreach (sdc_file ${ARG_SDC_FILES})
-        get_filename_component(sdc_file ${sdc_file} REALPATH)
+    foreach (tcl_file ${ARG_QSYS_TCL_FILES})
+        get_filename_component(tcl_file "${tcl_file}" REALPATH)
+        get_filename_component(name "${tcl_file}" NAME_WE)
+        get_filename_component(dir "${tcl_file}" DIRECTORY)
+
+        set(ip_file "${dir}/${name}.ip")
 
         if (CYGWIN)
-            execute_process(COMMAND cygpath -m ${sdc_file}
+            execute_process(COMMAND cygpath -m "${tcl_file}"
+                OUTPUT_VARIABLE tcl_file
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+        endif()
+
+        add_custom_command(
+            OUTPUT
+                "${ip_ile}"
+            COMMAND
+                ${QUARTUS_QSYS_SCRIPT}
+            ARGS
+                --quartus-project=${target_name}
+                --script="${tcl_file}"
+            COMMENT
+                "Platform Designer is creating IP file: ${name}.ip"
+            WORKING_DIRECTORY
+                "${ARG_PROJECT_DIRECTORY}"
+        )
+
+        list(APPEND ARG_IP_FILES "${ip_file}")
+    endforeach()
+
+    foreach (sdc_file ${ARG_SDC_FILES})
+        get_filename_component(sdc_file "${sdc_file}" REALPATH)
+        list(APPEND quartus_depends "${sdc_file}")
+
+        if (CYGWIN)
+            execute_process(COMMAND cygpath -m "${sdc_file}"
                 OUTPUT_VARIABLE sdc_file
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
         endif()
@@ -136,10 +169,11 @@ function(add_quartus_project target_name)
     endforeach()
 
     foreach (qsys_file ${ARG_QSYS_FILES})
-        get_filename_component(qsys_file ${qsys_file} REALPATH)
+        get_filename_component(qsys_file "${qsys_file}" REALPATH)
+        list(APPEND quartus_depends "${qsys_file}")
 
         if (CYGWIN)
-            execute_process(COMMAND cygpath -m ${qsys_file}
+            execute_process(COMMAND cygpath -m "${qsys_file}"
                 OUTPUT_VARIABLE qsys_file
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
         endif()
@@ -149,10 +183,11 @@ function(add_quartus_project target_name)
     endforeach()
 
     foreach (tcl_file ${ARG_SOURCE_TCL_SCRIPT_FILES})
-        get_filename_component(tcl_file ${tcl_file} REALPATH)
+        get_filename_component(tcl_file "${tcl_file}" REALPATH)
+        list(APPEND quartus_depends "${tcl_file}")
 
         if (CYGWIN)
-            execute_process(COMMAND cygpath -m ${tcl_file}
+            execute_process(COMMAND cygpath -m "${tcl_file}"
                 OUTPUT_VARIABLE tcl_file
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
         endif()
@@ -162,7 +197,7 @@ function(add_quartus_project target_name)
     endforeach()
 
     if (NOT DEFINED ARG_PROJECT_DIRECTORY)
-        set(ARG_PROJECT_DIRECTORY ${CMAKE_BINARY_DIR}/quartus/${target_name})
+        set(ARG_PROJECT_DIRECTORY "${CMAKE_BINARY_DIR}/quartus/${target_name}")
     endif()
 
     if (NOT DEFINED ARG_TOP_LEVEL_ENTITY)
@@ -173,22 +208,25 @@ function(add_quartus_project target_name)
         set(ARG_NUM_PARALLEL_PROCESSORS ALL)
     endif()
 
-    file(MAKE_DIRECTORY ${ARG_PROJECT_DIRECTORY})
+    file(MAKE_DIRECTORY "${ARG_PROJECT_DIRECTORY}")
 
     get_hdl_depends(${ARG_TOP_LEVEL_ENTITY} hdl_depends)
 
     foreach (hdl_name ${hdl_depends} ${ARG_TOP_LEVEL_ENTITY})
-        get_target_property(hdl_synthesizable ${hdl_name} HDL_SYNTHESIZABLE)
+        get_hdl_property(hdl_synthesizable ${hdl_name} SYNTHESIZABLE)
 
         if (hdl_synthesizable)
-            get_target_property(hdl_source ${hdl_name} HDL_SOURCE)
-            list(APPEND ARG_SOURCES ${hdl_source})
+            get_hdl_property(hdl_sources ${hdl_name} SOURCES)
+            list(APPEND ARG_SOURCES "${hdl_sources}")
 
-            get_target_property(hdl_defines ${hdl_name} HDL_DEFINES)
-            list(APPEND ARG_DEFINES ${hdl_defines})
+            get_hdl_property(hdl_source ${hdl_name} SOURCE)
+            list(APPEND ARG_SOURCES "${hdl_source}")
 
-            get_target_property(hdl_includes ${hdl_name} HDL_INCLUDES)
-            list(APPEND ARG_INCLUDES ${hdl_includes})
+            get_hdl_property(hdl_defines ${hdl_name} DEFINES)
+            list(APPEND ARG_DEFINES "${hdl_defines}")
+
+            get_hdl_property(hdl_includes ${hdl_name} INCLUDES)
+            list(APPEND ARG_INCLUDES "${hdl_includes}")
         endif()
     endforeach()
 
@@ -206,10 +244,10 @@ function(add_quartus_project target_name)
     endforeach()
 
     foreach (quartus_include ${ARG_INCLUDES})
-        get_filename_component(quartus_include ${quartus_include} REALPATH)
+        get_filename_component(quartus_include "${quartus_include}" REALPATH)
 
         if (CYGWIN)
-            execute_process(COMMAND cygpath -m ${quartus_include}
+            execute_process(COMMAND cygpath -m "${quartus_include}"
                 OUTPUT_VARIABLE quartus_include
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
         endif()
@@ -219,16 +257,20 @@ function(add_quartus_project target_name)
     endforeach()
 
     foreach (quartus_source ${ARG_SOURCES})
-        if (quartus_source MATCHES .sv)
+        if (quartus_source MATCHES "\\.sv$")
             set(quartus_type_file SYSTEMVERILOG_FILE)
-        elseif (quartus_source MATCHES .vhd)
+        elseif (quartus_source MATCHES "\\.vhd$")
             set(quartus_type_file VHDL_FILE)
-        elseif (quartus_source MATCHES .v)
+        elseif (quartus_source MATCHES "\\.v$")
             set(quartus_type_file VERILOG_FILE)
+        else()
+            continue()
         endif()
 
+        list(APPEND quartus_depends ${quartus_source})
+
         if (CYGWIN)
-            execute_process(COMMAND cygpath -m ${quartus_source}
+            execute_process(COMMAND cygpath -m "${quartus_source}"
                 OUTPUT_VARIABLE quartus_source
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
         endif()
@@ -240,70 +282,39 @@ function(add_quartus_project target_name)
     string(REGEX REPLACE ";" "\n" quartus_assignments "${quartus_assignments}")
 
     configure_file(
-        ${ADD_QUARTUS_PROJECT_CURRENT_DIR}/AddQuartusProject.qpf.cmake.in
-        ${ARG_PROJECT_DIRECTORY}/${target_name}.qpf)
+        "${ADD_QUARTUS_PROJECT_CURRENT_DIR}/AddQuartusProject.qpf.cmake.in"
+        "${ARG_PROJECT_DIRECTORY}/${target_name}.qpf")
 
     configure_file(
-        ${ADD_QUARTUS_PROJECT_CURRENT_DIR}/AddQuartusProject.qsf.cmake.in
-        ${ARG_PROJECT_DIRECTORY}/${target_name}.qsf)
+        "${ADD_QUARTUS_PROJECT_CURRENT_DIR}/AddQuartusProject.qsf.cmake.in"
+        "${ARG_PROJECT_DIRECTORY}/${target_name}.qsf")
 
-    foreach (tcl_file ${ARG_QSYS_TCL_FILES})
-        get_filename_component(tcl_file ${tcl_file} REALPATH)
-        get_filename_component(name ${tcl_file} NAME_WE)
-        get_filename_component(dir ${tcl_file} DIRECTORY)
+    foreach (qsys_file ${ARG_IP_FILES} ${ARG_QSYS_FILES})
+        get_filename_component(qsys_file "${qsys_file}" REALPATH)
+        get_filename_component(name "${qsys_file}" NAME_WE)
+        get_filename_component(dir "${qsys_file}" DIRECTORY)
 
-        set(qsys_tcl_file ${tcl_file})
-
-        if (CYGWIN)
-            execute_process(COMMAND cygpath -m ${qsys_tcl_file}
-                OUTPUT_VARIABLE qsys_tcl_file
-                OUTPUT_STRIP_TRAILING_WHITESPACE)
-        endif()
+        list(APPEND quartus_depends "${dir}/${name}/synth/${name}.v")
 
         add_custom_command(
             OUTPUT
-                ${dir}/${name}.ip
-            COMMAND
-                ${QUARTUS_QSYS_SCRIPT}
-            ARGS
-                --quartus-project=${target_name}.qpf
-                --script=${qsys_tcl_file}
+                "${dir}/${name}/synth/${name}.v"
             COMMAND
                 ${QUARTUS_QSYS_GENERATE}
             ARGS
-                --quartus-project=${target_name}.qpf
-                --upgrade-ip-cores
-                ${name}.ip
-            DEPENDS
-                ${tcl_file}
-            WORKING_DIRECTORY
-                ${output_directory}
-        )
-
-        list(APPEND quartus_ip_files ${dir}/${name}.ip)
-    endforeach()
-
-    set(quartus_qsys_depends "")
-    foreach (qsys_file ${ARG_QSYS_FILES})
-        get_filename_component(qsys_file ${qsys_file} REALPATH)
-        get_filename_component(qsys_name ${qsys_file} NAME_WE)
-        get_filename_component(qsys_dir ${qsys_file} DIRECTORY)
-
-        list(APPEND quartus_qsys_depends
-            ${qsys_dir}/${qsys_name}/synth/${qsys_name}.v)
-
-        add_custom_command(
-            OUTPUT ${qsys_dir}/${qsys_name}/synth/${qsys_name}.v
-            COMMAND ${QUARTUS_QSYS_GENERATE}
-                --synthesis=VERILOG
                 --quartus-project=${target_name}
-                ${qsys_file}
+                --upgrade-ip-cores
+                "${qsys_file}"
+            COMMAND
+                ${QUARTUS_QSYS_GENERATE}
+            ARGS
+                --quartus-project=${target_name}
+                --synthesis=VERILOG
+                "${qsys_file}"
             DEPENDS
-                ${ARG_PROJECT_DIRECTORY}/${target_name}.qpf
-                ${ARG_PROJECT_DIRECTORY}/${target_name}.qsf
-                ${qsys_file}
+                "${qsys_file}"
             WORKING_DIRECTORY
-                ${ARG_PROJECT_DIRECTORY}
+                "${ARG_PROJECT_DIRECTORY}"
             COMMENT
                 "Qsys generating ${qsys_name}"
         )
@@ -313,42 +324,33 @@ function(add_quartus_project target_name)
         set(quartus_analysis ${QUARTUS_SYN})
 
         set(quartus_analysis_file
-            ${ARG_PROJECT_DIRECTORY}/output_files/${target_name}.syn.rpt)
+            "${ARG_PROJECT_DIRECTORY}/output_files/${target_name}.syn.rpt")
     else ()
         set(quartus_analysis ${QUARTUS_MAP})
 
         set(quartus_analysis_file
-            ${ARG_PROJECT_DIRECTORY}/output_files/${target_name}.flow.rpt)
+            "${ARG_PROJECT_DIRECTORY}/output_files/${target_name}.flow.rpt")
     endif()
 
-    set(quartus_depends
-        ${ARG_PROJECT_DIRECTORY}/${target_name}.qpf
-        ${ARG_PROJECT_DIRECTORY}/${target_name}.qsf
-        ${quartus_ip_files}
-        ${quartus_sdc_files}
-        ${quartus_qsys_files}
-        ${quartus_qsys_depends}
-        ${quartus_source_tcl_script_files}
-        ${quartus_includes}
-        ${quartus_sources}
-    )
+    set(quartus_bitstream_file
+        "${ARG_PROJECT_DIRECTORY}/output_files/${target_name}.sof")
 
     add_custom_command(
         OUTPUT
-            ${quartus_analysis_file}
+            "${quartus_analysis_file}"
         COMMAND
             ${quartus_analysis} --analysis_and_elaboration ${target_name}
         DEPENDS
             ${quartus_depends}
         WORKING_DIRECTORY
-            ${ARG_PROJECT_DIRECTORY}
+            "${ARG_PROJECT_DIRECTORY}"
         COMMENT
             "Quartus analysing ${ARG_TOP_LEVEL_ENTITY}"
     )
 
     add_custom_command(
         OUTPUT
-            ${ARG_PROJECT_DIRECTORY}/output_files/${target_name}.sof
+            "${quartus_bitstream_file}"
         COMMAND
             ${QUARTUS_SH}
             --flow compile ${target_name}
@@ -356,18 +358,18 @@ function(add_quartus_project target_name)
         DEPENDS
             ${quartus_depends}
         WORKING_DIRECTORY
-            ${ARG_PROJECT_DIRECTORY}
+            "${ARG_PROJECT_DIRECTORY}"
         COMMENT
             "Quartus compiling ${ARG_PROJECT_DIRECTORY}"
     )
 
     add_custom_target(quartus-analysis-${target_name}
-        DEPENDS ${quartus_analysis_file})
+        DEPENDS "${quartus_analysis_file}")
 
     add_dependencies(quartus-analysis-all quartus-analysis-${target_name})
 
     add_custom_target(quartus-compile-${target_name}
-        DEPENDS ${ARG_PROJECT_DIRECTORY}/output_files/${target_name}.sof)
+        DEPENDS "${quartus_bitstream_file}")
 
     add_dependencies(quartus-compile-all quartus-compile-${target_name})
 endfunction()

@@ -46,6 +46,7 @@ interface logic_axi4_stream_if #(
     localparam TSTRB_WIDTH = TDATA_BYTES;
     localparam TKEEP_WIDTH = TDATA_BYTES;
 
+    typedef logic [7:0] byte_t;
     typedef logic [TDATA_BYTES-1:0][7:0] tdata_t;
     typedef logic [TSTRB_WIDTH-1:0] tstrb_t;
     typedef logic [TKEEP_WIDTH-1:0] tkeep_t;
@@ -63,25 +64,31 @@ interface logic_axi4_stream_if #(
         tdata_t tdata;
     } packet_t;
 
-    logic tready;
-    logic tvalid;
-    logic tlast;
-    tdata_t tdata;
-    tstrb_t tstrb;
-    tkeep_t tkeep;
-    tdest_t tdest;
-    tuser_t tuser;
-    tid_t tid;
+`ifndef LOGIC_SYNTHESIS
+    `define INIT = '0
+`else
+    `define INIT
+`endif
 
-    function packet_t read();
+    logic tready `INIT;
+    logic tvalid `INIT;
+    logic tlast `INIT;
+    tdata_t tdata `INIT;
+    tstrb_t tstrb `INIT;
+    tkeep_t tkeep `INIT;
+    tdest_t tdest `INIT;
+    tuser_t tuser `INIT;
+    tid_t tid `INIT;
+
+    function automatic packet_t read();
         return '{tuser, tdest, tid, tlast, tkeep, tstrb, tdata};
     endfunction
 
-    task write(input packet_t packet);
+    task automatic write(input packet_t packet);
         {tuser, tdest, tid, tlast, tkeep, tstrb, tdata} <= packet;
     endtask
 
-    task comb_write(input packet_t packet);
+    task automatic comb_write(input packet_t packet);
         {tuser, tdest, tid, tlast, tkeep, tstrb, tdata} = packet;
     endtask
 
@@ -129,18 +136,6 @@ interface logic_axi4_stream_if #(
 
 `ifndef LOGIC_SYNTHESIS
     clocking cb_rx @(posedge aclk);
-        input tvalid;
-        input tuser;
-        input tdest;
-        input tid;
-        input tlast;
-        input tkeep;
-        input tstrb;
-        input tdata;
-        output tready;
-    endclocking
-
-    clocking cb_tx @(posedge aclk);
         output tvalid;
         output tuser;
         output tdest;
@@ -150,6 +145,18 @@ interface logic_axi4_stream_if #(
         output tstrb;
         output tdata;
         input tready;
+    endclocking
+
+    clocking cb_tx @(posedge aclk);
+        input tvalid;
+        input tuser;
+        input tdest;
+        input tid;
+        input tlast;
+        input tkeep;
+        input tstrb;
+        input tdata;
+        output tready;
     endclocking
 
     clocking cb_mon @(posedge aclk);
@@ -163,6 +170,87 @@ interface logic_axi4_stream_if #(
         input tdata;
         input tready;
     endclocking
+
+    task automatic cb_rx_clear();
+        cb_rx.tid <= '0;
+        cb_rx.tuser <= '0;
+        cb_rx.tdest <= '0;
+        cb_rx.tlast <= '0;
+        cb_rx.tkeep <= '0;
+        cb_rx.tstrb <= '0;
+        cb_rx.tdata <= '0;
+        cb_rx.tvalid <= '0;
+    endtask
+
+    task automatic cb_tx_clear();
+        cb_tx.tready <= '0;
+    endtask
+
+    task automatic cb_write(byte data[], int id = 0, int dest = 0);
+        int total_size = data.size();
+        int index = 0;
+
+        while (index < total_size) begin
+            if (!areset_n) begin
+                break;
+            end
+            else if (1'b1 === cb_rx.tready) begin
+                for (int i = 0; i < TDATA_BYTES; ++i, ++index) begin
+                    if (index < total_size) begin
+                        cb_rx.tkeep[i] <= '1;
+                        cb_rx.tstrb[i] <= '1;
+                        cb_rx.tdata[i] <= byte_t'(data[index]);
+                    end
+                    else begin
+                        cb_rx.tkeep[i] <= '0;
+                        cb_rx.tstrb[i] <= '0;
+                        cb_rx.tdata[i] <= '0;
+                    end
+                end
+
+                cb_rx.tid <= tid_t'(id);
+                cb_rx.tdest <= tdest_t'(dest);
+                cb_rx.tlast <= (index >= total_size);
+                cb_rx.tvalid <= '1;
+            end
+
+            @(cb_rx);
+        end
+
+        cb_rx.tvalid <= '0;
+    endtask
+
+    task automatic cb_read(ref byte data[], input int id = 0, int dest = 0);
+        byte q[$];
+
+        forever begin
+            if (!areset_n) begin
+                break;
+            end
+            else if ((1'b1 === tready) && (1'b1 === cb_tx.tvalid) &&
+                    (tid_t'(id) === cb_tx.tid) &&
+                    (tdest_t'(dest) === cb_tx.tdest)) begin
+                for (int i = 0; i < TDATA_BYTES; ++i) begin
+                    if ((1'b1 === cb_tx.tkeep[i]) &&
+                            (1'b1 === cb_tx.tstrb[i])) begin
+                        q.push_back(byte'(cb_tx.tdata[i]));
+                    end
+                end
+
+                if (1'b1 === cb_tx.tlast) begin
+                    @(cb_tx);
+                    break;
+                end
+            end
+
+            @(cb_tx);
+        end
+
+        data = new [q.size()];
+        foreach (q[i]) begin
+            data[i] = q[i];
+        end
+    endtask
 `endif
 
 `ifndef LOGIC_STD_OVL_DISABLED

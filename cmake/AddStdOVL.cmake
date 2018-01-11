@@ -60,6 +60,7 @@ set(STD_OVL_SOURCES
 foreach (std_ovl_source ${STD_OVL_SOURCES})
     add_hdl_source(${STD_OVL_DIR}/${std_ovl_source}
         TYPE SystemVerilog
+        LIBRARY std_ovl
         DEFINES
             OVL_VERILOG
             OVL_ASSERT_ON
