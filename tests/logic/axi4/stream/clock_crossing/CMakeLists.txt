@@ -12,6 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(buffered)
-add_subdirectory(queue)
-add_subdirectory(clock_crossing)
+# SVUnit unit test
+
+add_hdl_unit_test(logic_axi4_stream_clock_crossing_unit_test.sv
+    DEPENDS
+        logic_axi4_stream_clock_crossing
+    MODELSIM_SUPPRESS
+        3009
+        3017
+        3722
+)

@@ -31,8 +31,8 @@ module logic_basic_gray2binary #(
     always_comb begin
         o[WIDTH-1] = i[WIDTH-1];
 
-        for (int k = 0; k < (WIDTH - 1); ++k) begin
-            o[k] = i[k] ^ o[k + 1];
+        for (int k = (WIDTH - 1); k > 0; --k) begin
+            o[k - 1] = i[k - 1] ^ o[k];
         end
     end
 endmodule

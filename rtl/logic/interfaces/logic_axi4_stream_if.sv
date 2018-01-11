@@ -46,7 +46,6 @@ interface logic_axi4_stream_if #(
     localparam TSTRB_WIDTH = TDATA_BYTES;
     localparam TKEEP_WIDTH = TDATA_BYTES;
 
-    typedef logic [7:0] byte_t;
     typedef logic [TDATA_BYTES-1:0][7:0] tdata_t;
     typedef logic [TSTRB_WIDTH-1:0] tstrb_t;
     typedef logic [TKEEP_WIDTH-1:0] tkeep_t;
@@ -136,6 +135,7 @@ interface logic_axi4_stream_if #(
 
 `ifndef LOGIC_SYNTHESIS
     clocking cb_rx @(posedge aclk);
+        //default input #1step output #1step;
         output tvalid;
         output tuser;
         output tdest;
@@ -148,6 +148,7 @@ interface logic_axi4_stream_if #(
     endclocking
 
     clocking cb_tx @(posedge aclk);
+        //default input #1step output #1step;
         input tvalid;
         input tuser;
         input tdest;
@@ -156,10 +157,11 @@ interface logic_axi4_stream_if #(
         input tkeep;
         input tstrb;
         input tdata;
-        output tready;
+        inout tready;
     endclocking
 
     clocking cb_mon @(posedge aclk);
+        //default input #1step output #1step;
         input tvalid;
         input tuser;
         input tdest;
@@ -186,20 +188,25 @@ interface logic_axi4_stream_if #(
         cb_tx.tready <= '0;
     endtask
 
-    task automatic cb_write(byte data[], int id = 0, int dest = 0);
+    task automatic cb_write(const ref byte data[], input int id = 0,
+            int dest = 0);
         int total_size = data.size();
         int index = 0;
 
-        while (index < total_size) begin
+        forever @(cb_rx) begin
             if (!areset_n) begin
                 break;
             end
             else if (1'b1 === cb_rx.tready) begin
-                for (int i = 0; i < TDATA_BYTES; ++i, ++index) begin
+                if (index >= total_size) begin
+                    break;
+                end
+
+                for (int i = 0; i < TDATA_BYTES; ++i) begin
                     if (index < total_size) begin
                         cb_rx.tkeep[i] <= '1;
                         cb_rx.tstrb[i] <= '1;
-                        cb_rx.tdata[i] <= byte_t'(data[index]);
+                        cb_rx.tdata[i] <= data[index++];
                     end
                     else begin
                         cb_rx.tkeep[i] <= '0;
@@ -213,8 +220,6 @@ interface logic_axi4_stream_if #(
                 cb_rx.tlast <= (index >= total_size);
                 cb_rx.tvalid <= '1;
             end
-
-            @(cb_rx);
         end
 
         cb_rx.tvalid <= '0;
@@ -223,11 +228,11 @@ interface logic_axi4_stream_if #(
     task automatic cb_read(ref byte data[], input int id = 0, int dest = 0);
         byte q[$];
 
-        forever begin
+        forever @(cb_tx) begin
             if (!areset_n) begin
                 break;
             end
-            else if ((1'b1 === tready) && (1'b1 === cb_tx.tvalid) &&
+            else if ((1'b1 === cb_tx.tready) && (1'b1 === cb_tx.tvalid) &&
                     (tid_t'(id) === cb_tx.tid) &&
                     (tdest_t'(dest) === cb_tx.tdest)) begin
                 for (int i = 0; i < TDATA_BYTES; ++i) begin
@@ -238,12 +243,9 @@ interface logic_axi4_stream_if #(
                 end
 
                 if (1'b1 === cb_tx.tlast) begin
-                    @(cb_tx);
                     break;
                 end
             end
-
-            @(cb_tx);
         end
 
         data = new [q.size()];
@@ -254,6 +256,25 @@ interface logic_axi4_stream_if #(
 `endif
 
 `ifndef LOGIC_STD_OVL_DISABLED
+    logic bus_hold;
+    logic bus_hold_start;
+    logic bus_hold_end;
+
+    always_comb bus_hold_start = !bus_hold && tvalid && !tready;
+    always_comb bus_hold_end = bus_hold && tready;
+
+    always_ff @(posedge aclk or negedge areset_n) begin
+        if (!areset_n) begin
+            bus_hold <= '0;
+        end
+        else if (bus_hold_start) begin
+            bus_hold <= '1;
+        end
+        else if (bus_hold_end) begin
+            bus_hold <= '0;
+        end
+    end
+
     /* verilator coverage_off */
     genvar k;
 
@@ -309,9 +330,9 @@ interface logic_axi4_stream_if #(
         .clock(aclk),
         .reset(areset_n),
         .enable(1'b1),
-        .start_event(tvalid && !tready),
+        .start_event(bus_hold_start),
         .test_expr(tvalid),
-        .end_event(tvalid && tready),
+        .end_event(bus_hold_end),
         .fire(assert_tvalid_unchange_fire)
     );
 
@@ -327,9 +348,9 @@ interface logic_axi4_stream_if #(
         .clock(aclk),
         .reset(areset_n),
         .enable(1'b1),
-        .start_event(tvalid && !tready),
+        .start_event(bus_hold_start),
         .test_expr(tlast),
-        .end_event(tvalid && tready),
+        .end_event(bus_hold_end),
         .fire(assert_tlast_unchange_fire)
     );
 
@@ -345,9 +366,9 @@ interface logic_axi4_stream_if #(
         .clock(aclk),
         .reset(areset_n),
         .enable(1'b1),
-        .start_event(tvalid && !tready),
+        .start_event(bus_hold_start),
         .test_expr(tdata),
-        .end_event(tvalid && tready),
+        .end_event(bus_hold_end),
         .fire(assert_tdata_unchange_fire)
     );
 
@@ -363,9 +384,9 @@ interface logic_axi4_stream_if #(
         .clock(aclk),
         .reset(areset_n),
         .enable(1'b1),
-        .start_event(tvalid && !tready),
+        .start_event(bus_hold_start),
         .test_expr(tkeep),
-        .end_event(tvalid && tready),
+        .end_event(bus_hold_end),
         .fire(assert_tkeep_unchange_fire)
     );
 
@@ -381,9 +402,9 @@ interface logic_axi4_stream_if #(
         .clock(aclk),
         .reset(areset_n),
         .enable(1'b1),
-        .start_event(tvalid && !tready),
+        .start_event(bus_hold_start),
         .test_expr(tstrb),
-        .end_event(tvalid && tready),
+        .end_event(bus_hold_end),
         .fire(assert_tstrb_unchange_fire)
     );
 
@@ -399,9 +420,9 @@ interface logic_axi4_stream_if #(
         .clock(aclk),
         .reset(areset_n),
         .enable(1'b1),
-        .start_event(tvalid && !tready),
+        .start_event(bus_hold_start),
         .test_expr(tuser),
-        .end_event(tvalid && tready),
+        .end_event(bus_hold_end),
         .fire(assert_tuser_unchange_fire)
     );
 
@@ -417,9 +438,9 @@ interface logic_axi4_stream_if #(
         .clock(aclk),
         .reset(areset_n),
         .enable(1'b1),
-        .start_event(tvalid && !tready),
+        .start_event(bus_hold_start),
         .test_expr(tdest),
-        .end_event(tvalid && tready),
+        .end_event(bus_hold_end),
         .fire(assert_tdest_unchange_fire)
     );
 
@@ -435,9 +456,9 @@ interface logic_axi4_stream_if #(
         .clock(aclk),
         .reset(areset_n),
         .enable(1'b1),
-        .start_event(tvalid && !tready),
+        .start_event(bus_hold_start),
         .test_expr(tid),
-        .end_event(tvalid && tready),
+        .end_event(bus_hold_end),
         .fire(assert_tid_unchange_fire)
     );
 

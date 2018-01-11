@@ -12,8 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_hdl_source(logic_clock_domain_crossing_generic_read.sv)
-add_hdl_source(logic_clock_domain_crossing_generic_write.sv)
+add_hdl_source(logic_clock_domain_crossing_generic_read.sv
+    INCLUDES
+        ${STD_OVL_DIR}
+)
+
+add_hdl_source(logic_clock_domain_crossing_generic_write.sv
+    INCLUDES
+        ${STD_OVL_DIR}
+)
+
 add_hdl_source(logic_clock_domain_crossing_generic_memory.sv)
 
 add_hdl_source(logic_clock_domain_crossing_generic_read_sync.sv

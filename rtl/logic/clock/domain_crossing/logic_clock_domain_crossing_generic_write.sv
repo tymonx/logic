@@ -15,6 +15,10 @@
 
 `include "logic.svh"
 
+`ifndef LOGIC_STD_OVL_DISABLED
+`include "std_ovl_defines.h"
+`endif
+
 /* Module: logic_clock_domain_crossing_genric_write
  *
  * Parameters:
@@ -52,8 +56,9 @@ module logic_clock_domain_crossing_generic_write #(
         `LOGIC_DRC_EQUAL_OR_GREATER_THAN(ADDRESS_WIDTH, 2)
     end
 
-    localparam ALMOST_FULL = 2**ADDRESS_WIDTH - 3;
+    localparam ALMOST_FULL = (2**ADDRESS_WIDTH) - 4;
 
+    logic almost_full;
     logic [ADDRESS_WIDTH-1:0] difference;
 
     always_ff @(posedge rx_aclk or negedge rx_areset_n) begin
@@ -65,12 +70,14 @@ module logic_clock_domain_crossing_generic_write #(
         end
     end
 
+    always_comb almost_full = (difference >= ALMOST_FULL[ADDRESS_WIDTH-1:0]);
+
     always_ff @(posedge rx_aclk or negedge rx_areset_n) begin
         if (!rx_areset_n) begin
             rx_tready <= '0;
         end
         else begin
-            rx_tready <= (difference > ALMOST_FULL[ADDRESS_WIDTH-1:0]);
+            rx_tready <= !almost_full;
         end
     end
 
@@ -95,4 +102,25 @@ module logic_clock_domain_crossing_generic_write #(
             write_pointer <= write_pointer + 1'b1;
         end
     end
+
+`ifndef LOGIC_STD_OVL_DISABLED
+    logic [`OVL_FIRE_WIDTH-1:0] assert_difference_fire;
+
+    ovl_no_transition #(
+        .severity_level(`OVL_FATAL),
+        .width(ADDRESS_WIDTH),
+        .property_type(`OVL_ASSERT),
+        .msg("difference cannot overflow")
+    )
+    assert_difference (
+        .clock(rx_aclk),
+        .reset(rx_areset_n),
+        .enable(1'b1),
+        .test_expr(difference),
+        .start_state('1),
+        .next_state('0),
+        .fire(assert_difference_fire)
+    );
+`endif
+
 endmodule
