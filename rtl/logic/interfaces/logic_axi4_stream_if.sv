@@ -64,15 +64,21 @@ interface logic_axi4_stream_if #(
         tdata_t tdata;
     } packet_t;
 
-    logic tready = '0;
-    logic tvalid = '0;
-    logic tlast = '0;
-    tdata_t tdata = '0;
-    tstrb_t tstrb = '0;
-    tkeep_t tkeep = '0;
-    tdest_t tdest = '0;
-    tuser_t tuser = '0;
-    tid_t tid = '0;
+`ifndef LOGIC_SYNTHESIS
+    `define INIT = '0
+`else
+    `define INIT
+`endif
+
+    logic tready `INIT;
+    logic tvalid `INIT;
+    logic tlast `INIT;
+    tdata_t tdata `INIT;
+    tstrb_t tstrb `INIT;
+    tkeep_t tkeep `INIT;
+    tdest_t tdest `INIT;
+    tuser_t tuser `INIT;
+    tid_t tid `INIT;
 
     function automatic packet_t read();
         return '{tuser, tdest, tid, tlast, tkeep, tstrb, tdata};

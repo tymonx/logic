@@ -257,13 +257,17 @@ function(add_quartus_project target_name)
     endforeach()
 
     foreach (quartus_source ${ARG_SOURCES})
-        if (quartus_source MATCHES .sv)
+        if (quartus_source MATCHES "\\.sv$")
             set(quartus_type_file SYSTEMVERILOG_FILE)
-        elseif (quartus_source MATCHES .vhd)
+        elseif (quartus_source MATCHES "\\.vhd$")
             set(quartus_type_file VHDL_FILE)
-        elseif (quartus_source MATCHES .v)
+        elseif (quartus_source MATCHES "\\.v$")
             set(quartus_type_file VERILOG_FILE)
+        else()
+            continue()
         endif()
+
+        list(APPEND quartus_depends ${quartus_source})
 
         if (CYGWIN)
             execute_process(COMMAND cygpath -m "${quartus_source}"
