@@ -139,7 +139,7 @@ function(add_quartus_project target_name)
 
         add_custom_command(
             OUTPUT
-                "${ip_ile}"
+                ${ip_file}
             COMMAND
                 ${QUARTUS_QSYS_SCRIPT}
             ARGS
