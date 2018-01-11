@@ -69,6 +69,13 @@ if (QUARTUS_FOUND)
         file(GLOB SYSTEMVERILOG_SOURCES "${QUARTUS_DIR}/eda/sim_lib/mentor/*.sv")
 
         foreach (hdl_source ${VERILOG_SOURCES} ${SYSTEMVERILOG_SOURCES})
+            if (hdl_source MATCHES for_vhdl OR
+                    hdl_source MATCHES ct1_hssi_atoms_ncrypt OR
+                    hdl_source MATCHES tennm_atoms_ncrypt OR
+                    hdl_source MATCHES fourteennm_atoms_ncrypt)
+                continue()
+            endif()
+
             get_filename_component(hdl_name "${hdl_source}" NAME_WE)
 
             add_hdl_source("${hdl_source}"
