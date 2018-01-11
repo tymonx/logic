@@ -110,20 +110,6 @@ function(add_quartus_project target_name)
             "set_global_assignment -name IP_SEARCH_PATHS \"${ip_search_paths}\"")
     endif()
 
-    foreach (ip_file ${ARG_IP_FILES})
-        get_filename_component(ip_file "${ip_file}" REALPATH)
-        list(APPEND quartus_depends "${ip_file}")
-
-        if (CYGWIN)
-            execute_process(COMMAND cygpath -m "${ip_file}"
-                OUTPUT_VARIABLE ip_file
-                OUTPUT_STRIP_TRAILING_WHITESPACE)
-        endif()
-
-        list(APPEND quartus_assignments
-            "set_global_assignment -name IP_FILE ${ip_file}")
-    endforeach()
-
     foreach (tcl_file ${ARG_QSYS_TCL_FILES})
         get_filename_component(tcl_file "${tcl_file}" REALPATH)
         get_filename_component(name "${tcl_file}" NAME_WE)
@@ -152,6 +138,20 @@ function(add_quartus_project target_name)
         )
 
         list(APPEND ARG_IP_FILES "${ip_file}")
+    endforeach()
+
+    foreach (ip_file ${ARG_IP_FILES})
+        get_filename_component(ip_file "${ip_file}" REALPATH)
+        list(APPEND quartus_depends "${ip_file}")
+
+        if (CYGWIN)
+            execute_process(COMMAND cygpath -m "${ip_file}"
+                OUTPUT_VARIABLE ip_file
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+        endif()
+
+        list(APPEND quartus_assignments
+            "set_global_assignment -name IP_FILE ${ip_file}")
     endforeach()
 
     foreach (sdc_file ${ARG_SDC_FILES})
@@ -294,30 +294,30 @@ function(add_quartus_project target_name)
         get_filename_component(name "${qsys_file}" NAME_WE)
         get_filename_component(dir "${qsys_file}" DIRECTORY)
 
-        list(APPEND quartus_depends "${dir}/${name}/synth/${name}.v")
+        #list(APPEND quartus_depends "${dir}/${name}/synth/${name}.v")
 
-        add_custom_command(
-            OUTPUT
-                "${dir}/${name}/synth/${name}.v"
-            COMMAND
-                ${QUARTUS_QSYS_GENERATE}
-            ARGS
-                --quartus-project=${target_name}
-                --upgrade-ip-cores
-                "${qsys_file}"
-            COMMAND
-                ${QUARTUS_QSYS_GENERATE}
-            ARGS
-                --quartus-project=${target_name}
-                --synthesis=VERILOG
-                "${qsys_file}"
-            DEPENDS
-                "${qsys_file}"
-            WORKING_DIRECTORY
-                "${ARG_PROJECT_DIRECTORY}"
-            COMMENT
-                "Qsys generating ${qsys_name}"
-        )
+        # add_custom_command(
+        #     #OUTPUT
+        #     #    "${dir}/${name}/synth/${name}.v"
+        #     COMMAND
+        #         ${QUARTUS_QSYS_GENERATE}
+        #     ARGS
+        #         --quartus-project=${target_name}
+        #         --upgrade-ip-cores
+        #         "${qsys_file}"
+        #         #COMMAND
+        #         #${QUARTUS_QSYS_GENERATE}
+        #         #ARGS
+        #         #--quartus-project=${target_name}
+        #         #--synthesis=VERILOG
+        #         #"${qsys_file}"
+        #     DEPENDS
+        #         "${qsys_file}"
+        #     WORKING_DIRECTORY
+        #         "${ARG_PROJECT_DIRECTORY}"
+        #     COMMENT
+        #         "Qsys generating ${qsys_name}"
+        # )
     endforeach()
 
     if (QUARTUS_EDITION MATCHES Pro)
