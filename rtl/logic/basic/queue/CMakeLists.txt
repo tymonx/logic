@@ -12,34 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_hdl_source(logic_basic_queue_generic_read.sv)
-add_hdl_source(logic_basic_queue_generic_write.sv)
-add_hdl_source(logic_basic_queue_generic_memory.sv)
-add_hdl_source(logic_basic_queue_generic_capacity.sv)
-
-add_hdl_source(logic_basic_queue_generic.sv
-    DEPENDS
-        logic_basic_queue_generic_read
-        logic_basic_queue_generic_write
-        logic_basic_queue_generic_memory
-        logic_basic_queue_generic_capacity
-    ANALYSIS TRUE
-)
-
-add_hdl_source(logic_basic_queue_intel.sv
-    DEPENDS
-        altera_mf
-)
-
-add_hdl_source(logic_basic_queue_main.sv
-    DEPENDS
-        logic_basic_queue_intel
-        logic_basic_queue_generic
-)
-
 add_hdl_source(logic_basic_queue.sv
+    SOURCES
+        logic_basic_queue_generic_capacity.sv
+        logic_basic_queue_generic_memory.sv
+        logic_basic_queue_generic_read.sv
+        logic_basic_queue_generic_write.sv
+        logic_basic_queue_generic.sv
+        logic_basic_queue_intel.sv
+        logic_basic_queue_main.sv
     DEPENDS
         logic_reset_synchronizer
-        logic_basic_queue_main
-    ANALYSIS TRUE
+        altera_mf
+    ANALYSIS
+        TRUE
 )

@@ -12,16 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_hdl_source(logic_axi4_lite_to_avalon_mm_main.sv)
 add_hdl_source(logic_axi4_lite_to_avalon_mm.sv
+    SOURCES
+        logic_axi4_lite_to_avalon_mm_main.sv
     DEPENDS
         logic_reset_synchronizer
         logic_axi4_lite_buffered
-        logic_axi4_lite_to_avalon_mm_main
 )
 
 add_hdl_source(logic_axi4_lite_to_avalon_mm_top.sv
     DEPENDS
         logic_axi4_lite_to_avalon_mm
-    ANALYSIS TRUE
+    ANALYSIS
+        TRUE
 )

@@ -20,5 +20,6 @@ add_hdl_source(logic_axi4_lite_buffered.sv
 add_hdl_source(logic_axi4_lite_buffered_top.sv
     DEPENDS
         logic_axi4_lite_buffered
-    ANALYSIS TRUE
+    ANALYSIS
+        TRUE
 )

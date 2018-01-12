@@ -20,5 +20,6 @@ add_hdl_source(logic_axi4_stream_buffered.sv
 add_hdl_source(logic_axi4_stream_buffered_top.sv
     DEPENDS
         logic_axi4_stream_buffered
-    ANALYSIS TRUE
+    ANALYSIS
+        TRUE
 )
