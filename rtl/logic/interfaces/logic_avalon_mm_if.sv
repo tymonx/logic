@@ -15,10 +15,6 @@
 
 `include "logic.svh"
 
-`ifndef LOGIC_STD_OVL_DISABLED
-`include "std_ovl_defines.h"
-`endif
-
 /* Interface: logic_avalon_mm_if
  *
  * Avalon-MM interface.

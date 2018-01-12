@@ -16,6 +16,8 @@ add_hdl_source(logic_axi4_lite_to_avalon_mm.sv
     SOURCES
         logic_axi4_lite_to_avalon_mm_main.sv
     DEPENDS
+        logic_axi4_lite_if
+        logic_avalon_mm_if
         logic_reset_synchronizer
         logic_axi4_lite_buffered
 )

@@ -22,9 +22,13 @@ add_hdl_source(logic_clock_domain_crossing.sv
         logic_clock_domain_crossing_generic_read_sync.sv
         logic_clock_domain_crossing_generic.sv
     DEPENDS
+        logic_pkg
+        logic_axi4_stream_if
+        logic_reset_synchronizer
         logic_basic_synchronizer
         logic_basic_gray2binary
         logic_basic_binary2gray
+        ovl_no_transition
         altera_mf
     ANALYSIS
         TRUE

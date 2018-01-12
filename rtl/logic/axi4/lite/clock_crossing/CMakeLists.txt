@@ -14,6 +14,8 @@
 
 add_hdl_source(logic_axi4_lite_clock_crossing.sv
     DEPENDS
+        logic_pkg
+        logic_axi4_lite_if
         logic_clock_domain_crossing
 )
 

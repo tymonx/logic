@@ -12,7 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_hdl_source(logic_axi4_stream_to_avalon_st.sv)
+add_hdl_source(logic_axi4_stream_to_avalon_st.sv
+    DEPENDS
+        logic_axi4_stream_if
+        logic_avalon_st_if
+)
 
 add_hdl_source(logic_axi4_stream_to_avalon_st_top.sv
     DEPENDS

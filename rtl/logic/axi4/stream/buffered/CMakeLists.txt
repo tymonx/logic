@@ -14,6 +14,7 @@
 
 add_hdl_source(logic_axi4_stream_buffered.sv
     DEPENDS
+        logic_axi4_stream_if
         logic_basic_buffered
 )
 

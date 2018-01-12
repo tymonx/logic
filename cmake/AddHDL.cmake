@@ -161,8 +161,8 @@ function(get_hdl_depends hdl_target hdl_depends_var)
     foreach (name ${ARG_DEPENDS})
         get_hdl_depends(${name} depends)
 
-        list(APPEND hdl_depends ${name})
         list(APPEND hdl_depends ${depends})
+        list(APPEND hdl_depends ${name})
     endforeach()
 
     list(REMOVE_DUPLICATES hdl_depends)

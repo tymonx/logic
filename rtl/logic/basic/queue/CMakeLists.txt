@@ -22,7 +22,10 @@ add_hdl_source(logic_basic_queue.sv
         logic_basic_queue_intel.sv
         logic_basic_queue_main.sv
     DEPENDS
+        logic_pkg
+        logic_axi4_stream_if
         logic_reset_synchronizer
+        ovl_no_transition
         altera_mf
     ANALYSIS
         TRUE
