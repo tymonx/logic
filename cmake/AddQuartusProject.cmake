@@ -66,15 +66,21 @@ function(add_quartus_project target_name)
     cmake_parse_arguments(ARG "${options}" "${one_value_arguments}"
         "${multi_value_arguments}" ${ARGN})
 
+    macro(set_default_value name value)
+        if (NOT DEFINED ARG_${name})
+            set(ARG_${name} ${value})
+        endif()
+    endmacro()
+
     set(quartus_depends "")
     set(quartus_assignments "")
 
+    set(ip_files "")
+    set(qsys_files "")
+    set(qsys_tcl_files "")
+
     if (DEFINED QUARTUS_NUM_PARALLEL_PROCESSORS)
         set(ARG_NUM_PARALLEL_PROCESSORS ${QUARTUS_NUM_PARALLEL_PROCESSORS})
-    endif()
-
-    if (NOT DEFINED ARG_REVISION)
-        set(ARG_REVISION ${target_name})
     endif()
 
     set(ARG_INCLUDES ${QUARTUS_INCLUDES} ${ARG_INCLUDES})
@@ -91,17 +97,11 @@ function(add_quartus_project target_name)
             "set_global_assignment -name DEVICE \"${ARG_DEVICE}\"")
     endif()
 
-    if (NOT DEFINED ARG_PROJECT_DIRECTORY)
-        set(ARG_PROJECT_DIRECTORY "${CMAKE_BINARY_DIR}/quartus/${target_name}")
-    endif()
-
-    if (NOT DEFINED ARG_TOP_LEVEL_ENTITY)
-        set(ARG_TOP_LEVEL_ENTITY ${target_name})
-    endif()
-
-    if (NOT DEFINED ARG_NUM_PARALLEL_PROCESSORS)
-        set(ARG_NUM_PARALLEL_PROCESSORS ALL)
-    endif()
+    set_default_value(REVISION ${target_name})
+    set_default_value(TOP_LEVEL_ENTITY "${target_name}")
+    set_default_value(NUM_PARALLEL_PROCESSORS ALL)
+    set_default_value(PROJECT_DIRECTORY
+        "${CMAKE_BINARY_DIR}/quartus/${target_name}")
 
     file(MAKE_DIRECTORY "${ARG_PROJECT_DIRECTORY}")
 
@@ -158,7 +158,22 @@ function(add_quartus_project target_name)
             "set_global_assignment -name IP_SEARCH_PATHS \"${ip_search_paths}\"")
     endif()
 
-    foreach (tcl_file ${ARG_QSYS_TCL_FILES})
+    foreach (file ${ARG_QSYS_TCL_FILES} ${ARG_QSYS_FILES} ${ARG_IP_FILES})
+        configure_file("${file}" "${ARG_PROJECT_DIRECTORY}")
+
+        get_filename_component(filename "${file}" NAME)
+        set(file "${ARG_PROJECT_DIRECTORY}/${filename}")
+
+        if (file MATCHES "\\.ip$")
+            list(APPEND ip_files "${file}")
+        elseif (file MATCHES "\\.qsys$")
+            list(APPEND qsys_files "${file}")
+        elseif (file MATCHES "\\.tcl$")
+            list(APPEND qsys_tcl_files "${file}")
+        endif()
+    endforeach()
+
+    foreach (tcl_file ${qsys_tcl_files})
         get_filename_component(tcl_file "${tcl_file}" REALPATH)
         get_filename_component(name "${tcl_file}" NAME_WE)
         get_filename_component(dir "${tcl_file}" DIRECTORY)
@@ -185,10 +200,10 @@ function(add_quartus_project target_name)
                 "${ARG_PROJECT_DIRECTORY}"
         )
 
-        list(APPEND ARG_IP_FILES "${ip_file}")
+        list(APPEND ip_files "${ip_file}")
     endforeach()
 
-    foreach (ip_file ${ARG_IP_FILES})
+    foreach (ip_file ${ip_files})
         get_filename_component(ip_file "${ip_file}" REALPATH)
         list(APPEND quartus_depends "${ip_file}")
 
@@ -216,7 +231,7 @@ function(add_quartus_project target_name)
             "set_global_assignment -name SDC_FILE ${sdc_file}")
     endforeach()
 
-    foreach (qsys_file ${ARG_QSYS_FILES})
+    foreach (qsys_file ${qsys_files})
         get_filename_component(qsys_file "${qsys_file}" REALPATH)
         list(APPEND quartus_depends "${qsys_file}")
 
@@ -303,7 +318,7 @@ function(add_quartus_project target_name)
         "${ADD_QUARTUS_PROJECT_CURRENT_DIR}/AddQuartusProject.qsf.cmake.in"
         "${ARG_PROJECT_DIRECTORY}/${target_name}.qsf")
 
-    foreach (qsys_file ${ARG_IP_FILES} ${ARG_QSYS_FILES})
+    foreach (qsys_file ${ip_files} ${qsys_files})
         get_filename_component(qsys_file "${qsys_file}" REALPATH)
         get_filename_component(name "${qsys_file}" NAME_WE)
         get_filename_component(dir "${qsys_file}" DIRECTORY)
