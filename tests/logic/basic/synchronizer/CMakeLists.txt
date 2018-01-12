@@ -12,6 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(binary2gray)
-add_subdirectory(gray2binary)
-add_subdirectory(synchronizer)
+# Create SystemVerilog with SVUnit
+
+add_hdl_unit_test(logic_basic_synchronizer_unit_test.sv
+    DEPENDS
+        ovl_never_unknown_async
+        logic_basic_synchronizer
+    INCLUDES
+        ${STD_OVL_DIR}
+)
