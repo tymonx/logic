@@ -24,6 +24,7 @@ include(AddMsvcCompiler)
 include(AddClangCompiler)
 include(AddVivadoProject)
 include(AddQuartusProject)
+include(AddQuartusFile)
 include(AddHDL)
 include(AddStdOVL)
 

@@ -91,6 +91,40 @@ function(add_quartus_project target_name)
             "set_global_assignment -name DEVICE \"${ARG_DEVICE}\"")
     endif()
 
+    if (NOT DEFINED ARG_PROJECT_DIRECTORY)
+        set(ARG_PROJECT_DIRECTORY "${CMAKE_BINARY_DIR}/quartus/${target_name}")
+    endif()
+
+    if (NOT DEFINED ARG_TOP_LEVEL_ENTITY)
+        set(ARG_TOP_LEVEL_ENTITY ${target_name})
+    endif()
+
+    if (NOT DEFINED ARG_NUM_PARALLEL_PROCESSORS)
+        set(ARG_NUM_PARALLEL_PROCESSORS ALL)
+    endif()
+
+    file(MAKE_DIRECTORY "${ARG_PROJECT_DIRECTORY}")
+
+    get_hdl_depends(${ARG_TOP_LEVEL_ENTITY} hdl_depends)
+
+    foreach (hdl_name ${hdl_depends} ${ARG_TOP_LEVEL_ENTITY})
+        get_hdl_property(hdl_synthesizable ${hdl_name} SYNTHESIZABLE)
+
+        if (hdl_synthesizable)
+            get_hdl_property(hdl_sources ${hdl_name} SOURCES)
+            list(APPEND ARG_SOURCES ${hdl_sources})
+
+            get_hdl_property(hdl_source ${hdl_name} SOURCE)
+            list(APPEND ARG_SOURCES "${hdl_source}")
+
+            get_hdl_property(hdl_defines ${hdl_name} DEFINES)
+            list(APPEND ARG_DEFINES ${hdl_defines})
+
+            get_hdl_property(hdl_includes ${hdl_name} INCLUDES)
+            list(APPEND ARG_INCLUDES ${hdl_includes})
+        endif()
+    endforeach()
+
     if (ARG_IP_SEARCH_PATHS)
         set(ip_search_paths "")
 
@@ -194,40 +228,6 @@ function(add_quartus_project target_name)
 
         list(APPEND quartus_assignments
             "set_global_assignment -name SOURCE_TCL_SCRIPT_FILE ${tcl_file}")
-    endforeach()
-
-    if (NOT DEFINED ARG_PROJECT_DIRECTORY)
-        set(ARG_PROJECT_DIRECTORY "${CMAKE_BINARY_DIR}/quartus/${target_name}")
-    endif()
-
-    if (NOT DEFINED ARG_TOP_LEVEL_ENTITY)
-        set(ARG_TOP_LEVEL_ENTITY ${target_name})
-    endif()
-
-    if (NOT DEFINED ARG_NUM_PARALLEL_PROCESSORS)
-        set(ARG_NUM_PARALLEL_PROCESSORS ALL)
-    endif()
-
-    file(MAKE_DIRECTORY "${ARG_PROJECT_DIRECTORY}")
-
-    get_hdl_depends(${ARG_TOP_LEVEL_ENTITY} hdl_depends)
-
-    foreach (hdl_name ${hdl_depends} ${ARG_TOP_LEVEL_ENTITY})
-        get_hdl_property(hdl_synthesizable ${hdl_name} SYNTHESIZABLE)
-
-        if (hdl_synthesizable)
-            get_hdl_property(hdl_sources ${hdl_name} SOURCES)
-            list(APPEND ARG_SOURCES "${hdl_sources}")
-
-            get_hdl_property(hdl_source ${hdl_name} SOURCE)
-            list(APPEND ARG_SOURCES "${hdl_source}")
-
-            get_hdl_property(hdl_defines ${hdl_name} DEFINES)
-            list(APPEND ARG_DEFINES "${hdl_defines}")
-
-            get_hdl_property(hdl_includes ${hdl_name} INCLUDES)
-            list(APPEND ARG_INCLUDES "${hdl_includes}")
-        endif()
     endforeach()
 
     if (ARG_DEFINES)
