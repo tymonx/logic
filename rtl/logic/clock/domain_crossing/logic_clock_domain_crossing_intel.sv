@@ -158,6 +158,9 @@ module logic_clock_domain_crossing_intel #(
         FSM_DATA: begin
             read_enable = !rdempty && tx_tready;
         end
+        default: begin
+            read_enable = '0;
+        end
         endcase
     end
 

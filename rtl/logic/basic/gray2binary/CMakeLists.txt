@@ -13,6 +13,8 @@
 # limitations under the License.
 
 add_hdl_source(logic_basic_gray2binary.sv
+    DEPENDS
+        ovl_never_unknown_async
     ANALYSIS
         TRUE
 )
