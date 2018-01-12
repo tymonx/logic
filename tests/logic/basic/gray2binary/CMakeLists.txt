@@ -12,6 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(axi4)
-add_subdirectory(reset)
-add_subdirectory(basic)
+# Create SystemVerilog with SVUnit
+
+add_hdl_unit_test(logic_basic_gray2binary_unit_test.sv
+    DEPENDS
+        ovl_never_unknown_async
+        logic_basic_gray2binary
+    INCLUDES
+        ${STD_OVL_DIR}
+)

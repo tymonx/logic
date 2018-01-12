@@ -12,6 +12,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(axi4)
-add_subdirectory(reset)
-add_subdirectory(basic)
+add_subdirectory(binary2gray)
+add_subdirectory(gray2binary)
