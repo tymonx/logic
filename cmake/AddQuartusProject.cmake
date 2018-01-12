@@ -159,7 +159,7 @@ function(add_quartus_project target_name)
     endif()
 
     foreach (file ${ARG_QSYS_TCL_FILES} ${ARG_QSYS_FILES} ${ARG_IP_FILES})
-        configure_file("${file}" "${ARG_PROJECT_DIRECTORY}")
+        configure_file("${file}" "${ARG_PROJECT_DIRECTORY}" COPYONLY)
 
         get_filename_component(filename "${file}" NAME)
         set(file "${ARG_PROJECT_DIRECTORY}/${filename}")
