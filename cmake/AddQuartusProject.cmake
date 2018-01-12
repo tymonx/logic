@@ -107,21 +107,35 @@ function(add_quartus_project target_name)
 
     get_hdl_depends(${ARG_TOP_LEVEL_ENTITY} hdl_depends)
 
-    foreach (hdl_name ${hdl_depends} ${ARG_TOP_LEVEL_ENTITY})
+    foreach (hdl_name ${ARG_DEPENDS} ${hdl_depends} ${ARG_TOP_LEVEL_ENTITY})
         get_hdl_property(hdl_synthesizable ${hdl_name} SYNTHESIZABLE)
 
         if (hdl_synthesizable)
-            get_hdl_property(hdl_sources ${hdl_name} SOURCES)
-            list(APPEND ARG_SOURCES ${hdl_sources})
+            get_hdl_property(hdl_type ${hdl_name} TYPE)
 
-            get_hdl_property(hdl_source ${hdl_name} SOURCE)
-            list(APPEND ARG_SOURCES "${hdl_source}")
+            if (hdl_type MATCHES Qsys)
+                get_hdl_property(hdl_source ${hdl_name} SOURCE)
 
-            get_hdl_property(hdl_defines ${hdl_name} DEFINES)
-            list(APPEND ARG_DEFINES ${hdl_defines})
+                if (hdl_source MATCHES "\\.tcl$")
+                    list(APPEND ARG_QSYS_TCL_FILES "${hdl_source}")
+                elseif (hdl_source MATCHES "\\.ip$")
+                    list(APPEND ARG_IP_FILES "${hdl_source}")
+                elseif (hdl_source MATCHES "\\.qsys$")
+                    list(APPEND ARG_QSYS_FILES "${hdl_source}")
+                endif()
+            elseif (hdl_type MATCHES Verilog OR hdl_type MATCHES VHDL)
+                get_hdl_property(hdl_sources ${hdl_name} SOURCES)
+                list(APPEND ARG_SOURCES ${hdl_sources})
 
-            get_hdl_property(hdl_includes ${hdl_name} INCLUDES)
-            list(APPEND ARG_INCLUDES ${hdl_includes})
+                get_hdl_property(hdl_source ${hdl_name} SOURCE)
+                list(APPEND ARG_SOURCES "${hdl_source}")
+
+                get_hdl_property(hdl_defines ${hdl_name} DEFINES)
+                list(APPEND ARG_DEFINES ${hdl_defines})
+
+                get_hdl_property(hdl_includes ${hdl_name} INCLUDES)
+                list(APPEND ARG_INCLUDES ${hdl_includes})
+            endif()
         endif()
     endforeach()
 
@@ -143,20 +157,6 @@ function(add_quartus_project target_name)
         set(quartus_ip_search_paths_assignment
             "set_global_assignment -name IP_SEARCH_PATHS \"${ip_search_paths}\"")
     endif()
-
-    foreach (ip_file ${ARG_IP_FILES})
-        get_filename_component(ip_file "${ip_file}" REALPATH)
-        list(APPEND quartus_depends "${ip_file}")
-
-        if (CYGWIN)
-            execute_process(COMMAND cygpath -m "${ip_file}"
-                OUTPUT_VARIABLE ip_file
-                OUTPUT_STRIP_TRAILING_WHITESPACE)
-        endif()
-
-        list(APPEND quartus_assignments
-            "set_global_assignment -name IP_FILE ${ip_file}")
-    endforeach()
 
     foreach (tcl_file ${ARG_QSYS_TCL_FILES})
         get_filename_component(tcl_file "${tcl_file}" REALPATH)
@@ -186,6 +186,20 @@ function(add_quartus_project target_name)
         )
 
         list(APPEND ARG_IP_FILES "${ip_file}")
+    endforeach()
+
+    foreach (ip_file ${ARG_IP_FILES})
+        get_filename_component(ip_file "${ip_file}" REALPATH)
+        list(APPEND quartus_depends "${ip_file}")
+
+        if (CYGWIN)
+            execute_process(COMMAND cygpath -m "${ip_file}"
+                OUTPUT_VARIABLE ip_file
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+        endif()
+
+        list(APPEND quartus_assignments
+            "set_global_assignment -name IP_FILE ${ip_file}")
     endforeach()
 
     foreach (sdc_file ${ARG_SDC_FILES})
