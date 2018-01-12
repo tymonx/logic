@@ -143,7 +143,7 @@ Run Verilator analysis for `<hdl-module-name>`:
 
     make verilator-analysis-<hdl-module-name>
 
-Rin Verilator analysis for all HDL modules:
+Run Verilator analysis for all HDL modules:
 
     make verilator-analysis-all
 
@@ -182,7 +182,7 @@ Use `add_vivado_project()` function to create Vivado project:
 
     add_vivado_project(<top_level_entity>)
 
-Quartus project will be created under:
+Vivado project will be created under:
 
     vivado/<top_level_entity>
 
