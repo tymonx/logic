@@ -15,9 +15,9 @@
 
 `include "logic.svh"
 
-/* Module: logic::axi4::stream::logic_axi4_stream_clock_crossing
+/* Module: logic_axi4_stream_packet_buffer_main
  *
- * Clock domain crossing module between rx_aclk and tx_aclk clocks.
+ * Buffer whole packet before sending to next module.
  *
  * Parameters:
  *  TDATA_BYTES - Number of bytes for tdata signal.
@@ -29,13 +29,12 @@
  *  TARGET      - Target device implementation.
  *
  * Ports:
+ *  aclk        - Clock.
  *  areset_n    - Asynchronous active-low reset.
- *  rx_aclk     - Clock for rx AXI4-Stream interface.
- *  tx_aclk     - Clock for tx AXI4-Stream interface.
  *  rx          - AXI4-Stream interface.
  *  tx          - AXI4-Stream interface.
  */
-module logic_axi4_stream_clock_crossing #(
+module logic_axi4_stream_packet_buffer_main #(
     int TDATA_BYTES = 1,
     int TDEST_WIDTH = 1,
     int TUSER_WIDTH = 1,
@@ -43,44 +42,60 @@ module logic_axi4_stream_clock_crossing #(
     int CAPACITY = 256,
     logic_pkg::target_t TARGET = `LOGIC_CONFIG_TARGET
 ) (
+    input aclk,
     input areset_n,
-    input rx_aclk,
-    input tx_aclk,
     `LOGIC_MODPORT(logic_axi4_stream_if, rx) rx,
     `LOGIC_MODPORT(logic_axi4_stream_if, tx) tx
 );
-    localparam TLAST_WIDTH = 1;
-    localparam TDATA_WIDTH = TDATA_BYTES * 8;
-    localparam TSTRB_WIDTH = TDATA_BYTES;
-    localparam TKEEP_WIDTH = TDATA_BYTES;
+    logic_axi4_stream_if #(
+        .TDATA_BYTES(TDATA_BYTES),
+        .TDEST_WIDTH(TDEST_WIDTH),
+        .TUSER_WIDTH(TUSER_WIDTH),
+        .TID_WIDTH(TID_WIDTH)
+    )
+    queued (
+        .*
+    );
 
-    localparam WIDTH = TUSER_WIDTH + TDEST_WIDTH + TID_WIDTH + TLAST_WIDTH +
-        TKEEP_WIDTH + TSTRB_WIDTH + TDATA_WIDTH;
+    logic_axi4_stream_if #(
+        .TDATA_BYTES(TDATA_BYTES),
+        .TDEST_WIDTH(TDEST_WIDTH),
+        .TUSER_WIDTH(TUSER_WIDTH),
+        .TID_WIDTH(TID_WIDTH)
+    )
+    monitor (
+        .*
+    );
 
-    logic rx_tvalid;
-    logic rx_tready;
-    logic [WIDTH-1:0] rx_tdata;
+    /* Workaround for Quartus Lite/Standard Prime */
+    always_comb monitor.tready = rx.tready;
+    always_comb monitor.tvalid = rx.tvalid;
+    always_comb monitor.tlast = rx.tlast;
+    always_comb monitor.tuser = rx.tuser;
+    always_comb monitor.tdest = rx.tdest;
+    always_comb monitor.tstrb = rx.tstrb;
+    always_comb monitor.tkeep = rx.tkeep;
+    always_comb monitor.tdata = rx.tdata;
+    always_comb monitor.tid = rx.tid;
 
-    logic tx_tvalid;
-    logic tx_tready;
-    logic [WIDTH-1:0] tx_tdata;
+    logic_axi4_stream_queue #(
+        .TDATA_BYTES(TDATA_BYTES),
+        .TDEST_WIDTH(TDEST_WIDTH),
+        .TUSER_WIDTH(TUSER_WIDTH),
+        .TID_WIDTH(TID_WIDTH),
+        .CAPACITY(CAPACITY),
+        .TARGET(TARGET)
+    )
+    queue (
+        .tx(queued),
+        .*
+    );
 
-    always_comb rx_tvalid = rx.tvalid;
-    always_comb rx.tready = rx_tready;
-    always_comb rx_tdata = {rx.tuser, rx.tdest, rx.tid, rx.tlast, rx.tkeep,
-        rx.tstrb, rx.tdata};
-
-    always_comb tx.tvalid = tx_tvalid;
-    always_comb tx_tready = tx.tready;
-    always_comb {tx.tuser, tx.tdest, tx.tid, tx.tlast, tx.tkeep,
-        tx.tstrb, tx.tdata} = tx_tdata;
-
-    logic_clock_domain_crossing #(
-        .WIDTH(WIDTH),
-        .TARGET(TARGET),
+    logic_axi4_stream_packet_buffer_count #(
         .CAPACITY(CAPACITY)
     )
-    unit (
+    count (
+        .rx(queued),
         .*
     );
 endmodule

@@ -24,7 +24,9 @@
          */
         `define LOGIC_SYNTHESIS
     `endif
-`else
+`endif
+
+`ifdef LOGIC_SYNTHESIS
     `ifndef LOGIC_STD_OVL_DISABLED
         /* Define: LOGIC_STD_OVL_DISABLED
          *
@@ -39,5 +41,9 @@
 `include "logic_axi4.svh"
 `include "logic_avalon.svh"
 `include "logic_modport.svh"
+
+`ifndef LOGIC_STD_OVL_DISABLED
+`include "std_ovl_defines.h"
+`endif
 
 `endif /* LOGIC_SVH */

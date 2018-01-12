@@ -15,10 +15,10 @@
 
 `include "svunit_defines.svh"
 
-module logic_axi4_stream_clock_crossing_unit_test;
+module logic_axi4_stream_clock_crossing_intel_unit_test;
     import svunit_pkg::svunit_testcase;
 
-    string name = "logic_axi4_stream_clock_crossing_unit_test";
+    string name = "logic_axi4_stream_clock_crossing_intel_unit_test";
     svunit_testcase svunit_ut;
 
     localparam TDATA_BYTES = 4;
@@ -45,7 +45,8 @@ module logic_axi4_stream_clock_crossing_unit_test;
     );
 
     logic_axi4_stream_clock_crossing #(
-        .TDATA_BYTES(TDATA_BYTES)
+        .TDATA_BYTES(TDATA_BYTES),
+        .TARGET(logic_pkg::TARGET_INTEL)
     )
     dut (
         .*

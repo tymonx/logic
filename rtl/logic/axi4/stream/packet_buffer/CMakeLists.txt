@@ -12,18 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# SVUnit unit test
-
-add_hdl_unit_test(logic_axi4_stream_clock_crossing_unit_test.sv
+add_hdl_source(logic_axi4_stream_packet_buffer.sv
+    SOURCES
+        logic_axi4_stream_packet_buffer_main.sv
+        logic_axi4_stream_packet_buffer_count.sv
     DEPENDS
-        logic_axi4_stream_clock_crossing
+        logic_axi4_stream_queue
 )
 
-add_hdl_unit_test(logic_axi4_stream_clock_crossing_intel_unit_test.sv
+add_hdl_source(logic_axi4_stream_packet_buffer_top.sv
     DEPENDS
-        logic_axi4_stream_clock_crossing
-    MODELSIM_SUPPRESS
-        3009
-        3017
-        3722
+        logic_axi4_stream_packet_buffer
+    ANALYSIS
+        TRUE
 )

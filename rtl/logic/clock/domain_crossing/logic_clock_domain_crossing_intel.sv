@@ -163,4 +163,76 @@ module logic_clock_domain_crossing_intel #(
 
     always_comb tx_tvalid = (FSM_DATA == fsm_state);
     always_comb tx_tdata = read_data;
+
+`ifndef LOGIC_STD_OVL_DISABLED
+    logic [`OVL_FIRE_WIDTH-1:0] assert_wrusedw_overflow_fire;
+    logic [`OVL_FIRE_WIDTH-1:0] assert_wrusedw_underflow_fire;
+    logic [`OVL_FIRE_WIDTH-1:0] assert_rdusedw_overflow_fire;
+    logic [`OVL_FIRE_WIDTH-1:0] assert_rdusedw_underflow_fire;
+
+    ovl_no_transition #(
+        .severity_level(`OVL_FATAL),
+        .width(ADDRESS_WIDTH),
+        .property_type(`OVL_ASSERT),
+        .msg("wrusedw cannot overflow")
+    )
+    assert_wrusedw_overflow (
+        .clock(rx_aclk),
+        .reset(areset_n),
+        .enable(1'b1),
+        .test_expr(wrusedw),
+        .start_state('1),
+        .next_state('0),
+        .fire(assert_wrusedw_overflow_fire)
+    );
+
+    ovl_no_transition #(
+        .severity_level(`OVL_FATAL),
+        .width(ADDRESS_WIDTH),
+        .property_type(`OVL_ASSERT),
+        .msg("wrusedw cannot underflow")
+    )
+    assert_wrusedw_underflow (
+        .clock(rx_aclk),
+        .reset(areset_n),
+        .enable(1'b1),
+        .test_expr(wrusedw),
+        .start_state('0),
+        .next_state('1),
+        .fire(assert_wrusedw_underflow_fire)
+    );
+
+    ovl_no_transition #(
+        .severity_level(`OVL_FATAL),
+        .width(ADDRESS_WIDTH),
+        .property_type(`OVL_ASSERT),
+        .msg("rdusedw cannot overflow")
+    )
+    assert_rdusedw_overflow (
+        .clock(rx_aclk),
+        .reset(areset_n),
+        .enable(1'b1),
+        .test_expr(rdusedw),
+        .start_state('1),
+        .next_state('0),
+        .fire(assert_rdusedw_overflow_fire)
+    );
+
+    ovl_no_transition #(
+        .severity_level(`OVL_FATAL),
+        .width(ADDRESS_WIDTH),
+        .property_type(`OVL_ASSERT),
+        .msg("rdusedw cannot underflow")
+    )
+    assert_rdusedw_underflow (
+        .clock(rx_aclk),
+        .reset(areset_n),
+        .enable(1'b1),
+        .test_expr(rdusedw),
+        .start_state('0),
+        .next_state('1),
+        .fire(assert_rdusedw_underflow_fire)
+    );
+`endif
+
 endmodule

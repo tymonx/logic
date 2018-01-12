@@ -15,10 +15,6 @@
 
 `include "logic.svh"
 
-`ifndef LOGIC_STD_OVL_DISABLED
-`include "std_ovl_defines.h"
-`endif
-
 /* Module: logic_clock_domain_crossing_generic_read
  *
  * Parameters:
@@ -180,7 +176,24 @@ module logic_clock_domain_crossing_generic_read #(
     end
 
 `ifndef LOGIC_STD_OVL_DISABLED
-    logic [`OVL_FIRE_WIDTH-1:0] assert_difference_fire;
+    logic [`OVL_FIRE_WIDTH-1:0] assert_difference_overflow_fire;
+    logic [`OVL_FIRE_WIDTH-1:0] assert_difference_underflow_fire;
+
+    ovl_no_transition #(
+        .severity_level(`OVL_FATAL),
+        .width(ADDRESS_WIDTH),
+        .property_type(`OVL_ASSERT),
+        .msg("difference cannot overflow")
+    )
+    assert_difference_overflow (
+        .clock(tx_aclk),
+        .reset(tx_areset_n),
+        .enable(1'b1),
+        .test_expr(difference),
+        .start_state('1),
+        .next_state('0),
+        .fire(assert_difference_overflow_fire)
+    );
 
     ovl_no_transition #(
         .severity_level(`OVL_FATAL),
@@ -188,14 +201,14 @@ module logic_clock_domain_crossing_generic_read #(
         .property_type(`OVL_ASSERT),
         .msg("difference cannot underflow")
     )
-    assert_difference (
+    assert_difference_underflow (
         .clock(tx_aclk),
         .reset(tx_areset_n),
         .enable(1'b1),
         .test_expr(difference),
         .start_state('0),
         .next_state('1),
-        .fire(assert_difference_fire)
+        .fire(assert_difference_underflow_fire)
     );
 `endif
 

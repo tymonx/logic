@@ -15,10 +15,6 @@
 
 `include "logic.svh"
 
-`ifndef LOGIC_STD_OVL_DISABLED
-`include "std_ovl_defines.h"
-`endif
-
 /* Interface: logic_axi4_stream_if
  *
  * AXI4-Stream interface.
@@ -119,7 +115,7 @@ interface logic_axi4_stream_if #(
         import comb_write
     );
 
-    modport mon (
+    modport monitor (
         input tvalid,
         input tuser,
         input tdest,
@@ -160,7 +156,7 @@ interface logic_axi4_stream_if #(
         inout tready;
     endclocking
 
-    clocking cb_mon @(posedge aclk);
+    clocking cb_monitor @(posedge aclk);
         //default input #1step output #1step;
         input tvalid;
         input tuser;
@@ -193,7 +189,7 @@ interface logic_axi4_stream_if #(
         int total_size = data.size();
         int index = 0;
 
-        forever @(cb_rx) begin
+        forever begin
             if (!areset_n) begin
                 break;
             end
@@ -220,6 +216,8 @@ interface logic_axi4_stream_if #(
                 cb_rx.tlast <= (index >= total_size);
                 cb_rx.tvalid <= '1;
             end
+
+            @(cb_rx);
         end
 
         cb_rx.tvalid <= '0;

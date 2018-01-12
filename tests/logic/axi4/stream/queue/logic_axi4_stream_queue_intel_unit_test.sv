@@ -15,37 +15,30 @@
 
 `include "svunit_defines.svh"
 
-module logic_axi4_stream_clock_crossing_unit_test;
+module logic_axi4_stream_queue_intel_unit_test;
     import svunit_pkg::svunit_testcase;
 
-    string name = "logic_axi4_stream_clock_crossing_unit_test";
+    string name = "logic_axi4_stream_queue_intel_unit_test";
     svunit_testcase svunit_ut;
 
     localparam TDATA_BYTES = 4;
 
-    logic rx_aclk = 0;
-    logic tx_aclk = 0;
+    logic aclk = 0;
     logic areset_n = 0;
 
-    initial forever #3 rx_aclk = ~rx_aclk;
-    initial forever #27 tx_aclk = ~tx_aclk;
+    initial forever #1 aclk = ~aclk;
 
     logic_axi4_stream_if #(
         .TDATA_BYTES(TDATA_BYTES)
-    ) rx (
-        .aclk(rx_aclk),
-        .*
-    );
+    ) rx (.*);
 
     logic_axi4_stream_if #(
         .TDATA_BYTES(TDATA_BYTES)
-    ) tx (
-        .aclk(tx_aclk),
-        .*
-    );
+    ) tx (.*);
 
-    logic_axi4_stream_clock_crossing #(
-        .TDATA_BYTES(TDATA_BYTES)
+    logic_axi4_stream_queue #(
+        .TDATA_BYTES(TDATA_BYTES),
+        .TARGET(logic_pkg::TARGET_INTEL)
     )
     dut (
         .*
@@ -59,13 +52,11 @@ module logic_axi4_stream_clock_crossing_unit_test;
         svunit_ut.setup();
 
         areset_n = 0;
-        @(posedge rx_aclk);
-        @(posedge tx_aclk);
+        @(posedge aclk);
 
         areset_n = 1;
         tx.cb_tx.tready <= 1;
-        @(posedge rx_aclk);
-        @(posedge tx_aclk);
+        @(posedge aclk);
     endtask
 
     task teardown();
@@ -87,11 +78,9 @@ module logic_axi4_stream_clock_crossing_unit_test;
 
     fork
     begin
-        @(rx.cb_rx);
         rx.cb_write(data);
     end
     begin
-        @(tx.cb_tx);
         tx.cb_read(captured);
     end
     join
@@ -112,11 +101,9 @@ module logic_axi4_stream_clock_crossing_unit_test;
 
     fork
     begin
-        @(rx.cb_rx);
         rx.cb_write(data);
     end
     begin
-        @(tx.cb_tx);
         tx.cb_read(captured);
     end
     join
@@ -137,11 +124,9 @@ module logic_axi4_stream_clock_crossing_unit_test;
 
     fork
     begin
-        @(rx.cb_rx);
         rx.cb_write(data);
     end
     begin
-        @(tx.cb_tx);
         tx.cb_read(captured);
     end
     begin
