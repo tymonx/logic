@@ -167,33 +167,6 @@ interface logic_axi4_lite_if #(
 `ifndef LOGIC_SYNTHESIS
     clocking cb_slave @(posedge aclk);
         /* Write address channel */
-        input awvalid;
-        output awready;
-        input awaddr;
-        input awprot;
-        /* Write data channel */
-        input wvalid;
-        output wready;
-        input wdata;
-        input wstrb;
-        /* Write response channel */
-        output bvalid;
-        input bready;
-        output bresp;
-        /* Read address channel */
-        input arvalid;
-        output arready;
-        input araddr;
-        input arprot;
-        /* Read data channel */
-        output rvalid;
-        input rready;
-        output rdata;
-        output rresp;
-    endclocking
-
-    clocking cb_master @(posedge aclk);
-        /* Write address channel */
         output awvalid;
         input awready;
         output awaddr;
@@ -217,6 +190,33 @@ interface logic_axi4_lite_if #(
         output rready;
         input rdata;
         input rresp;
+    endclocking
+
+    clocking cb_master @(posedge aclk);
+        /* Write address channel */
+        input awvalid;
+        output awready;
+        input awaddr;
+        input awprot;
+        /* Write data channel */
+        input wvalid;
+        output wready;
+        input wdata;
+        input wstrb;
+        /* Write response channel */
+        output bvalid;
+        input bready;
+        output bresp;
+        /* Read address channel */
+        input arvalid;
+        output arready;
+        input araddr;
+        input arprot;
+        /* Read data channel */
+        output rvalid;
+        input rready;
+        output rdata;
+        output rresp;
     endclocking
 
     clocking cb_monitor @(posedge aclk);
