@@ -12,7 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(axi4)
-add_subdirectory(reset)
-add_subdirectory(basic)
-add_subdirectory(pll)
+# SVUnit unit test
+
+add_hdl_unit_test(logic_pll_lock_service_unit_test.sv
+    DEPENDS
+        logic_pll_lock_service
+    MODELSIM_SUPPRESS
+        3009
+)
