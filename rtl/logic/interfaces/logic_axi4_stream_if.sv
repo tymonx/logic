@@ -131,7 +131,6 @@ interface logic_axi4_stream_if #(
 
 `ifndef LOGIC_SYNTHESIS
     clocking cb_rx @(posedge aclk);
-        //default input #1step output #1step;
         output tvalid;
         output tuser;
         output tdest;
@@ -144,7 +143,6 @@ interface logic_axi4_stream_if #(
     endclocking
 
     clocking cb_tx @(posedge aclk);
-        //default input #1step output #1step;
         input tvalid;
         input tuser;
         input tdest;
@@ -157,7 +155,6 @@ interface logic_axi4_stream_if #(
     endclocking
 
     clocking cb_monitor @(posedge aclk);
-        //default input #1step output #1step;
         input tvalid;
         input tuser;
         input tdest;
