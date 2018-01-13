@@ -14,6 +14,7 @@
 
 add_hdl_source(logic_axi4_stream_if.sv
     DEPENDS
+        ovl_never_unknown
         ovl_win_unchange
         ovl_always
 )

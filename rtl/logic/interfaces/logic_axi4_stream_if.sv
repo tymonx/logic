@@ -39,6 +39,7 @@ interface logic_axi4_stream_if #(
     input aclk,
     input areset_n
 );
+    localparam TDATA_WIDTH = TDATA_BYTES * 8;
     localparam TSTRB_WIDTH = TDATA_BYTES;
     localparam TKEEP_WIDTH = TDATA_BYTES;
 
@@ -273,6 +274,156 @@ interface logic_axi4_stream_if #(
     /* verilator coverage_off */
     genvar k;
 
+    logic [`OVL_FIRE_WIDTH-1:0] assert_tvalid_never_unknown_fire;
+
+    ovl_never_unknown #(
+        .severity_level(`OVL_FATAL),
+        .property_type(`OVL_ASSERT),
+        .msg("tvalid signal always must be in known 0 or 1 state")
+    )
+    assert_tvalid_never_unknown (
+        .clock(aclk),
+        .reset(1'b1),
+        .enable(1'b1),
+        .qualifier(1'b1),
+        .test_expr(tvalid),
+        .fire(assert_tvalid_never_unknown_fire)
+    );
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_tready_never_unknown_fire;
+
+    ovl_never_unknown #(
+        .severity_level(`OVL_FATAL),
+        .property_type(`OVL_ASSERT),
+        .msg("tready signal always must be in known 0 or 1 state")
+    )
+    assert_tready_never_unknown (
+        .clock(aclk),
+        .reset(1'b1),
+        .enable(1'b1),
+        .qualifier(1'b1),
+        .test_expr(tready),
+        .fire(assert_tready_never_unknown_fire)
+    );
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_tdata_never_unknown_fire;
+
+    ovl_never_unknown #(
+        .severity_level(`OVL_FATAL),
+        .width(TDATA_WIDTH),
+        .property_type(`OVL_ASSERT),
+        .msg("tdata signal cannot be unknown during active transfer")
+    )
+    assert_tdata_never_unknown (
+        .clock(aclk),
+        .reset(areset_n),
+        .enable(1'b1),
+        .qualifier(tvalid),
+        .test_expr(tdata),
+        .fire(assert_tdata_never_unknown_fire)
+    );
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_tkeep_never_unknown_fire;
+
+    ovl_never_unknown #(
+        .severity_level(`OVL_FATAL),
+        .width(TDATA_BYTES),
+        .property_type(`OVL_ASSERT),
+        .msg("tkeep signal cannot be unknown during active transfer")
+    )
+    assert_tkeep_never_unknown (
+        .clock(aclk),
+        .reset(areset_n),
+        .enable(1'b1),
+        .qualifier(tvalid),
+        .test_expr(tkeep),
+        .fire(assert_tkeep_never_unknown_fire)
+    );
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_tstrb_never_unknown_fire;
+
+    ovl_never_unknown #(
+        .severity_level(`OVL_FATAL),
+        .width(TDATA_BYTES),
+        .property_type(`OVL_ASSERT),
+        .msg("tstrb signal cannot be unknown during active transfer")
+    )
+    assert_tstrb_never_unknown (
+        .clock(aclk),
+        .reset(areset_n),
+        .enable(1'b1),
+        .qualifier(tvalid),
+        .test_expr(tstrb),
+        .fire(assert_tstrb_never_unknown_fire)
+    );
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_tlast_never_unknown_fire;
+
+    ovl_never_unknown #(
+        .severity_level(`OVL_FATAL),
+        .property_type(`OVL_ASSERT),
+        .msg("tlast signal cannot be unknown during active transfer")
+    )
+    assert_tlast_never_unknown (
+        .clock(aclk),
+        .reset(areset_n),
+        .enable(1'b1),
+        .qualifier(tvalid),
+        .test_expr(tlast),
+        .fire(assert_tlast_never_unknown_fire)
+    );
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_tdest_never_unknown_fire;
+
+    ovl_never_unknown #(
+        .severity_level(`OVL_FATAL),
+        .width(TDEST_WIDTH),
+        .property_type(`OVL_ASSERT),
+        .msg("tdest signal cannot be unknown during active transfer")
+    )
+    assert_tdest_never_unknown (
+        .clock(aclk),
+        .reset(areset_n),
+        .enable(1'b1),
+        .qualifier(tvalid),
+        .test_expr(tdest),
+        .fire(assert_tdest_never_unknown_fire)
+    );
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_tuser_never_unknown_fire;
+
+    ovl_never_unknown #(
+        .severity_level(`OVL_FATAL),
+        .width(TUSER_WIDTH),
+        .property_type(`OVL_ASSERT),
+        .msg("tuser signal cannot be unknown during active transfer")
+    )
+    assert_tuser_never_unknown (
+        .clock(aclk),
+        .reset(areset_n),
+        .enable(1'b1),
+        .qualifier(tvalid),
+        .test_expr(tuser),
+        .fire(assert_tuser_never_unknown_fire)
+    );
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_tid_never_unknown_fire;
+
+    ovl_never_unknown #(
+        .severity_level(`OVL_FATAL),
+        .width(TID_WIDTH),
+        .property_type(`OVL_ASSERT),
+        .msg("tid signal cannot be unknown during active transfer")
+    )
+    assert_tid_never_unknown (
+        .clock(aclk),
+        .reset(areset_n),
+        .enable(1'b1),
+        .qualifier(tvalid),
+        .test_expr(tid),
+        .fire(assert_tid_never_unknown_fire)
+    );
+
     logic [`OVL_FIRE_WIDTH-1:0] assert_tvalid_always_reset_fire;
 
     ovl_always #(
@@ -283,7 +434,7 @@ interface logic_axi4_stream_if #(
     assert_tvalid_always_reset (
         .clock(aclk),
         .reset(!areset_n),
-        .enable(!areset_n),
+        .enable(1'b1),
         .test_expr(!tvalid),
         .fire(assert_tvalid_always_reset_fire)
     );
@@ -300,8 +451,8 @@ interface logic_axi4_stream_if #(
             assert_tkeep_tstrb_always_valid (
                 .clock(aclk),
                 .reset(areset_n),
-                .enable(tvalid),
-                .test_expr(tkeep[k] || (!tkeep[k] && !tstrb[k])),
+                .enable(1'b1),
+                .test_expr(!tvalid || tkeep[k] || (!tkeep[k] && !tstrb[k])),
                 .fire(assert_tkeep_tstrb_always_valid_fire)
             );
 
@@ -353,7 +504,7 @@ interface logic_axi4_stream_if #(
 
     ovl_win_unchange #(
         .severity_level(`OVL_FATAL),
-        .width(8 * TDATA_BYTES),
+        .width(TDATA_WIDTH),
         .property_type(`OVL_ASSERT),
         .msg("tdata signal cannot change value during bus hold")
     )
