@@ -46,7 +46,7 @@ module logic_axi4_stream_from_avalon_st #(
 
     always_ff @(posedge aclk or negedge areset_n) begin
         if (!areset_n) begin
-            tx.tvalid <= 1'b0;
+            tx.tvalid <= '0;
         end
         else if (tx.tready) begin
             tx.tvalid <= rx.valid;

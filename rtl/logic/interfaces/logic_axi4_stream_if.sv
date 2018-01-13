@@ -187,6 +187,10 @@ interface logic_axi4_stream_if #(
         int total_size = data.size();
         int index = 0;
 
+        if (0 == data.size()) begin
+            return;
+        end
+
         forever begin
             if (!areset_n) begin
                 break;
@@ -214,7 +218,6 @@ interface logic_axi4_stream_if #(
                 cb_rx.tlast <= (index >= total_size);
                 cb_rx.tvalid <= '1;
             end
-
             @(cb_rx);
         end
 

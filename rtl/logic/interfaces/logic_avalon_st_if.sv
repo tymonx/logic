@@ -80,14 +80,20 @@ interface logic_avalon_st_if #(
         data_t data;
     } packet_t;
 
-    logic ready;
-    logic valid;
-    logic startofpacket;
-    logic endofpacket;
-    channel_t channel;
-    error_t error;
-    empty_t empty;
-    data_t data;
+`ifndef LOGIC_SYNTHESIS
+    `define INIT = '0
+`else
+    `define INIT
+`endif
+
+    logic ready `INIT;
+    logic valid `INIT;
+    logic startofpacket `INIT;
+    logic endofpacket `INIT;
+    channel_t channel `INIT;
+    error_t error `INIT;
+    empty_t empty `INIT;
+    data_t data `INIT;
 
     function packet_t read();
         return '{startofpacket, endofpacket, channel, error, empty, data};
@@ -173,6 +179,98 @@ interface logic_avalon_st_if #(
         input empty;
         input data;
     endclocking
+
+    task automatic cb_rx_clear();
+        cb_rx.error <= '0;
+        cb_rx.channel <= '0;
+        cb_rx.endofpacket <= '0;
+        cb_rx.startofpacket <= '0;
+        cb_rx.empty <= '0;
+        cb_rx.data <= '0;
+        cb_rx.valid <= '0;
+    endtask
+
+    task automatic cb_tx_clear();
+        cb_tx.ready <= '0;
+    endtask
+
+    task automatic cb_write(const ref byte data[], input int ch = 0);
+        int total_size = data.size();
+        int index = 0;
+
+        if (0 == data.size()) begin
+            return;
+        end
+
+        forever begin
+            if (!reset_n) begin
+                break;
+            end
+            else if (1'b1 === cb_rx.ready) begin
+                int data_empty = 0;
+
+                if (index >= total_size) begin
+                    break;
+                end
+
+                cb_rx.startofpacket <= !index;
+
+                for (int i = 0; i < SYMBOLS_PER_BEAT; ++i) begin
+                    if (index < total_size) begin
+                        cb_rx.data[i] <= data[index++];
+                    end
+                    else begin
+                        cb_rx.data[i] <= '0;
+                        ++data_empty;
+                    end
+                end
+
+                cb_rx.empty <= empty_t'(data_empty);
+                cb_rx.channel <= channel_t'(ch);
+                cb_rx.endofpacket <= (index >= total_size);
+                cb_rx.valid <= '1;
+            end
+
+            @(cb_rx);
+        end
+
+        cb_rx.valid <= '0;
+    endtask
+
+    task automatic cb_read(ref byte data[], input int ch = 0);
+        byte q[$];
+
+        forever @(cb_tx) begin
+            if (!reset_n) begin
+                break;
+            end
+            else if ((1'b1 === cb_tx.ready) && (1'b1 === cb_tx.valid) &&
+                    (channel_t'(ch) === cb_tx.channel)) begin
+                int data_size = SYMBOLS_PER_BEAT;
+
+                if (EMPTY_WITHIN_PACKET || (1'b1 === cb_tx.endofpacket)) begin
+                    data_size -= cb_tx.empty;
+                end
+
+                if (1'b1 === cb_tx.startofpacket) begin
+                    q.delete();
+                end
+
+                for (int i = 0; i < data_size; ++i) begin
+                    q.push_back(byte'(cb_tx.data[i]));
+                end
+
+                if (1'b1 === cb_tx.endofpacket) begin
+                    break;
+                end
+            end
+        end
+
+        data = new [q.size()];
+        foreach (q[i]) begin
+            data[i] = q[i];
+        end
+    endtask
 `endif
 
 `ifndef LOGIC_STD_OVL_DISABLED
