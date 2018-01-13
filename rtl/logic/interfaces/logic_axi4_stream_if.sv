@@ -282,9 +282,9 @@ interface logic_axi4_stream_if #(
     )
     assert_tvalid_always_reset (
         .clock(aclk),
-        .reset(1'b1),
-        .enable(1'b1),
-        .test_expr(areset_n || (!areset_n && !tvalid)),
+        .reset(!areset_n),
+        .enable(!areset_n),
+        .test_expr(!tvalid),
         .fire(assert_tvalid_always_reset_fire)
     );
 
@@ -317,7 +317,7 @@ interface logic_axi4_stream_if #(
 
     ovl_win_unchange #(
         .severity_level(`OVL_FATAL),
-        .width($bits(tvalid)),
+        .width(1),
         .property_type(`OVL_ASSERT),
         .msg("tvalid signal cannot change value during bus hold")
     )
@@ -335,7 +335,7 @@ interface logic_axi4_stream_if #(
 
     ovl_win_unchange #(
         .severity_level(`OVL_FATAL),
-        .width($bits(tlast)),
+        .width(1),
         .property_type(`OVL_ASSERT),
         .msg("tlast signal cannot change value during bus hold")
     )
@@ -353,7 +353,7 @@ interface logic_axi4_stream_if #(
 
     ovl_win_unchange #(
         .severity_level(`OVL_FATAL),
-        .width($bits(tdata)),
+        .width(8 * TDATA_BYTES),
         .property_type(`OVL_ASSERT),
         .msg("tdata signal cannot change value during bus hold")
     )
@@ -371,7 +371,7 @@ interface logic_axi4_stream_if #(
 
     ovl_win_unchange #(
         .severity_level(`OVL_FATAL),
-        .width($bits(tkeep)),
+        .width(TDATA_BYTES),
         .property_type(`OVL_ASSERT),
         .msg("tkeep signal cannot change value during bus hold")
     )
@@ -389,7 +389,7 @@ interface logic_axi4_stream_if #(
 
     ovl_win_unchange #(
         .severity_level(`OVL_FATAL),
-        .width($bits(tstrb)),
+        .width(TDATA_BYTES),
         .property_type(`OVL_ASSERT),
         .msg("tstrb signal cannot change value during bus hold")
     )
@@ -407,7 +407,7 @@ interface logic_axi4_stream_if #(
 
     ovl_win_unchange #(
         .severity_level(`OVL_FATAL),
-        .width($bits(tuser)),
+        .width(TUSER_WIDTH),
         .property_type(`OVL_ASSERT),
         .msg("tuser signal cannot change value during bus hold")
     )
@@ -425,7 +425,7 @@ interface logic_axi4_stream_if #(
 
     ovl_win_unchange #(
         .severity_level(`OVL_FATAL),
-        .width($bits(tdest)),
+        .width(TDEST_WIDTH),
         .property_type(`OVL_ASSERT),
         .msg("tdest signal cannot change value during bus hold")
     )
@@ -443,7 +443,7 @@ interface logic_axi4_stream_if #(
 
     ovl_win_unchange #(
         .severity_level(`OVL_FATAL),
-        .width($bits(tid)),
+        .width(TID_WIDTH),
         .property_type(`OVL_ASSERT),
         .msg("tid signal cannot change value during bus hold")
     )
