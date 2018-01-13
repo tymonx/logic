@@ -227,7 +227,7 @@ interface logic_axi4_stream_if #(
     task automatic cb_read(ref byte data[], input int id = 0, int dest = 0);
         byte q[$];
 
-        forever @(cb_tx) begin
+        forever begin
             if (!areset_n) begin
                 break;
             end
@@ -242,9 +242,11 @@ interface logic_axi4_stream_if #(
                 end
 
                 if (1'b1 === cb_tx.tlast) begin
+                    @(cb_tx);
                     break;
                 end
             end
+            @(cb_tx);
         end
 
         data = new [q.size()];

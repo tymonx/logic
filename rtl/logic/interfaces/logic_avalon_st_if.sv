@@ -230,7 +230,6 @@ interface logic_avalon_st_if #(
                 cb_rx.endofpacket <= (index >= total_size);
                 cb_rx.valid <= '1;
             end
-
             @(cb_rx);
         end
 
@@ -240,7 +239,7 @@ interface logic_avalon_st_if #(
     task automatic cb_read(ref byte data[], input int ch = 0);
         byte q[$];
 
-        forever @(cb_tx) begin
+        forever begin
             if (!reset_n) begin
                 break;
             end
@@ -261,9 +260,11 @@ interface logic_avalon_st_if #(
                 end
 
                 if (1'b1 === cb_tx.endofpacket) begin
+                    @(cb_tx);
                     break;
                 end
             end
+            @(cb_tx);
         end
 
         data = new [q.size()];
