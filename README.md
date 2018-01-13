@@ -80,13 +80,18 @@ Create build scripts using CMake:
 
     cmake ..
 
-Build project using CMake:
+Build project using CMake (generic):
 
     cmake --build . --target all
 
 Or build project using make:
 
     make -j`nproc`
+
+It is much faster to recompile project using Ninja rather than Unix makefiles:
+
+    cmake -G Ninja ..
+    cmake --build . --target all
 
 Documentation
 -------------
