@@ -64,6 +64,8 @@ interface logic_avalon_st_if #(
         `LOGIC_DRC_TRUE_FALSE(FIRST_SYMBOL_IN_HIGH_ORDER_BITS)
     end
 
+    localparam DATA_WIDTH = SYMBOLS_PER_BEAT * DATA_BITS_PER_SYMBOL;
+
     typedef logic [SYMBOLS_PER_BEAT-1:0][DATA_BITS_PER_SYMBOL-1:0] data_t;
     typedef logic [EMPTY_WIDTH-1:0] empty_t;
     typedef logic [ERROR_WIDTH-1:0] error_t;
@@ -125,7 +127,7 @@ interface logic_avalon_st_if #(
         import comb_write
     );
 
-    modport mon (
+    modport monitor (
         input ready,
         input valid,
         input startofpacket,
@@ -140,17 +142,6 @@ interface logic_avalon_st_if #(
 
 `ifndef LOGIC_SYNTHESIS
     clocking cb_rx @(posedge clk);
-        output ready;
-        input valid;
-        input startofpacket;
-        input endofpacket;
-        input channel;
-        input error;
-        input empty;
-        input data;
-    endclocking
-
-    clocking cb_tx @(posedge clk);
         input ready;
         output valid;
         output startofpacket;
@@ -159,6 +150,17 @@ interface logic_avalon_st_if #(
         output error;
         output empty;
         output data;
+    endclocking
+
+    clocking cb_tx @(posedge clk);
+        inout ready;
+        input valid;
+        input startofpacket;
+        input endofpacket;
+        input channel;
+        input error;
+        input empty;
+        input data;
     endclocking
 
     clocking cb_mon @(posedge clk);
@@ -171,6 +173,313 @@ interface logic_avalon_st_if #(
         input empty;
         input data;
     endclocking
+`endif
+
+`ifndef LOGIC_STD_OVL_DISABLED
+    logic bus_hold;
+    logic bus_hold_start;
+    logic bus_hold_end;
+
+    always_comb bus_hold_start = !bus_hold && valid && !ready;
+    always_comb bus_hold_end = bus_hold && ready;
+
+    always_ff @(posedge clk or negedge reset_n) begin
+        if (!reset_n) begin
+            bus_hold <= '0;
+        end
+        else if (bus_hold_start) begin
+            bus_hold <= '1;
+        end
+        else if (bus_hold_end) begin
+            bus_hold <= '0;
+        end
+    end
+
+    /* verilator coverage_off */
+    genvar k;
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_valid_never_unknown_fire;
+
+    ovl_never_unknown #(
+        .severity_level(`OVL_FATAL),
+        .property_type(`OVL_ASSERT),
+        .msg("valid signal always must be in known 0 or 1 state")
+    )
+    assert_valid_never_unknown (
+        .clock(clk),
+        .reset(1'b1),
+        .enable(1'b1),
+        .qualifier(1'b1),
+        .test_expr(valid),
+        .fire(assert_valid_never_unknown_fire)
+    );
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_ready_never_unknown_fire;
+
+    ovl_never_unknown #(
+        .severity_level(`OVL_FATAL),
+        .property_type(`OVL_ASSERT),
+        .msg("ready signal always must be in known 0 or 1 state")
+    )
+    assert_ready_never_unknown (
+        .clock(clk),
+        .reset(1'b1),
+        .enable(1'b1),
+        .qualifier(1'b1),
+        .test_expr(ready),
+        .fire(assert_ready_never_unknown_fire)
+    );
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_data_never_unknown_fire;
+
+    ovl_never_unknown #(
+        .severity_level(`OVL_FATAL),
+        .width(DATA_WIDTH),
+        .property_type(`OVL_ASSERT),
+        .msg("data signal cannot be unknown during active transfer")
+    )
+    assert_data_never_unknown (
+        .clock(clk),
+        .reset(reset_n),
+        .enable(1'b1),
+        .qualifier(valid),
+        .test_expr(data),
+        .fire(assert_data_never_unknown_fire)
+    );
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_empty_never_unknown_fire;
+
+    ovl_never_unknown #(
+        .severity_level(`OVL_FATAL),
+        .width(EMPTY_WIDTH),
+        .property_type(`OVL_ASSERT),
+        .msg("empty signal cannot be unknown during active transfer")
+    )
+    assert_empty_never_unknown (
+        .clock(clk),
+        .reset(reset_n),
+        .enable(1'b1),
+        .qualifier(valid),
+        .test_expr(empty),
+        .fire(assert_empty_never_unknown_fire)
+    );
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_startofpacket_never_unknown_fire;
+
+    ovl_never_unknown #(
+        .severity_level(`OVL_FATAL),
+        .property_type(`OVL_ASSERT),
+        .msg("startofpacket signal cannot be unknown during active transfer")
+    )
+    assert_startofpacket_never_unknown (
+        .clock(clk),
+        .reset(reset_n),
+        .enable(1'b1),
+        .qualifier(valid),
+        .test_expr(startofpacket),
+        .fire(assert_startofpacket_never_unknown_fire)
+    );
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_endofpacket_never_unknown_fire;
+
+    ovl_never_unknown #(
+        .severity_level(`OVL_FATAL),
+        .property_type(`OVL_ASSERT),
+        .msg("endofpacket signal cannot be unknown during active transfer")
+    )
+    assert_endofpacket_never_unknown (
+        .clock(clk),
+        .reset(reset_n),
+        .enable(1'b1),
+        .qualifier(valid),
+        .test_expr(endofpacket),
+        .fire(assert_endofpacket_never_unknown_fire)
+    );
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_error_never_unknown_fire;
+
+    ovl_never_unknown #(
+        .severity_level(`OVL_FATAL),
+        .width(ERROR_WIDTH),
+        .property_type(`OVL_ASSERT),
+        .msg("error signal cannot be unknown during active transfer")
+    )
+    assert_error_never_unknown (
+        .clock(clk),
+        .reset(reset_n),
+        .enable(1'b1),
+        .qualifier(valid),
+        .test_expr(error),
+        .fire(assert_error_never_unknown_fire)
+    );
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_channel_never_unknown_fire;
+
+    ovl_never_unknown #(
+        .severity_level(`OVL_FATAL),
+        .width(CHANNEL_WIDTH),
+        .property_type(`OVL_ASSERT),
+        .msg("channel signal cannot be unknown during active transfer")
+    )
+    assert_channel_never_unknown (
+        .clock(clk),
+        .reset(reset_n),
+        .enable(1'b1),
+        .qualifier(valid),
+        .test_expr(channel),
+        .fire(assert_channel_never_unknown_fire)
+    );
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_valid_always_reset_fire;
+
+    ovl_always #(
+        .severity_level(`OVL_FATAL),
+        .property_type(`OVL_ASSERT),
+        .msg("valid signal must be low during reset phase")
+    )
+    assert_valid_always_reset (
+        .clock(clk),
+        .reset(!reset_n),
+        .enable(1'b1),
+        .test_expr(!valid),
+        .fire(assert_valid_always_reset_fire)
+    );
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_valid_unchange_fire;
+
+    ovl_win_unchange #(
+        .severity_level(`OVL_FATAL),
+        .property_type(`OVL_ASSERT),
+        .msg("valid signal cannot change value during bus hold")
+    )
+    assert_valid_unchange (
+        .clock(clk),
+        .reset(reset_n),
+        .enable(1'b1),
+        .start_event(bus_hold_start),
+        .test_expr(valid),
+        .end_event(bus_hold_end),
+        .fire(assert_valid_unchange_fire)
+    );
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_startofpacket_unchange_fire;
+
+    ovl_win_unchange #(
+        .severity_level(`OVL_FATAL),
+        .property_type(`OVL_ASSERT),
+        .msg("startofpacket signal cannot change value during bus hold")
+    )
+    assert_startofpacket_unchange (
+        .clock(clk),
+        .reset(reset_n),
+        .enable(1'b1),
+        .start_event(bus_hold_start),
+        .test_expr(startofpacket),
+        .end_event(bus_hold_end),
+        .fire(assert_startofpacket_unchange_fire)
+    );
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_endofpacket_unchange_fire;
+
+    ovl_win_unchange #(
+        .severity_level(`OVL_FATAL),
+        .property_type(`OVL_ASSERT),
+        .msg("endofpacket signal cannot change value during bus hold")
+    )
+    assert_endofpacket_unchange (
+        .clock(clk),
+        .reset(reset_n),
+        .enable(1'b1),
+        .start_event(bus_hold_start),
+        .test_expr(endofpacket),
+        .end_event(bus_hold_end),
+        .fire(assert_endofpacket_unchange_fire)
+    );
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_data_unchange_fire;
+
+    ovl_win_unchange #(
+        .severity_level(`OVL_FATAL),
+        .width(DATA_WIDTH),
+        .property_type(`OVL_ASSERT),
+        .msg("data signal cannot change value during bus hold")
+    )
+    assert_data_unchange (
+        .clock(clk),
+        .reset(reset_n),
+        .enable(1'b1),
+        .start_event(bus_hold_start),
+        .test_expr(data),
+        .end_event(bus_hold_end),
+        .fire(assert_data_unchange_fire)
+    );
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_empty_unchange_fire;
+
+    ovl_win_unchange #(
+        .severity_level(`OVL_FATAL),
+        .width(EMPTY_WIDTH),
+        .property_type(`OVL_ASSERT),
+        .msg("empty signal cannot change value during bus hold")
+    )
+    assert_empty_unchange (
+        .clock(clk),
+        .reset(reset_n),
+        .enable(1'b1),
+        .start_event(bus_hold_start),
+        .test_expr(empty),
+        .end_event(bus_hold_end),
+        .fire(assert_empty_unchange_fire)
+    );
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_error_unchange_fire;
+
+    ovl_win_unchange #(
+        .severity_level(`OVL_FATAL),
+        .width(ERROR_WIDTH),
+        .property_type(`OVL_ASSERT),
+        .msg("error signal cannot change value during bus hold")
+    )
+    assert_error_unchange (
+        .clock(clk),
+        .reset(reset_n),
+        .enable(1'b1),
+        .start_event(bus_hold_start),
+        .test_expr(error),
+        .end_event(bus_hold_end),
+        .fire(assert_error_unchange_fire)
+    );
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_channel_unchange_fire;
+
+    ovl_win_unchange #(
+        .severity_level(`OVL_FATAL),
+        .width(CHANNEL_WIDTH),
+        .property_type(`OVL_ASSERT),
+        .msg("channel signal cannot change value during bus hold")
+    )
+    assert_channel_unchange (
+        .clock(clk),
+        .reset(reset_n),
+        .enable(1'b1),
+        .start_event(bus_hold_start),
+        .test_expr(channel),
+        .end_event(bus_hold_end),
+        .fire(assert_channel_unchange_fire)
+    );
+
+    logic _unused_assert_fires = &{
+        1'b0,
+        assert_valid_always_reset_fire,
+        assert_valid_unchange_fire,
+        assert_endofpacket_unchange_fire,
+        assert_data_unchange_fire,
+        assert_empty_unchange_fire,
+        assert_error_unchange_fire,
+        assert_channel_unchange_fire,
+        1'b0
+    };
+    /* verilator coverage_on */
 `endif
 
 `ifdef VERILATOR

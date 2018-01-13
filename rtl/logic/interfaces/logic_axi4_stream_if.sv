@@ -468,7 +468,6 @@ interface logic_axi4_stream_if #(
 
     ovl_win_unchange #(
         .severity_level(`OVL_FATAL),
-        .width(1),
         .property_type(`OVL_ASSERT),
         .msg("tvalid signal cannot change value during bus hold")
     )
@@ -486,7 +485,6 @@ interface logic_axi4_stream_if #(
 
     ovl_win_unchange #(
         .severity_level(`OVL_FATAL),
-        .width(1),
         .property_type(`OVL_ASSERT),
         .msg("tlast signal cannot change value during bus hold")
     )
