@@ -520,7 +520,7 @@ function(add_hdl_verilator hdl_name)
                 ${compile_flags}
                 ${verilator_flags}
             COMMAND
-                $(MAKE)
+                make
             ARGS
                 -f ${verilator_target}.mk
             DEPENDS
