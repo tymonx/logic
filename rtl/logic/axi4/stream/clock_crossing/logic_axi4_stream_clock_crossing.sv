@@ -15,7 +15,7 @@
 
 `include "logic.svh"
 
-/* Module: logic::axi4::stream::logic_axi4_stream_clock_crossing
+/* Module: logic_axi4_stream_clock_crossing
  *
  * Clock domain crossing module between rx_aclk and tx_aclk clocks.
  *

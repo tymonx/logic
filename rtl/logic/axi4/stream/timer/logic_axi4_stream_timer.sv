@@ -15,7 +15,7 @@
 
 `include "logic.svh"
 
-/* Module: logic::axi4::stream::logic_axi4_stream_queue
+/* Module: logic_axi4_stream_queue
  *
  * Stores data stream in the queue (FIFO).
  *
