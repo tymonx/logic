@@ -17,6 +17,10 @@
 
 /* Module: logic_pll_lock_service_main
  *
+ * Main implementation for logic_pll_lock_service module.
+ * It provides PLL control by using PLL input reset and PLL output locked
+ * signals.
+ *
  * Parameters:
  *  RESET_DURATION      - Number of clock cycles for PLL reset duration.
  *  WAIT_FOR_LOCK       - Number of clock cycles for PLL lock timeout.
@@ -39,12 +43,9 @@ module logic_pll_lock_service_main #(
 ) (
     input aclk,
     input areset_n,
-    /* PLL */
     input pll_locked,
     output logic pll_reset,
-    /* Status */
     output logic locked,
-    /* Timer */
     `LOGIC_MODPORT(logic_axi4_stream_if, rx) timer,
     `LOGIC_MODPORT(logic_axi4_stream_if, tx) timer_config
 );

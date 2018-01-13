@@ -16,11 +16,9 @@
 module logic_clock_domain_crossing_generic_write_sync #(
     int ADDRESS_WIDTH = 1
 ) (
-    /* Tx */
     input read_aclk,
     input read_areset_n,
     input [ADDRESS_WIDTH-1:0] read_pointer,
-    /* Rx  */
     input write_aclk,
     input write_areset_n,
     output logic [ADDRESS_WIDTH-1:0] read_pointer_synced

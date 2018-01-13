@@ -18,10 +18,10 @@
 /* Interface: logic_avalon_mm_if
  *
  * Avalon-MM interface.
- *  DATA_BYTES      - Number of bytes for writedata and readdata signals.
- *  ADDRESS_WIDTH   - Number of bits for address signal.
  *
  * Parameters:
+ *  DATA_BYTES      - Number of bytes for writedata and readdata signals.
+ *  ADDRESS_WIDTH   - Number of bits for address signal.
  *
  * Ports:
  *  clk         - Clock. Used only for internal checkers and assertions
@@ -32,10 +32,8 @@ interface logic_avalon_mm_if #(
     int DATA_BYTES = 4,
     int ADDRESS_WIDTH = 1
 ) (
-    /* verilator lint_off UNUSED */
     input clk,
     input reset_n
-    /* verilator lint_on UNUSED */
 );
     import logic_avalon_mm_pkg::response_t;
 
@@ -140,6 +138,11 @@ interface logic_avalon_mm_if #(
         input readdatavalid;
         input writeresponsevalid;
     endclocking
+`endif
+
+
+`ifdef VERILATOR
+    logic _unused_ports = &{1'b0, clk, reset_n, 1'b0};
 `endif
 
 endinterface

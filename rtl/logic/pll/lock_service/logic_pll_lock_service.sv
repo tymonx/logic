@@ -17,6 +17,9 @@
 
 /* Module: logic_pll_lock_service
  *
+ * It provides PLL control by using PLL input reset and PLL output locked
+ * signals.
+ *
  * Parameters:
  *  CLOCK_FREQUENCY_HZ  - Clock frequency in Hz.
  *  RESET_DURATION_NS   - PLL reset duration in nanoseconds.
@@ -39,10 +42,8 @@ module logic_pll_lock_service #(
 ) (
     input aclk,
     input areset_n,
-    /* PLL */
     input pll_locked,
     output logic pll_reset,
-    /* Status */
     output logic locked
 );
     localparam real TIME_BASE = 1_000_000_000.0;

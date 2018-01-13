@@ -15,7 +15,7 @@
 
 `include "logic.svh"
 
-/* Module: logic_clock_domain_crossing_genric_write
+/* Module: logic_clock_domain_crossing_generic_write
  *
  * Parameters:
  *  WIDTH       - Number of bits for input and output data signals.
@@ -38,11 +38,9 @@ module logic_clock_domain_crossing_generic_write #(
 ) (
     input rx_aclk,
     input rx_areset_n,
-    /* Rx */
     input rx_tvalid,
     input [DATA_WIDTH-1:0] rx_tdata,
     output logic rx_tready,
-    /* Write */
     output logic write_enable,
     output logic [DATA_WIDTH-1:0] write_data,
     output logic [ADDRESS_WIDTH-1:0] write_pointer,

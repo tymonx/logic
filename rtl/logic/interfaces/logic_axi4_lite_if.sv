@@ -34,10 +34,8 @@ interface logic_axi4_lite_if #(
     int AWADDR_WIDTH = ADDRESS_WIDTH,
     int ARADDR_WIDTH = ADDRESS_WIDTH
 ) (
-    /* verilator lint_off UNUSED */
     input aclk,
     input areset_n
-    /* verilator lint_on UNUSED */
 );
     initial begin: design_rule_checks
         `LOGIC_DRC_POWER_OF_2(DATA_BYTES)
@@ -247,6 +245,10 @@ interface logic_axi4_lite_if #(
         input rdata;
         input rresp;
     endclocking
+`endif
+
+`ifdef VERILATOR
+    logic _unused_ports = &{1'b0, aclk, areset_n, 1'b0};
 `endif
 
 endinterface

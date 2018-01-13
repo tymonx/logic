@@ -15,7 +15,7 @@
 
 `include "logic.svh"
 
-/* Module: logic_basic_gray2binary
+/* Module: logic_basic_binary2gray
  *
  * Converts input binary data to data coded in gray codes.
  *

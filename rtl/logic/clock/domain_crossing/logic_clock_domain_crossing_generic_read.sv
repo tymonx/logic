@@ -38,11 +38,9 @@ module logic_clock_domain_crossing_generic_read #(
 ) (
     input tx_aclk,
     input tx_areset_n,
-    /* Tx */
     output logic tx_tvalid,
     output logic [DATA_WIDTH-1:0] tx_tdata,
     input tx_tready,
-    /* Read */
     output logic read_enable,
     output logic [ADDRESS_WIDTH-1:0] read_pointer,
     input [DATA_WIDTH-1:0] read_data,

@@ -21,15 +21,12 @@ module logic_basic_queue_generic_write #(
 ) (
     input aclk,
     input areset_n,
-    /* Rx */
     input rx_tvalid,
     input [DATA_WIDTH-1:0] rx_tdata,
     output logic rx_tready,
-    /* Write */
     output logic write_enable,
     output logic [DATA_WIDTH-1:0] write_data,
     output logic [ADDRESS_WIDTH-1:0] write_pointer,
-    /* Capacity */
     input capacity_valid,
     input [ADDRESS_WIDTH-1:0] capacity_data
 );

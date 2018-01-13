@@ -20,11 +20,9 @@ module logic_basic_queue_generic_memory #(
     int ADDRESS_WIDTH = 1
 ) (
     input aclk,
-    /* Write */
     input write_enable,
     input [DATA_WIDTH-1:0] write_data,
     input [ADDRESS_WIDTH-1:0] write_pointer,
-    /* Read */
     input read_enable,
     input [ADDRESS_WIDTH-1:0] read_pointer,
     output logic [DATA_WIDTH-1:0] read_data

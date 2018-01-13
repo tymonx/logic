@@ -622,7 +622,9 @@ interface logic_axi4_stream_if #(
         1'b0
     };
     /* verilator coverage_on */
-`else
+`endif
+
+`ifdef VERILATOR
     logic _unused_ports = &{1'b0, aclk, areset_n, 1'b0};
 `endif
 endinterface

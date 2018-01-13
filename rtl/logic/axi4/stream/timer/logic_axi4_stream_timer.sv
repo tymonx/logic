@@ -15,9 +15,12 @@
 
 `include "logic.svh"
 
-/* Module: logic_axi4_stream_queue
+/* Module: logic_axi4_stream_timer
  *
- * Stores data stream in the queue (FIFO).
+ * Timer over AXI4-Stream interface. The rx input port is used to write
+ * periodic value for internal counter. The tx output port produce values
+ * from 0 to periodic value minus one. The tlast output signal is used
+ * as counter reload event.
  *
  * Parameters:
  *  TDATA_BYTES         - Number of bytes for tdata signal.

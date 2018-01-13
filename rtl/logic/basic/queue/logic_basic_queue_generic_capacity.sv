@@ -20,11 +20,8 @@ module logic_basic_queue_generic_capacity #(
 ) (
     input aclk,
     input areset_n,
-    /* Write */
     input write_enable,
-    /* Read */
     input read_enable,
-    /* Capacity */
     output logic capacity_valid,
     output logic [ADDRESS_WIDTH-1:0] capacity_data
 );

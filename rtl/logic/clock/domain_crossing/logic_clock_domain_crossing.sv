@@ -39,12 +39,10 @@ module logic_clock_domain_crossing #(
     logic_pkg::target_t TARGET = `LOGIC_CONFIG_TARGET
 ) (
     input areset_n,
-    /* Rx */
     input rx_aclk,
     input rx_tvalid,
     input [WIDTH-1:0] rx_tdata,
     output logic rx_tready,
-    /* Tx */
     input tx_aclk,
     input tx_tready,
     output logic tx_tvalid,

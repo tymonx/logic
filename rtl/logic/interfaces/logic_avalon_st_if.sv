@@ -53,10 +53,8 @@ interface logic_avalon_st_if #(
     int EMPTY_WITHIN_PACKET = 0,
     int FIRST_SYMBOL_IN_HIGH_ORDER_BITS = 1
 ) (
-    /* verilator lint_off UNUSED */
     input clk,
     input reset_n
-    /* verilator lint_on UNUSED */
 );
     initial begin: design_rule_checks
         `LOGIC_DRC_RANGE(SYMBOLS_PER_BEAT, 1, 32)
@@ -173,6 +171,10 @@ interface logic_avalon_st_if #(
         input empty;
         input data;
     endclocking
+`endif
+
+`ifdef VERILATOR
+    logic _unused_ports = &{1'b0, clk, reset_n, 1'b0};
 `endif
 
 endinterface
