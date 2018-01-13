@@ -55,7 +55,7 @@ module logic_axi4_stream_timer #(
     end
 
     typedef logic [COUNTER_WIDTH-1:0] counter_t;
-    typedef logic [TDATA_BYTES-1:0] data_t;
+    typedef logic [TDATA_BYTES-1:0][7:0] data_t;
 
     logic counter_reload;
 
