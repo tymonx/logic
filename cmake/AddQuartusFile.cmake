@@ -50,29 +50,14 @@ function(add_quartus_file file)
         message(FATAL_ERROR "Quartus file must be IP, Qsys or Tcl file")
     endif()
 
-    set(new_file "${CMAKE_CURRENT_BINARY_DIR}/${name}.${file_type}")
+    set(qsys_file "${CMAKE_CURRENT_BINARY_DIR}/${name}.${file_type}")
 
-    configure_file("${file}" "${new_file}" COPYONLY)
-
-    # if (NOT "${file}" MATCHES "${new_file}")
-    #     add_custom_command(
-    #         OUTPUT
-    #             "${new_file}"
-    #         COMMAND
-    #             ${CMAKE_COMMAND}
-    #         ARGS
-    #             -E copy "${file}" "${new_file}"
-    #         DEPENDS
-    #             "${file}"
-    #     )
-    # endif()
-    #
-    set(file "${new_file}")
+    configure_file("${file}" "${qsys_file}" COPYONLY)
 
     set(entries
         TYPE Qsys
         NAME "${name}"
-        SOURCE "${file}"
+        SOURCE "${qsys_file}"
         LIBRARY "${name}"
         SOURCES ""
         DEPENDS ""
@@ -96,25 +81,26 @@ function(add_quartus_file file)
     endif()
 
     if (file_type MATCHES tcl)
-        set(tcl_file "${file}")
+        set(tcl_file "${qsys_file}")
+        set(tcl_file_arg "${qsys_file}")
 
         if (CYGWIN)
-            execute_process(COMMAND cygpath -m "${tcl_file}"
-                OUTPUT_VARIABLE tcl_file
+            execute_process(COMMAND cygpath -m "${tcl_file_arg}"
+                OUTPUT_VARIABLE tcl_file_arg
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
         endif()
 
-        set(file "${CMAKE_CURRENT_BINARY_DIR}/${name}.ip")
+        set(qsys_file "${CMAKE_CURRENT_BINARY_DIR}/${name}.ip")
 
         add_custom_command(
             OUTPUT
-                "${file}"
+                "${qsys_file}"
             COMMAND
                 ${QUARTUS_QSYS_SCRIPT}
             ARGS
-                --script=${tcl_file}
+                --script=${tcl_file_arg}
             DEPENDS
-                "${CMAKE_CURRENT_BINARY_DIR}/${name}.tcl"
+                "${tcl_file}"
             WORKING_DIRECTORY
                 "${CMAKE_CURRENT_BINARY_DIR}"
         )
@@ -123,11 +109,11 @@ function(add_quartus_file file)
     endif()
 
     set(modules_dir "${CMAKE_BINARY_DIR}/modelsim/.modules")
-    set(qsys_file "${file}")
+    set(qsys_file_arg "${file}")
 
     if (CYGWIN)
-        execute_process(COMMAND cygpath -m "${qsys_file}"
-            OUTPUT_VARIABLE qsys_file
+        execute_process(COMMAND cygpath -m "${qsys_file_arg}"
+            OUTPUT_VARIABLE qsys_file_arg
             OUTPUT_STRIP_TRAILING_WHITESPACE)
     endif()
 
@@ -140,35 +126,45 @@ function(add_quartus_file file)
         file(MAKE_DIRECTORY "${modules_dir}/${name}")
     endif()
 
+    set(spd_file "${CMAKE_CURRENT_BINARY_DIR}/${name}/${name}.spd")
+    set(sources_file "${CMAKE_CURRENT_BINARY_DIR}/${name}/${name}.f")
+    set(sources_file_arg "${CMAKE_CURRENT_BINARY_DIR}/${name}/${name}.f")
+
+    if (CYGWIN)
+        execute_process(COMMAND cygpath -m "${sources_file_arg}"
+            OUTPUT_VARIABLE sources_file_arg
+            OUTPUT_STRIP_TRAILING_WHITESPACE)
+    endif()
+
     add_custom_command(
         OUTPUT
-            "${CMAKE_CURRENT_BINARY_DIR}/${name}/${name}.spd"
+            "${spd_file}"
         COMMAND
             ${QUARTUS_QSYS_GENERATE}
         ARGS
-            "${qsys_file}"
+            "${qsys_file_arg}"
             --upgrade-ip-cores
         COMMAND
             ${QUARTUS_QSYS_GENERATE}
         ARGS
-            "${qsys_file}"
+            "${qsys_file_arg}"
             --simulation=VERILOG
         DEPENDS
-            "${file}"
+            "${qsys_file}"
         WORKING_DIRECTORY
             "${CMAKE_CURRENT_BINARY_DIR}"
     )
 
     add_custom_command(
         OUTPUT
-            "${CMAKE_CURRENT_BINARY_DIR}/${name}/${name}.f"
+            "${sources_file}"
         COMMAND
             ${CMAKE_COMMAND}
         ARGS
-            -DSPD_FILE="${CMAKE_CURRENT_BINARY_DIR}/${name}/${name}.spd"
+            -DSPD_FILE="${spd_file}"
             -P "${ADD_QUARTUS_FILE_SPD_DIR}/AddQuartusFileSPD.cmake"
         DEPENDS
-            "${CMAKE_CURRENT_BINARY_DIR}/${name}/${name}.spd"
+            "${spd_file}"
         WORKING_DIRECTORY
             "${CMAKE_CURRENT_BINARY_DIR}"
     )
@@ -181,13 +177,13 @@ function(add_quartus_file file)
         ARGS
             -sv
             -work ${name}
-            -f "${CMAKE_CURRENT_BINARY_DIR}/${name}/${name}.f"
+            -f "${sources_file_arg}"
         COMMAND
             ${CMAKE_COMMAND}
         ARGS
             -E touch "${modules_dir}/${name}/${name}"
         DEPENDS
-            "${CMAKE_CURRENT_BINARY_DIR}/${name}/${name}.f"
+            "${sources_file}"
         WORKING_DIRECTORY
             "${CMAKE_BINARY_DIR}/modelsim"
     )

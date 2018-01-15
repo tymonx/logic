@@ -203,9 +203,18 @@ function(add_quartus_project target_name)
         list(APPEND ip_files "${ip_file}")
     endforeach()
 
+    set(quartus_ip_dir "${ARG_PROJECT_DIRECTORY}/.ip")
+
+    if (NOT EXISTS "${quartus_ip_dir}")
+        file(MAKE_DIRECTORY "${quartus_ip_dir}")
+    endif()
+
     foreach (ip_file ${ip_files})
         get_filename_component(ip_file "${ip_file}" REALPATH)
         list(APPEND quartus_depends "${ip_file}")
+
+        get_filename_component(name "${ip_file}" NAME_WE)
+        set(depend_file "${ip_file}")
 
         if (CYGWIN)
             execute_process(COMMAND cygpath -m "${ip_file}"
@@ -213,6 +222,32 @@ function(add_quartus_project target_name)
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
         endif()
 
+        add_custom_command(
+            OUTPUT
+                "${quartus_ip_dir}/${name}"
+            COMMAND
+                ${QUARTUS_QSYS_GENERATE}
+            ARGS
+                "${ip_file}"
+                --upgrade-ip-cores
+                --quartus-project=${target_name}
+            COMMAND
+                ${QUARTUS_QSYS_GENERATE}
+            ARGS
+                "${ip_file}"
+                --synthesis=VERILOG
+                --quartus-project=${target_name}
+            COMMAND
+                ${CMAKE_COMMAND}
+            ARGS
+                -E touch "${quartus_ip_dir}/${name}"
+            DEPENDS
+                "${depend_file}"
+            WORKING_DIRECTORY
+                "${ARG_PROJECT_DIRECTORY}"
+        )
+
+        list(APPEND quartus_depends "${quartus_ip_dir}/${name}")
         list(APPEND quartus_assignments
             "set_global_assignment -name IP_FILE ${ip_file}")
     endforeach()
