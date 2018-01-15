@@ -159,10 +159,14 @@ function(get_hdl_depends hdl_target hdl_depends_var)
         "${_HDL_MULTI_VALUE_ARGUMENTS}" ${_HDL_${hdl_target}})
 
     foreach (name ${ARG_DEPENDS})
+        if (NOT DEFINED _HDL_${name})
+            message(FATAL_ERROR "HDL target doesn't exist: ${name}")
+        endif()
+
         get_hdl_depends(${name} depends)
 
-        list(APPEND hdl_depends ${name})
         list(APPEND hdl_depends ${depends})
+        list(APPEND hdl_depends ${name})
     endforeach()
 
     list(REMOVE_DUPLICATES hdl_depends)
@@ -516,7 +520,7 @@ function(add_hdl_verilator hdl_name)
                 ${compile_flags}
                 ${verilator_flags}
             COMMAND
-                $(MAKE)
+                make
             ARGS
                 -f ${verilator_target}.mk
             DEPENDS

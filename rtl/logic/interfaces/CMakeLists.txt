@@ -12,28 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-if (STD_OVL_FOUND)
-    set(HDL_DEPENDS ${HDL_DEPENDS}
-        ovl_always
+add_hdl_source(logic_axi4_stream_if.sv
+    DEPENDS
+        ovl_never_unknown
         ovl_win_unchange
-    )
+        ovl_always
+)
 
-    set(HDL_INCLUDES ${HDL_INCLUDES}
-        ${STD_OVL_DIR}
-    )
-else()
-    set(HDL_DEFINES ${HDL_DEFINES}
-        LOGIC_STD_OVL_DISABLED
-    )
-endif()
-
-add_hdl_source(logic_axi4_stream_if.sv)
 add_hdl_source(logic_axi4_lite_if.sv
     DEPENDS
         logic_axi4_lite_pkg
 )
 
-add_hdl_source(logic_avalon_st_if.sv)
+add_hdl_source(logic_avalon_st_if.sv
+    DEPENDS
+        ovl_win_unchange
+        ovl_always
+)
+
 add_hdl_source(logic_avalon_mm_if.sv
     DEPENDS
         logic_avalon_mm_pkg

@@ -29,26 +29,15 @@ module logic_axi4_stream_from_avalon_st #(
     int TDATA_BYTES = 1,
     int TDEST_WIDTH = 1,
     int TUSER_WIDTH = 1,
-    int TID_WIDTH = 1
+    int TID_WIDTH = 1,
+    int EMPTY_WIDTH = (TDATA_BYTES >= 2) ? $clog2(TDATA_BYTES) : 1
 ) (
     input aclk,
     input areset_n,
     `LOGIC_MODPORT(logic_avalon_st_if, rx) rx,
     `LOGIC_MODPORT(logic_axi4_stream_if, tx) tx
 );
-    function automatic bit [$bits(tx.tstrb)-1:0] empty_to_tstrb(
-        input [$bits(rx.empty)-1:0] empty
-    );
-        bit [$bits(tx.tstrb)-1:0] value = '1;
-
-        if ($bits(tx.tstrb) > 1) begin
-            for (bit [$bits(empty)-1:0] i = '0; i < empty; ++i) begin
-                value = value >> 1;
-            end
-        end
-
-        return value;
-    endfunction
+    logic [TDATA_BYTES-1:0] strb;
 
     always_comb rx.ready = tx.tready;
     always_comb tx.tkeep = '1;
@@ -57,10 +46,20 @@ module logic_axi4_stream_from_avalon_st #(
 
     always_ff @(posedge aclk or negedge areset_n) begin
         if (!areset_n) begin
-            tx.tvalid <= 1'b0;
+            tx.tvalid <= '0;
         end
         else if (tx.tready) begin
             tx.tvalid <= rx.valid;
+        end
+    end
+
+    always_comb begin
+        strb = '1;
+
+        if ($bits(tx.tstrb) > 1) begin
+            for (bit [EMPTY_WIDTH-1:0] i = '0; i < rx.empty; ++i) begin
+                strb = strb >> 1;
+            end
         end
     end
 
@@ -68,7 +67,7 @@ module logic_axi4_stream_from_avalon_st #(
         if (tx.tready) begin
             tx.tlast <= rx.endofpacket;
             tx.tid <= rx.channel;
-            tx.tstrb <= empty_to_tstrb(rx.empty);
+            tx.tstrb <= strb;
             tx.tdata <= rx.data;
         end
     end

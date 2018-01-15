@@ -19,12 +19,10 @@ module logic_clock_domain_crossing_generic_memory #(
     int DATA_WIDTH = 1,
     int ADDRESS_WIDTH = 1
 ) (
-    /* Write */
     input write_aclk,
     input write_enable,
     input [DATA_WIDTH-1:0] write_data,
     input [ADDRESS_WIDTH-1:0] write_pointer,
-    /* Read */
     input read_aclk,
     input read_enable,
     input [ADDRESS_WIDTH-1:0] read_pointer,

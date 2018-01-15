@@ -17,7 +17,7 @@
 
 /* Module: logic_axi4_stream_queue
  *
- * Stores data stream in queue (FIFO)
+ * Stores data stream in the queue (FIFO).
  *
  * Parameters:
  *  TDATA_BYTES - Number of bytes for tdata signal.
@@ -26,7 +26,7 @@
  *  TID_WIDTH   - Number of bits for tid signal.
  *  CAPACITY    - Number of single data transactions that can be store in
  *                internal queue memory (FIFO capacity).
- *  TARGET      - Target device.
+ *  TARGET      - Target device implementation.
  *
  * Ports:
  *  aclk        - Clock.

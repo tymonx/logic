@@ -14,11 +14,14 @@
 
 add_hdl_source(logic_axi4_stream_queue.sv
     DEPENDS
+        logic_pkg
+        logic_axi4_stream_if
         logic_basic_queue
 )
 
 add_hdl_source(logic_axi4_stream_queue_top.sv
     DEPENDS
         logic_axi4_stream_queue
-    ANALYSIS TRUE
+    ANALYSIS
+        TRUE
 )

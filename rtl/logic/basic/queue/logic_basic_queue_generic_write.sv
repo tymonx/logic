@@ -21,19 +21,18 @@ module logic_basic_queue_generic_write #(
 ) (
     input aclk,
     input areset_n,
-    /* Rx */
     input rx_tvalid,
     input [DATA_WIDTH-1:0] rx_tdata,
     output logic rx_tready,
-    /* Write */
     output logic write_enable,
     output logic [DATA_WIDTH-1:0] write_data,
     output logic [ADDRESS_WIDTH-1:0] write_pointer,
-    /* Capacity */
     input capacity_valid,
     input [ADDRESS_WIDTH-1:0] capacity_data
 );
     localparam ALMOST_FULL = (2**ADDRESS_WIDTH) - 3;
+
+    logic almost_full;
 
     always_ff @(posedge aclk) begin
         write_data <= rx_tdata;
@@ -48,13 +47,14 @@ module logic_basic_queue_generic_write #(
         end
     end
 
+    always_comb almost_full = (capacity_data >= ALMOST_FULL[ADDRESS_WIDTH-1:0]);
+
     always_ff @(posedge aclk or negedge areset_n) begin
         if (!areset_n) begin
             rx_tready <= '0;
         end
         else begin
-            rx_tready <= !capacity_valid ||
-                (capacity_data < ALMOST_FULL[ADDRESS_WIDTH-1:0]);
+            rx_tready <= !capacity_valid || !almost_full;
         end
     end
 

@@ -14,11 +14,14 @@
 
 add_hdl_source(logic_axi4_stream_clock_crossing.sv
     DEPENDS
+        logic_pkg
+        logic_axi4_stream_if
         logic_clock_domain_crossing
 )
 
 add_hdl_source(logic_axi4_stream_clock_crossing_top.sv
     DEPENDS
         logic_axi4_stream_clock_crossing
-    ANALYSIS TRUE
+    ANALYSIS
+        TRUE
 )

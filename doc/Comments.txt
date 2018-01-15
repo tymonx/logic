@@ -1,4 +1,4 @@
-Format: 2.0.1
+﻿Format: 2.0.1
 
 # This is the Natural Docs comments file for this project.  If you change
 # anything here, it will apply to THIS PROJECT ONLY.  You can edit the version
@@ -25,9 +25,19 @@ Format: 2.0.1
 Alter Comment Type: Class
 
    Keywords:
-      module, Modules
       package, Packages
       interface, Interfaces
+
+
+Alter Comment Type: Function
+
+   Display Name: Module
+   Plural Display Name: Module
+
+   Scope: Start
+
+   Keywords:
+      module, Module
 
 
 Comment Type: Logic

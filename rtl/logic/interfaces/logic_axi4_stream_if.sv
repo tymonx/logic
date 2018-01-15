@@ -15,10 +15,6 @@
 
 `include "logic.svh"
 
-`ifndef LOGIC_STD_OVL_DISABLED
-`include "std_ovl_defines.h"
-`endif
-
 /* Interface: logic_axi4_stream_if
  *
  * AXI4-Stream interface.
@@ -43,10 +39,10 @@ interface logic_axi4_stream_if #(
     input aclk,
     input areset_n
 );
+    localparam TDATA_WIDTH = TDATA_BYTES * 8;
     localparam TSTRB_WIDTH = TDATA_BYTES;
     localparam TKEEP_WIDTH = TDATA_BYTES;
 
-    typedef logic [7:0] byte_t;
     typedef logic [TDATA_BYTES-1:0][7:0] tdata_t;
     typedef logic [TSTRB_WIDTH-1:0] tstrb_t;
     typedef logic [TKEEP_WIDTH-1:0] tkeep_t;
@@ -120,7 +116,7 @@ interface logic_axi4_stream_if #(
         import comb_write
     );
 
-    modport mon (
+    modport monitor (
         input tvalid,
         input tuser,
         input tdest,
@@ -156,10 +152,10 @@ interface logic_axi4_stream_if #(
         input tkeep;
         input tstrb;
         input tdata;
-        output tready;
+        inout tready;
     endclocking
 
-    clocking cb_mon @(posedge aclk);
+    clocking cb_monitor @(posedge aclk);
         input tvalid;
         input tuser;
         input tdest;
@@ -186,20 +182,29 @@ interface logic_axi4_stream_if #(
         cb_tx.tready <= '0;
     endtask
 
-    task automatic cb_write(byte data[], int id = 0, int dest = 0);
+    task automatic cb_write(const ref byte data[], input int id = 0,
+            int dest = 0);
         int total_size = data.size();
         int index = 0;
 
-        while (index < total_size) begin
+        if (0 == data.size()) begin
+            return;
+        end
+
+        forever begin
             if (!areset_n) begin
                 break;
             end
             else if (1'b1 === cb_rx.tready) begin
-                for (int i = 0; i < TDATA_BYTES; ++i, ++index) begin
+                if (index >= total_size) begin
+                    break;
+                end
+
+                for (int i = 0; i < TDATA_BYTES; ++i) begin
                     if (index < total_size) begin
                         cb_rx.tkeep[i] <= '1;
                         cb_rx.tstrb[i] <= '1;
-                        cb_rx.tdata[i] <= byte_t'(data[index]);
+                        cb_rx.tdata[i] <= data[index++];
                     end
                     else begin
                         cb_rx.tkeep[i] <= '0;
@@ -213,7 +218,6 @@ interface logic_axi4_stream_if #(
                 cb_rx.tlast <= (index >= total_size);
                 cb_rx.tvalid <= '1;
             end
-
             @(cb_rx);
         end
 
@@ -227,7 +231,7 @@ interface logic_axi4_stream_if #(
             if (!areset_n) begin
                 break;
             end
-            else if ((1'b1 === tready) && (1'b1 === cb_tx.tvalid) &&
+            else if ((1'b1 === cb_tx.tready) && (1'b1 === cb_tx.tvalid) &&
                     (tid_t'(id) === cb_tx.tid) &&
                     (tdest_t'(dest) === cb_tx.tdest)) begin
                 for (int i = 0; i < TDATA_BYTES; ++i) begin
@@ -242,7 +246,6 @@ interface logic_axi4_stream_if #(
                     break;
                 end
             end
-
             @(cb_tx);
         end
 
@@ -254,8 +257,177 @@ interface logic_axi4_stream_if #(
 `endif
 
 `ifndef LOGIC_STD_OVL_DISABLED
+    logic bus_hold;
+    logic bus_hold_start;
+    logic bus_hold_end;
+
+    always_comb bus_hold_start = !bus_hold && tvalid && !tready;
+    always_comb bus_hold_end = bus_hold && tready;
+
+    always_ff @(posedge aclk or negedge areset_n) begin
+        if (!areset_n) begin
+            bus_hold <= '0;
+        end
+        else if (bus_hold_start) begin
+            bus_hold <= '1;
+        end
+        else if (bus_hold_end) begin
+            bus_hold <= '0;
+        end
+    end
+
     /* verilator coverage_off */
     genvar k;
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_tvalid_never_unknown_fire;
+
+    ovl_never_unknown #(
+        .severity_level(`OVL_FATAL),
+        .property_type(`OVL_ASSERT),
+        .msg("tvalid signal always must be in known 0 or 1 state")
+    )
+    assert_tvalid_never_unknown (
+        .clock(aclk),
+        .reset(1'b1),
+        .enable(1'b1),
+        .qualifier(1'b1),
+        .test_expr(tvalid),
+        .fire(assert_tvalid_never_unknown_fire)
+    );
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_tready_never_unknown_fire;
+
+    ovl_never_unknown #(
+        .severity_level(`OVL_FATAL),
+        .property_type(`OVL_ASSERT),
+        .msg("tready signal always must be in known 0 or 1 state")
+    )
+    assert_tready_never_unknown (
+        .clock(aclk),
+        .reset(1'b1),
+        .enable(1'b1),
+        .qualifier(1'b1),
+        .test_expr(tready),
+        .fire(assert_tready_never_unknown_fire)
+    );
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_tdata_never_unknown_fire;
+
+    ovl_never_unknown #(
+        .severity_level(`OVL_FATAL),
+        .width(TDATA_WIDTH),
+        .property_type(`OVL_ASSERT),
+        .msg("tdata signal cannot be unknown during active transfer")
+    )
+    assert_tdata_never_unknown (
+        .clock(aclk),
+        .reset(areset_n),
+        .enable(1'b1),
+        .qualifier(tvalid),
+        .test_expr(tdata),
+        .fire(assert_tdata_never_unknown_fire)
+    );
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_tkeep_never_unknown_fire;
+
+    ovl_never_unknown #(
+        .severity_level(`OVL_FATAL),
+        .width(TDATA_BYTES),
+        .property_type(`OVL_ASSERT),
+        .msg("tkeep signal cannot be unknown during active transfer")
+    )
+    assert_tkeep_never_unknown (
+        .clock(aclk),
+        .reset(areset_n),
+        .enable(1'b1),
+        .qualifier(tvalid),
+        .test_expr(tkeep),
+        .fire(assert_tkeep_never_unknown_fire)
+    );
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_tstrb_never_unknown_fire;
+
+    ovl_never_unknown #(
+        .severity_level(`OVL_FATAL),
+        .width(TDATA_BYTES),
+        .property_type(`OVL_ASSERT),
+        .msg("tstrb signal cannot be unknown during active transfer")
+    )
+    assert_tstrb_never_unknown (
+        .clock(aclk),
+        .reset(areset_n),
+        .enable(1'b1),
+        .qualifier(tvalid),
+        .test_expr(tstrb),
+        .fire(assert_tstrb_never_unknown_fire)
+    );
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_tlast_never_unknown_fire;
+
+    ovl_never_unknown #(
+        .severity_level(`OVL_FATAL),
+        .property_type(`OVL_ASSERT),
+        .msg("tlast signal cannot be unknown during active transfer")
+    )
+    assert_tlast_never_unknown (
+        .clock(aclk),
+        .reset(areset_n),
+        .enable(1'b1),
+        .qualifier(tvalid),
+        .test_expr(tlast),
+        .fire(assert_tlast_never_unknown_fire)
+    );
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_tdest_never_unknown_fire;
+
+    ovl_never_unknown #(
+        .severity_level(`OVL_FATAL),
+        .width(TDEST_WIDTH),
+        .property_type(`OVL_ASSERT),
+        .msg("tdest signal cannot be unknown during active transfer")
+    )
+    assert_tdest_never_unknown (
+        .clock(aclk),
+        .reset(areset_n),
+        .enable(1'b1),
+        .qualifier(tvalid),
+        .test_expr(tdest),
+        .fire(assert_tdest_never_unknown_fire)
+    );
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_tuser_never_unknown_fire;
+
+    ovl_never_unknown #(
+        .severity_level(`OVL_FATAL),
+        .width(TUSER_WIDTH),
+        .property_type(`OVL_ASSERT),
+        .msg("tuser signal cannot be unknown during active transfer")
+    )
+    assert_tuser_never_unknown (
+        .clock(aclk),
+        .reset(areset_n),
+        .enable(1'b1),
+        .qualifier(tvalid),
+        .test_expr(tuser),
+        .fire(assert_tuser_never_unknown_fire)
+    );
+
+    logic [`OVL_FIRE_WIDTH-1:0] assert_tid_never_unknown_fire;
+
+    ovl_never_unknown #(
+        .severity_level(`OVL_FATAL),
+        .width(TID_WIDTH),
+        .property_type(`OVL_ASSERT),
+        .msg("tid signal cannot be unknown during active transfer")
+    )
+    assert_tid_never_unknown (
+        .clock(aclk),
+        .reset(areset_n),
+        .enable(1'b1),
+        .qualifier(tvalid),
+        .test_expr(tid),
+        .fire(assert_tid_never_unknown_fire)
+    );
 
     logic [`OVL_FIRE_WIDTH-1:0] assert_tvalid_always_reset_fire;
 
@@ -266,9 +438,9 @@ interface logic_axi4_stream_if #(
     )
     assert_tvalid_always_reset (
         .clock(aclk),
-        .reset(1'b1),
+        .reset(!areset_n),
         .enable(1'b1),
-        .test_expr(areset_n || (!areset_n && !tvalid)),
+        .test_expr(!tvalid),
         .fire(assert_tvalid_always_reset_fire)
     );
 
@@ -284,8 +456,8 @@ interface logic_axi4_stream_if #(
             assert_tkeep_tstrb_always_valid (
                 .clock(aclk),
                 .reset(areset_n),
-                .enable(tvalid),
-                .test_expr(tkeep[k] || (!tkeep[k] && !tstrb[k])),
+                .enable(1'b1),
+                .test_expr(!tvalid || tkeep[k] || (!tkeep[k] && !tstrb[k])),
                 .fire(assert_tkeep_tstrb_always_valid_fire)
             );
 
@@ -301,7 +473,6 @@ interface logic_axi4_stream_if #(
 
     ovl_win_unchange #(
         .severity_level(`OVL_FATAL),
-        .width($bits(tvalid)),
         .property_type(`OVL_ASSERT),
         .msg("tvalid signal cannot change value during bus hold")
     )
@@ -309,9 +480,9 @@ interface logic_axi4_stream_if #(
         .clock(aclk),
         .reset(areset_n),
         .enable(1'b1),
-        .start_event(tvalid && !tready),
+        .start_event(bus_hold_start),
         .test_expr(tvalid),
-        .end_event(tvalid && tready),
+        .end_event(bus_hold_end),
         .fire(assert_tvalid_unchange_fire)
     );
 
@@ -319,7 +490,6 @@ interface logic_axi4_stream_if #(
 
     ovl_win_unchange #(
         .severity_level(`OVL_FATAL),
-        .width($bits(tlast)),
         .property_type(`OVL_ASSERT),
         .msg("tlast signal cannot change value during bus hold")
     )
@@ -327,9 +497,9 @@ interface logic_axi4_stream_if #(
         .clock(aclk),
         .reset(areset_n),
         .enable(1'b1),
-        .start_event(tvalid && !tready),
+        .start_event(bus_hold_start),
         .test_expr(tlast),
-        .end_event(tvalid && tready),
+        .end_event(bus_hold_end),
         .fire(assert_tlast_unchange_fire)
     );
 
@@ -337,7 +507,7 @@ interface logic_axi4_stream_if #(
 
     ovl_win_unchange #(
         .severity_level(`OVL_FATAL),
-        .width($bits(tdata)),
+        .width(TDATA_WIDTH),
         .property_type(`OVL_ASSERT),
         .msg("tdata signal cannot change value during bus hold")
     )
@@ -345,9 +515,9 @@ interface logic_axi4_stream_if #(
         .clock(aclk),
         .reset(areset_n),
         .enable(1'b1),
-        .start_event(tvalid && !tready),
+        .start_event(bus_hold_start),
         .test_expr(tdata),
-        .end_event(tvalid && tready),
+        .end_event(bus_hold_end),
         .fire(assert_tdata_unchange_fire)
     );
 
@@ -355,7 +525,7 @@ interface logic_axi4_stream_if #(
 
     ovl_win_unchange #(
         .severity_level(`OVL_FATAL),
-        .width($bits(tkeep)),
+        .width(TDATA_BYTES),
         .property_type(`OVL_ASSERT),
         .msg("tkeep signal cannot change value during bus hold")
     )
@@ -363,9 +533,9 @@ interface logic_axi4_stream_if #(
         .clock(aclk),
         .reset(areset_n),
         .enable(1'b1),
-        .start_event(tvalid && !tready),
+        .start_event(bus_hold_start),
         .test_expr(tkeep),
-        .end_event(tvalid && tready),
+        .end_event(bus_hold_end),
         .fire(assert_tkeep_unchange_fire)
     );
 
@@ -373,7 +543,7 @@ interface logic_axi4_stream_if #(
 
     ovl_win_unchange #(
         .severity_level(`OVL_FATAL),
-        .width($bits(tstrb)),
+        .width(TDATA_BYTES),
         .property_type(`OVL_ASSERT),
         .msg("tstrb signal cannot change value during bus hold")
     )
@@ -381,9 +551,9 @@ interface logic_axi4_stream_if #(
         .clock(aclk),
         .reset(areset_n),
         .enable(1'b1),
-        .start_event(tvalid && !tready),
+        .start_event(bus_hold_start),
         .test_expr(tstrb),
-        .end_event(tvalid && tready),
+        .end_event(bus_hold_end),
         .fire(assert_tstrb_unchange_fire)
     );
 
@@ -391,7 +561,7 @@ interface logic_axi4_stream_if #(
 
     ovl_win_unchange #(
         .severity_level(`OVL_FATAL),
-        .width($bits(tuser)),
+        .width(TUSER_WIDTH),
         .property_type(`OVL_ASSERT),
         .msg("tuser signal cannot change value during bus hold")
     )
@@ -399,9 +569,9 @@ interface logic_axi4_stream_if #(
         .clock(aclk),
         .reset(areset_n),
         .enable(1'b1),
-        .start_event(tvalid && !tready),
+        .start_event(bus_hold_start),
         .test_expr(tuser),
-        .end_event(tvalid && tready),
+        .end_event(bus_hold_end),
         .fire(assert_tuser_unchange_fire)
     );
 
@@ -409,7 +579,7 @@ interface logic_axi4_stream_if #(
 
     ovl_win_unchange #(
         .severity_level(`OVL_FATAL),
-        .width($bits(tdest)),
+        .width(TDEST_WIDTH),
         .property_type(`OVL_ASSERT),
         .msg("tdest signal cannot change value during bus hold")
     )
@@ -417,9 +587,9 @@ interface logic_axi4_stream_if #(
         .clock(aclk),
         .reset(areset_n),
         .enable(1'b1),
-        .start_event(tvalid && !tready),
+        .start_event(bus_hold_start),
         .test_expr(tdest),
-        .end_event(tvalid && tready),
+        .end_event(bus_hold_end),
         .fire(assert_tdest_unchange_fire)
     );
 
@@ -427,7 +597,7 @@ interface logic_axi4_stream_if #(
 
     ovl_win_unchange #(
         .severity_level(`OVL_FATAL),
-        .width($bits(tid)),
+        .width(TID_WIDTH),
         .property_type(`OVL_ASSERT),
         .msg("tid signal cannot change value during bus hold")
     )
@@ -435,9 +605,9 @@ interface logic_axi4_stream_if #(
         .clock(aclk),
         .reset(areset_n),
         .enable(1'b1),
-        .start_event(tvalid && !tready),
+        .start_event(bus_hold_start),
         .test_expr(tid),
-        .end_event(tvalid && tready),
+        .end_event(bus_hold_end),
         .fire(assert_tid_unchange_fire)
     );
 
@@ -455,7 +625,9 @@ interface logic_axi4_stream_if #(
         1'b0
     };
     /* verilator coverage_on */
-`else
+`endif
+
+`ifdef VERILATOR
     logic _unused_ports = &{1'b0, aclk, areset_n, 1'b0};
 `endif
 endinterface

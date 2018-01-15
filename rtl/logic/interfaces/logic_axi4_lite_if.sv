@@ -15,10 +15,6 @@
 
 `include "logic.svh"
 
-`ifndef LOGIC_STD_OVL_DISABLED
-`include "std_ovl_defines.h"
-`endif
-
 /* Interface: logic_axi4_lite_if
  *
  * AXI4-Lite interface.
@@ -38,10 +34,8 @@ interface logic_axi4_lite_if #(
     int AWADDR_WIDTH = ADDRESS_WIDTH,
     int ARADDR_WIDTH = ADDRESS_WIDTH
 ) (
-    /* verilator lint_off UNUSED */
     input aclk,
     input areset_n
-    /* verilator lint_on UNUSED */
 );
     initial begin: design_rule_checks
         `LOGIC_DRC_POWER_OF_2(DATA_BYTES)
@@ -173,33 +167,6 @@ interface logic_axi4_lite_if #(
 `ifndef LOGIC_SYNTHESIS
     clocking cb_slave @(posedge aclk);
         /* Write address channel */
-        input awvalid;
-        output awready;
-        input awaddr;
-        input awprot;
-        /* Write data channel */
-        input wvalid;
-        output wready;
-        input wdata;
-        input wstrb;
-        /* Write response channel */
-        output bvalid;
-        input bready;
-        output bresp;
-        /* Read address channel */
-        input arvalid;
-        output arready;
-        input araddr;
-        input arprot;
-        /* Read data channel */
-        output rvalid;
-        input rready;
-        output rdata;
-        output rresp;
-    endclocking
-
-    clocking cb_master @(posedge aclk);
-        /* Write address channel */
         output awvalid;
         input awready;
         output awaddr;
@@ -223,6 +190,33 @@ interface logic_axi4_lite_if #(
         output rready;
         input rdata;
         input rresp;
+    endclocking
+
+    clocking cb_master @(posedge aclk);
+        /* Write address channel */
+        input awvalid;
+        output awready;
+        input awaddr;
+        input awprot;
+        /* Write data channel */
+        input wvalid;
+        output wready;
+        input wdata;
+        input wstrb;
+        /* Write response channel */
+        output bvalid;
+        input bready;
+        output bresp;
+        /* Read address channel */
+        input arvalid;
+        output arready;
+        input araddr;
+        input arprot;
+        /* Read data channel */
+        output rvalid;
+        input rready;
+        output rdata;
+        output rresp;
     endclocking
 
     clocking cb_monitor @(posedge aclk);
@@ -251,6 +245,10 @@ interface logic_axi4_lite_if #(
         input rdata;
         input rresp;
     endclocking
+`endif
+
+`ifdef VERILATOR
+    logic _unused_ports = &{1'b0, aclk, areset_n, 1'b0};
 `endif
 
 endinterface

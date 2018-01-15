@@ -21,15 +21,12 @@ module logic_basic_queue_generic_read #(
 ) (
     input aclk,
     input areset_n,
-    /* Tx */
     input tx_tready,
     output logic tx_tvalid,
     output logic [DATA_WIDTH-1:0] tx_tdata,
-    /* Read */
     input [DATA_WIDTH-1:0] read_data,
     output logic [ADDRESS_WIDTH-1:0] read_pointer,
     output logic read_enable,
-    /* Capacity */
     input capacity_valid
 );
     enum logic [0:0] {

@@ -66,15 +66,21 @@ function(add_quartus_project target_name)
     cmake_parse_arguments(ARG "${options}" "${one_value_arguments}"
         "${multi_value_arguments}" ${ARGN})
 
+    macro(set_default_value name value)
+        if (NOT DEFINED ARG_${name})
+            set(ARG_${name} ${value})
+        endif()
+    endmacro()
+
     set(quartus_depends "")
     set(quartus_assignments "")
 
+    set(ip_files "")
+    set(qsys_files "")
+    set(qsys_tcl_files "")
+
     if (DEFINED QUARTUS_NUM_PARALLEL_PROCESSORS)
         set(ARG_NUM_PARALLEL_PROCESSORS ${QUARTUS_NUM_PARALLEL_PROCESSORS})
-    endif()
-
-    if (NOT DEFINED ARG_REVISION)
-        set(ARG_REVISION ${target_name})
     endif()
 
     set(ARG_INCLUDES ${QUARTUS_INCLUDES} ${ARG_INCLUDES})
@@ -90,6 +96,48 @@ function(add_quartus_project target_name)
         list(APPEND quartus_assignments
             "set_global_assignment -name DEVICE \"${ARG_DEVICE}\"")
     endif()
+
+    set_default_value(REVISION ${target_name})
+    set_default_value(TOP_LEVEL_ENTITY "${target_name}")
+    set_default_value(NUM_PARALLEL_PROCESSORS ALL)
+    set_default_value(PROJECT_DIRECTORY
+        "${CMAKE_BINARY_DIR}/quartus/${target_name}")
+
+    file(MAKE_DIRECTORY "${ARG_PROJECT_DIRECTORY}")
+
+    get_hdl_depends(${ARG_TOP_LEVEL_ENTITY} hdl_depends)
+
+    foreach (hdl_name ${ARG_DEPENDS} ${hdl_depends} ${ARG_TOP_LEVEL_ENTITY})
+        get_hdl_property(hdl_synthesizable ${hdl_name} SYNTHESIZABLE)
+
+        if (hdl_synthesizable)
+            get_hdl_property(hdl_type ${hdl_name} TYPE)
+
+            if (hdl_type MATCHES Qsys)
+                get_hdl_property(hdl_source ${hdl_name} SOURCE)
+
+                if (hdl_source MATCHES "\\.tcl$")
+                    list(APPEND ARG_QSYS_TCL_FILES "${hdl_source}")
+                elseif (hdl_source MATCHES "\\.ip$")
+                    list(APPEND ARG_IP_FILES "${hdl_source}")
+                elseif (hdl_source MATCHES "\\.qsys$")
+                    list(APPEND ARG_QSYS_FILES "${hdl_source}")
+                endif()
+            elseif (hdl_type MATCHES Verilog OR hdl_type MATCHES VHDL)
+                get_hdl_property(hdl_sources ${hdl_name} SOURCES)
+                list(APPEND ARG_SOURCES ${hdl_sources})
+
+                get_hdl_property(hdl_source ${hdl_name} SOURCE)
+                list(APPEND ARG_SOURCES "${hdl_source}")
+
+                get_hdl_property(hdl_defines ${hdl_name} DEFINES)
+                list(APPEND ARG_DEFINES ${hdl_defines})
+
+                get_hdl_property(hdl_includes ${hdl_name} INCLUDES)
+                list(APPEND ARG_INCLUDES ${hdl_includes})
+            endif()
+        endif()
+    endforeach()
 
     if (ARG_IP_SEARCH_PATHS)
         set(ip_search_paths "")
@@ -110,7 +158,22 @@ function(add_quartus_project target_name)
             "set_global_assignment -name IP_SEARCH_PATHS \"${ip_search_paths}\"")
     endif()
 
-    foreach (tcl_file ${ARG_QSYS_TCL_FILES})
+    foreach (file ${ARG_QSYS_TCL_FILES} ${ARG_QSYS_FILES} ${ARG_IP_FILES})
+        configure_file("${file}" "${ARG_PROJECT_DIRECTORY}" COPYONLY)
+
+        get_filename_component(filename "${file}" NAME)
+        set(file "${ARG_PROJECT_DIRECTORY}/${filename}")
+
+        if (file MATCHES "\\.ip$")
+            list(APPEND ip_files "${file}")
+        elseif (file MATCHES "\\.qsys$")
+            list(APPEND qsys_files "${file}")
+        elseif (file MATCHES "\\.tcl$")
+            list(APPEND qsys_tcl_files "${file}")
+        endif()
+    endforeach()
+
+    foreach (tcl_file ${qsys_tcl_files})
         get_filename_component(tcl_file "${tcl_file}" REALPATH)
         get_filename_component(name "${tcl_file}" NAME_WE)
         get_filename_component(dir "${tcl_file}" DIRECTORY)
@@ -137,7 +200,21 @@ function(add_quartus_project target_name)
                 "${ARG_PROJECT_DIRECTORY}"
         )
 
-        list(APPEND ARG_IP_FILES "${ip_file}")
+        list(APPEND ip_files "${ip_file}")
+    endforeach()
+
+    foreach (ip_file ${ip_files})
+        get_filename_component(ip_file "${ip_file}" REALPATH)
+        list(APPEND quartus_depends "${ip_file}")
+
+        if (CYGWIN)
+            execute_process(COMMAND cygpath -m "${ip_file}"
+                OUTPUT_VARIABLE ip_file
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+        endif()
+
+        list(APPEND quartus_assignments
+            "set_global_assignment -name IP_FILE ${ip_file}")
     endforeach()
 
     foreach (ip_file ${ARG_IP_FILES})
@@ -168,7 +245,7 @@ function(add_quartus_project target_name)
             "set_global_assignment -name SDC_FILE ${sdc_file}")
     endforeach()
 
-    foreach (qsys_file ${ARG_QSYS_FILES})
+    foreach (qsys_file ${qsys_files})
         get_filename_component(qsys_file "${qsys_file}" REALPATH)
         list(APPEND quartus_depends "${qsys_file}")
 
@@ -194,40 +271,6 @@ function(add_quartus_project target_name)
 
         list(APPEND quartus_assignments
             "set_global_assignment -name SOURCE_TCL_SCRIPT_FILE ${tcl_file}")
-    endforeach()
-
-    if (NOT DEFINED ARG_PROJECT_DIRECTORY)
-        set(ARG_PROJECT_DIRECTORY "${CMAKE_BINARY_DIR}/quartus/${target_name}")
-    endif()
-
-    if (NOT DEFINED ARG_TOP_LEVEL_ENTITY)
-        set(ARG_TOP_LEVEL_ENTITY ${target_name})
-    endif()
-
-    if (NOT DEFINED ARG_NUM_PARALLEL_PROCESSORS)
-        set(ARG_NUM_PARALLEL_PROCESSORS ALL)
-    endif()
-
-    file(MAKE_DIRECTORY "${ARG_PROJECT_DIRECTORY}")
-
-    get_hdl_depends(${ARG_TOP_LEVEL_ENTITY} hdl_depends)
-
-    foreach (hdl_name ${hdl_depends} ${ARG_TOP_LEVEL_ENTITY})
-        get_hdl_property(hdl_synthesizable ${hdl_name} SYNTHESIZABLE)
-
-        if (hdl_synthesizable)
-            get_hdl_property(hdl_sources ${hdl_name} SOURCES)
-            list(APPEND ARG_SOURCES "${hdl_sources}")
-
-            get_hdl_property(hdl_source ${hdl_name} SOURCE)
-            list(APPEND ARG_SOURCES "${hdl_source}")
-
-            get_hdl_property(hdl_defines ${hdl_name} DEFINES)
-            list(APPEND ARG_DEFINES "${hdl_defines}")
-
-            get_hdl_property(hdl_includes ${hdl_name} INCLUDES)
-            list(APPEND ARG_INCLUDES "${hdl_includes}")
-        endif()
     endforeach()
 
     if (ARG_DEFINES)
@@ -289,7 +332,7 @@ function(add_quartus_project target_name)
         "${ADD_QUARTUS_PROJECT_CURRENT_DIR}/AddQuartusProject.qsf.cmake.in"
         "${ARG_PROJECT_DIRECTORY}/${target_name}.qsf")
 
-    foreach (qsys_file ${ARG_IP_FILES} ${ARG_QSYS_FILES})
+    foreach (qsys_file ${ip_files} ${qsys_files})
         get_filename_component(qsys_file "${qsys_file}" REALPATH)
         get_filename_component(name "${qsys_file}" NAME_WE)
         get_filename_component(dir "${qsys_file}" DIRECTORY)

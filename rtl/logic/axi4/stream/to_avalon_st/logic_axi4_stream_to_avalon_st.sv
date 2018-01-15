@@ -29,33 +29,23 @@ module logic_axi4_stream_to_avalon_st #(
     int TDATA_BYTES = 1,
     int TDEST_WIDTH = 1,
     int TUSER_WIDTH = 1,
-    int TID_WIDTH = 1
+    int TID_WIDTH = 1,
+    int EMPTY_WIDTH = (TDATA_BYTES >= 2) ? $clog2(TDATA_BYTES) : 1
 ) (
     input aclk,
     input areset_n,
     `LOGIC_MODPORT(logic_axi4_stream_if, rx) rx,
     `LOGIC_MODPORT(logic_avalon_st_if, tx) tx
 );
-    function automatic bit [$bits(tx.empty)-1:0] tstrb_to_empty(
-        input [$bits(rx.tstrb)-1:0] tstrb
-    );
-        bit [$bits(tx.empty)-1:0] count = '0;
-
-        for (int i = 0; i < $bits(tstrb); ++i) begin
-            if (tstrb[i]) begin
-                --count;
-            end
-        end
-
-        return count;
-    endfunction
+    logic startofpacket;
+    logic [EMPTY_WIDTH-1:0] empty;
 
     always_comb rx.tready = tx.ready;
     always_comb tx.error = '0;
 
     always_ff @(posedge aclk or negedge areset_n) begin
         if (!areset_n) begin
-            tx.valid <= 1'b0;
+            tx.valid <= '0;
         end
         else if (tx.ready) begin
             tx.valid <= rx.tvalid;
@@ -64,23 +54,34 @@ module logic_axi4_stream_to_avalon_st #(
 
     always_ff @(posedge aclk or negedge areset_n) begin
         if (!areset_n) begin
-            tx.startofpacket <= 1'b1;
+            startofpacket <= '1;
         end
-        else if (tx.ready) begin
-            if (rx.tlast && rx.tvalid) begin
-                tx.startofpacket <= 1'b1;
+        else if (rx.tready && rx.tvalid) begin
+            if (rx.tlast) begin
+                startofpacket <= '1;
             end
             else begin
-                tx.startofpacket <= 1'b0;
+                startofpacket <= '0;
+            end
+        end
+    end
+
+    always_comb begin
+        empty = '0;
+
+        for (int i = 0; i < $bits(rx.tstrb); ++i) begin
+            if (rx.tstrb[i] && rx.tkeep[i]) begin
+                --empty;
             end
         end
     end
 
     always_ff @(posedge aclk) begin
         if (tx.ready) begin
+            tx.startofpacket <= startofpacket;
             tx.endofpacket <= rx.tlast;
             tx.channel <= rx.tid;
-            tx.empty <= tstrb_to_empty(rx.tstrb & rx.tkeep);
+            tx.empty <= empty;
             tx.data <= rx.tdata;
         end
     end

@@ -42,11 +42,9 @@ module logic_basic_queue_main #(
 ) (
     input aclk,
     input areset_n,
-    /* Rx */
     input rx_tvalid,
     input [WIDTH-1:0] rx_tdata,
     output logic rx_tready,
-    /* Tx */
     input tx_tready,
     output logic tx_tvalid,
     output logic [WIDTH-1:0] tx_tdata

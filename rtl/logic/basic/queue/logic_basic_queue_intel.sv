@@ -22,11 +22,9 @@ module logic_basic_queue_intel #(
 ) (
     input aclk,
     input areset_n,
-    /* Rx */
     input rx_tvalid,
     input [WIDTH-1:0] rx_tdata,
     output logic rx_tready,
-    /* Tx */
     input tx_tready,
     output logic tx_tvalid,
     output logic [WIDTH-1:0] tx_tdata
@@ -134,9 +132,50 @@ module logic_basic_queue_intel #(
         FSM_DATA: begin
             read = !empty && tx_tready;
         end
+        default: begin
+            read = '0;
+        end
         endcase
     end
 
     always_comb tx_tvalid = (FSM_DATA == fsm_state);
     always_comb tx_tdata = read_data;
+
+`ifndef LOGIC_STD_OVL_DISABLED
+    logic [`OVL_FIRE_WIDTH-1:0] assert_usedw_overflow_fire;
+    logic [`OVL_FIRE_WIDTH-1:0] assert_usedw_underflow_fire;
+
+    ovl_no_transition #(
+        .severity_level(`OVL_FATAL),
+        .width(ADDRESS_WIDTH),
+        .property_type(`OVL_ASSERT),
+        .msg("usedw cannot overflow")
+    )
+    assert_usedw_overflow (
+        .clock(aclk),
+        .reset(areset_n),
+        .enable(1'b1),
+        .test_expr(usedw),
+        .start_state('1),
+        .next_state('0),
+        .fire(assert_usedw_overflow_fire)
+    );
+
+    ovl_no_transition #(
+        .severity_level(`OVL_FATAL),
+        .width(ADDRESS_WIDTH),
+        .property_type(`OVL_ASSERT),
+        .msg("usedw cannot underflow")
+    )
+    assert_usedw_underflow (
+        .clock(aclk),
+        .reset(areset_n),
+        .enable(1'b1),
+        .test_expr(usedw),
+        .start_state('0),
+        .next_state('1),
+        .fire(assert_usedw_underflow_fire)
+    );
+`endif
+
 endmodule

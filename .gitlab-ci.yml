@@ -4,7 +4,7 @@ job1:
   script:
     - source /home/fpga/.bashrc
     - mkdir build && cd build
-    - cmake ..
-    - cmake --build . --target all -- -j4
+    - cmake -G Ninja ..
+    - cmake --build . --target all
     - ctest
     - cmake --build . --target quartus-analysis-all

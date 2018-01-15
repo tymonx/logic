@@ -15,7 +15,7 @@
 
 `include "logic.svh"
 
-/* Module: logic_clock_domain_crossing_genric_write
+/* Module: logic_clock_domain_crossing_generic_write
  *
  * Parameters:
  *  WIDTH       - Number of bits for input and output data signals.
@@ -38,11 +38,9 @@ module logic_clock_domain_crossing_generic_write #(
 ) (
     input rx_aclk,
     input rx_areset_n,
-    /* Rx */
     input rx_tvalid,
     input [DATA_WIDTH-1:0] rx_tdata,
     output logic rx_tready,
-    /* Write */
     output logic write_enable,
     output logic [DATA_WIDTH-1:0] write_data,
     output logic [ADDRESS_WIDTH-1:0] write_pointer,
@@ -52,8 +50,9 @@ module logic_clock_domain_crossing_generic_write #(
         `LOGIC_DRC_EQUAL_OR_GREATER_THAN(ADDRESS_WIDTH, 2)
     end
 
-    localparam ALMOST_FULL = (2**ADDRESS_WIDTH) - 3;
+    localparam ALMOST_FULL = (2**ADDRESS_WIDTH) - 4;
 
+    logic almost_full;
     logic [ADDRESS_WIDTH-1:0] difference;
 
     always_ff @(posedge rx_aclk or negedge rx_areset_n) begin
@@ -65,12 +64,14 @@ module logic_clock_domain_crossing_generic_write #(
         end
     end
 
+    always_comb almost_full = (difference >= ALMOST_FULL[ADDRESS_WIDTH-1:0]);
+
     always_ff @(posedge rx_aclk or negedge rx_areset_n) begin
         if (!rx_areset_n) begin
             rx_tready <= '0;
         end
         else begin
-            rx_tready <= (difference > ALMOST_FULL[ADDRESS_WIDTH-1:0]);
+            rx_tready <= !almost_full;
         end
     end
 
@@ -95,4 +96,42 @@ module logic_clock_domain_crossing_generic_write #(
             write_pointer <= write_pointer + 1'b1;
         end
     end
+
+`ifndef LOGIC_STD_OVL_DISABLED
+    logic [`OVL_FIRE_WIDTH-1:0] assert_difference_overflow_fire;
+    logic [`OVL_FIRE_WIDTH-1:0] assert_difference_underflow_fire;
+
+    ovl_no_transition #(
+        .severity_level(`OVL_FATAL),
+        .width(ADDRESS_WIDTH),
+        .property_type(`OVL_ASSERT),
+        .msg("difference cannot overflow")
+    )
+    assert_difference_overflow (
+        .clock(rx_aclk),
+        .reset(rx_areset_n),
+        .enable(1'b1),
+        .test_expr(difference),
+        .start_state('1),
+        .next_state('0),
+        .fire(assert_difference_overflow_fire)
+    );
+
+    ovl_no_transition #(
+        .severity_level(`OVL_FATAL),
+        .width(ADDRESS_WIDTH),
+        .property_type(`OVL_ASSERT),
+        .msg("difference cannot underflow")
+    )
+    assert_difference_underflow (
+        .clock(rx_aclk),
+        .reset(rx_areset_n),
+        .enable(1'b1),
+        .test_expr(difference),
+        .start_state('0),
+        .next_state('1),
+        .fire(assert_difference_underflow_fire)
+    );
+`endif
+
 endmodule

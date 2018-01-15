@@ -17,13 +17,16 @@
 
 /* Module: logic_axi4_stream_clock_crossing
  *
- * Clock domain crossing module between rx_aclk and tx_aclk.
+ * Clock domain crossing module between rx_aclk and tx_aclk clocks.
  *
  * Parameters:
  *  TDATA_BYTES - Number of bytes for tdata signal.
  *  TDEST_WIDTH - Number of bits for tdest signal.
  *  TUSER_WIDTH - Number of bits for tuser signal.
  *  TID_WIDTH   - Number of bits for tid signal.
+ *  CAPACITY    - Number of single data transactions that can be store in
+ *                internal queue memory (FIFO capacity).
+ *  TARGET      - Target device implementation.
  *
  * Ports:
  *  areset_n    - Asynchronous active-low reset.
@@ -54,12 +57,21 @@ module logic_axi4_stream_clock_crossing #(
     localparam WIDTH = TUSER_WIDTH + TDEST_WIDTH + TID_WIDTH + TLAST_WIDTH +
         TKEEP_WIDTH + TSTRB_WIDTH + TDATA_WIDTH;
 
+    logic rx_tvalid;
+    logic rx_tready;
     logic [WIDTH-1:0] rx_tdata;
+
+    logic tx_tvalid;
+    logic tx_tready;
     logic [WIDTH-1:0] tx_tdata;
 
+    always_comb rx_tvalid = rx.tvalid;
+    always_comb rx.tready = rx_tready;
     always_comb rx_tdata = {rx.tuser, rx.tdest, rx.tid, rx.tlast, rx.tkeep,
         rx.tstrb, rx.tdata};
 
+    always_comb tx.tvalid = tx_tvalid;
+    always_comb tx_tready = tx.tready;
     always_comb {tx.tuser, tx.tdest, tx.tid, tx.tlast, tx.tkeep,
         tx.tstrb, tx.tdata} = tx_tdata;
 
@@ -69,10 +81,6 @@ module logic_axi4_stream_clock_crossing #(
         .CAPACITY(CAPACITY)
     )
     unit (
-        .rx_tvalid(rx.tvalid),
-        .rx_tready(rx.tready),
-        .tx_tvalid(tx.tvalid),
-        .tx_tready(tx.tready),
         .*
     );
 endmodule

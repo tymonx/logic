@@ -14,3 +14,5 @@
 
 add_subdirectory(axi4)
 add_subdirectory(reset)
+add_subdirectory(basic)
+add_subdirectory(pll)

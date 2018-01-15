@@ -17,6 +17,8 @@
 
 /* Module: logic_basic_synchronizer
  *
+ * Synchronize input signal to clock.
+ *
  * Parameters:
  *  WIDTH       - Number of bits for input and output signals.
  *  STAGES      - Number of pipeline stages from input to output.

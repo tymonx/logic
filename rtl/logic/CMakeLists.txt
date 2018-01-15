@@ -17,20 +17,20 @@ set(HDL_DEFINES)
 set(HDL_LIBRARY logic)
 set(HDL_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
+if (STD_OVL_FOUND)
+    set(HDL_INCLUDES ${HDL_INCLUDES}
+        ${STD_OVL_DIR}
+    )
+else()
+    set(HDL_DEFINES ${HDL_DEFINES}
+        LOGIC_STD_OVL_DISABLED
+    )
+endif()
+
 add_subdirectory(packages)
 add_subdirectory(interfaces)
-
-set(HDL_DEPENDS
-    logic_pkg
-    logic_axi4_lite_pkg
-    logic_axi4_lite_if
-    logic_axi4_stream_if
-    logic_avalon_mm_pkg
-    logic_avalon_mm_if
-    logic_avalon_st_if
-)
-
 add_subdirectory(reset)
 add_subdirectory(basic)
 add_subdirectory(clock)
 add_subdirectory(axi4)
+add_subdirectory(pll)

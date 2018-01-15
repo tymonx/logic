@@ -15,17 +15,13 @@
 
 `include "logic.svh"
 
-`ifndef LOGIC_STD_OVL_DISABLED
-`include "std_ovl_defines.h"
-`endif
-
 /* Interface: logic_avalon_mm_if
  *
  * Avalon-MM interface.
- *  DATA_BYTES      - Number of bytes for writedata and readdata signals.
- *  ADDRESS_WIDTH   - Number of bits for address signal.
  *
  * Parameters:
+ *  DATA_BYTES      - Number of bytes for writedata and readdata signals.
+ *  ADDRESS_WIDTH   - Number of bits for address signal.
  *
  * Ports:
  *  clk         - Clock. Used only for internal checkers and assertions
@@ -36,10 +32,8 @@ interface logic_avalon_mm_if #(
     int DATA_BYTES = 4,
     int ADDRESS_WIDTH = 1
 ) (
-    /* verilator lint_off UNUSED */
     input clk,
     input reset_n
-    /* verilator lint_on UNUSED */
 );
     import logic_avalon_mm_pkg::response_t;
 
@@ -53,16 +47,24 @@ interface logic_avalon_mm_if #(
     typedef logic [DATA_BYTES-1:0] byteenable_t;
     typedef logic [ADDRESS_WIDTH-1:0] address_t;
 
-    logic read;
-    logic write;
-    logic waitrequest;
-    logic readdatavalid;
-    logic writeresponsevalid;
-    data_t readdata;
-    data_t writedata;
-    address_t address;
-    response_t response;
-    byteenable_t byteenable;
+`ifndef LOGIC_SYNTHESIS
+    `define INIT = '0
+    `define INIT_RESPONSE = response_t'('0)
+`else
+    `define INIT
+    `define INIT_RESPONSE
+`endif
+
+    logic read `INIT;
+    logic write `INIT;
+    logic waitrequest `INIT;
+    logic readdatavalid `INIT;
+    logic writeresponsevalid `INIT;
+    data_t readdata `INIT;
+    data_t writedata `INIT;
+    address_t address `INIT;
+    response_t response `INIT_RESPONSE;
+    byteenable_t byteenable `INIT;
 
 `ifndef LOGIC_MODPORT_DISABLED
     modport slave (
@@ -107,19 +109,6 @@ interface logic_avalon_mm_if #(
 
 `ifndef LOGIC_SYNTHESIS
     clocking cb_slave @(posedge clk);
-        input read;
-        input write;
-        input address;
-        input writedata;
-        input byteenable;
-        output response;
-        output readdata;
-        output waitrequest;
-        output readdatavalid;
-        output writeresponsevalid;
-    endclocking
-
-    clocking cb_master @(posedge clk);
         output read;
         output write;
         output address;
@@ -130,6 +119,19 @@ interface logic_avalon_mm_if #(
         input waitrequest;
         input readdatavalid;
         input writeresponsevalid;
+    endclocking
+
+    clocking cb_master @(posedge clk);
+        input read;
+        input write;
+        input address;
+        input writedata;
+        input byteenable;
+        output response;
+        output readdata;
+        output waitrequest;
+        output readdatavalid;
+        output writeresponsevalid;
     endclocking
 
     clocking cb_monitor @(posedge clk);
@@ -144,6 +146,86 @@ interface logic_avalon_mm_if #(
         input readdatavalid;
         input writeresponsevalid;
     endclocking
+
+    task automatic cb_slave_write_request(address_t addr, data_t data,
+            byteenable_t enable = '1);
+        bit sent = 0;
+
+        forever begin
+            if (!reset_n) begin
+                break;
+            end
+            else if (1'b0 === cb_slave.waitrequest) begin
+                if (sent) begin
+                    break;
+                end
+
+                sent = 1;
+                cb_slave.write <= 1;
+                cb_slave.address <= addr;
+                cb_slave.writedata <= data;
+                cb_slave.byteenable <= enable;
+            end
+            @(cb_slave);
+        end
+
+        cb_slave.write <= 0;
+    endtask
+
+    task automatic cb_slave_write_response();
+        forever begin
+            if (!reset_n) begin
+                break;
+            end
+            else if (1'b1 === cb_slave.writeresponsevalid) begin
+                @(cb_slave);
+                break;
+            end
+            @(cb_slave);
+        end
+    endtask
+
+    task automatic cb_slave_read_request(address_t addr,
+            byteenable_t enable = '1);
+        bit sent = 0;
+
+        forever begin
+            if (!reset_n) begin
+                break;
+            end
+            else if (1'b0 === cb_slave.waitrequest) begin
+                if (sent) begin
+                    break;
+                end
+
+                sent = 1;
+                cb_slave.read <= 1;
+                cb_slave.address <= addr;
+                cb_slave.byteenable <= enable;
+            end
+            @(cb_slave);
+        end
+
+        cb_slave.read <= 0;
+    endtask
+
+    task automatic cb_slave_read_response(output data_t data);
+        forever begin
+            if (!reset_n) begin
+                break;
+            end
+            else if (1'b1 === cb_slave.readdatavalid) begin
+                data = cb_slave.readdata;
+                @(cb_slave);
+                break;
+            end
+            @(cb_slave);
+        end
+    endtask
+`endif
+
+`ifdef VERILATOR
+    logic _unused_ports = &{1'b0, clk, reset_n, 1'b0};
 `endif
 
 endinterface
