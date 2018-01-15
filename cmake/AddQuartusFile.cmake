@@ -19,36 +19,55 @@ endif()
 find_package(Quartus)
 find_package(ModelSim)
 
-file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/modelsim/.qsys")
-
-if (NOT TARGET modelsim-compile-qsys)
-    add_custom_target(modelsim-compile-qsys ALL)
-endif()
-
 if (NOT TARGET modelsim-compile-all)
     add_custom_target(modelsim-compile-all ALL)
 endif()
 
-add_dependencies(modelsim-compile-all modelsim-compile-qsys)
+set(ADD_QUARTUS_FILE_SPD_DIR "${CMAKE_CURRENT_LIST_DIR}"
+    CACHE STRING "SPD current directory" FORCE)
 
 function(add_quartus_file file)
+    set(file_type "")
+
     if (NOT file)
         message(FATAL_ERROR "Quartus file is not defined")
     endif()
 
     get_filename_component(file "${file}" REALPATH)
+    get_filename_component(name "${file}" NAME_WE)
 
     if (NOT EXISTS "${file}")
         message(FATAL_ERROR "Quartus file doesn't exist: ${file}")
     endif()
 
-    if (NOT file MATCHES "\\.ip$" AND NOT file MATCHES "\\.qsys$"
-            AND NOT file MATCHES "\\.tcl$")
+    if (file MATCHES "\\.ip$")
+        set(file_type ip)
+    elseif (file MATCHES "\\.qsys$")
+        set(file_type qsys)
+    elseif (file MATCHES "\\.tcl$")
+        set(file_type tcl)
+    else()
         message(FATAL_ERROR "Quartus file must be IP, Qsys or Tcl file")
     endif()
 
-    get_filename_component(name "${file}" NAME_WE)
-    get_filename_component(filename "${file}" NAME)
+    set(new_file "${CMAKE_CURRENT_BINARY_DIR}/${name}.${file_type}")
+
+    configure_file("${file}" "${new_file}" COPYONLY)
+
+    # if (NOT "${file}" MATCHES "${new_file}")
+    #     add_custom_command(
+    #         OUTPUT
+    #             "${new_file}"
+    #         COMMAND
+    #             ${CMAKE_COMMAND}
+    #         ARGS
+    #             -E copy "${file}" "${new_file}"
+    #         DEPENDS
+    #             "${file}"
+    #     )
+    # endif()
+    #
+    set(file "${new_file}")
 
     set(entries
         TYPE Qsys
@@ -76,114 +95,41 @@ function(add_quartus_file file)
         return()
     endif()
 
-    configure_file("${file}" "${CMAKE_CURRENT_BINARY_DIR}" COPYONLY)
+    if (file_type MATCHES tcl)
+        set(tcl_file "${file}")
 
-    if (filename MATCHES "\\.tcl$")
-        set(ip_file "${CMAKE_CURRENT_BINARY_DIR}/${name}.ip")
-        set(tcl_file "${CMAKE_CURRENT_BINARY_DIR}/${name}.tcl")
-        set(qsys_file "${CMAKE_CURRENT_BINARY_DIR}/${name}.qsys")
-
-        if (NOT EXISTS "${ip_file}" AND NOT EXISTS "${qsys_file}")
-            if (CYGWIN)
-                execute_process(COMMAND cygpath -m "${tcl_file}"
-                    OUTPUT_VARIABLE tcl_file
-                    OUTPUT_STRIP_TRAILING_WHITESPACE)
-            endif()
-
-            execute_process(
-                COMMAND
-                    ${QUARTUS_QSYS_SCRIPT}
-                    --script=${tcl_file}
-                WORKING_DIRECTORY
-                    "${CMAKE_CURRENT_BINARY_DIR}"
-            )
+        if (CYGWIN)
+            execute_process(COMMAND cygpath -m "${tcl_file}"
+                OUTPUT_VARIABLE tcl_file
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
         endif()
 
-        if (EXISTS "${ip_file}")
-            set(filename "${name}.ip")
-        elseif (EXISTS "${qsys_file}")
-            set(filename "${name}.qsys")
-        endif()
-    endif()
+        set(file "${CMAKE_CURRENT_BINARY_DIR}/${name}.ip")
 
-    if (CYGWIN)
-        execute_process(COMMAND cygpath -m "${filename}"
-            OUTPUT_VARIABLE filename
-            OUTPUT_STRIP_TRAILING_WHITESPACE)
-    endif()
-
-    set(spd_file "${CMAKE_CURRENT_BINARY_DIR}/${name}/${name}.spd")
-
-    if (NOT EXISTS "${spd_file}")
-        set(quartus_project_flag --quartus-project=${name})
-
-        if (NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/${name}.qpf")
-            set(quartus_project_flag --new-quartus-project=${name})
-        endif()
-
-        execute_process(
+        add_custom_command(
+            OUTPUT
+                "${file}"
             COMMAND
-                ${QUARTUS_QSYS_GENERATE}
-                "${filename}"
-                --upgrade-ip-cores
-                ${quartus_project_flag}
+                ${QUARTUS_QSYS_SCRIPT}
+            ARGS
+                --script=${tcl_file}
+            DEPENDS
+                "${CMAKE_CURRENT_BINARY_DIR}/${name}.tcl"
             WORKING_DIRECTORY
                 "${CMAKE_CURRENT_BINARY_DIR}"
         )
 
-        if (NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/${name}.qpf")
-            set(quartus_project_flag --new-quartus-project=${name})
-        endif()
-
-        execute_process(
-            COMMAND
-                ${QUARTUS_QSYS_GENERATE}
-                "${filename}"
-                --simulation=VERILOG
-                ${quartus_project_flag}
-            WORKING_DIRECTORY
-                "${CMAKE_CURRENT_BINARY_DIR}"
-        )
-
-        if (NOT EXISTS "${spd_file}")
-            message(FATAL_ERROR "Quartus SPD file doesn't exist: ${spd_file}")
-        endif()
+        set(file_type ip)
     endif()
-
-    file(READ "${spd_file}" spd_content)
-
-    string(REGEX REPLACE "\n" ";" spd_list ${spd_content})
-
-    set(hdl_sources "")
-    foreach (spd_line ${spd_list})
-        string(REGEX MATCH "path=\".*\\.s?v\"" match "${spd_line}")
-
-        if (match)
-            string(REGEX REPLACE ".*path=\"(.*\\.s?v)\".*" "\\1"
-                hdl_source "${spd_line}")
-
-            if (NOT hdl_source MATCHES aldec AND
-                    NOT hdl_source MATCHES synopsys AND
-                    NOT hdl_source MATCHES cadence AND
-                    NOT hdl_source MATCHES ${name}_bb.v AND
-                    NOT hdl_source MATCHES ${name}_inst.v)
-                set(hdl_source
-                    "${CMAKE_CURRENT_BINARY_DIR}/${name}/${hdl_source}")
-
-                get_filename_component(hdl_source "${hdl_source}" REALPATH)
-
-                if (CYGWIN)
-                    execute_process(COMMAND cygpath -m "${hdl_source}"
-                        OUTPUT_VARIABLE hdl_source
-                        OUTPUT_STRIP_TRAILING_WHITESPACE)
-                endif()
-
-                list(APPEND hdl_sources "${hdl_source}")
-            endif()
-        endif()
-    endforeach()
 
     set(modules_dir "${CMAKE_BINARY_DIR}/modelsim/.modules")
+    set(qsys_file "${file}")
+
+    if (CYGWIN)
+        execute_process(COMMAND cygpath -m "${qsys_file}"
+            OUTPUT_VARIABLE qsys_file
+            OUTPUT_STRIP_TRAILING_WHITESPACE)
+    endif()
 
     if (NOT EXISTS "${CMAKE_BINARY_DIR}/modelsim/${name}")
         execute_process(COMMAND ${MODELSIM_VLIB} ${name}
@@ -196,21 +142,52 @@ function(add_quartus_file file)
 
     add_custom_command(
         OUTPUT
+            "${CMAKE_CURRENT_BINARY_DIR}/${name}/${name}.spd"
+        COMMAND
+            ${QUARTUS_QSYS_GENERATE}
+        ARGS
+            "${qsys_file}"
+            --upgrade-ip-cores
+        COMMAND
+            ${QUARTUS_QSYS_GENERATE}
+        ARGS
+            "${qsys_file}"
+            --simulation=VERILOG
+        DEPENDS
+            "${file}"
+        WORKING_DIRECTORY
+            "${CMAKE_CURRENT_BINARY_DIR}"
+    )
+
+    add_custom_command(
+        OUTPUT
+            "${CMAKE_CURRENT_BINARY_DIR}/${name}/${name}.f"
+        COMMAND
+            ${CMAKE_COMMAND}
+        ARGS
+            -DSPD_FILE="${CMAKE_CURRENT_BINARY_DIR}/${name}/${name}.spd"
+            -P "${ADD_QUARTUS_FILE_SPD_DIR}/AddQuartusFileSPD.cmake"
+        DEPENDS
+            "${CMAKE_CURRENT_BINARY_DIR}/${name}/${name}.spd"
+        WORKING_DIRECTORY
+            "${CMAKE_CURRENT_BINARY_DIR}"
+    )
+
+    add_custom_command(
+        OUTPUT
             "${modules_dir}/${name}/${name}"
         COMMAND
             ${MODELSIM_VLOG}
         ARGS
             -sv
             -work ${name}
-            ${hdl_sources}
+            -f "${CMAKE_CURRENT_BINARY_DIR}/${name}/${name}.f"
         COMMAND
             ${CMAKE_COMMAND}
         ARGS
             -E touch "${modules_dir}/${name}/${name}"
-        BYPRODUCTS
-            "${CMAKE_CURRENT_BINARY_DIR}/${filename}"
-        COMMENT
-            "ModelSim compiling Quartus Qsys/Ip module ${name}"
+        DEPENDS
+            "${CMAKE_CURRENT_BINARY_DIR}/${name}/${name}.f"
         WORKING_DIRECTORY
             "${CMAKE_BINARY_DIR}/modelsim"
     )
