@@ -217,20 +217,6 @@ function(add_quartus_project target_name)
             "set_global_assignment -name IP_FILE ${ip_file}")
     endforeach()
 
-    foreach (ip_file ${ip_files})
-        get_filename_component(ip_file "${ip_file}" REALPATH)
-        list(APPEND quartus_depends "${ip_file}")
-
-        if (CYGWIN)
-            execute_process(COMMAND cygpath -m "${ip_file}"
-                OUTPUT_VARIABLE ip_file
-                OUTPUT_STRIP_TRAILING_WHITESPACE)
-        endif()
-
-        list(APPEND quartus_assignments
-            "set_global_assignment -name IP_FILE ${ip_file}")
-    endforeach()
-
     foreach (sdc_file ${ARG_SDC_FILES})
         get_filename_component(sdc_file "${sdc_file}" REALPATH)
         list(APPEND quartus_depends "${sdc_file}")
