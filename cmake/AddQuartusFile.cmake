@@ -109,7 +109,7 @@ function(add_quartus_file file)
     endif()
 
     set(modules_dir "${CMAKE_BINARY_DIR}/modelsim/.modules")
-    set(qsys_file_arg "${file}")
+    set(qsys_file_arg "${qsys_file}")
 
     if (CYGWIN)
         execute_process(COMMAND cygpath -m "${qsys_file_arg}"
