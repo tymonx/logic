@@ -21,6 +21,7 @@ add_hdl_unit_test(logic_axi4_stream_queue_unit_test.sv
 
 add_hdl_unit_test(logic_axi4_stream_queue_intel_unit_test.sv
     DEPENDS
+        logic_pkg
         logic_axi4_stream_queue
     MODELSIM_SUPPRESS
         3009

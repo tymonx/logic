@@ -21,6 +21,7 @@ add_hdl_unit_test(logic_axi4_stream_packet_buffer_unit_test.sv
 
 add_hdl_unit_test(logic_axi4_stream_packet_buffer_intel_unit_test.sv
     DEPENDS
+        logic_pkg
         logic_axi4_stream_packet_buffer
     MODELSIM_SUPPRESS
         3009
