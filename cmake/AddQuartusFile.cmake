@@ -57,7 +57,7 @@ function(add_quartus_file file)
         LIBRARY "${name}"
         SOURCES ""
         DEPENDS ""
-        DEFINED ""
+        DEFINES ""
         INCLUDES ""
         COMPILE Quartus ModelSim
         ANALYSIS Quartus ModelSim
@@ -83,7 +83,7 @@ function(add_quartus_file file)
         set(tcl_file "${CMAKE_CURRENT_BINARY_DIR}/${name}.tcl")
         set(qsys_file "${CMAKE_CURRENT_BINARY_DIR}/${name}.qsys")
 
-        if (NOT EXISTS "${ip_file}" OR NOT EXISTS "${qsys_file}")
+        if (NOT EXISTS "${ip_file}" AND NOT EXISTS "${qsys_file}")
             if (CYGWIN)
                 execute_process(COMMAND cygpath -m "${tcl_file}"
                     OUTPUT_VARIABLE tcl_file
@@ -115,20 +115,32 @@ function(add_quartus_file file)
     set(spd_file "${CMAKE_CURRENT_BINARY_DIR}/${name}/${name}.spd")
 
     if (NOT EXISTS "${spd_file}")
+        set(quartus_project_flag --quartus-project=${name})
+
+        if (NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/${name}.qpf")
+            set(quartus_project_flag --new-quartus-project=${name})
+        endif()
+
         execute_process(
             COMMAND
                 ${QUARTUS_QSYS_GENERATE}
                 "${filename}"
                 --upgrade-ip-cores
+                ${quartus_project_flag}
             WORKING_DIRECTORY
                 "${CMAKE_CURRENT_BINARY_DIR}"
         )
+
+        if (NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/${name}.qpf")
+            set(quartus_project_flag --new-quartus-project=${name})
+        endif()
 
         execute_process(
             COMMAND
                 ${QUARTUS_QSYS_GENERATE}
                 "${filename}"
                 --simulation=VERILOG
+                ${quartus_project_flag}
             WORKING_DIRECTORY
                 "${CMAKE_CURRENT_BINARY_DIR}"
         )
@@ -171,14 +183,20 @@ function(add_quartus_file file)
         endif()
     endforeach()
 
+    set(modules_dir "${CMAKE_BINARY_DIR}/modelsim/.modules")
+
     if (NOT EXISTS "${CMAKE_BINARY_DIR}/modelsim/${name}")
         execute_process(COMMAND ${MODELSIM_VLIB} ${name}
             WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/modelsim OUTPUT_QUIET)
     endif()
 
+    if (NOT EXISTS "${modules_dir}/${name}")
+        file(MAKE_DIRECTORY "${modules_dir}/${name}")
+    endif()
+
     add_custom_command(
         OUTPUT
-            "${CMAKE_BINARY_DIR}/modelsim/.qsys/${name}"
+            "${modules_dir}/${name}/${name}"
         COMMAND
             ${MODELSIM_VLOG}
         ARGS
@@ -188,8 +206,8 @@ function(add_quartus_file file)
         COMMAND
             ${CMAKE_COMMAND}
         ARGS
-            -E touch "${CMAKE_BINARY_DIR}/modelsim/.qsys/${name}"
-        DEPENDS
+            -E touch "${modules_dir}/${name}/${name}"
+        BYPRODUCTS
             "${CMAKE_CURRENT_BINARY_DIR}/${filename}"
         COMMENT
             "ModelSim compiling Quartus Qsys/Ip module ${name}"
@@ -197,12 +215,17 @@ function(add_quartus_file file)
             "${CMAKE_BINARY_DIR}/modelsim"
     )
 
-    add_custom_target(modelsim-compile-qsys-${name}
-        DEPENDS "${CMAKE_BINARY_DIR}/modelsim/.qsys/${name}"
+    add_custom_target(modelsim-compile-${name}-${name}
+        DEPENDS "${modules_dir}/${name}/${name}"
     )
 
-    add_dependencies(modelsim-compile-qsys
-        modelsim-compile-qsys-${name})
+    if (NOT TARGET modelsim-compile-${name})
+        add_custom_target(modelsim-compile-${name})
+        add_dependencies(modelsim-compile-all modelsim-compile-${name})
+    endif()
+
+    add_dependencies(modelsim-compile-${name}
+        modelsim-compile-${name}-${name})
 endfunction()
 
 function(add_quartus_files)
