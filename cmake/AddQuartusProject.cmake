@@ -139,9 +139,9 @@ function(add_quartus_project target_name)
         endif()
     endforeach()
 
-    if (ARG_IP_SEARCH_PATHS)
-        set(ip_search_paths "")
+    set(ip_search_paths "")
 
+    if (ARG_IP_SEARCH_PATHS)
         foreach(ip_path ${ARG_IP_SEARCH_PATHS})
             get_filename_component(ip_path "${ip_path}" REALPATH)
 
@@ -158,18 +158,20 @@ function(add_quartus_project target_name)
             "set_global_assignment -name IP_SEARCH_PATHS \"${ip_search_paths}\"")
     endif()
 
-    foreach (file ${ARG_QSYS_TCL_FILES} ${ARG_QSYS_FILES} ${ARG_IP_FILES})
-        configure_file("${file}" "${ARG_PROJECT_DIRECTORY}" COPYONLY)
+    list(APPEND ip_search_paths "$$")
 
-        get_filename_component(filename "${file}" NAME)
-        set(file "${ARG_PROJECT_DIRECTORY}/${filename}")
+    foreach (file ${ARG_QSYS_TCL_FILES} ${ARG_QSYS_FILES} ${ARG_IP_FILES})
+        get_filename_component(file "${file}" REALPATH)
+        get_filename_component(name "${file}" NAME_WE)
+
+        configure_file("${file}" "${ARG_PROJECT_DIRECTORY}")
 
         if (file MATCHES "\\.ip$")
-            list(APPEND ip_files "${file}")
+            list(APPEND ip_files "${ARG_PROJECT_DIRECTORY}/${name}.ip")
         elseif (file MATCHES "\\.qsys$")
-            list(APPEND qsys_files "${file}")
+            list(APPEND qsys_files "${ARG_PROJECT_DIRECTORY}/${name}.qsys")
         elseif (file MATCHES "\\.tcl$")
-            list(APPEND qsys_tcl_files "${file}")
+            list(APPEND qsys_tcl_files "${ARG_PROJECT_DIRECTORY}/${name}.tcl")
         endif()
     endforeach()
 
@@ -192,7 +194,7 @@ function(add_quartus_project target_name)
             COMMAND
                 ${QUARTUS_QSYS_SCRIPT}
             ARGS
-                --quartus-project=${target_name}
+                --quartus-project=${target_name}.qpf
                 --script="${tcl_file}"
             COMMENT
                 "Platform Designer is creating IP file: ${name}.ip"
@@ -208,6 +210,8 @@ function(add_quartus_project target_name)
     if (NOT EXISTS "${quartus_ip_dir}")
         file(MAKE_DIRECTORY "${quartus_ip_dir}")
     endif()
+
+    string(REPLACE ";" "," qsys_search_path "${ip_search_paths}")
 
     foreach (ip_file ${ip_files})
         get_filename_component(ip_file "${ip_file}" REALPATH)
@@ -230,13 +234,15 @@ function(add_quartus_project target_name)
             ARGS
                 "${ip_file}"
                 --upgrade-ip-cores
-                --quartus-project=${target_name}
+                --search-path=\"${qsys_search_path}\"
+                --quartus-project=${target_name}.qpf
             COMMAND
                 ${QUARTUS_QSYS_GENERATE}
             ARGS
                 "${ip_file}"
                 --synthesis=VERILOG
-                --quartus-project=${target_name}
+                --search-path=\"${qsys_search_path}\"
+                --quartus-project=${target_name}.qpf
             COMMAND
                 ${CMAKE_COMMAND}
             ARGS
