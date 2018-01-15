@@ -217,7 +217,7 @@ function(add_quartus_project target_name)
             "set_global_assignment -name IP_FILE ${ip_file}")
     endforeach()
 
-    foreach (ip_file ${ARG_IP_FILES})
+    foreach (ip_file ${ip_files})
         get_filename_component(ip_file "${ip_file}" REALPATH)
         list(APPEND quartus_depends "${ip_file}")
 
@@ -331,37 +331,6 @@ function(add_quartus_project target_name)
     configure_file(
         "${ADD_QUARTUS_PROJECT_CURRENT_DIR}/AddQuartusProject.qsf.cmake.in"
         "${ARG_PROJECT_DIRECTORY}/${target_name}.qsf")
-
-    foreach (qsys_file ${ip_files} ${qsys_files})
-        get_filename_component(qsys_file "${qsys_file}" REALPATH)
-        get_filename_component(name "${qsys_file}" NAME_WE)
-        get_filename_component(dir "${qsys_file}" DIRECTORY)
-
-        #list(APPEND quartus_depends "${dir}/${name}/synth/${name}.v")
-
-        # add_custom_command(
-        #     #OUTPUT
-        #     #    "${dir}/${name}/synth/${name}.v"
-        #     COMMAND
-        #         ${QUARTUS_QSYS_GENERATE}
-        #     ARGS
-        #         --quartus-project=${target_name}
-        #         --upgrade-ip-cores
-        #         "${qsys_file}"
-        #         #COMMAND
-        #         #${QUARTUS_QSYS_GENERATE}
-        #         #ARGS
-        #         #--quartus-project=${target_name}
-        #         #--synthesis=VERILOG
-        #         #"${qsys_file}"
-        #     DEPENDS
-        #         "${qsys_file}"
-        #     WORKING_DIRECTORY
-        #         "${ARG_PROJECT_DIRECTORY}"
-        #     COMMENT
-        #         "Qsys generating ${qsys_name}"
-        # )
-    endforeach()
 
     if (QUARTUS_EDITION MATCHES Pro)
         set(quartus_analysis ${QUARTUS_SYN})
