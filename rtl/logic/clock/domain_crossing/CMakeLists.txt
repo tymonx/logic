@@ -32,4 +32,6 @@ add_hdl_source(logic_clock_domain_crossing.sv
         altera_mf
     ANALYSIS
         TRUE
+    QUARTUS_SDC_FILES
+        logic_clock_domain_crossing.sdc
 )

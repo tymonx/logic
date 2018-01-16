@@ -56,6 +56,7 @@ set(_HDL_MULTI_VALUE_ARGUMENTS
     PARAMETERS
     MODELSIM_FLAGS
     VERILATOR_CONFIGURATIONS
+    QUARTUS_SDC_FILES
 )
 
 set(VERILATOR_CONFIGURATION_FILE
@@ -607,6 +608,7 @@ function(add_hdl_source hdl_file)
     set_default_value(MODELSIM_PEDANTICERRORS TRUE)
     set_default_value(MODELSIM_WARNING_AS_ERROR TRUE)
     set_default_value(VERILATOR_CONFIGURATIONS "")
+    set_default_value(QUARTUS_SDC_FILES "")
 
     if (HDL_LIBRARY)
         set(ARG_LIBRARY ${HDL_LIBRARY})
@@ -653,6 +655,15 @@ function(add_hdl_source hdl_file)
     endforeach()
 
     set(ARG_SOURCES ${arg_sources})
+
+    set(arg_sdc_files "")
+
+    foreach (arg_sdc_file ${ARG_SDC_FILES})
+        get_filename_component(arg_sdc_file "${arg_sdc_file}" REALPATH)
+        list(APPEND arg_sdc_files ${arg_sdc_file})
+    endforeach()
+
+    set(ARG_SDC_FILES ${arg_sdc_files})
 
     if (NOT ARG_TYPE)
         if (ARG_SOURCE MATCHES .sv)

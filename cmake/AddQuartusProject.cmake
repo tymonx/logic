@@ -113,6 +113,9 @@ function(add_quartus_project target_name)
         if (hdl_synthesizable)
             get_hdl_property(hdl_type ${hdl_name} TYPE)
 
+            get_hdl_property(sdc_files ${hdl_name} QUARTUS_SDC_FILES)
+            list(APPEND ARG_SDC_FILES ${sdc_files})
+
             if (hdl_type MATCHES Qsys)
                 get_hdl_property(hdl_source ${hdl_name} SOURCE)
 
@@ -311,6 +314,10 @@ function(add_quartus_project target_name)
         list(APPEND quartus_assignments
             "set_global_assignment -name QSYS_FILE ${qsys_file}")
     endforeach()
+
+    if (ARG_SDC_FILES)
+        list(REMOVE_DUPLICATES ARG_SDC_FILES)
+    endif()
 
     foreach (sdc_file ${ARG_SDC_FILES})
         get_filename_component(sdc_file "${sdc_file}" REALPATH)
