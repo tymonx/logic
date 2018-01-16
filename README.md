@@ -11,6 +11,13 @@ Includes:
   * Modern C++ framework for UVM with SystemC for creating high quality and
     performance efficient tests for RTL projects
 
+Examples
+--------
+
+FPGA projects that use **Logic** utilities for creating, building and testing:
+
+  * [Virtio](https://github.com/tymonx/virtio) - Virtio implementation
+
 Requirements
 ------------
 
