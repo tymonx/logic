@@ -12,17 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_hdl_source(logic_axi4_stream_buffered.sv
-    DEPENDS
-        logic_axi4_stream_if
-        logic_basic_buffered
-    MODELSIM_SUPPRESS
-        2583
-)
+# SVUnit unit test
 
-add_hdl_source(logic_axi4_stream_buffered_top.sv
+add_hdl_unit_test(logic_axi4_stream_mux_unit_test.sv
     DEPENDS
-        logic_axi4_stream_buffered
-    ANALYSIS
-        TRUE
+        logic_axi4_stream_mux
 )

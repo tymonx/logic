@@ -17,6 +17,8 @@ add_hdl_source(logic_axi4_stream_clock_crossing.sv
         logic_pkg
         logic_axi4_stream_if
         logic_clock_domain_crossing
+    MODELSIM_SUPPRESS
+        2583
 )
 
 add_hdl_source(logic_axi4_stream_clock_crossing_top.sv

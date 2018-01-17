@@ -55,6 +55,7 @@ set(_HDL_MULTI_VALUE_ARGUMENTS
     LIBRARIES
     PARAMETERS
     MODELSIM_FLAGS
+    MODELSIM_SUPPRESS
     VERILATOR_CONFIGURATIONS
     QUARTUS_SDC_FILES
 )
@@ -221,6 +222,21 @@ function(add_hdl_modelsim hdl_name)
     endif()
 
     list(APPEND modelsim_flags -work ${ARG_LIBRARY})
+
+    if (DEFINED ARG_MODELSIM_SUPPRESS)
+        list(LENGTH ARG_MODELSIM_SUPPRESS len)
+
+        if (len GREATER 0)
+            list(GET ARG_MODELSIM_SUPPRESS 0 suppress)
+            list(REMOVE_AT ARG_MODELSIM_SUPPRESS 0)
+
+            foreach (value ${ARG_MODELSIM_SUPPRESS})
+                set(suppress "${suppress},${value}")
+            endforeach()
+
+            list(APPEND modelsim_flags -suppress ${suppress})
+        endif()
+    endif()
 
     if (ARG_TYPE MATCHES Verilog)
         if (ARG_TYPE MATCHES SystemVerilog)
@@ -607,6 +623,7 @@ function(add_hdl_source hdl_file)
     set_default_value(MODELSIM_LINT TRUE)
     set_default_value(MODELSIM_PEDANTICERRORS TRUE)
     set_default_value(MODELSIM_WARNING_AS_ERROR TRUE)
+    set_default_value(MODELSIM_SUPPRESS "")
     set_default_value(VERILATOR_CONFIGURATIONS "")
     set_default_value(QUARTUS_SDC_FILES "")
 

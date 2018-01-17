@@ -19,4 +19,4 @@ add_subdirectory(packet_buffer)
 add_subdirectory(timer)
 add_subdirectory(from_avalon_st)
 add_subdirectory(to_avalon_st)
-
+add_subdirectory(mux)

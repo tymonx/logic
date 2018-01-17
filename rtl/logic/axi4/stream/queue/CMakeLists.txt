@@ -17,6 +17,8 @@ add_hdl_source(logic_axi4_stream_queue.sv
         logic_pkg
         logic_axi4_stream_if
         logic_basic_queue
+    MODELSIM_SUPPRESS
+        2583
 )
 
 add_hdl_source(logic_axi4_stream_queue_top.sv
