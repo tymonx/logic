@@ -166,8 +166,22 @@ function(add_quartus_project target_name)
     foreach (file ${ARG_QSYS_TCL_FILES} ${ARG_QSYS_FILES} ${ARG_IP_FILES})
         get_filename_component(file "${file}" REALPATH)
         get_filename_component(name "${file}" NAME_WE)
+        get_filename_component(filename "${file}" NAME)
 
-        configure_file("${file}" "${ARG_PROJECT_DIRECTORY}")
+        if (NOT file MATCHES "${ARG_PROJECT_DIRECTORY}")
+            add_custom_command(
+                OUTPUT
+                    "${ARG_PROJECT_DIRECTORY}/${filename}"
+                COMMAND
+                    ${CMAKE_COMMAND}
+                ARGS
+                    -E copy "${file}" "${ARG_PROJECT_DIRECTORY}"
+                DEPENDS
+                    "${file}"
+                WORKING_DIRECTORY
+                    "${ARG_PROJECT_DIRECTORY}"
+            )
+        endif()
 
         if (file MATCHES "\\.ip$")
             list(APPEND ip_files "${ARG_PROJECT_DIRECTORY}/${name}.ip")
@@ -184,10 +198,11 @@ function(add_quartus_project target_name)
         get_filename_component(dir "${tcl_file}" DIRECTORY)
 
         set(ip_file "${dir}/${name}.ip")
+        set(tcl_file_arg "${tcl_file}")
 
         if (CYGWIN)
-            execute_process(COMMAND cygpath -m "${tcl_file}"
-                OUTPUT_VARIABLE tcl_file
+            execute_process(COMMAND cygpath -m "${tcl_file_arg}"
+                OUTPUT_VARIABLE tcl_file_arg
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
         endif()
 
@@ -198,7 +213,9 @@ function(add_quartus_project target_name)
                 ${QUARTUS_QSYS_SCRIPT}
             ARGS
                 --quartus-project=${target_name}.qpf
-                --script="${tcl_file}"
+                --script="${tcl_file_arg}"
+            DEPENDS
+                "${tcl_file}"
             COMMENT
                 "Platform Designer is creating IP file: ${name}.ip"
             WORKING_DIRECTORY
@@ -222,11 +239,11 @@ function(add_quartus_project target_name)
         list(APPEND quartus_depends "${ip_file}")
 
         get_filename_component(name "${ip_file}" NAME_WE)
-        set(depend_file "${ip_file}")
+        set(ip_file_arg "${ip_file}")
 
         if (CYGWIN)
-            execute_process(COMMAND cygpath -m "${ip_file}"
-                OUTPUT_VARIABLE ip_file
+            execute_process(COMMAND cygpath -m "${ip_file_arg}"
+                OUTPUT_VARIABLE ip_file_arg
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
         endif()
 
@@ -236,14 +253,14 @@ function(add_quartus_project target_name)
             COMMAND
                 ${QUARTUS_QSYS_GENERATE}
             ARGS
-                "${ip_file}"
+                "${ip_file_arg}"
                 --upgrade-ip-cores
                 --search-path=\"${qsys_search_path}\"
                 --quartus-project=${target_name}.qpf
             COMMAND
                 ${QUARTUS_QSYS_GENERATE}
             ARGS
-                "${ip_file}"
+                "${ip_file_arg}"
                 --synthesis=VERILOG
                 --search-path=\"${qsys_search_path}\"
                 --quartus-project=${target_name}.qpf
@@ -252,7 +269,7 @@ function(add_quartus_project target_name)
             ARGS
                 -E touch "${quartus_ip_dir}/${name}"
             DEPENDS
-                "${depend_file}"
+                "${ip_file}"
             WORKING_DIRECTORY
                 "${ARG_PROJECT_DIRECTORY}"
         )
@@ -260,7 +277,7 @@ function(add_quartus_project target_name)
         list(APPEND qsys_ip_depends "${quartus_ip_dir}/${name}")
         list(APPEND quartus_depends "${quartus_ip_dir}/${name}")
         list(APPEND quartus_assignments
-            "set_global_assignment -name IP_FILE ${ip_file}")
+            "set_global_assignment -name IP_FILE ${ip_file_arg}")
     endforeach()
 
     set(quartus_qsys_dir "${ARG_PROJECT_DIRECTORY}/.qsys")
@@ -274,11 +291,11 @@ function(add_quartus_project target_name)
         list(APPEND quartus_depends "${qsys_file}")
 
         get_filename_component(name "${qsys_file}" NAME_WE)
-        set(depend_file "${qsys_file}")
+        set(qsys_file_arg "${qsys_file}")
 
         if (CYGWIN)
-            execute_process(COMMAND cygpath -m "${qsys_file}"
-                OUTPUT_VARIABLE qsys_file
+            execute_process(COMMAND cygpath -m "${qsys_file_arg}"
+                OUTPUT_VARIABLE qsys_file_arg
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
         endif()
 
@@ -288,14 +305,14 @@ function(add_quartus_project target_name)
             COMMAND
                 ${QUARTUS_QSYS_GENERATE}
             ARGS
-                "${qsys_file}"
+                "${qsys_file_arg}"
                 --upgrade-ip-cores
                 --search-path=\"${qsys_search_path}\"
                 --quartus-project=${target_name}.qpf
             COMMAND
                 ${QUARTUS_QSYS_GENERATE}
             ARGS
-                "${qsys_file}"
+                "${qsys_file_arg}"
                 --synthesis=VERILOG
                 --search-path=\"${qsys_search_path}\"
                 --quartus-project=${target_name}.qpf
@@ -304,7 +321,7 @@ function(add_quartus_project target_name)
             ARGS
                 -E touch "${quartus_qsys_dir}/${name}"
             DEPENDS
-                "${depend_file}"
+                "${qsys_file}"
                 ${qsys_ip_depends}
             WORKING_DIRECTORY
                 "${ARG_PROJECT_DIRECTORY}"
@@ -312,7 +329,7 @@ function(add_quartus_project target_name)
 
         list(APPEND quartus_depends "${quartus_qsys_dir}/${name}")
         list(APPEND quartus_assignments
-            "set_global_assignment -name QSYS_FILE ${qsys_file}")
+            "set_global_assignment -name QSYS_FILE ${qsys_file_arg}")
     endforeach()
 
     if (ARG_SDC_FILES)
