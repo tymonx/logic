@@ -658,12 +658,12 @@ function(add_hdl_source hdl_file)
 
     set(arg_sdc_files "")
 
-    foreach (arg_sdc_file ${ARG_SDC_FILES})
+    foreach (arg_sdc_file ${ARG_QUARTUS_SDC_FILES})
         get_filename_component(arg_sdc_file "${arg_sdc_file}" REALPATH)
         list(APPEND arg_sdc_files ${arg_sdc_file})
     endforeach()
 
-    set(ARG_SDC_FILES ${arg_sdc_files})
+    set(ARG_QUARTUS_SDC_FILES ${arg_sdc_files})
 
     if (NOT ARG_TYPE)
         if (ARG_SOURCE MATCHES .sv)
