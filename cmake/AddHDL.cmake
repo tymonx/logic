@@ -21,6 +21,7 @@ find_package(SystemC REQUIRED COMPONENTS SCV UVM)
 find_package(Verilator)
 
 include(AddVivadoProject)
+include(AddQuartusFile)
 include(AddQuartusProject)
 include(CMakeParseArguments)
 
@@ -54,10 +55,14 @@ set(_HDL_MULTI_VALUE_ARGUMENTS
     SOURCES
     LIBRARIES
     PARAMETERS
+    MIF_FILES
     MODELSIM_FLAGS
     MODELSIM_SUPPRESS
     VERILATOR_CONFIGURATIONS
+    QUARTUS_IP_FILES
     QUARTUS_SDC_FILES
+    QUARTUS_QSYS_FILES
+    QUARTUS_QSYS_TCL_FILES
 )
 
 set(VERILATOR_CONFIGURATION_FILE
@@ -609,6 +614,18 @@ function(add_hdl_source hdl_file)
         endif()
     endmacro()
 
+    macro(set_realpath name)
+        set(paths "")
+
+        foreach (path ${ARG_${name}})
+            get_filename_component(path "${path}" REALPATH)
+            list(APPEND paths "${path}")
+        endforeach()
+
+        list(REMOVE_DUPLICATES paths)
+        set(ARG_${name} ${paths})
+    endmacro()
+
     set_default_value(NAME ${hdl_name})
     set_default_value(SOURCE ${hdl_file})
     set_default_value(SOURCES "")
@@ -625,7 +642,6 @@ function(add_hdl_source hdl_file)
     set_default_value(MODELSIM_WARNING_AS_ERROR TRUE)
     set_default_value(MODELSIM_SUPPRESS "")
     set_default_value(VERILATOR_CONFIGURATIONS "")
-    set_default_value(QUARTUS_SDC_FILES "")
 
     if (HDL_LIBRARY)
         set(ARG_LIBRARY ${HDL_LIBRARY})
@@ -651,36 +667,21 @@ function(add_hdl_source hdl_file)
         list(REMOVE_DUPLICATES ARG_DEFINES)
     endif()
 
-    if (ARG_INCLUDES)
-        list(REMOVE_DUPLICATES ARG_INCLUDES)
-    endif()
+    set_realpath(SOURCES)
+    set_realpath(INCLUDES)
+    set_realpath(MIF_FILES)
+    set_realpath(QUARTUS_IP_FILES)
+    set_realpath(QUARTUS_SDC_FILES)
+    set_realpath(QUARTUS_QSYS_FILES)
+    set_realpath(QUARTUS_QSYS_TCL_FILES)
 
-    set(arg_includes "")
+    foreach (quartus_file ${ARG_QUARTUS_IP_FILES} ${ARG_QUARTUS_QSYS_TCL_FILES}
+            ${ARG_QUARTUS_QSYS_FILES})
+        get_filename_component(name "${quartus_file}" NAME_WE)
 
-    foreach (arg_include ${ARG_INCLUDES})
-        get_filename_component(arg_include "${arg_include}" REALPATH)
-        list(APPEND arg_includes ${arg_include})
+        add_quartus_file("${quartus_file}")
+        list(APPEND ARG_DEPENDS "${name}")
     endforeach()
-
-    set(ARG_INCLUDES ${arg_includes})
-
-    set(arg_sources "")
-
-    foreach (arg_source ${ARG_SOURCES})
-        get_filename_component(arg_source "${arg_source}" REALPATH)
-        list(APPEND arg_sources ${arg_source})
-    endforeach()
-
-    set(ARG_SOURCES ${arg_sources})
-
-    set(arg_sdc_files "")
-
-    foreach (arg_sdc_file ${ARG_QUARTUS_SDC_FILES})
-        get_filename_component(arg_sdc_file "${arg_sdc_file}" REALPATH)
-        list(APPEND arg_sdc_files ${arg_sdc_file})
-    endforeach()
-
-    set(ARG_QUARTUS_SDC_FILES ${arg_sdc_files})
 
     if (NOT ARG_TYPE)
         if (ARG_SOURCE MATCHES .sv)

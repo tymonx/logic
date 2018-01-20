@@ -55,6 +55,7 @@ function(add_quartus_project target_name)
         INCLUDES
         ASSIGNMENTS
         IP_FILES
+        MIF_FILES
         SDC_FILES
         QSYS_FILES
         QSYS_TCL_FILES
@@ -138,6 +139,18 @@ function(add_quartus_project target_name)
 
                 get_hdl_property(hdl_includes ${hdl_name} INCLUDES)
                 list(APPEND ARG_INCLUDES ${hdl_includes})
+
+                get_hdl_property(mif_files ${hdl_name} MIF_FILES)
+                list(APPEND ARG_MIF_FILES ${mif_files})
+
+                get_hdl_property(ip_files ${hdl_name} QUARTUS_IP_FILES)
+                list(APPEND ARG_IP_FILES ${ip_files})
+
+                get_hdl_property(qsys_files ${hdl_name} QUARTUS_QSYS_FILES)
+                list(APPEND ARG_QSYS_FILES ${qsys_files})
+
+                get_hdl_property(tcl_files ${hdl_name} QUARTUS_QSYS_TCL_FILES)
+                list(APPEND ARG_QSYS_TCL_FILES ${tcl_files})
             endif()
         endif()
     endforeach()
@@ -318,6 +331,20 @@ function(add_quartus_project target_name)
     if (ARG_SDC_FILES)
         list(REMOVE_DUPLICATES ARG_SDC_FILES)
     endif()
+
+    foreach (mif_file ${ARG_MIF_FILES})
+        get_filename_component(mif_file "${mif_file}" REALPATH)
+        list(APPEND quartus_depends "${mif_file}")
+
+        if (CYGWIN)
+            execute_process(COMMAND cygpath -m "${mif_file}"
+                OUTPUT_VARIABLE mif_file
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+        endif()
+
+        list(APPEND quartus_assignments
+            "set_global_assignment -name MIF_FILE ${mif_file}")
+    endforeach()
 
     foreach (sdc_file ${ARG_SDC_FILES})
         get_filename_component(sdc_file "${sdc_file}" REALPATH)
