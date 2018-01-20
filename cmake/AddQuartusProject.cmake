@@ -24,6 +24,10 @@ if (QUARTUS_FOUND)
     set(ADD_QUARTUS_PROJECT_CURRENT_DIR "${CMAKE_CURRENT_LIST_DIR}"
         CACHE INTERNAL "Add Quartus project current directory" FORCE)
 
+    if (NOT TARGET quartus-initialize-all)
+        add_custom_target(quartus-initialize-all)
+    endif()
+
     if (NOT TARGET quartus-analysis-all)
         add_custom_target(quartus-analysis-all)
     endif()
@@ -170,8 +174,20 @@ function(add_quartus_project target_name)
     foreach (file ${ARG_QSYS_TCL_FILES} ${ARG_QSYS_FILES} ${ARG_IP_FILES})
         get_filename_component(file "${file}" REALPATH)
         get_filename_component(name "${file}" NAME_WE)
+        get_filename_component(filename "${file}" NAME)
 
-        configure_file("${file}" "${ARG_PROJECT_DIRECTORY}")
+        if (NOT file MATCHES "${ARG_PROJECT_DIRECTORY}/${filename}")
+            add_custom_command(
+                OUTPUT
+                    "${ARG_PROJECT_DIRECTORY}/${filename}"
+                COMMAND
+                    ${CMAKE_COMMAND}
+                ARGS
+                    -E copy "${file}" "${ARG_PROJECT_DIRECTORY}"
+                DEPENDS
+                    "${file}"
+            )
+        endif()
 
         if (file MATCHES "\\.ip$")
             list(APPEND ip_files "${ARG_PROJECT_DIRECTORY}/${name}.ip")
@@ -484,6 +500,11 @@ function(add_quartus_project target_name)
         COMMENT
             "Quartus compiling ${ARG_PROJECT_DIRECTORY}"
     )
+
+    add_custom_target(quartus-initialize-${target_name}
+        DEPENDS ${qsys_files} ${ip_files})
+
+    add_dependencies(quartus-initialize-all quartus-initialize-${target_name})
 
     add_custom_target(quartus-analysis-${target_name}
         DEPENDS "${quartus_analysis_file}")
