@@ -22,7 +22,9 @@
  *  TDEST_WIDTH - Number of bits for tdest signal.
  *  TUSER_WIDTH - Number of bits for tuser signal.
  *  TID_WIDTH   - Number of bits for tid signal.
- *  TLAST       - Enable/disable tlast signal.
+ *  USE_TLAST   - Enable or disable tlast signal.
+ *  USE_TKEEP   - Enable or disable tkeep signal.
+ *  USE_TSTRB   - Enable or disable tstrb signal.
  *
  * Ports:
  *  aclk        - Clock.
@@ -35,7 +37,9 @@ module logic_axi4_stream_mux_unit #(
     int TDEST_WIDTH = 1,
     int TUSER_WIDTH = 1,
     int TID_WIDTH = 1,
-    int TLAST = 1
+    int USE_TLAST = 1,
+    int USE_TKEEP = 1,
+    int USE_TSTRB = 1
 ) (
     input aclk,
     input areset_n,
@@ -110,7 +114,6 @@ module logic_axi4_stream_mux_unit #(
         endcase
     end
 
-    always_comb tx.tstrb = tx.tkeep;
     always_comb rx[0].tready = !rx[0].tvalid || ((1'b0 == select) && tx.tready);
     always_comb rx[1].tready = !rx[1].tvalid || ((1'b1 == select) && tx.tready);
 
@@ -124,7 +127,7 @@ module logic_axi4_stream_mux_unit #(
     end
 
     generate
-        if (TLAST > 0) begin: tlast_enabled
+        if (USE_TLAST > 0) begin: tlast_enabled
             always_ff @(posedge aclk) begin
                 if (tx.tready) begin
                     tx.tlast <= select ? rx[1].tlast : rx[0].tlast;
@@ -135,7 +138,7 @@ module logic_axi4_stream_mux_unit #(
             always_comb tx.tlast = '1;
         end
 
-        if (TDATA_BYTES > 0) begin: tkeep_enabled
+        if ((TDATA_BYTES > 0) && (USE_TKEEP > 1)) begin: tkeep_enabled
             always_ff @(posedge aclk) begin
                 if (tx.tready) begin
                     tx.tkeep <= select ? rx[1].tkeep : rx[0].tkeep;
@@ -144,6 +147,17 @@ module logic_axi4_stream_mux_unit #(
         end
         else begin: tkeep_disabled
             always_comb tx.tkeep = '1;
+        end
+
+        if ((TDATA_BYTES > 0) && (USE_TSTRB > 1)) begin: tstrb_enabled
+            always_ff @(posedge aclk) begin
+                if (tx.tready) begin
+                    tx.tstrb <= select ? rx[1].tstrb : rx[0].tstrb;
+                end
+            end
+        end
+        else begin: tstrb_disabled
+            always_comb tx.tstrb = '1;
         end
 
         if (TDATA_BYTES > 0) begin: tdata_enabled

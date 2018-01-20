@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_hdl_source(logic_axi4_stream_mux.sv
+add_hdl_source(logic_axi4_stream_demux.sv
     SOURCES
-        logic_axi4_stream_mux_unit.sv
-        logic_axi4_stream_mux_stage.sv
-        logic_axi4_stream_mux_main.sv
+        logic_axi4_stream_demux_unit.sv
+        logic_axi4_stream_demux_stage.sv
+        logic_axi4_stream_demux_main.sv
     DEPENDS
         logic_axi4_stream_if
         logic_axi4_stream_assign
@@ -26,9 +26,9 @@ add_hdl_source(logic_axi4_stream_mux.sv
         2583
 )
 
-add_hdl_source(logic_axi4_stream_mux_top.sv
+add_hdl_source(logic_axi4_stream_demux_top.sv
     DEPENDS
-        logic_axi4_stream_mux
+        logic_axi4_stream_demux
     ANALYSIS
         TRUE
     MODELSIM_SUPPRESS

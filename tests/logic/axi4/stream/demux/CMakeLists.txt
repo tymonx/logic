@@ -1,4 +1,4 @@
-# Copyright 2018 Tymoteusz Blazejczyk
+# Copyright 2017 Tymoteusz Blazejczyk
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,25 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_hdl_source(logic_axi4_stream_mux.sv
-    SOURCES
-        logic_axi4_stream_mux_unit.sv
-        logic_axi4_stream_mux_stage.sv
-        logic_axi4_stream_mux_main.sv
-    DEPENDS
-        logic_axi4_stream_if
-        logic_axi4_stream_assign
-        logic_axi4_stream_buffered
-        logic_reset_synchronizer
-    MODELSIM_SUPPRESS
-        2583
-)
+# SVUnit unit test
 
-add_hdl_source(logic_axi4_stream_mux_top.sv
+add_hdl_unit_test(logic_axi4_stream_demux_unit_test.sv
     DEPENDS
-        logic_axi4_stream_mux
-    ANALYSIS
-        TRUE
-    MODELSIM_SUPPRESS
-        2583
+        logic_axi4_stream_demux
 )

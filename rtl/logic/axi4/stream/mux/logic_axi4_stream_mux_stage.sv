@@ -22,7 +22,9 @@
  *  TDEST_WIDTH - Number of bits for tdest signal.
  *  TUSER_WIDTH - Number of bits for tuser signal.
  *  TID_WIDTH   - Number of bits for tid signal.
- *  TLAST       - Enable/disable tlast signal.
+ *  USE_TLAST   - Enable or disable tlast signal.
+ *  USE_TKEEP   - Enable or disable tkeep signal.
+ *  USE_TSTRB   - Enable or disable tstrb signal.
  *
  * Ports:
  *  aclk        - Clock.
@@ -37,7 +39,9 @@ module logic_axi4_stream_mux_stage #(
     int TDEST_WIDTH = 1,
     int TUSER_WIDTH = 1,
     int TID_WIDTH = 1,
-    int TLAST = 1
+    int USE_TLAST = 1,
+    int USE_TKEEP = 1,
+    int USE_TSTRB = 1
 ) (
     input aclk,
     input areset_n,
@@ -77,7 +81,9 @@ module logic_axi4_stream_mux_stage #(
                     .TDEST_WIDTH(TDEST_WIDTH),
                     .TUSER_WIDTH(TUSER_WIDTH),
                     .TID_WIDTH(TID_WIDTH),
-                    .TLAST(TLAST)
+                    .USE_TLAST(USE_TLAST),
+                    .USE_TKEEP(USE_TKEEP),
+                    .USE_TSTRB(USE_TSTRB)
                 )
                 buffer (
                     .rx(rx[k + n]),
@@ -91,7 +97,9 @@ module logic_axi4_stream_mux_stage #(
                 .TDEST_WIDTH(TDEST_WIDTH),
                 .TUSER_WIDTH(TUSER_WIDTH),
                 .TID_WIDTH(TID_WIDTH),
-                .TLAST(TLAST)
+                .USE_TLAST(USE_TLAST),
+                .USE_TKEEP(USE_TKEEP),
+                .USE_TSTRB(USE_TSTRB)
             )
             mux (
                 .rx(buffered),

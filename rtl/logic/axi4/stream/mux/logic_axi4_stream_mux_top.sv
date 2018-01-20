@@ -1,4 +1,4 @@
-/* Copyright 2017 Tymoteusz Blazejczyk
+/* Copyright 2018 Tymoteusz Blazejczyk
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,9 @@ module logic_axi4_stream_mux_top #(
     int TDEST_WIDTH = `LOGIC_AXI4_STREAM_TDEST_WIDTH,
     int TUSER_WIDTH = `LOGIC_AXI4_STREAM_TUSER_WIDTH,
     int TID_WIDTH = `LOGIC_AXI4_STREAM_TID_WIDTH,
-    int TLAST = 1
+    int USE_TLAST = 1,
+    int USE_TKEEP = 1,
+    int USE_TSTRB = 1
 ) (
     input aclk,
     input areset_n,
@@ -85,7 +87,9 @@ module logic_axi4_stream_mux_top #(
         .TDEST_WIDTH(TDEST_WIDTH),
         .TUSER_WIDTH(TUSER_WIDTH),
         .TID_WIDTH(TID_WIDTH),
-        .TLAST(TLAST)
+        .USE_TLAST(USE_TLAST),
+        .USE_TKEEP(USE_TKEEP),
+        .USE_TSTRB(USE_TSTRB)
     ) unit (
         .*
     );

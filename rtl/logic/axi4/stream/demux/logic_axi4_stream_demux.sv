@@ -15,16 +15,20 @@
 
 `include "logic.svh"
 
-/* Module: logic_axi4_stream_mux
+/* Module: logic_axi4_stream_demux
  *
  * Parameters:
+ *  GROUP       - Group outputs.
+ *  OFFSET      - Offset ID.
+ *  OUTPUTS     - Number of outputs.
  *  TDATA_BYTES - Number of bytes for tdata signal.
  *  TDEST_WIDTH - Number of bits for tdest signal.
  *  TUSER_WIDTH - Number of bits for tuser signal.
  *  TID_WIDTH   - Number of bits for tid signal.
- *  USE_TLAST   - Enable or disable tlast signal.
  *  USE_TKEEP   - Enable or disable tkeep signal.
  *  USE_TSTRB   - Enable or disable tstrb signal.
+ *  USE_TLAST   - Enable or disable tlast signal.
+ *  USE_TID     - Use tid instead of tdest signal for demultiplexing data.
  *
  * Ports:
  *  aclk        - Clock.
@@ -32,20 +36,23 @@
  *  rx          - AXI4-Stream Rx interface.
  *  tx          - AXI4-Stream Tx interface.
  */
-module logic_axi4_stream_mux #(
-    int INPUTS = 2,
+module logic_axi4_stream_demux #(
+    int GROUP = 8,
+    int OFFSET = 0,
+    int OUTPUTS = 2,
     int TDATA_BYTES = 1,
     int TDEST_WIDTH = 1,
     int TUSER_WIDTH = 1,
     int TID_WIDTH = 1,
     int USE_TLAST = 1,
     int USE_TKEEP = 1,
-    int USE_TSTRB = 1
+    int USE_TSTRB = 1,
+    int USE_TID = 1
 ) (
     input aclk,
     input areset_n,
-    `LOGIC_MODPORT(logic_axi4_stream_if, rx) rx[INPUTS],
-    `LOGIC_MODPORT(logic_axi4_stream_if, tx) tx
+    `LOGIC_MODPORT(logic_axi4_stream_if, rx) rx,
+    `LOGIC_MODPORT(logic_axi4_stream_if, tx) tx[OUTPUTS]
 );
     logic areset_n_synced;
 
@@ -54,15 +61,18 @@ module logic_axi4_stream_mux #(
         .*
     );
 
-    logic_axi4_stream_mux_main #(
-        .INPUTS(INPUTS),
+    logic_axi4_stream_demux_main #(
+        .GROUP(GROUP),
+        .OFFSET(OFFSET),
+        .OUTPUTS(OUTPUTS),
         .TDATA_BYTES(TDATA_BYTES),
         .TDEST_WIDTH(TDEST_WIDTH),
         .TUSER_WIDTH(TUSER_WIDTH),
         .TID_WIDTH(TID_WIDTH),
         .USE_TLAST(USE_TLAST),
         .USE_TKEEP(USE_TKEEP),
-        .USE_TSTRB(USE_TSTRB)
+        .USE_TSTRB(USE_TSTRB),
+        .USE_TID(USE_TID)
     )
     main (
         .areset_n(areset_n_synced),
