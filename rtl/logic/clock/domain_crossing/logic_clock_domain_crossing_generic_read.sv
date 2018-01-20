@@ -122,7 +122,7 @@ module logic_clock_domain_crossing_generic_read #(
             end
             FSM_BURST: begin
                 if (tx_tready && almost_empty) begin
-                    fsm_state <= FSM_WAIT;
+                    fsm_state <= FSM_READ;
                 end
             end
             default: begin
