@@ -138,7 +138,7 @@ module logic_axi4_stream_mux_unit #(
             always_comb tx.tlast = '1;
         end
 
-        if ((TDATA_BYTES > 0) && (USE_TKEEP > 1)) begin: tkeep_enabled
+        if ((TDATA_BYTES > 0) && (USE_TKEEP > 0)) begin: tkeep_enabled
             always_ff @(posedge aclk) begin
                 if (tx.tready) begin
                     tx.tkeep <= select ? rx[1].tkeep : rx[0].tkeep;
@@ -149,7 +149,7 @@ module logic_axi4_stream_mux_unit #(
             always_comb tx.tkeep = '1;
         end
 
-        if ((TDATA_BYTES > 0) && (USE_TSTRB > 1)) begin: tstrb_enabled
+        if ((TDATA_BYTES > 0) && (USE_TSTRB > 0)) begin: tstrb_enabled
             always_ff @(posedge aclk) begin
                 if (tx.tready) begin
                     tx.tstrb <= select ? rx[1].tstrb : rx[0].tstrb;
