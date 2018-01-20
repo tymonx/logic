@@ -142,15 +142,6 @@ function(add_quartus_project target_name)
 
                 get_hdl_property(mif_files ${hdl_name} MIF_FILES)
                 list(APPEND ARG_MIF_FILES ${mif_files})
-
-                get_hdl_property(ip_files ${hdl_name} QUARTUS_IP_FILES)
-                list(APPEND ARG_IP_FILES ${ip_files})
-
-                get_hdl_property(qsys_files ${hdl_name} QUARTUS_QSYS_FILES)
-                list(APPEND ARG_QSYS_FILES ${qsys_files})
-
-                get_hdl_property(tcl_files ${hdl_name} QUARTUS_QSYS_TCL_FILES)
-                list(APPEND ARG_QSYS_TCL_FILES ${tcl_files})
             endif()
         endif()
     endforeach()
@@ -204,14 +195,20 @@ function(add_quartus_project target_name)
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
         endif()
 
+        set(qsys_flags "")
+
+        if (QUARTUS_EDITION MATCHES Pro)
+            list(APPEND qsys_flags --quartus-project=${target_name}.qpf)
+        endif()
+
         add_custom_command(
             OUTPUT
                 ${ip_file}
             COMMAND
                 ${QUARTUS_QSYS_SCRIPT}
             ARGS
-                --quartus-project=${target_name}.qpf
                 --script="${tcl_file}"
+                ${qsys_flags}
             COMMENT
                 "Platform Designer is creating IP file: ${name}.ip"
             WORKING_DIRECTORY
@@ -243,6 +240,12 @@ function(add_quartus_project target_name)
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
         endif()
 
+        set(qsys_flags "")
+
+        if (QUARTUS_EDITION MATCHES Pro)
+            list(APPEND qsys_flags --quartus-project=${target_name}.qpf)
+        endif()
+
         add_custom_command(
             OUTPUT
                 "${quartus_ip_dir}/${name}"
@@ -252,14 +255,14 @@ function(add_quartus_project target_name)
                 "${ip_file}"
                 --upgrade-ip-cores
                 --search-path=\"${qsys_search_path}\"
-                --quartus-project=${target_name}.qpf
+                ${qsys_flags}
             COMMAND
                 ${QUARTUS_QSYS_GENERATE}
             ARGS
                 "${ip_file}"
                 --synthesis=VERILOG
                 --search-path=\"${qsys_search_path}\"
-                --quartus-project=${target_name}.qpf
+                ${qsys_flags}
             COMMAND
                 ${CMAKE_COMMAND}
             ARGS
@@ -295,6 +298,12 @@ function(add_quartus_project target_name)
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
         endif()
 
+        set(qsys_flags "")
+
+        if (QUARTUS_EDITION MATCHES Pro)
+            list(APPEND qsys_flags --quartus-project=${target_name}.qpf)
+        endif()
+
         add_custom_command(
             OUTPUT
                 "${quartus_qsys_dir}/${name}"
@@ -304,14 +313,14 @@ function(add_quartus_project target_name)
                 "${qsys_file}"
                 --upgrade-ip-cores
                 --search-path=\"${qsys_search_path}\"
-                --quartus-project=${target_name}.qpf
+                ${qsys_flags}
             COMMAND
                 ${QUARTUS_QSYS_GENERATE}
             ARGS
                 "${qsys_file}"
                 --synthesis=VERILOG
                 --search-path=\"${qsys_search_path}\"
-                --quartus-project=${target_name}.qpf
+                ${qsys_flags}
             COMMAND
                 ${CMAKE_COMMAND}
             ARGS

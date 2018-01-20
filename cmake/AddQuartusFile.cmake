@@ -52,12 +52,23 @@ function(add_quartus_file file)
 
     set(qsys_file "${CMAKE_CURRENT_BINARY_DIR}/${name}.${file_type}")
 
-    configure_file("${file}" "${qsys_file}" COPYONLY)
+    if (NOT file MATCHES "${qsys_file}")
+        add_custom_command(
+            OUTPUT
+                "${qsys_file}"
+            COMMAND
+                ${CMAKE_COMMAND}
+            ARGS
+                -E copy "${file}" "${qsys_file}"
+            DEPENDS
+                "${file}"
+        )
+    endif()
 
     set(entries
         TYPE Qsys
         NAME "${name}"
-        SOURCE "${qsys_file}"
+        SOURCE "${file}"
         LIBRARY "${name}"
         SOURCES ""
         DEPENDS ""
