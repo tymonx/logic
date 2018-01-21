@@ -15,6 +15,7 @@
 add_subdirectory(assign)
 add_subdirectory(timer)
 add_subdirectory(buffered)
+add_subdirectory(delay)
 add_subdirectory(mux)
 add_subdirectory(demux)
 add_subdirectory(queue)
