@@ -1,4 +1,4 @@
-/* Copyright 2017 Tymoteusz Blazejczyk
+/* Copyright 2018 Tymoteusz Blazejczyk
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,6 +77,9 @@ module logic_basic_buffered #(
                     fsm_state <= FSM_IDLE;
                 end
             end
+            default: begin
+                fsm_state <= FSM_IDLE;
+            end
             endcase
         end
     end
@@ -102,7 +105,10 @@ module logic_basic_buffered #(
             tx_tvalid = rx_tvalid && rx_tready;
         end
         FSM_BUFFERED: begin
-            tx_tvalid = 1'b1;
+            tx_tvalid = '1;
+        end
+        default: begin
+            tx_tvalid = '0;
         end
         endcase
     end
@@ -114,6 +120,9 @@ module logic_basic_buffered #(
         end
         FSM_BUFFERED: begin
             tx_tdata = buffered;
+        end
+        default: begin
+            tx_tdata = '0;
         end
         endcase
     end

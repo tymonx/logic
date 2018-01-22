@@ -1,4 +1,4 @@
-# Copyright 2017 Tymoteusz Blazejczyk
+# Copyright 2018 Tymoteusz Blazejczyk
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -52,12 +52,23 @@ function(add_quartus_file file)
 
     set(qsys_file "${CMAKE_CURRENT_BINARY_DIR}/${name}.${file_type}")
 
-    configure_file("${file}" "${qsys_file}" COPYONLY)
+    if (NOT file MATCHES "${qsys_file}")
+        add_custom_command(
+            OUTPUT
+                "${qsys_file}"
+            COMMAND
+                ${CMAKE_COMMAND}
+            ARGS
+                -E copy "${file}" "${qsys_file}"
+            DEPENDS
+                "${file}"
+        )
+    endif()
 
     set(entries
         TYPE Qsys
         NAME "${name}"
-        SOURCE "${qsys_file}"
+        SOURCE "${file}"
         LIBRARY "${name}"
         SOURCES ""
         DEPENDS ""

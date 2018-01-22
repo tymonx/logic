@@ -1,4 +1,4 @@
-# Copyright 2017 Tymoteusz Blazejczyk
+# Copyright 2018 Tymoteusz Blazejczyk
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,11 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+add_subdirectory(assign)
 add_subdirectory(buffered)
+add_subdirectory(delay)
 add_subdirectory(queue)
 add_subdirectory(clock_crossing)
 add_subdirectory(packet_buffer)
 add_subdirectory(timer)
 add_subdirectory(from_avalon_st)
 add_subdirectory(to_avalon_st)
-
+add_subdirectory(mux)
+add_subdirectory(demux)

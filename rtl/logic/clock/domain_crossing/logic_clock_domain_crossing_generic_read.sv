@@ -1,4 +1,4 @@
-/* Copyright 2017 Tymoteusz Blazejczyk
+/* Copyright 2018 Tymoteusz Blazejczyk
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,7 +122,7 @@ module logic_clock_domain_crossing_generic_read #(
             end
             FSM_BURST: begin
                 if (tx_tready && almost_empty) begin
-                    fsm_state <= FSM_WAIT;
+                    fsm_state <= FSM_READ;
                 end
             end
             default: begin

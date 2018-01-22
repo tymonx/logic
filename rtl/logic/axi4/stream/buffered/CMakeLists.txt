@@ -1,4 +1,4 @@
-# Copyright 2017 Tymoteusz Blazejczyk
+# Copyright 2018 Tymoteusz Blazejczyk
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@ add_hdl_source(logic_axi4_stream_buffered.sv
     DEPENDS
         logic_axi4_stream_if
         logic_basic_buffered
+    MODELSIM_SUPPRESS
+        2583
 )
 
 add_hdl_source(logic_axi4_stream_buffered_top.sv

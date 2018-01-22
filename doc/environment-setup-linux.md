@@ -64,7 +64,7 @@ Xilinx Vivado
 
 Required: No. It is used for RTL analysis and elaboration check
 
-Minimum required version: 2017.3.1
+Minimum required version: 2018.3.1
 
 `Xilinx Vivado` enables analysis and synthesis of HDL designs, which
 enables the developer to compile their designs, perform timing analysis,

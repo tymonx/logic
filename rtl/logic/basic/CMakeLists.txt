@@ -1,4 +1,4 @@
-# Copyright 2017 Tymoteusz Blazejczyk
+# Copyright 2018 Tymoteusz Blazejczyk
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,4 +16,5 @@ add_subdirectory(synchronizer)
 add_subdirectory(binary2gray)
 add_subdirectory(gray2binary)
 add_subdirectory(buffered)
+add_subdirectory(delay)
 add_subdirectory(queue)

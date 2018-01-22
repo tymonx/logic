@@ -1,4 +1,4 @@
-# Copyright 2017 Tymoteusz Blazejczyk
+# Copyright 2018 Tymoteusz Blazejczyk
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,6 +23,10 @@ include(CMakeParseArguments)
 if (QUARTUS_FOUND)
     set(ADD_QUARTUS_PROJECT_CURRENT_DIR "${CMAKE_CURRENT_LIST_DIR}"
         CACHE INTERNAL "Add Quartus project current directory" FORCE)
+
+    if (NOT TARGET quartus-initialize-all)
+        add_custom_target(quartus-initialize-all)
+    endif()
 
     if (NOT TARGET quartus-analysis-all)
         add_custom_target(quartus-analysis-all)
@@ -55,6 +59,7 @@ function(add_quartus_project target_name)
         INCLUDES
         ASSIGNMENTS
         IP_FILES
+        MIF_FILES
         SDC_FILES
         QSYS_FILES
         QSYS_TCL_FILES
@@ -138,6 +143,9 @@ function(add_quartus_project target_name)
 
                 get_hdl_property(hdl_includes ${hdl_name} INCLUDES)
                 list(APPEND ARG_INCLUDES ${hdl_includes})
+
+                get_hdl_property(mif_files ${hdl_name} MIF_FILES)
+                list(APPEND ARG_MIF_FILES ${mif_files})
             endif()
         endif()
     endforeach()
@@ -168,7 +176,7 @@ function(add_quartus_project target_name)
         get_filename_component(name "${file}" NAME_WE)
         get_filename_component(filename "${file}" NAME)
 
-        if (NOT file MATCHES "${ARG_PROJECT_DIRECTORY}")
+        if (NOT file MATCHES "${ARG_PROJECT_DIRECTORY}/${filename}")
             add_custom_command(
                 OUTPUT
                     "${ARG_PROJECT_DIRECTORY}/${filename}"
@@ -178,8 +186,6 @@ function(add_quartus_project target_name)
                     -E copy "${file}" "${ARG_PROJECT_DIRECTORY}"
                 DEPENDS
                     "${file}"
-                WORKING_DIRECTORY
-                    "${ARG_PROJECT_DIRECTORY}"
             )
         endif()
 
@@ -206,16 +212,20 @@ function(add_quartus_project target_name)
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
         endif()
 
+        set(qsys_flags "")
+
+        if (QUARTUS_EDITION MATCHES Pro)
+            list(APPEND qsys_flags --quartus-project=${target_name}.qpf)
+        endif()
+
         add_custom_command(
             OUTPUT
                 ${ip_file}
             COMMAND
                 ${QUARTUS_QSYS_SCRIPT}
             ARGS
-                --quartus-project=${target_name}.qpf
-                --script="${tcl_file_arg}"
-            DEPENDS
-                "${tcl_file}"
+                --script="${tcl_file}"
+                ${qsys_flags}
             COMMENT
                 "Platform Designer is creating IP file: ${name}.ip"
             WORKING_DIRECTORY
@@ -247,6 +257,12 @@ function(add_quartus_project target_name)
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
         endif()
 
+        set(qsys_flags "")
+
+        if (QUARTUS_EDITION MATCHES Pro)
+            list(APPEND qsys_flags --quartus-project=${target_name}.qpf)
+        endif()
+
         add_custom_command(
             OUTPUT
                 "${quartus_ip_dir}/${name}"
@@ -256,14 +272,14 @@ function(add_quartus_project target_name)
                 "${ip_file_arg}"
                 --upgrade-ip-cores
                 --search-path=\"${qsys_search_path}\"
-                --quartus-project=${target_name}.qpf
+                ${qsys_flags}
             COMMAND
                 ${QUARTUS_QSYS_GENERATE}
             ARGS
                 "${ip_file_arg}"
                 --synthesis=VERILOG
                 --search-path=\"${qsys_search_path}\"
-                --quartus-project=${target_name}.qpf
+                ${qsys_flags}
             COMMAND
                 ${CMAKE_COMMAND}
             ARGS
@@ -299,6 +315,12 @@ function(add_quartus_project target_name)
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
         endif()
 
+        set(qsys_flags "")
+
+        if (QUARTUS_EDITION MATCHES Pro)
+            list(APPEND qsys_flags --quartus-project=${target_name}.qpf)
+        endif()
+
         add_custom_command(
             OUTPUT
                 "${quartus_qsys_dir}/${name}"
@@ -308,14 +330,14 @@ function(add_quartus_project target_name)
                 "${qsys_file_arg}"
                 --upgrade-ip-cores
                 --search-path=\"${qsys_search_path}\"
-                --quartus-project=${target_name}.qpf
+                ${qsys_flags}
             COMMAND
                 ${QUARTUS_QSYS_GENERATE}
             ARGS
                 "${qsys_file_arg}"
                 --synthesis=VERILOG
                 --search-path=\"${qsys_search_path}\"
-                --quartus-project=${target_name}.qpf
+                ${qsys_flags}
             COMMAND
                 ${CMAKE_COMMAND}
             ARGS
@@ -335,6 +357,20 @@ function(add_quartus_project target_name)
     if (ARG_SDC_FILES)
         list(REMOVE_DUPLICATES ARG_SDC_FILES)
     endif()
+
+    foreach (mif_file ${ARG_MIF_FILES})
+        get_filename_component(mif_file "${mif_file}" REALPATH)
+        list(APPEND quartus_depends "${mif_file}")
+
+        if (CYGWIN)
+            execute_process(COMMAND cygpath -m "${mif_file}"
+                OUTPUT_VARIABLE mif_file
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+        endif()
+
+        list(APPEND quartus_assignments
+            "set_global_assignment -name MIF_FILE ${mif_file}")
+    endforeach()
 
     foreach (sdc_file ${ARG_SDC_FILES})
         get_filename_component(sdc_file "${sdc_file}" REALPATH)
@@ -465,6 +501,11 @@ function(add_quartus_project target_name)
         COMMENT
             "Quartus compiling ${ARG_PROJECT_DIRECTORY}"
     )
+
+    add_custom_target(quartus-initialize-${target_name}
+        DEPENDS ${qsys_files} ${ip_files})
+
+    add_dependencies(quartus-initialize-all quartus-initialize-${target_name})
 
     add_custom_target(quartus-analysis-${target_name}
         DEPENDS "${quartus_analysis_file}")
