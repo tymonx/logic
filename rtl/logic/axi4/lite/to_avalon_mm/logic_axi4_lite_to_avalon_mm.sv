@@ -53,7 +53,7 @@ module logic_axi4_lite_to_avalon_mm #(
         .*
     );
 
-    logic_axi4_lite_buffered #(
+    logic_axi4_lite_buffer #(
         .DATA_BYTES(DATA_BYTES),
         .ADDRESS_WIDTH(ADDRESS_WIDTH)
     )

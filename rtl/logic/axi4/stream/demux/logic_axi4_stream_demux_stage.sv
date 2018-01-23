@@ -64,7 +64,7 @@ module logic_axi4_stream_demux_stage #(
         .*
     );
 
-    logic_axi4_stream_buffered #(
+    logic_axi4_stream_buffer #(
         .TDATA_BYTES(TDATA_BYTES),
         .TDEST_WIDTH(TDEST_WIDTH),
         .TUSER_WIDTH(TUSER_WIDTH),

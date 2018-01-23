@@ -54,7 +54,7 @@ module logic_axi4_lite_from_avalon_mm #(
         .*
     );
 
-    logic_axi4_lite_from_avalon_mm_buffered #(
+    logic_axi4_lite_from_avalon_mm_buffer #(
         .DATA_BYTES(DATA_BYTES),
         .ADDRESS_WIDTH(ADDRESS_WIDTH)
     )

@@ -15,7 +15,7 @@
 
 `include "logic.svh"
 
-/* Module: logic_axi4_lite_buffered
+/* Module: logic_axi4_lite_buffer
  *
  * Improve timings between modules by adding register to ready signal path from
  * tx to rx ports and it keeps zero latency bus transcation on both sides.
@@ -30,7 +30,7 @@
  *  slave       - AXI4-Lite slave interface.
  *  master      - AXI$-Lite master interface.
  */
-module logic_axi4_lite_buffered #(
+module logic_axi4_lite_buffer #(
     int DATA_BYTES = 4,
     int ADDRESS_WIDTH = 1
 ) (
@@ -44,7 +44,7 @@ module logic_axi4_lite_buffered #(
     localparam PROT_WIDTH = $bits(logic_axi4_lite_pkg::access_t);
     localparam RESP_WIDTH = $bits(logic_axi4_lite_pkg::response_t);
 
-    logic_basic_buffered #(
+    logic_basic_buffer #(
         .WIDTH(PROT_WIDTH + ADDRESS_WIDTH)
     )
     write_address_channel (
@@ -59,7 +59,7 @@ module logic_axi4_lite_buffered #(
         .*
     );
 
-    logic_basic_buffered #(
+    logic_basic_buffer #(
         .WIDTH(STRB_WIDTH + DATA_WIDTH)
     )
     write_data_channel (
@@ -74,7 +74,7 @@ module logic_axi4_lite_buffered #(
         .*
     );
 
-    logic_basic_buffered #(
+    logic_basic_buffer #(
         .WIDTH(RESP_WIDTH)
     )
     write_response_channel (
@@ -89,7 +89,7 @@ module logic_axi4_lite_buffered #(
         .*
     );
 
-    logic_basic_buffered #(
+    logic_basic_buffer #(
         .WIDTH(PROT_WIDTH + ADDRESS_WIDTH)
     )
     read_address_channel (
@@ -104,7 +104,7 @@ module logic_axi4_lite_buffered #(
         .*
     );
 
-    logic_basic_buffered #(
+    logic_basic_buffer #(
         .WIDTH(RESP_WIDTH + DATA_WIDTH)
     )
     read_data_channel (

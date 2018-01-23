@@ -15,7 +15,7 @@
 
 `include "logic.svh"
 
-/* Module: logic_axi4_lite_from_avalon_mm_buffered
+/* Module: logic_axi4_lite_from_avalon_mm_buffer
  *
  * Avalon-MM buffer module.
  *
@@ -29,7 +29,7 @@
  *  slave           - Avalon-MM interface.
  *  master          - Avalon-MM interface.
  */
-module logic_axi4_lite_from_avalon_mm_buffered #(
+module logic_axi4_lite_from_avalon_mm_buffer #(
     int DATA_BYTES = 4,
     int ADDRESS_WIDTH = 1
 ) (
@@ -68,7 +68,7 @@ module logic_axi4_lite_from_avalon_mm_buffered #(
     always_comb slave.readdatavalid = master.readdatavalid;
     always_comb slave.writeresponsevalid = master.writeresponsevalid;
 
-    logic_basic_buffered #(
+    logic_basic_buffer #(
         .WIDTH(WIDTH)
     )
     buffer_service (

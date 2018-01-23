@@ -14,14 +14,14 @@
 
 # SVUnit unit test
 
-add_hdl_unit_test(logic_axi4_stream_buffered_unit_test.sv
+add_hdl_unit_test(logic_axi4_stream_buffer_unit_test.sv
     DEPENDS
-        logic_axi4_stream_buffered
+        logic_axi4_stream_buffer
 )
 
 # SVUnit unit test
 
-set(MODULE_NAME logic_axi4_stream_buffered)
+set(MODULE_NAME logic_axi4_stream_buffer)
 set(MODULE_TOP ${MODULE_NAME}_top)
 
 set(MODULE_DEFINITIONS

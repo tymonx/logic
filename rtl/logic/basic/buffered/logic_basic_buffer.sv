@@ -15,7 +15,7 @@
 
 `include "logic.svh"
 
-/* Module: logic_basic_buffered
+/* Module: logic_basic_buffer
  *
  * Improve timings between modules by adding register to ready signal path from
  * tx to rx ports and it keeps zero latency bus transcation on both sides.
@@ -33,7 +33,7 @@
  *  tx_tdata    - Tx data signal.
  *  tx_tready   - Tx ready signal.
  */
-module logic_basic_buffered #(
+module logic_basic_buffer #(
     int WIDTH = 1
 ) (
     input aclk,

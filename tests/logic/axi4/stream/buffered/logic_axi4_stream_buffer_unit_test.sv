@@ -15,10 +15,10 @@
 
 `include "svunit_defines.svh"
 
-module logic_axi4_stream_buffered_unit_test;
+module logic_axi4_stream_buffer_unit_test;
     import svunit_pkg::svunit_testcase;
 
-    string name = "logic_axi4_stream_buffered_unit_test";
+    string name = "logic_axi4_stream_buffer_unit_test";
     svunit_testcase svunit_ut;
 
     localparam TDATA_BYTES = 4;
@@ -36,7 +36,7 @@ module logic_axi4_stream_buffered_unit_test;
         .TDATA_BYTES(TDATA_BYTES)
     ) tx (.*);
 
-    logic_axi4_stream_buffered #(
+    logic_axi4_stream_buffer #(
         .TDATA_BYTES(TDATA_BYTES)
     )
     dut (

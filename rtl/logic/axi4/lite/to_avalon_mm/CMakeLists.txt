@@ -19,7 +19,7 @@ add_hdl_source(logic_axi4_lite_to_avalon_mm.sv
         logic_axi4_lite_if
         logic_avalon_mm_if
         logic_reset_synchronizer
-        logic_axi4_lite_buffered
+        logic_axi4_lite_buffer
 )
 
 add_hdl_source(logic_axi4_lite_to_avalon_mm_top.sv

@@ -12,15 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_hdl_source(logic_axi4_lite_buffered.sv
+add_hdl_source(logic_axi4_lite_buffer.sv
     DEPENDS
         logic_axi4_lite_if
-        logic_basic_buffered
+        logic_basic_buffer
 )
 
-add_hdl_source(logic_axi4_lite_buffered_top.sv
+add_hdl_source(logic_axi4_lite_buffer_top.sv
     DEPENDS
-        logic_axi4_lite_buffered
+        logic_axi4_lite_buffer
     ANALYSIS
         TRUE
 )
