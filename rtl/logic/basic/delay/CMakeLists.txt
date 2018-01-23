@@ -13,6 +13,8 @@
 # limitations under the License.
 
 add_hdl_source(logic_basic_delay.sv
+    MODELSIM_SUPPRESS
+        2583
     ANALYSIS
         TRUE
 )
