@@ -16,7 +16,7 @@
 `include "logic.svh"
 
 module logic_axi4_stream_mux_top #(
-    int INPUTS = 16,
+    int INPUTS = 13,
     int TDATA_BYTES = `LOGIC_AXI4_STREAM_TDATA_BYTES,
     int TDEST_WIDTH = `LOGIC_AXI4_STREAM_TDEST_WIDTH,
     int TUSER_WIDTH = `LOGIC_AXI4_STREAM_TUSER_WIDTH,
