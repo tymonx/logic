@@ -44,7 +44,7 @@ module logic_axi4_stream_mux_main #(
 ) (
     input aclk,
     input areset_n,
-    `LOGIC_MODPORT(logic_axi4_stream_if, rx) rx[INPUTS],
+    `LOGIC_MODPORT(logic_axi4_stream_if, rx) rx[INPUTS-1:0],
     `LOGIC_MODPORT(logic_axi4_stream_if, tx) tx
 );
     generate
@@ -57,7 +57,7 @@ module logic_axi4_stream_mux_main #(
                 .TUSER_WIDTH((TUSER_WIDTH > 0) ? TUSER_WIDTH : 1),
                 .TID_WIDTH((TID_WIDTH > 0) ? TID_WIDTH : 1)
             )
-            muxed [MUXED] (
+            muxed [MUXED-1:0] (
                 .aclk(aclk),
                 .areset_n(areset_n)
             );
@@ -101,7 +101,7 @@ module logic_axi4_stream_mux_main #(
                 .TUSER_WIDTH((TUSER_WIDTH > 0) ? TUSER_WIDTH : 1),
                 .TID_WIDTH((TID_WIDTH > 0) ? TID_WIDTH : 1)
             )
-            muxed [1] (
+            muxed [0:0] (
                 .aclk(aclk),
                 .areset_n(areset_n)
             );

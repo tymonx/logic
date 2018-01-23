@@ -45,8 +45,8 @@ module logic_axi4_stream_mux_stage #(
 ) (
     input aclk,
     input areset_n,
-    `LOGIC_MODPORT(logic_axi4_stream_if, rx) rx[INPUTS],
-    `LOGIC_MODPORT(logic_axi4_stream_if, tx) tx[OUTPUTS]
+    `LOGIC_MODPORT(logic_axi4_stream_if, rx) rx[INPUTS-1:0],
+    `LOGIC_MODPORT(logic_axi4_stream_if, tx) tx[OUTPUTS-1:0]
 );
     localparam int NUM = 2 * (INPUTS / 2) ;
 
@@ -70,13 +70,13 @@ module logic_axi4_stream_mux_stage #(
                 .TUSER_WIDTH((TUSER_WIDTH > 0) ? TUSER_WIDTH : 1),
                 .TID_WIDTH((TID_WIDTH > 0) ? TID_WIDTH : 1)
             )
-            buffered [2] (
+            buffered [1:0] (
                 .aclk(aclk),
                 .areset_n(areset_n)
             );
 
             for (n = 0; n < 2; ++n) begin: buffers
-                logic_axi4_stream_buffered #(
+                logic_axi4_stream_buffer #(
                     .TDATA_BYTES(TDATA_BYTES),
                     .TDEST_WIDTH(TDEST_WIDTH),
                     .TUSER_WIDTH(TUSER_WIDTH),

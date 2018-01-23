@@ -20,7 +20,7 @@ add_hdl_source(logic_axi4_stream_mux.sv
     DEPENDS
         logic_axi4_stream_if
         logic_axi4_stream_assign
-        logic_axi4_stream_buffered
+        logic_axi4_stream_buffer
         logic_reset_synchronizer
     MODELSIM_SUPPRESS
         2583
