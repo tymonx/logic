@@ -52,7 +52,7 @@ module logic_axi4_stream_demux_stage #(
     input areset_n,
     `LOGIC_MODPORT(logic_axi4_stream_if, rx) prev,
     `LOGIC_MODPORT(logic_axi4_stream_if, tx) next,
-    `LOGIC_MODPORT(logic_axi4_stream_if, tx) tx[OUTPUTS]
+    `LOGIC_MODPORT(logic_axi4_stream_if, tx) tx[OUTPUTS-1:0]
 );
     logic_axi4_stream_if #(
         .TDATA_BYTES(TDATA_BYTES),

@@ -67,7 +67,7 @@ module logic_axi4_stream_demux_top #(
         .TDEST_WIDTH(TDEST_WIDTH),
         .TUSER_WIDTH(TUSER_WIDTH),
         .TID_WIDTH(TID_WIDTH)
-    ) tx [OUTPUTS] (
+    ) tx [OUTPUTS-1:0] (
         .aclk(aclk),
         .areset_n(areset_n)
     );
