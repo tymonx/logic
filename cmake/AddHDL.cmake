@@ -317,6 +317,37 @@ function(add_hdl_modelsim hdl_name)
             modelsim-compile-${DEP_LIBRARY}-${DEP_NAME})
     endforeach()
 
+    foreach (mif_file ${ARG_MIF_FILES})
+        if (mif_file MATCHES "${CMAKE_CURRENT_SOURCE_DIR}")
+            file(RELATIVE_PATH modelsim_mif_file "${CMAKE_CURRENT_SOURCE_DIR}"
+                "${mif_file}")
+
+            set(modelsim_mif_file
+                "${CMAKE_CURRENT_BINARY_DIR}/modelsim/${modelsim_mif_file}")
+
+            get_filename_component(dir "${modelsim_mif_file}" DIRECTORY)
+
+            if (NOT EXISTS "${dir}")
+                file(MAKE_DIRECTORY "${dir}")
+            endif()
+
+            add_custom_command(
+                OUTPUT
+                    "${modelsim_mif_file}"
+                COMMAND
+                    ${CMAKE_COMMAND}
+                ARGS
+                    -E copy "${mif_file}" "${modelsim_mif_file}"
+                DEPENDS
+                    "${mif_file}"
+            )
+
+            list(APPEND modelsim_depends "${modelsim_mif_file}")
+        elseif (IS_ABSOLUTE "${mif_file}")
+            list(APPEND modelsim_depends "${mif_file}")
+        endif()
+    endforeach()
+
     list(REMOVE_DUPLICATES modelsim_depends)
     list(REMOVE_DUPLICATES modelsim_libraries)
 
