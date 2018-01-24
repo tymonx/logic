@@ -56,6 +56,7 @@ set(_HDL_MULTI_VALUE_ARGUMENTS
     LIBRARIES
     PARAMETERS
     MIF_FILES
+    TEXT_FILES
     MODELSIM_FLAGS
     MODELSIM_SUPPRESS
     VERILATOR_CONFIGURATIONS
@@ -317,15 +318,15 @@ function(add_hdl_modelsim hdl_name)
             modelsim-compile-${DEP_LIBRARY}-${DEP_NAME})
     endforeach()
 
-    foreach (mif_file ${ARG_MIF_FILES})
-        if (mif_file MATCHES "${CMAKE_CURRENT_SOURCE_DIR}")
-            file(RELATIVE_PATH modelsim_mif_file "${CMAKE_CURRENT_SOURCE_DIR}"
-                "${mif_file}")
+    foreach (file ${ARG_MIF_FILES} ${ARG_TEXT_FILES})
+        if (file MATCHES "${CMAKE_CURRENT_SOURCE_DIR}")
+            file(RELATIVE_PATH modelsim_file "${CMAKE_CURRENT_SOURCE_DIR}"
+                "${file}")
 
-            set(modelsim_mif_file
-                "${CMAKE_CURRENT_BINARY_DIR}/modelsim/${modelsim_mif_file}")
+            set(modelsim_file
+                "${CMAKE_CURRENT_BINARY_DIR}/modelsim/${modelsim_file}")
 
-            get_filename_component(dir "${modelsim_mif_file}" DIRECTORY)
+            get_filename_component(dir "${modelsim_file}" DIRECTORY)
 
             if (NOT EXISTS "${dir}")
                 file(MAKE_DIRECTORY "${dir}")
@@ -333,18 +334,18 @@ function(add_hdl_modelsim hdl_name)
 
             add_custom_command(
                 OUTPUT
-                    "${modelsim_mif_file}"
+                    "${modelsim_file}"
                 COMMAND
                     ${CMAKE_COMMAND}
                 ARGS
-                    -E copy "${mif_file}" "${modelsim_mif_file}"
+                    -E copy "${file}" "${modelsim_file}"
                 DEPENDS
-                    "${mif_file}"
+                    "${file}"
             )
 
-            list(APPEND modelsim_depends "${modelsim_mif_file}")
-        elseif (IS_ABSOLUTE "${mif_file}")
-            list(APPEND modelsim_depends "${mif_file}")
+            list(APPEND modelsim_depends "${modelsim_file}")
+        elseif (IS_ABSOLUTE "${file}")
+            list(APPEND modelsim_depends "${file}")
         endif()
     endforeach()
 
