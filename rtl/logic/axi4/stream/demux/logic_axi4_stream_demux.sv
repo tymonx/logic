@@ -52,7 +52,7 @@ module logic_axi4_stream_demux #(
     input aclk,
     input areset_n,
     `LOGIC_MODPORT(logic_axi4_stream_if, rx) rx,
-    `LOGIC_MODPORT(logic_axi4_stream_if, tx) tx[OUTPUTS]
+    `LOGIC_MODPORT(logic_axi4_stream_if, tx) tx[OUTPUTS-1:0]
 );
     logic areset_n_synced;
 

@@ -15,7 +15,7 @@
 
 `include "logic.svh"
 
-module logic_axi4_lite_buffered_top #(
+module logic_axi4_lite_buffer_top #(
     int DATA_BYTES = 4,
     int ADDRESS_WIDTH = 1
 ) (
@@ -82,7 +82,7 @@ module logic_axi4_lite_buffered_top #(
 
     `LOGIC_AXI4_LITE_IF_SLAVE_ASSIGN(slave, slave);
 
-    logic_axi4_lite_buffered #(
+    logic_axi4_lite_buffer #(
         .DATA_BYTES(DATA_BYTES),
         .ADDRESS_WIDTH(ADDRESS_WIDTH)
     ) unit (.*);

@@ -15,7 +15,7 @@
 
 `include "logic.svh"
 
-/* Module: logic_axi4_stream_buffered
+/* Module: logic_axi4_stream_buffer
  *
  * Improve timings between modules by adding register to ready signal path from
  * tx to rx ports and it keeps zero latency bus transcation on both sides.
@@ -35,7 +35,7 @@
  *  rx          - AXI4-Stream interface.
  *  tx          - AXI4-Stream interface.
  */
-module logic_axi4_stream_buffered #(
+module logic_axi4_stream_buffer #(
     int TDATA_BYTES = 1,
     int TDEST_WIDTH = 1,
     int TUSER_WIDTH = 1,
@@ -166,7 +166,7 @@ module logic_axi4_stream_buffered #(
         end
     endgenerate
 
-    logic_basic_buffered #(
+    logic_basic_buffer #(
         .WIDTH(WIDTH)
     )
     unit (

@@ -12,7 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_hdl_source(logic_basic_buffered.sv
+add_hdl_source(logic_axi4_stream_buffer.sv
+    DEPENDS
+        logic_axi4_stream_if
+        logic_basic_buffer
+    MODELSIM_SUPPRESS
+        2583
+)
+
+add_hdl_source(logic_axi4_stream_buffer_top.sv
+    DEPENDS
+        logic_axi4_stream_buffer
     ANALYSIS
         TRUE
 )

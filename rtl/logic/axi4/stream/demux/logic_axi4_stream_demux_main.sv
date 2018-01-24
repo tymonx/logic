@@ -52,7 +52,7 @@ module logic_axi4_stream_demux_main #(
     input aclk,
     input areset_n,
     `LOGIC_MODPORT(logic_axi4_stream_if, rx) rx,
-    `LOGIC_MODPORT(logic_axi4_stream_if, tx) tx[OUTPUTS]
+    `LOGIC_MODPORT(logic_axi4_stream_if, tx) tx[OUTPUTS-1:0]
 );
     localparam int DEMUXES = (OUTPUTS + GROUP - 1) / GROUP;
     localparam int STAGES = DEMUXES + 1;
@@ -66,7 +66,7 @@ module logic_axi4_stream_demux_main #(
         .TUSER_WIDTH((TUSER_WIDTH > 0) ? TUSER_WIDTH : 1),
         .TID_WIDTH((TID_WIDTH > 0) ? TID_WIDTH : 1)
     )
-    stages [STAGES] (
+    stages [STAGES-1:0] (
         .aclk(aclk),
         .areset_n(areset_n)
     );
@@ -99,7 +99,7 @@ module logic_axi4_stream_demux_main #(
                 .TUSER_WIDTH((TUSER_WIDTH > 0) ? TUSER_WIDTH : 1),
                 .TID_WIDTH((TID_WIDTH > 0) ? TID_WIDTH : 1)
             )
-            demuxed [WIDTH] (
+            demuxed [WIDTH-1:0] (
                 .aclk(aclk),
                 .areset_n(areset_n)
             );

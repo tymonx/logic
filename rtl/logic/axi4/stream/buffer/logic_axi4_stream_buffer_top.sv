@@ -15,7 +15,7 @@
 
 `include "logic.svh"
 
-module logic_axi4_stream_buffered_top #(
+module logic_axi4_stream_buffer_top #(
     int TDATA_BYTES = `LOGIC_AXI4_STREAM_TDATA_BYTES,
     int TDEST_WIDTH = `LOGIC_AXI4_STREAM_TDEST_WIDTH,
     int TUSER_WIDTH = `LOGIC_AXI4_STREAM_TUSER_WIDTH,
@@ -60,7 +60,7 @@ module logic_axi4_stream_buffered_top #(
 
     `LOGIC_AXI4_STREAM_IF_RX_ASSIGN(rx, rx);
 
-    logic_axi4_stream_buffered #(
+    logic_axi4_stream_buffer #(
         .TDATA_BYTES(TDATA_BYTES),
         .TDEST_WIDTH(TDEST_WIDTH),
         .TUSER_WIDTH(TUSER_WIDTH),

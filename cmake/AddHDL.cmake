@@ -56,6 +56,7 @@ set(_HDL_MULTI_VALUE_ARGUMENTS
     LIBRARIES
     PARAMETERS
     MIF_FILES
+    TEXT_FILES
     MODELSIM_FLAGS
     MODELSIM_SUPPRESS
     VERILATOR_CONFIGURATIONS
@@ -315,6 +316,37 @@ function(add_hdl_modelsim hdl_name)
         list(APPEND modelsim_libraries ${DEP_LIBRARY})
         list(APPEND modelsim_depends
             modelsim-compile-${DEP_LIBRARY}-${DEP_NAME})
+    endforeach()
+
+    foreach (file ${ARG_MIF_FILES} ${ARG_TEXT_FILES})
+        if (file MATCHES "${CMAKE_CURRENT_SOURCE_DIR}")
+            file(RELATIVE_PATH modelsim_file "${CMAKE_CURRENT_SOURCE_DIR}"
+                "${file}")
+
+            set(modelsim_file
+                "${CMAKE_CURRENT_BINARY_DIR}/modelsim/${modelsim_file}")
+
+            get_filename_component(dir "${modelsim_file}" DIRECTORY)
+
+            if (NOT EXISTS "${dir}")
+                file(MAKE_DIRECTORY "${dir}")
+            endif()
+
+            add_custom_command(
+                OUTPUT
+                    "${modelsim_file}"
+                COMMAND
+                    ${CMAKE_COMMAND}
+                ARGS
+                    -E copy "${file}" "${modelsim_file}"
+                DEPENDS
+                    "${file}"
+            )
+
+            list(APPEND modelsim_depends "${modelsim_file}")
+        elseif (IS_ABSOLUTE "${file}")
+            list(APPEND modelsim_depends "${file}")
+        endif()
     endforeach()
 
     list(REMOVE_DUPLICATES modelsim_depends)

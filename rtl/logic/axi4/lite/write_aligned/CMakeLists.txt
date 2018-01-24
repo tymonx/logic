@@ -18,7 +18,7 @@ add_hdl_source(logic_axi4_lite_write_aligned.sv
     DEPENDS
         logic_axi4_lite_if
         logic_reset_synchronizer
-        logic_axi4_lite_buffered
+        logic_axi4_lite_buffer
 )
 
 add_hdl_source(logic_axi4_lite_write_aligned_top.sv

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 add_subdirectory(assign)
-add_subdirectory(buffered)
+add_subdirectory(buffer)
 add_subdirectory(delay)
 add_subdirectory(queue)
 add_subdirectory(clock_crossing)

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "logic_axi4_stream_buffered_top.h"
+#include "logic_axi4_stream_buffer_top.h"
 
 #include <logic/trace.hpp>
 #include <logic/command_line.hpp>
@@ -35,7 +35,7 @@ int sc_main(int argc, char* argv[]) {
     logic::axi4::stream::bus_if<> tx{"tx"};
     logic::axi4::stream::reset_if reset{};
 
-    logic_axi4_stream_buffered_top dut{"logic_axi4_stream_buffered_top"};
+    logic_axi4_stream_buffer_top dut{"logic_axi4_stream_buffer_top"};
 
     std::string trace_filename{dut.name()};
 
