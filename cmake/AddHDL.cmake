@@ -74,6 +74,10 @@ set(SVUNIT_TEST_RUNNER_FILE
     ${CMAKE_CURRENT_LIST_DIR}/SVUnitTestRunner.sv.in
     CACHE INTERNAL "SVunit test runner template file" FORCE)
 
+set(ADD_HDL_COPY_FILE
+    ${CMAKE_CURRENT_LIST_DIR}/AddHDLCopy.cmake
+    CACHE INTERNAL "Add HDL copy file" FORCE)
+
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/output)
 
 if (MODELSIM_FOUND)
@@ -83,15 +87,27 @@ if (MODELSIM_FOUND)
 
     file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/modelsim)
     file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/modelsim/.modules)
+    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/modelsim/libraries)
+    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/modelsim/unit_tests)
 
-    if (NOT EXISTS ${CMAKE_BINARY_DIR}/modelsim/work/_info)
+    if (NOT EXISTS ${CMAKE_BINARY_DIR}/modelsim/libraries/work/_info)
         execute_process(COMMAND ${MODELSIM_VLIB} work
-            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/modelsim OUTPUT_QUIET)
+            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/modelsim/libraries
+            OUTPUT_QUIET)
     endif()
 
-    if (NOT EXISTS ${CMAKE_BINARY_DIR}/modelsim/modelsim.ini)
-        execute_process(COMMAND ${MODELSIM_VMAP} work work
-            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/modelsim OUTPUT_QUIET)
+    if (NOT EXISTS ${CMAKE_BINARY_DIR}/modelsim/libraries/modelsim.ini)
+        set(library_dir "${CMAKE_BINARY_DIR}/modelsim/libraries/work")
+
+        if (CYGWIN)
+            execute_process(COMMAND cygpath -m "${library_dir}"
+                OUTPUT_VARIABLE library_dir
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+        endif()
+
+        execute_process(COMMAND ${MODELSIM_VMAP} work "${library_dir}"
+            WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/modelsim/libraries"
+            OUTPUT_QUIET)
     endif()
 
     if (NOT TARGET modelsim-compile-all)
@@ -269,10 +285,22 @@ function(add_hdl_modelsim hdl_name)
     list(APPEND modelsim_flags ${ARG_MODELSIM_FLAGS})
 
     set(modelsim_modules_dir ${CMAKE_BINARY_DIR}/modelsim/.modules)
+    set(modelsim_libraries_dir ${CMAKE_BINARY_DIR}/modelsim/libraries)
 
-    if (NOT EXISTS ${CMAKE_BINARY_DIR}/modelsim/${ARG_LIBRARY})
+    if (NOT EXISTS ${modelsim_libraries_dir}/${ARG_LIBRARY})
+        set(library_dir "${CMAKE_BINARY_DIR}/modelsim/libraries/${ARG_LIBRARY}")
+
+        if (CYGWIN)
+            execute_process(COMMAND cygpath -m "${library_dir}"
+                OUTPUT_VARIABLE library_dir
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+        endif()
+
         execute_process(COMMAND ${MODELSIM_VLIB} ${ARG_LIBRARY}
-            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/modelsim OUTPUT_QUIET)
+            WORKING_DIRECTORY "${modelsim_libraries_dir}" OUTPUT_QUIET)
+
+        execute_process(COMMAND ${MODELSIM_VMAP} ${ARG_LIBRARY} "${library_dir}"
+            WORKING_DIRECTORY "${modelsim_libraries_dir}" OUTPUT_QUIET)
     endif()
 
     if (NOT EXISTS ${modelsim_modules_dir}/${ARG_LIBRARY})
@@ -318,37 +346,6 @@ function(add_hdl_modelsim hdl_name)
             modelsim-compile-${DEP_LIBRARY}-${DEP_NAME})
     endforeach()
 
-    foreach (file ${ARG_MIF_FILES} ${ARG_TEXT_FILES})
-        if (file MATCHES "${CMAKE_CURRENT_SOURCE_DIR}")
-            file(RELATIVE_PATH modelsim_file "${CMAKE_CURRENT_SOURCE_DIR}"
-                "${file}")
-
-            set(modelsim_file
-                "${CMAKE_CURRENT_BINARY_DIR}/modelsim/${modelsim_file}")
-
-            get_filename_component(dir "${modelsim_file}" DIRECTORY)
-
-            if (NOT EXISTS "${dir}")
-                file(MAKE_DIRECTORY "${dir}")
-            endif()
-
-            add_custom_command(
-                OUTPUT
-                    "${modelsim_file}"
-                COMMAND
-                    ${CMAKE_COMMAND}
-                ARGS
-                    -E copy "${file}" "${modelsim_file}"
-                DEPENDS
-                    "${file}"
-            )
-
-            list(APPEND modelsim_depends "${modelsim_file}")
-        elseif (IS_ABSOLUTE "${file}")
-            list(APPEND modelsim_depends "${file}")
-        endif()
-    endforeach()
-
     list(REMOVE_DUPLICATES modelsim_depends)
     list(REMOVE_DUPLICATES modelsim_libraries)
 
@@ -356,7 +353,7 @@ function(add_hdl_modelsim hdl_name)
         set(modelsim_flags ${modelsim_flags} -L ${modelsim_library})
     endforeach()
 
-    set(hdl_module_file ${modelsim_modules_dir}/${ARG_LIBRARY}/${ARG_NAME})
+    set(hdl_module_file "${modelsim_modules_dir}/${ARG_LIBRARY}/${ARG_NAME}")
 
     add_custom_command(
         OUTPUT
@@ -371,7 +368,7 @@ function(add_hdl_modelsim hdl_name)
             ${ARG_INCLUDES}
             ${modelsim_depends}
         WORKING_DIRECTORY
-            ${CMAKE_BINARY_DIR}/modelsim
+            "${modelsim_libraries_dir}"
         COMMENT
             "ModelSim compiling HDL ${ARG_NAME} to ${ARG_LIBRARY} library"
     )
@@ -846,17 +843,32 @@ function(add_hdl_unit_test hdl_file)
     )
 
     if (MODELSIM_FOUND)
-        set(modelsim_waveform "${CMAKE_BINARY_DIR}/output/${ARG_NAME}.wlf")
+        set(modelsim_target modelsim-compile-${ARG_LIBRARY}-${ARG_NAME})
+        set(unit_test_dir "${CMAKE_BINARY_DIR}/modelsim/unit_tests/${ARG_NAME}")
+
+        if (NOT EXISTS "${unit_test_dir}")
+            file(MAKE_DIRECTORY "${unit_test_dir}")
+        endif()
+
+        set(modelsim_ini "${CMAKE_BINARY_DIR}/modelsim/libraries/modelsim.ini")
+        set(modelsim_run_tcl "${MODELSIM_RUN_TCL}")
+        set(modelsim_waveform "${unit_test_dir}/${ARG_NAME}.wlf")
 
         if (CYGWIN)
-            execute_process(COMMAND cygpath -m "${MODELSIM_RUN_TCL}"
-                OUTPUT_VARIABLE MODELSIM_RUN_TCL
+            execute_process(COMMAND cygpath -m "${modelsim_run_tcl}"
+                OUTPUT_VARIABLE modelsim_run_tcl
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
 
             execute_process(COMMAND cygpath -m "${modelsim_waveform}"
                 OUTPUT_VARIABLE modelsim_waveform
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+            execute_process(COMMAND cygpath -m "${modelsim_ini}"
+                OUTPUT_VARIABLE modelsim_ini
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
         endif()
+
+        file(MAKE_DIRECTORY "${unit_test_dir}/.deps")
 
         set(hdl_depends "")
         set(hdl_libraries "")
@@ -883,17 +895,87 @@ function(add_hdl_unit_test hdl_file)
 
         list(APPEND modelsim_flags +nowarn3116)
         list(APPEND modelsim_flags -c)
+        list(APPEND modelsim_flags -modelsimini "${modelsim_ini}")
         list(APPEND modelsim_flags -wlf "${modelsim_waveform}")
-        list(APPEND modelsim_flags -do "${MODELSIM_RUN_TCL}")
+        list(APPEND modelsim_flags -do "${modelsim_run_tcl}")
         list(APPEND modelsim_flags ${ARG_MODELSIM_FLAGS})
+
+        set(modelsim_inputs "")
 
         get_hdl_depends(${ARG_NAME}_testrunner hdl_depends)
 
         foreach (hdl_name ${hdl_depends} ${ARG_NAME}_testrunner)
+            get_hdl_property(hdl_type ${hdl_name} TYPE)
+            get_hdl_property(hdl_source ${hdl_name} SOURCE)
+            get_filename_component(dir "${hdl_source}" DIRECTORY)
+
             get_hdl_property(hdl_library ${hdl_name} LIBRARY)
             list(APPEND hdl_libraries ${hdl_library})
+
+            get_hdl_property(mif_files ${hdl_name} MIF_FILES)
+            get_hdl_property(text_files ${hdl_name} TEXT_FILES)
+
+            foreach (file ${mif_files} ${text_files})
+                if (file MATCHES "${dir}")
+                    file(RELATIVE_PATH modelsim_file "${dir}" "${file}")
+                    set(modelsim_file "${unit_test_dir}/${modelsim_file}")
+
+                    add_custom_command(
+                        OUTPUT
+                            "${modelsim_file}"
+                        COMMAND
+                            ${CMAKE_COMMAND}
+                        ARGS
+                            -E copy "${file}" "${modelsim_file}"
+                        DEPENDS
+                            "${file}"
+                    )
+
+                    list(APPEND modelsim_inputs "${modelsim_file}")
+                endif()
+            endforeach()
+
+            if (hdl_type MATCHES Qsys)
+                if (NOT dir MATCHES "${CMAKE_BINARY_DIR}")
+                    file(RELATIVE_PATH file "${CMAKE_SOURCE_DIR}" "${hdl_source}")
+                    set(file "${CMAKE_BINARY_DIR}/${file}")
+                    get_filename_component(dir "${file}" DIRECTORY)
+                endif()
+
+                set(modelsim_file "${unit_test_dir}/.deps/${hdl_name}")
+
+                add_custom_command(
+                    OUTPUT
+                        "${modelsim_file}"
+                    COMMAND
+                        ${CMAKE_COMMAND}
+                    ARGS
+                        -DINPUT_FILE="${dir}/${hdl_name}/.inputs"
+                        -DOUTPUT_DIRECTORY="${unit_test_dir}"
+                        -P "${ADD_HDL_COPY_FILE}"
+                    COMMAND
+                        ${CMAKE_COMMAND}
+                    ARGS
+                        -E touch "${modelsim_file}"
+                    DEPENDS
+                        "${hdl_source}"
+                )
+
+                list(APPEND modelsim_inputs "${modelsim_file}")
+            endif()
         endforeach()
 
+        if (modelsim_inputs)
+            add_custom_target(${modelsim_target}-init
+                DEPENDS ${modelsim_inputs}
+            )
+
+            add_dependencies(${modelsim_target}-init ${modelsim_target})
+            add_dependencies(${modelsim_target}_testrunner
+                ${modelsim_target}-init)
+        endif()
+
+        list(APPEND hdl_libraries work)
         list(REMOVE_DUPLICATES hdl_libraries)
 
         foreach (hdl_library ${hdl_libraries})
@@ -901,8 +983,8 @@ function(add_hdl_unit_test hdl_file)
         endforeach()
 
         add_test(NAME ${ARG_NAME}
-            COMMAND ${MODELSIM_VSIM} ${modelsim_flags} ${ARG_NAME}_testrunner
-            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/modelsim
+            COMMAND ${MODELSIM_VSIM} ${modelsim_flags} unit_test.${ARG_NAME}_testrunner
+            WORKING_DIRECTORY "${unit_test_dir}"
         )
     endif()
 endfunction()
