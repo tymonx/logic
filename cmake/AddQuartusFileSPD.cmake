@@ -18,39 +18,93 @@ if (NOT EXISTS "${SPD_FILE}")
     message(FATAL_ERROR "SPD file doesn't exist: ${SPD_FILE}")
 endif()
 
+if (NOT DEFINED WORK)
+    set(WORK work)
+endif()
+
+if (NOT DEFINED WORKING_DIRECTORY)
+    set(WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
+endif()
+
 get_filename_component(dir "${SPD_FILE}" DIRECTORY)
-get_filename_component(name "${SPD_FILE}" NAME_WE)
 
 file(READ "${SPD_FILE}" content)
-string(REGEX REPLACE "\n" ";" content_split ${content})
+string(REGEX REPLACE "[\n ]+" ";" content_split "${content}")
 
-set(sources_file "${dir}/${name}.f")
+set(hex_files "")
+set(modelsim_vhdl_sources "")
+set(modelsim_verilog_sources "")
 
-file(WRITE "${sources_file}" "")
+foreach (item ${content_split})
+    if (item STREQUAL "<file")
+        set(type "")
+        set(path "")
+        set(simulator "")
+    endif()
 
-foreach (line ${content_split})
-    string(REGEX MATCH "path=\".*\\.s?v\"" match "${line}")
-
+    string(REGEX MATCH "path=" match "${item}")
     if (match)
-        string(REGEX REPLACE ".*path=\"(.*\\.s?v)\".*" "\\1"
-            source "${line}")
+        string(REGEX REPLACE ".*path=\"(.*)\".*" "\\1" path "${item}")
+    endif()
 
-        if (NOT source MATCHES aldec AND
-                NOT source MATCHES synopsys AND
-                NOT source MATCHES cadence AND
-                NOT source MATCHES ${name}_bb.v AND
-                NOT source MATCHES ${name}_inst.v)
-            set(source "${dir}/${source}")
+    string(REGEX MATCH "type=" match "${item}")
+    if (match)
+        string(REGEX REPLACE ".*type=\"(.*)\".*" "\\1" type "${item}")
+    endif()
 
-            get_filename_component(source "${source}" REALPATH)
+    string(REGEX MATCH "simulator=" match "${item}")
+    if (match)
+        string(REGEX REPLACE ".*simulator=\"(.*)\".*" "\\1" simulator "${item}")
+    endif()
 
-            if (CYGWIN)
-                execute_process(COMMAND cygpath -m "${source}"
-                    OUTPUT_VARIABLE source
-                    OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if (item STREQUAL "/>")
+        if (dir AND path)
+            set(path "${dir}/${path}")
+            get_filename_component(path "${path}" REALPATH)
+        endif()
+
+        if (type MATCHES VHDL)
+            if (NOT simulator OR simulator MATCHES modelsim OR
+                    simulator MATCHES mentor)
+                list(APPEND modelsim_vhdl_sources "${path}")
             endif()
-
-            file(APPEND "${sources_file}" "${source}\n")
+        elseif (type MATCHES VERILOG)
+            if (NOT simulator OR simulator MATCHES modelsim OR
+                    simulator MATCHES mentor)
+                list(APPEND modelsim_verilog_sources "${path}")
+            endif()
+        elseif (type MATCHES HEX)
+            list(APPEND hex_files "${path}")
         endif()
     endif()
 endforeach()
+
+if (DEFINED MODELSIM_VLOG AND modelsim_verilog_sources)
+    execute_process(
+        COMMAND
+            ${MODELSIM_VLOG}
+            -sv
+            -work ${WORK}
+            ${modelsim_verilog_sources}
+        WORKING_DIRECTORY
+            "${WORKING_DIRECTORY}"
+    )
+endif()
+
+if (DEFINED MODELSIM_VCOM AND modelsim_vhdl_sources)
+    execute_process(
+        COMMAND
+            ${MODELSIM_VCOM}
+            -2008
+            -work ${WORK}
+            ${modelsim_vhdl_sources}
+        WORKING_DIRECTORY
+            "${WORKING_DIRECTORY}"
+    )
+endif()
+
+if (DEFINED MODELSIM_HEX_OUTPUT)
+    foreach (hex_file ${hex_files})
+        configure_file("${hex_file}" "${MODELSIM_HEX_OUTPUT}" COPYONLY)
+    endforeach()
+endif()

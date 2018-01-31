@@ -16,15 +16,17 @@ if (COMMAND add_quartus_file)
     return()
 endif()
 
+if (NOT DEFINED _HDL_CMAKE_ROOT_DIR)
+    set(_HDL_CMAKE_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}" CACHE INTERNAL
+        "HDL CMake root directory" FORCE)
+endif()
+
 find_package(Quartus)
 find_package(ModelSim)
 
 if (NOT TARGET modelsim-compile-all)
     add_custom_target(modelsim-compile-all ALL)
 endif()
-
-set(ADD_QUARTUS_FILE_SPD_DIR "${CMAKE_CURRENT_LIST_DIR}"
-    CACHE STRING "SPD current directory" FORCE)
 
 function(add_quartus_file file)
     set(file_type "")
@@ -50,6 +52,7 @@ function(add_quartus_file file)
         message(FATAL_ERROR "Quartus file must be IP, Qsys or Tcl file")
     endif()
 
+    set(spd_file "${CMAKE_CURRENT_BINARY_DIR}/${name}/${name}.spd")
     set(qsys_file "${CMAKE_CURRENT_BINARY_DIR}/${name}.${file_type}")
 
     if (NOT file MATCHES "${qsys_file}")
@@ -77,6 +80,7 @@ function(add_quartus_file file)
         COMPILE Quartus ModelSim
         ANALYSIS Quartus ModelSim
         SYNTHESIZABLE TRUE
+        QUARTUS_SPD_FILES "${spd_file}"
     )
 
     if (NOT DEFINED _HDL_${name})
@@ -121,6 +125,7 @@ function(add_quartus_file file)
 
     set(modules_dir "${CMAKE_BINARY_DIR}/modelsim/.modules")
     set(qsys_file_arg "${qsys_file}")
+    set(modelsim_libraries_dir "${CMAKE_BINARY_DIR}/modelsim/libraries")
 
     if (CYGWIN)
         execute_process(COMMAND cygpath -m "${qsys_file_arg}"
@@ -128,23 +133,24 @@ function(add_quartus_file file)
             OUTPUT_STRIP_TRAILING_WHITESPACE)
     endif()
 
-    if (NOT EXISTS "${CMAKE_BINARY_DIR}/modelsim/${name}")
+    if (NOT EXISTS "${modelsim_libraries_dir}/${name}")
+        set(library_dir "${CMAKE_BINARY_DIR}/modelsim/libraries/${name}")
+
+        if (CYGWIN)
+            execute_process(COMMAND cygpath -m "${library_dir}"
+                OUTPUT_VARIABLE library_dir
+                OUTPUT_STRIP_TRAILING_WHITESPACE)
+        endif()
+
         execute_process(COMMAND ${MODELSIM_VLIB} ${name}
-            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/modelsim OUTPUT_QUIET)
+            WORKING_DIRECTORY "${modelsim_libraries_dir}" OUTPUT_QUIET)
+
+        execute_process(COMMAND ${MODELSIM_VMAP} ${name} "${library_dir}"
+            WORKING_DIRECTORY "${modelsim_libraries_dir}" OUTPUT_QUIET)
     endif()
 
     if (NOT EXISTS "${modules_dir}/${name}")
         file(MAKE_DIRECTORY "${modules_dir}/${name}")
-    endif()
-
-    set(spd_file "${CMAKE_CURRENT_BINARY_DIR}/${name}/${name}.spd")
-    set(sources_file "${CMAKE_CURRENT_BINARY_DIR}/${name}/${name}.f")
-    set(sources_file_arg "${CMAKE_CURRENT_BINARY_DIR}/${name}/${name}.f")
-
-    if (CYGWIN)
-        execute_process(COMMAND cygpath -m "${sources_file_arg}"
-            OUTPUT_VARIABLE sources_file_arg
-            OUTPUT_STRIP_TRAILING_WHITESPACE)
     endif()
 
     add_custom_command(
@@ -168,33 +174,22 @@ function(add_quartus_file file)
 
     add_custom_command(
         OUTPUT
-            "${sources_file}"
+            "${modules_dir}/${name}/${name}"
         COMMAND
             ${CMAKE_COMMAND}
         ARGS
+            -DWORK=${name}
             -DSPD_FILE="${spd_file}"
-            -P "${ADD_QUARTUS_FILE_SPD_DIR}/AddQuartusFileSPD.cmake"
-        DEPENDS
-            "${spd_file}"
-        WORKING_DIRECTORY
-            "${CMAKE_CURRENT_BINARY_DIR}"
-    )
-
-    add_custom_command(
-        OUTPUT
-            "${modules_dir}/${name}/${name}"
-        COMMAND
-            ${MODELSIM_VLOG}
-        ARGS
-            -sv
-            -work ${name}
-            -f "${sources_file_arg}"
+            -DMODELSIM_VCOM="${MODELSIM_VCOM}"
+            -DMODELSIM_VLOG="${MODELSIM_VLOG}"
+            -DWORKING_DIRECTORY="${CMAKE_BINARY_DIR}/modelsim/libraries"
+            -P "${_HDL_CMAKE_ROOT_DIR}/AddQuartusFileSPD.cmake"
         COMMAND
             ${CMAKE_COMMAND}
         ARGS
             -E touch "${modules_dir}/${name}/${name}"
         DEPENDS
-            "${sources_file}"
+            "${spd_file}"
         WORKING_DIRECTORY
             "${CMAKE_BINARY_DIR}/modelsim"
     )

@@ -126,9 +126,9 @@ Run only unit tests for AXI4-Stream:
 
     ctest -R axi4_stream
 
-All waveforms generated from unit tests are located in:
+Waveforms from unit tests run under ModelSim are stored in:
 
-    output
+    modelsim/unit_tests/<unit_test_name>
 
 All unit tests logs are stored in:
 

@@ -459,6 +459,9 @@ function(add_quartus_project target_name)
         "${ADD_QUARTUS_PROJECT_CURRENT_DIR}/AddQuartusProject.qsf.cmake.in"
         "${ARG_PROJECT_DIRECTORY}/${target_name}.qsf")
 
+    list(APPEND quartus_depends "${ARG_PROJECT_DIRECTORY}/${target_name}.qsf")
+    list(APPEND quartus_depends "${ARG_PROJECT_DIRECTORY}/${target_name}.qpf")
+
     if (QUARTUS_EDITION MATCHES Pro)
         set(quartus_analysis ${QUARTUS_SYN})
 

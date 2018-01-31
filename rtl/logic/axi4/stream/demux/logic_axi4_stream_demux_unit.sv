@@ -77,11 +77,8 @@ module logic_axi4_stream_demux_unit #(
 
     generate
         if (TDATA_BYTES > 0) begin: tdata_enabled
-            always_ff @(posedge aclk or negedge areset_n) begin
-                if (!areset_n) begin
-                    next.tdata <= '0;
-                end
-                else if (next.tready) begin
+            always_ff @(posedge aclk) begin
+                if (next.tready) begin
                     next.tdata <= prev.tdata;
                 end
             end
@@ -91,11 +88,8 @@ module logic_axi4_stream_demux_unit #(
         end
 
         if ((TDATA_BYTES > 0) && (USE_TKEEP > 0)) begin: tkeep_enabled
-            always_ff @(posedge aclk or negedge areset_n) begin
-                if (!areset_n) begin
-                    next.tkeep <= '0;
-                end
-                else if (next.tready) begin
+            always_ff @(posedge aclk) begin
+                if (next.tready) begin
                     next.tkeep <= prev.tkeep;
                 end
             end
@@ -105,11 +99,8 @@ module logic_axi4_stream_demux_unit #(
         end
 
         if ((TDATA_BYTES > 0) && (USE_TSTRB > 0)) begin: tstrb_enabled
-            always_ff @(posedge aclk or negedge areset_n) begin
-                if (!areset_n) begin
-                    next.tstrb <= '0;
-                end
-                else if (next.tready) begin
+            always_ff @(posedge aclk) begin
+                if (next.tready) begin
                     next.tstrb <= prev.tstrb;
                 end
             end
@@ -119,11 +110,8 @@ module logic_axi4_stream_demux_unit #(
         end
 
         if (USE_TLAST > 0) begin: tlast_enabled
-            always_ff @(posedge aclk or negedge areset_n) begin
-                if (!areset_n) begin
-                    next.tlast <= '0;
-                end
-                else if (next.tready) begin
+            always_ff @(posedge aclk) begin
+                if (next.tready) begin
                     next.tlast <= prev.tlast;
                 end
             end
@@ -133,11 +121,8 @@ module logic_axi4_stream_demux_unit #(
         end
 
         if (TUSER_WIDTH > 0) begin: tuser_enabled
-            always_ff @(posedge aclk or negedge areset_n) begin
-                if (!areset_n) begin
-                    next.tuser <= '0;
-                end
-                else if (next.tready) begin
+            always_ff @(posedge aclk) begin
+                if (next.tready) begin
                     next.tuser <= prev.tuser;
                 end
             end
@@ -147,11 +132,8 @@ module logic_axi4_stream_demux_unit #(
         end
 
         if (TDEST_WIDTH > 0) begin: tdest_enabled
-            always_ff @(posedge aclk or negedge areset_n) begin
-                if (!areset_n) begin
-                    next.tdest <= '0;
-                end
-                else if (next.tready) begin
+            always_ff @(posedge aclk) begin
+                if (next.tready) begin
                     next.tdest <= prev.tdest;
                 end
             end
@@ -161,11 +143,8 @@ module logic_axi4_stream_demux_unit #(
         end
 
         if (TID_WIDTH > 0) begin: tid_enabled
-            always_ff @(posedge aclk or negedge areset_n) begin
-                if (!areset_n) begin
-                    next.tid <= '0;
-                end
-                else if (next.tready) begin
+            always_ff @(posedge aclk) begin
+                if (next.tready) begin
                     next.tid <= prev.tid;
                 end
             end
@@ -187,11 +166,8 @@ module logic_axi4_stream_demux_unit #(
             end
 
             if (TDATA_BYTES > 0) begin: tdata_enabled
-                always_ff @(posedge aclk or negedge areset_n) begin
-                    if (!areset_n) begin
-                        tx[k].tdata <= '0;
-                    end
-                    else if (tx[k].tready) begin
+                always_ff @(posedge aclk) begin
+                    if (tx[k].tready) begin
                         tx[k].tdata <= prev.tdata;
                     end
                 end
@@ -201,11 +177,8 @@ module logic_axi4_stream_demux_unit #(
             end
 
             if ((TDATA_BYTES > 0) && (USE_TKEEP > 0)) begin: tkeep_enabled
-                always_ff @(posedge aclk or negedge areset_n) begin
-                    if (!areset_n) begin
-                        tx[k].tkeep <= '0;
-                    end
-                    else if (tx[k].tready) begin
+                always_ff @(posedge aclk) begin
+                    if (tx[k].tready) begin
                         tx[k].tkeep <= prev.tkeep;
                     end
                 end
@@ -215,11 +188,8 @@ module logic_axi4_stream_demux_unit #(
             end
 
             if ((TDATA_BYTES > 0) && (USE_TSTRB > 0)) begin: tstrb_enabled
-                always_ff @(posedge aclk or negedge areset_n) begin
-                    if (!areset_n) begin
-                        tx[k].tstrb <= '0;
-                    end
-                    else if (tx[k].tready) begin
+                always_ff @(posedge aclk) begin
+                    if (tx[k].tready) begin
                         tx[k].tstrb <= prev.tstrb;
                     end
                 end
@@ -229,11 +199,8 @@ module logic_axi4_stream_demux_unit #(
             end
 
             if (USE_TLAST > 0) begin: tlast_enabled
-                always_ff @(posedge aclk or negedge areset_n) begin
-                    if (!areset_n) begin
-                        tx[k].tlast <= '0;
-                    end
-                    else if (tx[k].tready) begin
+                always_ff @(posedge aclk) begin
+                    if (tx[k].tready) begin
                         tx[k].tlast <= prev.tlast;
                     end
                 end
@@ -243,11 +210,8 @@ module logic_axi4_stream_demux_unit #(
             end
 
             if (TUSER_WIDTH > 0) begin: tuser_enabled
-                always_ff @(posedge aclk or negedge areset_n) begin
-                    if (!areset_n) begin
-                        tx[k].tuser <= '0;
-                    end
-                    else if (tx[k].tready) begin
+                always_ff @(posedge aclk) begin
+                    if (tx[k].tready) begin
                         tx[k].tuser <= prev.tuser;
                     end
                 end
@@ -257,11 +221,8 @@ module logic_axi4_stream_demux_unit #(
             end
 
             if (TDEST_WIDTH > 0) begin: tdest_enabled
-                always_ff @(posedge aclk or negedge areset_n) begin
-                    if (!areset_n) begin
-                        tx[k].tdest <= '0;
-                    end
-                    else if (tx[k].tready) begin
+                always_ff @(posedge aclk) begin
+                    if (tx[k].tready) begin
                         tx[k].tdest <= prev.tdest;
                     end
                 end
@@ -271,11 +232,8 @@ module logic_axi4_stream_demux_unit #(
             end
 
             if (TID_WIDTH > 0) begin: tid_enabled
-                always_ff @(posedge aclk or negedge areset_n) begin
-                    if (!areset_n) begin
-                        tx[k].tid <= '0;
-                    end
-                    else if (tx[k].tready) begin
+                always_ff @(posedge aclk) begin
+                    if (tx[k].tready) begin
                         tx[k].tid <= prev.tid;
                     end
                 end
