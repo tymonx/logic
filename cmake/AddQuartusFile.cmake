@@ -16,15 +16,17 @@ if (COMMAND add_quartus_file)
     return()
 endif()
 
+if (NOT DEFINED _HDL_CMAKE_ROOT_DIR)
+    set(_HDL_CMAKE_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}" CACHE INTERNAL
+        "HDL CMake root directory" FORCE)
+endif()
+
 find_package(Quartus)
 find_package(ModelSim)
 
 if (NOT TARGET modelsim-compile-all)
     add_custom_target(modelsim-compile-all ALL)
 endif()
-
-set(ADD_QUARTUS_FILE_SPD_DIR "${CMAKE_CURRENT_LIST_DIR}"
-    CACHE STRING "SPD current directory" FORCE)
 
 function(add_quartus_file file)
     set(file_type "")
@@ -50,6 +52,7 @@ function(add_quartus_file file)
         message(FATAL_ERROR "Quartus file must be IP, Qsys or Tcl file")
     endif()
 
+    set(spd_file "${CMAKE_CURRENT_BINARY_DIR}/${name}/${name}.spd")
     set(qsys_file "${CMAKE_CURRENT_BINARY_DIR}/${name}.${file_type}")
 
     if (NOT file MATCHES "${qsys_file}")
@@ -77,6 +80,7 @@ function(add_quartus_file file)
         COMPILE Quartus ModelSim
         ANALYSIS Quartus ModelSim
         SYNTHESIZABLE TRUE
+        QUARTUS_SPD_FILES "${spd_file}"
     )
 
     if (NOT DEFINED _HDL_${name})
@@ -149,8 +153,6 @@ function(add_quartus_file file)
         file(MAKE_DIRECTORY "${modules_dir}/${name}")
     endif()
 
-    set(spd_file "${CMAKE_CURRENT_BINARY_DIR}/${name}/${name}.spd")
-
     add_custom_command(
         OUTPUT
             "${spd_file}"
@@ -181,7 +183,7 @@ function(add_quartus_file file)
             -DMODELSIM_VCOM="${MODELSIM_VCOM}"
             -DMODELSIM_VLOG="${MODELSIM_VLOG}"
             -DWORKING_DIRECTORY="${CMAKE_BINARY_DIR}/modelsim/libraries"
-            -P "${ADD_QUARTUS_FILE_SPD_DIR}/AddQuartusFileSPD.cmake"
+            -P "${_HDL_CMAKE_ROOT_DIR}/AddQuartusFileSPD.cmake"
         COMMAND
             ${CMAKE_COMMAND}
         ARGS

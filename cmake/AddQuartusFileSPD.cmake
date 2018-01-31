@@ -18,14 +18,6 @@ if (NOT EXISTS "${SPD_FILE}")
     message(FATAL_ERROR "SPD file doesn't exist: ${SPD_FILE}")
 endif()
 
-if (NOT DEFINED MODELSIM_VLOG)
-    set(MODELSIM_VLOG vlog)
-endif()
-
-if (NOT DEFINED MODELSIM_VCOM)
-    set(MODELSIM_VCOM vcom)
-endif()
-
 if (NOT DEFINED WORK)
     set(WORK work)
 endif()
@@ -35,96 +27,84 @@ if (NOT DEFINED WORKING_DIRECTORY)
 endif()
 
 get_filename_component(dir "${SPD_FILE}" DIRECTORY)
-get_filename_component(name "${SPD_FILE}" NAME_WE)
 
 file(READ "${SPD_FILE}" content)
-string(REGEX REPLACE "\n" ";" content_split ${content})
+string(REGEX REPLACE "[\n ]+" ";" content_split "${content}")
 
 set(hex_files "")
-set(text_files "")
-set(vhdl_files "")
-set(verilog_files "")
+set(modelsim_vhdl_sources "")
+set(modelsim_verilog_sources "")
 
-foreach (line ${content_split})
-    string(REGEX MATCH "path=\".*\\.hex\"" match "${line}")
-    if (match)
-        string(REGEX REPLACE ".*path=\"(.*\\.hex)\".*" "\\1"
-            source "${line}")
-
-        set(source "${dir}/${source}")
-        get_filename_component(source "${source}" REALPATH)
-
-        list(APPEND text_files "${source}")
+foreach (item ${content_split})
+    if (item STREQUAL "<file")
+        set(type "")
+        set(path "")
+        set(simulator "")
     endif()
 
-    string(REGEX MATCH "path=\".*\\.txt\"" match "${line}")
+    string(REGEX MATCH "path=" match "${item}")
     if (match)
-        string(REGEX REPLACE ".*path=\"(.*\\.txt)\".*" "\\1"
-            source "${line}")
-
-        set(source "${dir}/${source}")
-        get_filename_component(source "${source}" REALPATH)
-
-        list(APPEND hex_files "${source}")
+        string(REGEX REPLACE ".*path=\"(.*)\".*" "\\1" path "${item}")
     endif()
 
-    string(REGEX MATCH "path=\".*\\.s?vh?d?\"" match "${line}")
+    string(REGEX MATCH "type=" match "${item}")
     if (match)
-        string(REGEX REPLACE ".*path=\"(.*\\.s?vh?d?)\".*" "\\1"
-            source "${line}")
+        string(REGEX REPLACE ".*type=\"(.*)\".*" "\\1" type "${item}")
+    endif()
 
-        if (NOT source MATCHES aldec AND
-                NOT source MATCHES synopsys AND
-                NOT source MATCHES cadence)
-            set(source "${dir}/${source}")
+    string(REGEX MATCH "simulator=" match "${item}")
+    if (match)
+        string(REGEX REPLACE ".*simulator=\"(.*)\".*" "\\1" simulator "${item}")
+    endif()
 
-            get_filename_component(source "${source}" REALPATH)
+    if (item STREQUAL "/>")
+        if (dir AND path)
+            set(path "${dir}/${path}")
+            get_filename_component(path "${path}" REALPATH)
+        endif()
 
-            if (CYGWIN)
-                execute_process(COMMAND cygpath -m "${source}"
-                    OUTPUT_VARIABLE source
-                    OUTPUT_STRIP_TRAILING_WHITESPACE)
+        if (type MATCHES VHDL)
+            if (NOT simulator OR simulator MATCHES modelsim OR
+                    simulator MATCHES mentor)
+                list(APPEND modelsim_vhdl_sources "${path}")
             endif()
-
-            if (source MATCHES "\\.vhd$")
-                list(APPEND vhdl_files "${source}")
-            elseif (source MATCHES "\\.v$")
-                list(APPEND verilog_files "${source}")
-            elseif (source MATCHES "\\.sv$")
-                list(APPEND verilog_files "${source}")
+        elseif (type MATCHES VERILOG)
+            if (NOT simulator OR simulator MATCHES modelsim OR
+                    simulator MATCHES mentor)
+                list(APPEND modelsim_verilog_sources "${path}")
             endif()
+        elseif (type MATCHES HEX)
+            list(APPEND hex_files "${path}")
         endif()
     endif()
 endforeach()
 
-set(inputs_file "${dir}/.inputs")
-
-file(WRITE "${inputs_file}" "")
-
-foreach (file ${hex_files} ${text_files})
-    file(APPEND "${inputs_file}" "${file}\n")
-endforeach()
-
-if (verilog_files)
+if (DEFINED MODELSIM_VLOG AND modelsim_verilog_sources)
     execute_process(
         COMMAND
             ${MODELSIM_VLOG}
             -sv
             -work ${WORK}
-            ${verilog_files}
+            ${modelsim_verilog_sources}
         WORKING_DIRECTORY
             "${WORKING_DIRECTORY}"
     )
 endif()
 
-if (vhdl_files)
+if (DEFINED MODELSIM_VCOM AND modelsim_vhdl_sources)
     execute_process(
         COMMAND
             ${MODELSIM_VCOM}
             -2008
             -work ${WORK}
-            ${vhdl_files}
+            ${modelsim_vhdl_sources}
         WORKING_DIRECTORY
             "${WORKING_DIRECTORY}"
     )
+endif()
+
+if (DEFINED MODELSIM_HEX_OUTPUT)
+    foreach (hex_file ${hex_files})
+        configure_file("${hex_file}" "${MODELSIM_HEX_OUTPUT}" COPYONLY)
+    endforeach()
 endif()

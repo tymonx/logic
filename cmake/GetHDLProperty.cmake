@@ -12,15 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-file(READ "${INPUT_FILE}" content_file)
+if (COMMAND get_hdl_property)
+    return()
+endif()
 
-string(REGEX REPLACE "\n" ";" content_list "${content_file}")
+include(CMakeParseArguments)
 
-message(STATUS "${INPUT_FILE}")
+function(get_hdl_property var name property)
+    cmake_parse_arguments(ARG "" "${_HDL_ONE_VALUE_ARGUMENTS}"
+        "${_HDL_MULTI_VALUE_ARGUMENTS}" ${_HDL_${name}})
 
-foreach (file ${content_list})
-    message(STATUS "${file}")
-    if (EXISTS "${file}")
-        configure_file("${file}" "${OUTPUT_DIRECTORY}" COPYONLY)
+    if (DEFINED ARG_${property})
+        set(${var} "${ARG_${property}}" PARENT_SCOPE)
+    else()
+        set(${var} "" PARENT_SCOPE)
     endif()
-endforeach()
+endfunction()
