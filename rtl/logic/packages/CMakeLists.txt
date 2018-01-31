@@ -12,6 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_hdl_source(logic_pkg.sv)
-add_hdl_source(logic_axi4_lite_pkg.sv)
-add_hdl_source(logic_avalon_mm_pkg.sv)
+add_hdl_source(logic_pkg.sv
+    PACKAGE
+        TRUE
+)
+
+add_hdl_source(logic_axi4_lite_pkg.sv
+    PACKAGE
+        TRUE
+)
+
+add_hdl_source(logic_avalon_mm_pkg.sv
+    PACKAGE
+        TRUE
+)
