@@ -150,6 +150,56 @@ module logic_axi4_stream_clock_crossing_unit_test;
     end
 `SVTEST_END
 
+`SVTEST(slow_write)
+    byte data[] = new [7654];
+    byte captured[];
+
+    foreach (data[i]) begin
+        data[i] = $urandom;
+    end
+
+    fork
+    begin
+        @(rx.cb_rx);
+        rx.cb_write(data, 0, 0, 3, 0);
+    end
+    begin
+        @(tx.cb_tx);
+        tx.cb_read(captured);
+    end
+    join
+
+    `FAIL_UNLESS_EQUAL(data.size(), captured.size())
+    foreach (data[i]) begin
+        `FAIL_UNLESS_EQUAL(data[i], captured[i])
+    end
+`SVTEST_END
+
+`SVTEST(write_read_mix)
+    byte data[] = new [7654];
+    byte captured[];
+
+    foreach (data[i]) begin
+        data[i] = $urandom;
+    end
+
+    fork
+    begin
+        @(rx.cb_rx);
+        rx.cb_write(data, 0, 0, 3, 0);
+    end
+    begin
+        @(tx.cb_tx);
+        tx.cb_read(captured, 0, 0, 3, 0);
+    end
+    join
+
+    `FAIL_UNLESS_EQUAL(data.size(), captured.size())
+    foreach (data[i]) begin
+        `FAIL_UNLESS_EQUAL(data[i], captured[i])
+    end
+`SVTEST_END
+
 `SVUNIT_TESTS_END
 
 endmodule
