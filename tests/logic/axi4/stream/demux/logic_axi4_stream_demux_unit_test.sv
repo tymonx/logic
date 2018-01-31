@@ -69,22 +69,16 @@ module logic_axi4_stream_demux_unit_test;
         svunit_ut.setup();
 
         areset_n = 0;
-        @(posedge aclk);
+        @(rx.cb_rx);
 
         areset_n = 1;
-        for (int i = 0; i < OUTPUTS; ++i) begin
-            tx_if[i].cb_tx.tready <= 1;
-        end
-        @(posedge aclk);
+        @(rx.cb_rx);
     endtask
 
     task teardown();
         svunit_ut.teardown();
 
         areset_n = 0;
-        for (int i = 0; i < OUTPUTS; ++i) begin
-            tx_if[i].cb_tx.tready <= 0;
-        end
     endtask
 
 `SVUNIT_TESTS_BEGIN
