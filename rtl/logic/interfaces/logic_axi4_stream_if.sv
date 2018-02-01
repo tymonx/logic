@@ -183,9 +183,10 @@ interface logic_axi4_stream_if #(
     endtask
 
     task automatic cb_write(const ref byte data[], input int id = 0,
-            int dest = 0);
+            int dest = 0, int idle_max = 0, int idle_min = 0);
         int total_size = data.size();
         int index = 0;
+        int idle = 0;
 
         if (0 == data.size()) begin
             return;
@@ -196,27 +197,35 @@ interface logic_axi4_stream_if #(
                 break;
             end
             else if (1'b1 === cb_rx.tready) begin
-                if (index >= total_size) begin
-                    break;
-                end
-
-                for (int i = 0; i < TDATA_BYTES; ++i) begin
-                    if (index < total_size) begin
-                        cb_rx.tkeep[i] <= '1;
-                        cb_rx.tstrb[i] <= '1;
-                        cb_rx.tdata[i] <= data[index++];
+                if (0 == idle) begin
+                    if (index >= total_size) begin
+                        break;
                     end
-                    else begin
-                        cb_rx.tkeep[i] <= '0;
-                        cb_rx.tstrb[i] <= '0;
-                        cb_rx.tdata[i] <= '0;
-                    end
-                end
 
-                cb_rx.tid <= tid_t'(id);
-                cb_rx.tdest <= tdest_t'(dest);
-                cb_rx.tlast <= (index >= total_size);
-                cb_rx.tvalid <= '1;
+                    idle = $urandom_range(idle_max, idle_min);
+
+                    for (int i = 0; i < TDATA_BYTES; ++i) begin
+                        if (index < total_size) begin
+                            cb_rx.tkeep[i] <= '1;
+                            cb_rx.tstrb[i] <= '1;
+                            cb_rx.tdata[i] <= data[index++];
+                        end
+                        else begin
+                            cb_rx.tkeep[i] <= '0;
+                            cb_rx.tstrb[i] <= '0;
+                            cb_rx.tdata[i] <= '0;
+                        end
+                    end
+
+                    cb_rx.tid <= tid_t'(id);
+                    cb_rx.tdest <= tdest_t'(dest);
+                    cb_rx.tlast <= (index >= total_size);
+                    cb_rx.tvalid <= '1;
+                end
+                else begin
+                    --idle;
+                    cb_rx.tvalid <= '0;
+                end
             end
             @(cb_rx);
         end
@@ -224,8 +233,12 @@ interface logic_axi4_stream_if #(
         cb_rx.tvalid <= '0;
     endtask
 
-    task automatic cb_read(ref byte data[], input int id = 0, int dest = 0);
+    task automatic cb_read(ref byte data[], input int id = 0, int dest = 0,
+            int idle_max = 0, int idle_min = 0);
+        int idle = 0;
         byte q[$];
+
+        cb_tx.tready <= '1;
 
         forever begin
             if (!areset_n) begin
@@ -242,12 +255,25 @@ interface logic_axi4_stream_if #(
                 end
 
                 if (1'b1 === cb_tx.tlast) begin
+                    cb_tx.tready <= '0;
                     @(cb_tx);
                     break;
                 end
             end
+
+            if (0 == idle) begin
+                idle = $urandom_range(idle_max, idle_min);
+                cb_tx.tready <= '1;
+            end
+            else begin
+                --idle;
+                cb_tx.tready <= '0;
+            end
+
             @(cb_tx);
         end
+
+        cb_tx.tready <= '0;
 
         data = new [q.size()];
         foreach (q[i]) begin

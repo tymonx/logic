@@ -173,31 +173,38 @@ function(add_hdl_modelsim hdl_name)
     list(REMOVE_DUPLICATES modelsim_sources)
 
     set(modelsim_depends "")
+    set(modelsim_packages "")
     set(modelsim_libraries "")
 
     foreach (name ${ARG_DEPENDS})
-        cmake_parse_arguments(DEP "" "${_HDL_ONE_VALUE_ARGUMENTS}"
-            "${_HDL_MULTI_VALUE_ARGUMENTS}" ${_HDL_${name}})
+        get_hdl_property(hdl_compile ${name} COMPILE)
+        get_hdl_property(hdl_compile_exclude ${name} COMPILE_EXCLUDE)
+        get_hdl_property(hdl_library ${name} LIBRARY)
+        get_hdl_property(hdl_package ${name} PACKAGE)
+        get_hdl_property(hdl_source ${name} SOURCE)
 
-        if (DEFINED DEP_COMPILE_EXCLUDE)
-            if (DEP_COMPILE_EXCLUDE MATCHES ModelSim)
-                continue()
-            endif()
+        if (hdl_compile_exclude MATCHES ModelSim)
+            continue()
         endif()
 
-        if (DEFINED DEP_COMPILE)
-            if (NOT DEP_COMPILE MATCHES ALL AND
-                    NOT DEP_COMPILE MATCHES ModelSim)
-                continue()
-            endif()
+        if (NOT hdl_compile MATCHES ALL AND NOT hdl_compile MATCHES ModelSim)
+            continue()
         endif()
 
-        list(APPEND modelsim_libraries ${DEP_LIBRARY})
-        list(APPEND modelsim_depends
-            modelsim-compile-${DEP_LIBRARY}-${DEP_NAME})
+        if (NOT TARGET modelsim-compile-${hdl_library}-${name})
+            message(FATAL_ERROR "HDL doesn't exist ${name}")
+        endif()
+
+        if (hdl_package)
+            list(APPEND modelsim_packages "${hdl_source}")
+        endif()
+
+        list(APPEND modelsim_libraries ${hdl_library})
+        list(APPEND modelsim_depends modelsim-compile-${hdl_library}-${name})
     endforeach()
 
     list(REMOVE_DUPLICATES modelsim_depends)
+    list(REMOVE_DUPLICATES modelsim_packages)
     list(REMOVE_DUPLICATES modelsim_libraries)
 
     foreach (modelsim_library ${modelsim_libraries})
@@ -218,6 +225,7 @@ function(add_hdl_modelsim hdl_name)
             ${ARG_SOURCES}
             ${ARG_INCLUDES}
             ${modelsim_depends}
+            ${modelsim_packages}
         WORKING_DIRECTORY
             "${modelsim_libraries_dir}"
         COMMENT

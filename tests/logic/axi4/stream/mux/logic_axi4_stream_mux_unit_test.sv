@@ -68,18 +68,16 @@ module logic_axi4_stream_mux_unit_test;
         svunit_ut.setup();
 
         areset_n = 0;
-        @(posedge aclk);
+        @(rx[0].cb_rx);
 
         areset_n = 1;
-        tx.cb_tx.tready <= 1;
-        @(posedge aclk);
+        @(rx[0].cb_rx);
     endtask
 
     task teardown();
         svunit_ut.teardown();
 
         areset_n = 0;
-        tx.cb_tx.tready <= 0;
     endtask
 
 `SVUNIT_TESTS_BEGIN

@@ -51,18 +51,16 @@ module logic_axi4_stream_packet_buffer_unit_test;
         svunit_ut.setup();
 
         areset_n = 0;
-        @(posedge aclk);
+        @(rx.cb_rx);
 
         areset_n = 1;
-        tx.cb_tx.tready <= 1;
-        @(posedge aclk);
+        @(rx.cb_rx);
     endtask
 
     task teardown();
         svunit_ut.teardown();
 
         areset_n = 0;
-        tx.cb_tx.tready <= 0;
     endtask
 
 `SVUNIT_TESTS_BEGIN
@@ -136,16 +134,7 @@ module logic_axi4_stream_packet_buffer_unit_test;
         rx.cb_write(data);
     end
     begin
-        tx.cb_read(captured);
-    end
-    begin
-        for (int i = 0; i < (data.size() / TDATA_BYTES); ++i) begin
-            tx.cb_tx.tready <= 0;
-            repeat (2) @(tx.cb_tx);
-
-            tx.cb_tx.tready <= 1;
-            repeat (1) @(tx.cb_tx);
-        end
+        tx.cb_read(captured, 0, 0, 3, 0);
     end
     join
 

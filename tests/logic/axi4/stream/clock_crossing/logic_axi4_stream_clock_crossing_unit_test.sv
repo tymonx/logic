@@ -63,7 +63,6 @@ module logic_axi4_stream_clock_crossing_unit_test;
         @(posedge tx_aclk);
 
         areset_n = 1;
-        tx.cb_tx.tready <= 1;
         @(posedge rx_aclk);
         @(posedge tx_aclk);
     endtask
@@ -72,7 +71,6 @@ module logic_axi4_stream_clock_crossing_unit_test;
         svunit_ut.teardown();
 
         areset_n = 0;
-        tx.cb_tx.tready <= 0;
     endtask
 
 `SVUNIT_TESTS_BEGIN
@@ -142,16 +140,57 @@ module logic_axi4_stream_clock_crossing_unit_test;
     end
     begin
         @(tx.cb_tx);
-        tx.cb_read(captured);
+        tx.cb_read(captured, 0, 0, 3, 0);
+    end
+    join
+
+    `FAIL_UNLESS_EQUAL(data.size(), captured.size())
+    foreach (data[i]) begin
+        `FAIL_UNLESS_EQUAL(data[i], captured[i])
+    end
+`SVTEST_END
+
+`SVTEST(slow_write)
+    byte data[] = new [7654];
+    byte captured[];
+
+    foreach (data[i]) begin
+        data[i] = $urandom;
+    end
+
+    fork
+    begin
+        @(rx.cb_rx);
+        rx.cb_write(data, 0, 0, 3, 0);
     end
     begin
-        for (int i = 0; i < (data.size() / TDATA_BYTES); ++i) begin
-            tx.cb_tx.tready <= 0;
-            repeat (2) @(tx.cb_tx);
+        @(tx.cb_tx);
+        tx.cb_read(captured);
+    end
+    join
 
-            tx.cb_tx.tready <= 1;
-            repeat (1) @(tx.cb_tx);
-        end
+    `FAIL_UNLESS_EQUAL(data.size(), captured.size())
+    foreach (data[i]) begin
+        `FAIL_UNLESS_EQUAL(data[i], captured[i])
+    end
+`SVTEST_END
+
+`SVTEST(write_read_mix)
+    byte data[] = new [7654];
+    byte captured[];
+
+    foreach (data[i]) begin
+        data[i] = $urandom;
+    end
+
+    fork
+    begin
+        @(rx.cb_rx);
+        rx.cb_write(data, 0, 0, 3, 0);
+    end
+    begin
+        @(tx.cb_tx);
+        tx.cb_read(captured, 0, 0, 3, 0);
     end
     join
 

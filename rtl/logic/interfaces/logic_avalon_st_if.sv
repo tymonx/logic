@@ -194,9 +194,11 @@ interface logic_avalon_st_if #(
         cb_tx.ready <= '0;
     endtask
 
-    task automatic cb_write(const ref byte data[], input int ch = 0);
+    task automatic cb_write(const ref byte data[], input int ch = 0,
+            int idle_max = 0, int idle_min = 0);
         int total_size = data.size();
         int index = 0;
+        int idle = 0;
 
         if (0 == data.size()) begin
             return;
@@ -207,28 +209,36 @@ interface logic_avalon_st_if #(
                 break;
             end
             else if (1'b1 === cb_rx.ready) begin
-                int data_empty = 0;
+                if (0 == idle) begin
+                    int data_empty = 0;
 
-                if (index >= total_size) begin
-                    break;
-                end
-
-                cb_rx.startofpacket <= !index;
-
-                for (int i = 0; i < SYMBOLS_PER_BEAT; ++i) begin
-                    if (index < total_size) begin
-                        cb_rx.data[i] <= data[index++];
+                    if (index >= total_size) begin
+                        break;
                     end
-                    else begin
-                        cb_rx.data[i] <= '0;
-                        ++data_empty;
-                    end
-                end
 
-                cb_rx.empty <= empty_t'(data_empty);
-                cb_rx.channel <= channel_t'(ch);
-                cb_rx.endofpacket <= (index >= total_size);
-                cb_rx.valid <= '1;
+                    idle = $urandom_range(idle_max, idle_min);
+
+                    cb_rx.startofpacket <= !index;
+
+                    for (int i = 0; i < SYMBOLS_PER_BEAT; ++i) begin
+                        if (index < total_size) begin
+                            cb_rx.data[i] <= data[index++];
+                        end
+                        else begin
+                            cb_rx.data[i] <= '0;
+                            ++data_empty;
+                        end
+                    end
+
+                    cb_rx.empty <= empty_t'(data_empty);
+                    cb_rx.channel <= channel_t'(ch);
+                    cb_rx.endofpacket <= (index >= total_size);
+                    cb_rx.valid <= '1;
+                end
+                else begin
+                    --idle;
+                    cb_rx.valid <= '0;
+                end
             end
             @(cb_rx);
         end
@@ -236,8 +246,12 @@ interface logic_avalon_st_if #(
         cb_rx.valid <= '0;
     endtask
 
-    task automatic cb_read(ref byte data[], input int ch = 0);
+    task automatic cb_read(ref byte data[], input int ch = 0,
+            int idle_max = 0, int idle_min = 0);
+        int idle = 0;
         byte q[$];
+
+        cb_tx.ready <= '1;
 
         forever begin
             if (!reset_n) begin
@@ -260,12 +274,25 @@ interface logic_avalon_st_if #(
                 end
 
                 if (1'b1 === cb_tx.endofpacket) begin
+                    cb_tx.ready <= '0;
                     @(cb_tx);
                     break;
                 end
             end
+
+            if (0 == idle) begin
+                idle = $urandom_range(idle_max, idle_min);
+                cb_tx.ready <= '1;
+            end
+            else begin
+                --idle;
+                cb_tx.ready <= '0;
+            end
+
             @(cb_tx);
         end
+
+        cb_tx.ready <= '0;
 
         data = new [q.size()];
         foreach (q[i]) begin
