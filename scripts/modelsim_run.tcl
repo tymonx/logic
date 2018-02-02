@@ -28,13 +28,6 @@ onbreak {
         if {[string match "user_*" $fullstat]} {
             pause
         } else {
-            if {[find signals test_passed] != ""} {
-                if ![exa test_passed] {
-                    set broken 2
-                }
-            } else {
-                set broken 2
-            }
             resume
         }
     } else {
@@ -45,11 +38,16 @@ onbreak {
 log -r /*
 run -all
 
-if {$broken == 1} {
+if {$broken} {
     # Unexpected condition. Exit with bad status.
     quit -force -code 3
-} elseif {$broken == 2} {
-    # Assertion or other break condition.
+}
+
+if {[find signals test_passed] != ""} {
+    if ![exa test_passed] {
+        quit -force -code 1
+    }
+} else {
     quit -force -code 1
 }
 
