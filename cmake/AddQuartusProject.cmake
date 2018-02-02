@@ -92,6 +92,14 @@ function(add_quartus_project target_name)
     set(ARG_DEFINES ${QUARTUS_DEFINES} ${ARG_DEFINES})
     set(ARG_ASSIGNMENTS ${QUARTUS_ASSIGNMENTS} ${ARG_ASSIGNMENTS})
 
+    set_default_value(REVISION ${target_name})
+    set_default_value(FAMILY "Cyclone 10 GX")
+    set_default_value(DEVICE "10CX220YF780I5G")
+    set_default_value(TOP_LEVEL_ENTITY "${target_name}")
+    set_default_value(NUM_PARALLEL_PROCESSORS ALL)
+    set_default_value(PROJECT_DIRECTORY
+        "${CMAKE_BINARY_DIR}/quartus/${target_name}")
+
     if (ARG_FAMILY)
         list(APPEND quartus_assignments
             "set_global_assignment -name FAMILY \"${ARG_FAMILY}\"")
@@ -101,12 +109,6 @@ function(add_quartus_project target_name)
         list(APPEND quartus_assignments
             "set_global_assignment -name DEVICE \"${ARG_DEVICE}\"")
     endif()
-
-    set_default_value(REVISION ${target_name})
-    set_default_value(TOP_LEVEL_ENTITY "${target_name}")
-    set_default_value(NUM_PARALLEL_PROCESSORS ALL)
-    set_default_value(PROJECT_DIRECTORY
-        "${CMAKE_BINARY_DIR}/quartus/${target_name}")
 
     file(MAKE_DIRECTORY "${ARG_PROJECT_DIRECTORY}")
 
@@ -204,10 +206,11 @@ function(add_quartus_project target_name)
         get_filename_component(dir "${tcl_file}" DIRECTORY)
 
         set(ip_file "${dir}/${name}.ip")
+        set(tcl_file_arg "${tcl_file}")
 
         if (CYGWIN)
-            execute_process(COMMAND cygpath -m "${tcl_file}"
-                OUTPUT_VARIABLE tcl_file
+            execute_process(COMMAND cygpath -m "${tcl_file_arg}"
+                OUTPUT_VARIABLE tcl_file_arg
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
         endif()
 
@@ -246,11 +249,11 @@ function(add_quartus_project target_name)
     foreach (ip_file ${ip_files})
         get_filename_component(ip_file "${ip_file}" REALPATH)
         get_filename_component(name "${ip_file}" NAME_WE)
-        set(depend_file "${ip_file}")
+        set(ip_file_arg "${ip_file}")
 
         if (CYGWIN)
-            execute_process(COMMAND cygpath -m "${ip_file}"
-                OUTPUT_VARIABLE ip_file
+            execute_process(COMMAND cygpath -m "${ip_file_arg}"
+                OUTPUT_VARIABLE ip_file_arg
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
         endif()
 
@@ -266,14 +269,18 @@ function(add_quartus_project target_name)
             COMMAND
                 ${QUARTUS_QSYS_GENERATE}
             ARGS
-                "${ip_file}"
+                "${ip_file_arg}"
+                --family=\""${ARG_FAMILY}"\"
+                --part=\""${ARG_DEVICE}"\"
                 --upgrade-ip-cores
                 --search-path=\"${qsys_search_path}\"
                 ${qsys_flags}
             COMMAND
                 ${QUARTUS_QSYS_GENERATE}
             ARGS
-                "${ip_file}"
+                "${ip_file_arg}"
+                --family=\""${ARG_FAMILY}"\"
+                --part=\""${ARG_DEVICE}"\"
                 --synthesis=VERILOG
                 --search-path=\"${qsys_search_path}\"
                 ${qsys_flags}
@@ -282,7 +289,7 @@ function(add_quartus_project target_name)
             ARGS
                 -E touch "${quartus_ip_dir}/${name}"
             DEPENDS
-                "${depend_file}"
+                "${ip_file}"
             WORKING_DIRECTORY
                 "${ARG_PROJECT_DIRECTORY}"
         )
@@ -290,7 +297,7 @@ function(add_quartus_project target_name)
         list(APPEND qsys_ip_depends "${quartus_ip_dir}/${name}")
         list(APPEND quartus_depends "${quartus_ip_dir}/${name}")
         list(APPEND quartus_assignments
-            "set_global_assignment -name IP_FILE ${ip_file}")
+            "set_global_assignment -name IP_FILE ${ip_file_arg}")
     endforeach()
 
     set(quartus_qsys_dir "${ARG_PROJECT_DIRECTORY}/.qsys")
@@ -302,11 +309,11 @@ function(add_quartus_project target_name)
     foreach (qsys_file ${qsys_files})
         get_filename_component(qsys_file "${qsys_file}" REALPATH)
         get_filename_component(name "${qsys_file}" NAME_WE)
-        set(depend_file "${qsys_file}")
+        set(qsys_file_arg "${qsys_file}")
 
         if (CYGWIN)
-            execute_process(COMMAND cygpath -m "${qsys_file}"
-                OUTPUT_VARIABLE qsys_file
+            execute_process(COMMAND cygpath -m "${qsys_file_arg}"
+                OUTPUT_VARIABLE qsys_file_arg
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
         endif()
 
@@ -322,14 +329,18 @@ function(add_quartus_project target_name)
             COMMAND
                 ${QUARTUS_QSYS_GENERATE}
             ARGS
-                "${qsys_file}"
+                "${qsys_file_arg}"
+                --family=\""${ARG_FAMILY}"\"
+                --part=\""${ARG_DEVICE}"\"
                 --upgrade-ip-cores
                 --search-path=\"${qsys_search_path}\"
                 ${qsys_flags}
             COMMAND
                 ${QUARTUS_QSYS_GENERATE}
             ARGS
-                "${qsys_file}"
+                "${qsys_file_arg}"
+                --family=\""${ARG_FAMILY}"\"
+                --part=\""${ARG_DEVICE}"\"
                 --synthesis=VERILOG
                 --search-path=\"${qsys_search_path}\"
                 ${qsys_flags}
@@ -338,7 +349,7 @@ function(add_quartus_project target_name)
             ARGS
                 -E touch "${quartus_qsys_dir}/${name}"
             DEPENDS
-                "${depend_file}"
+                "${qsys_file}"
                 ${qsys_ip_depends}
             WORKING_DIRECTORY
                 "${ARG_PROJECT_DIRECTORY}"
@@ -346,7 +357,7 @@ function(add_quartus_project target_name)
 
         list(APPEND quartus_depends "${quartus_qsys_dir}/${name}")
         list(APPEND quartus_assignments
-            "set_global_assignment -name QSYS_FILE ${qsys_file}")
+            "set_global_assignment -name QSYS_FILE ${qsys_file_arg}")
     endforeach()
 
     if (ARG_SDC_FILES)
