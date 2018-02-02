@@ -246,8 +246,6 @@ function(add_quartus_project target_name)
 
     foreach (ip_file ${ip_files})
         get_filename_component(ip_file "${ip_file}" REALPATH)
-        list(APPEND quartus_depends "${ip_file}")
-
         get_filename_component(name "${ip_file}" NAME_WE)
         set(ip_file_arg "${ip_file}")
 
@@ -304,8 +302,6 @@ function(add_quartus_project target_name)
 
     foreach (qsys_file ${qsys_files})
         get_filename_component(qsys_file "${qsys_file}" REALPATH)
-        list(APPEND quartus_depends "${qsys_file}")
-
         get_filename_component(name "${qsys_file}" NAME_WE)
         set(qsys_file_arg "${qsys_file}")
 
