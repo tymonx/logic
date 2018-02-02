@@ -201,8 +201,7 @@ function(add_quartus_project target_name)
                 COMMAND
                     ${CMAKE_COMMAND}
                 ARGS
-                    -E $<$<BOOL:UNIX>:create_symlink>$<$<NOT:$<BOOL:UNIX>>:copy>
-                    "${file}" "${filename}"
+                    -E copy "${file}" "${filename}"
                 DEPENDS
                     "${file}"
                 COMMENT
