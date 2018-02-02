@@ -201,7 +201,9 @@ function(add_quartus_project target_name)
                 COMMAND
                     ${CMAKE_COMMAND}
                 ARGS
-                    -E $<IF:$<BOOL:UNIX>,create_symlink,copy>
+                    -E
+                    $<$<BOOL:UNIX>:create_symlink>$<$<NOT:
+                        $<BOOL:UNIX>>:copy>
                     "${file}" "${filename}"
                 DEPENDS
                     "${file}"
@@ -454,7 +456,8 @@ function(add_quartus_project target_name)
         OUTPUT
             "${quartus_analysis_file}"
         COMMAND
-            $<IF:$<STREQUAL:QUARTUS_EDITION,Pro>,${QUARTUS_SYN},${QUARTUS_MAP}>
+            $<$<STREQUAL:QUARTUS_EDITION,PRO>:${QUARTUS_SYN}>$<$<NOT:
+                $<STREQUAL:QUARTUS_EDITION,PRO>>:${QUARTUS_MAP}>
         ARGS
             --analysis_and_elaboration ${target_name}
         DEPENDS
