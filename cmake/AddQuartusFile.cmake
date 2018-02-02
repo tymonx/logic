@@ -64,8 +64,7 @@ function(add_quartus_file file)
             COMMAND
                 ${CMAKE_COMMAND}
             ARGS
-                -E $<$<BOOL:UNIX>:create_symlink>$<$<NOT:
-                    $<BOOL:UNIX>>:copy>
+                -E $<$<BOOL:UNIX>:create_symlink>$<$<NOT:$<BOOL:UNIX>>:copy>
                 "${file}" ${name}.${file_type}
             DEPENDS
                 "${file}"

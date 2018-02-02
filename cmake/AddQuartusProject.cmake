@@ -201,9 +201,7 @@ function(add_quartus_project target_name)
                 COMMAND
                     ${CMAKE_COMMAND}
                 ARGS
-                    -E
-                    $<$<BOOL:UNIX>:create_symlink>$<$<NOT:
-                        $<BOOL:UNIX>>:copy>
+                    -E $<$<BOOL:UNIX>:create_symlink>$<$<NOT:$<BOOL:UNIX>>:copy>
                     "${file}" "${filename}"
                 DEPENDS
                     "${file}"
@@ -223,6 +221,10 @@ function(add_quartus_project target_name)
         endif()
     endforeach()
 
+    set(quartus_pro
+        --quartus-project=${target_name}.qpf
+    )
+
     foreach (qsys_tcl_file ${qsys_tcl_files})
         get_filename_component(qsys_tcl_file "${qsys_tcl_file}" REALPATH)
         get_filename_component(name "${qsys_tcl_file}" NAME_WE)
@@ -238,8 +240,7 @@ function(add_quartus_project target_name)
                 ${QUARTUS_QSYS_SCRIPT}
             ARGS
                 --script="${input_file}"
-                $<$<STREQUAL:QUARTUS_EDITION,Pro>:
-                    --quartus-project=${target_name}.qpf>
+                $<$<STREQUAL:QUARTUS_EDITION,Pro>:${quartus_pro}>
             DEPENDS
                 "${qsys_tcl_file}"
             COMMENT
@@ -273,8 +274,7 @@ function(add_quartus_project target_name)
                 --part=\""${ARG_DEVICE}"\"
                 --upgrade-ip-cores
                 --search-path=\"${qsys_search_path}\"
-                $<$<STREQUAL:QUARTUS_EDITION,Pro>:
-                    --quartus-project=${target_name}.qpf>
+                $<$<STREQUAL:QUARTUS_EDITION,Pro>:${quartus_pro}>
             COMMAND
                 ${QUARTUS_QSYS_GENERATE}
             ARGS
@@ -283,8 +283,7 @@ function(add_quartus_project target_name)
                 --part=\""${ARG_DEVICE}"\"
                 --synthesis=VERILOG
                 --search-path=\"${qsys_search_path}\"
-                $<$<STREQUAL:QUARTUS_EDITION,Pro>:
-                    --quartus-project=${target_name}.qpf>
+                $<$<STREQUAL:QUARTUS_EDITION,Pro>:${quartus_pro}>
             COMMAND
                 ${CMAKE_COMMAND}
             ARGS
@@ -322,8 +321,7 @@ function(add_quartus_project target_name)
                 --part=\""${ARG_DEVICE}"\"
                 --upgrade-ip-cores
                 --search-path=\"${qsys_search_path}\"
-                $<$<STREQUAL:QUARTUS_EDITION,Pro>:
-                    --quartus-project=${target_name}.qpf>
+                $<$<STREQUAL:QUARTUS_EDITION,Pro>:${quartus_pro}>
             COMMAND
                 ${QUARTUS_QSYS_GENERATE}
             ARGS
@@ -332,8 +330,7 @@ function(add_quartus_project target_name)
                 --part=\""${ARG_DEVICE}"\"
                 --synthesis=VERILOG
                 --search-path=\"${qsys_search_path}\"
-                $<$<STREQUAL:QUARTUS_EDITION,Pro>:
-                    --quartus-project=${target_name}.qpf>
+                $<$<STREQUAL:QUARTUS_EDITION,Pro>:${quartus_pro}>
             COMMAND
                 ${CMAKE_COMMAND}
             ARGS
@@ -442,9 +439,11 @@ function(add_quartus_project target_name)
     list(APPEND quartus_depends "${ARG_PROJECT_DIRECTORY}/${target_name}.qpf")
 
     if (QUARTUS_EDITION MATCHES Pro)
+        set(quartus_analysis ${QUARTUS_SYN})
         set(quartus_analysis_file
             "${ARG_PROJECT_DIRECTORY}/output_files/${target_name}.syn.rpt")
     else ()
+        set(quartus_analysis ${QUARTUS_MAP})
         set(quartus_analysis_file
             "${ARG_PROJECT_DIRECTORY}/output_files/${target_name}.flow.rpt")
     endif()
@@ -456,8 +455,7 @@ function(add_quartus_project target_name)
         OUTPUT
             "${quartus_analysis_file}"
         COMMAND
-            $<$<STREQUAL:QUARTUS_EDITION,PRO>:${QUARTUS_SYN}>$<$<NOT:
-                $<STREQUAL:QUARTUS_EDITION,PRO>>:${QUARTUS_MAP}>
+            ${quartus_analysis}
         ARGS
             --analysis_and_elaboration ${target_name}
         DEPENDS
