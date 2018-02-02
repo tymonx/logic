@@ -53,6 +53,7 @@ function(add_hdl_unit_test hdl_file)
         DEPENDS
         DEFINES
         INCLUDES
+        INPUT_FILES
         MODELSIM_FLAGS
         MODELSIM_SUPPRESS
         MODELSIM_WARNING_AS_ERROR
@@ -73,6 +74,7 @@ function(add_hdl_unit_test hdl_file)
     set_default_value(DEPENDS "")
     set_default_value(DEFINES "")
     set_default_value(INCLUDES "")
+    set_default_value(INPUT_FILES "")
     set_default_value(LIBRARY unit_test)
     set_default_value(MODELSIM_FLAGS "")
     set_default_value(MODELSIM_SUPPRESS "")
@@ -99,6 +101,8 @@ function(add_hdl_unit_test hdl_file)
         INCLUDES
             ${SVUNIT_INCLUDE_DIR}
             ${ARG_INCLUDES}
+        INPUT_FILES
+            ${ARG_INPUT_FILES}
     )
 
     add_hdl_source("${test_runner_source}"
