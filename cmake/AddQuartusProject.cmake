@@ -93,22 +93,40 @@ function(add_quartus_project target_name)
     set(ARG_ASSIGNMENTS ${QUARTUS_ASSIGNMENTS} ${ARG_ASSIGNMENTS})
 
     set_default_value(REVISION ${target_name})
-    set_default_value(FAMILY "Cyclone 10 GX")
-    set_default_value(DEVICE "10CX220YF780I5G")
     set_default_value(TOP_LEVEL_ENTITY "${target_name}")
     set_default_value(NUM_PARALLEL_PROCESSORS ALL)
     set_default_value(PROJECT_DIRECTORY
         "${CMAKE_BINARY_DIR}/quartus/${target_name}")
 
-    if (ARG_FAMILY)
-        list(APPEND quartus_assignments
-            "set_global_assignment -name FAMILY \"${ARG_FAMILY}\"")
+    if (NOT ARG_DEVICE)
+        if (QUARTUS_DEVICE)
+            set(ARG_DEVICE ${QUARTUS_DEVICE})
+        else()
+            if (QUARTUS_EDITION MATCHES Pro)
+                set(ARG_DEVICE "10CX220YF780I5G")
+            else()
+                set(ARG_DEVICE "5CGXFC7C7F23C8")
+            endif()
+        endif()
     endif()
 
-    if (ARG_DEVICE)
-        list(APPEND quartus_assignments
-            "set_global_assignment -name DEVICE \"${ARG_DEVICE}\"")
+    if (NOT ARG_FAMILY)
+        if (QUARTUS_FAMILY)
+            set(ARG_FAMILY ${QUARTUS_FAMILY})
+        else()
+            if (QUARTUS_EDITION MATCHES Pro)
+                set(ARG_FAMILY "Cyclone 10 GX")
+            else()
+                set(ARG_FAMILY "Cyclone V")
+            endif()
+        endif()
     endif()
+
+    list(APPEND quartus_assignments
+        "set_global_assignment -name FAMILY \"${ARG_FAMILY}\"")
+
+    list(APPEND quartus_assignments
+        "set_global_assignment -name DEVICE \"${ARG_DEVICE}\"")
 
     file(MAKE_DIRECTORY "${ARG_PROJECT_DIRECTORY}")
 
@@ -272,10 +290,6 @@ function(add_quartus_project target_name)
                 "${ip_file_arg}"
                 --family=\""${ARG_FAMILY}"\"
                 --part=\""${ARG_DEVICE}"\"
-                --upgrade-ip-cores
-                --search-path=\"${qsys_search_path}\"
-                ${qsys_flags}
-            COMMAND
                 --upgrade-ip-cores
                 --search-path=\"${qsys_search_path}\"
                 ${qsys_flags}
