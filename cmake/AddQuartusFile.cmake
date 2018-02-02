@@ -24,6 +24,8 @@ endif()
 find_package(Quartus)
 find_package(ModelSim)
 
+include(SetHDLPath)
+
 if (NOT TARGET modelsim-compile-all)
     add_custom_target(modelsim-compile-all ALL)
 endif()
@@ -62,9 +64,12 @@ function(add_quartus_file file)
             COMMAND
                 ${CMAKE_COMMAND}
             ARGS
-                -E copy "${file}" "${qsys_file}"
+                -E $<IF:$<BOOL:UNIX>,create_symlink,copy>
+                "${file}" ${name}.${file_type}
             DEPENDS
                 "${file}"
+            WORKING_DIRECTORY
+                "${CMAKE_CURRENT_BINARY_DIR}"
         )
     endif()
 
@@ -97,14 +102,7 @@ function(add_quartus_file file)
 
     if (file_type MATCHES tcl)
         set(tcl_file "${qsys_file}")
-        set(tcl_file_arg "${qsys_file}")
-
-        if (CYGWIN)
-            execute_process(COMMAND cygpath -m "${tcl_file_arg}"
-                OUTPUT_VARIABLE tcl_file_arg
-                OUTPUT_STRIP_TRAILING_WHITESPACE)
-        endif()
-
+        set_hdl_path(input_file "${qsys_file}")
         set(qsys_file "${CMAKE_CURRENT_BINARY_DIR}/${name}.ip")
 
         add_custom_command(
@@ -113,7 +111,7 @@ function(add_quartus_file file)
             COMMAND
                 ${QUARTUS_QSYS_SCRIPT}
             ARGS
-                --script=${tcl_file_arg}
+                --script=${input_file}
             DEPENDS
                 "${tcl_file}"
             WORKING_DIRECTORY
@@ -123,24 +121,13 @@ function(add_quartus_file file)
         set(file_type ip)
     endif()
 
+    set_hdl_path(input_file "${qsys_file}")
     set(modules_dir "${CMAKE_BINARY_DIR}/modelsim/.modules")
-    set(qsys_file_arg "${qsys_file}")
     set(modelsim_libraries_dir "${CMAKE_BINARY_DIR}/modelsim/libraries")
 
-    if (CYGWIN)
-        execute_process(COMMAND cygpath -m "${qsys_file_arg}"
-            OUTPUT_VARIABLE qsys_file_arg
-            OUTPUT_STRIP_TRAILING_WHITESPACE)
-    endif()
-
     if (NOT EXISTS "${modelsim_libraries_dir}/${name}")
-        set(library_dir "${CMAKE_BINARY_DIR}/modelsim/libraries/${name}")
-
-        if (CYGWIN)
-            execute_process(COMMAND cygpath -m "${library_dir}"
-                OUTPUT_VARIABLE library_dir
-                OUTPUT_STRIP_TRAILING_WHITESPACE)
-        endif()
+        set_hdl_path(library_dir
+            "${CMAKE_BINARY_DIR}/modelsim/libraries/${name}")
 
         execute_process(COMMAND ${MODELSIM_VLIB} ${name}
             WORKING_DIRECTORY "${modelsim_libraries_dir}" OUTPUT_QUIET)
@@ -159,12 +146,12 @@ function(add_quartus_file file)
         COMMAND
             ${QUARTUS_QSYS_GENERATE}
         ARGS
-            "${qsys_file_arg}"
+            "${input_file}"
             --upgrade-ip-cores
         COMMAND
             ${QUARTUS_QSYS_GENERATE}
         ARGS
-            "${qsys_file_arg}"
+            "${input_file}"
             --simulation=VERILOG
         DEPENDS
             "${qsys_file}"

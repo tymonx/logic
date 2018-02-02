@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+include(SetHDLPath)
+
 set(SPD_FILE "" CACHE STRING "SPD file")
 
 if (NOT EXISTS "${SPD_FILE}")
@@ -67,11 +69,13 @@ foreach (item ${content_split})
         if (type MATCHES VHDL)
             if (NOT simulator OR simulator MATCHES modelsim OR
                     simulator MATCHES mentor)
+                set_hdl_path(path "${path}")
                 list(APPEND modelsim_vhdl_sources "${path}")
             endif()
         elseif (type MATCHES VERILOG)
             if (NOT simulator OR simulator MATCHES modelsim OR
                     simulator MATCHES mentor)
+                set_hdl_path(path "${path}")
                 list(APPEND modelsim_verilog_sources "${path}")
             endif()
         elseif (type MATCHES HEX)
