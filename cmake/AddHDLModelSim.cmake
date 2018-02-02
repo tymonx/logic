@@ -197,6 +197,12 @@ function(add_hdl_modelsim hdl_name)
 
         if (hdl_package)
             list(APPEND modelsim_packages "${hdl_source}")
+
+            get_hdl_property(hdl_includes ${name} INCLUDES)
+
+            foreach (hdl_include ${hdl_includes})
+                list(APPEND modelsim_packages "${hdl_include}")
+            endforeach()
         endif()
 
         list(APPEND modelsim_libraries ${hdl_library})
