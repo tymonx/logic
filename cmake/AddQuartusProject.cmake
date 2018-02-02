@@ -92,6 +92,14 @@ function(add_quartus_project target_name)
     set(ARG_DEFINES ${QUARTUS_DEFINES} ${ARG_DEFINES})
     set(ARG_ASSIGNMENTS ${QUARTUS_ASSIGNMENTS} ${ARG_ASSIGNMENTS})
 
+    set_default_value(REVISION ${target_name})
+    set_default_value(FAMILY "Cyclone 10 GX")
+    set_default_value(DEVICE "10CX220YF780I5G")
+    set_default_value(TOP_LEVEL_ENTITY "${target_name}")
+    set_default_value(NUM_PARALLEL_PROCESSORS ALL)
+    set_default_value(PROJECT_DIRECTORY
+        "${CMAKE_BINARY_DIR}/quartus/${target_name}")
+
     if (ARG_FAMILY)
         list(APPEND quartus_assignments
             "set_global_assignment -name FAMILY \"${ARG_FAMILY}\"")
@@ -101,12 +109,6 @@ function(add_quartus_project target_name)
         list(APPEND quartus_assignments
             "set_global_assignment -name DEVICE \"${ARG_DEVICE}\"")
     endif()
-
-    set_default_value(REVISION ${target_name})
-    set_default_value(TOP_LEVEL_ENTITY "${target_name}")
-    set_default_value(NUM_PARALLEL_PROCESSORS ALL)
-    set_default_value(PROJECT_DIRECTORY
-        "${CMAKE_BINARY_DIR}/quartus/${target_name}")
 
     file(MAKE_DIRECTORY "${ARG_PROJECT_DIRECTORY}")
 
@@ -268,6 +270,12 @@ function(add_quartus_project target_name)
                 ${QUARTUS_QSYS_GENERATE}
             ARGS
                 "${ip_file_arg}"
+                --family=\""${ARG_FAMILY}"\"
+                --part=\""${ARG_DEVICE}"\"
+                --upgrade-ip-cores
+                --search-path=\"${qsys_search_path}\"
+                ${qsys_flags}
+            COMMAND
                 --upgrade-ip-cores
                 --search-path=\"${qsys_search_path}\"
                 ${qsys_flags}
@@ -275,6 +283,8 @@ function(add_quartus_project target_name)
                 ${QUARTUS_QSYS_GENERATE}
             ARGS
                 "${ip_file_arg}"
+                --family=\""${ARG_FAMILY}"\"
+                --part=\""${ARG_DEVICE}"\"
                 --synthesis=VERILOG
                 --search-path=\"${qsys_search_path}\"
                 ${qsys_flags}
@@ -324,6 +334,8 @@ function(add_quartus_project target_name)
                 ${QUARTUS_QSYS_GENERATE}
             ARGS
                 "${qsys_file_arg}"
+                --family=\""${ARG_FAMILY}"\"
+                --part=\""${ARG_DEVICE}"\"
                 --upgrade-ip-cores
                 --search-path=\"${qsys_search_path}\"
                 ${qsys_flags}
@@ -331,6 +343,8 @@ function(add_quartus_project target_name)
                 ${QUARTUS_QSYS_GENERATE}
             ARGS
                 "${qsys_file_arg}"
+                --family=\""${ARG_FAMILY}"\"
+                --part=\""${ARG_DEVICE}"\"
                 --synthesis=VERILOG
                 --search-path=\"${qsys_search_path}\"
                 ${qsys_flags}
