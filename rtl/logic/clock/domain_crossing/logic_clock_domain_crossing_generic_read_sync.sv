@@ -69,7 +69,7 @@ module logic_clock_domain_crossing_generic_read_sync #(
     );
 
     always_ff @(posedge read_aclk or negedge read_areset_n) begin
-        if (!write_areset_n) begin
+        if (!read_areset_n) begin
             write_pointer_synced <= '0;
         end
         else begin
