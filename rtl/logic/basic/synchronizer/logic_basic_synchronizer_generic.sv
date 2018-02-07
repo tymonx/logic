@@ -15,7 +15,7 @@
 
 `include "logic.svh"
 
-/* Module: logic_basic_synchronizer
+/* Module: logic_basic_synchronizer_generic
  *
  * Synchronize input signal to clock.
  *
@@ -23,8 +23,7 @@
  *  WIDTH       - Number of bits for input and output signals.
  *  STAGES      - Number of pipeline stages from input to output.
  */
-module logic_basic_synchronizer #(
-    logic_pkg::target_t TARGET = `LOGIC_CONFIG_TARGET,
+module logic_basic_synchronizer_generic #(
     int WIDTH = 1,
     int STAGES = 2
 ) (
@@ -33,27 +32,31 @@ module logic_basic_synchronizer #(
     input [WIDTH-1:0] i,
     output logic [WIDTH-1:0] o
 );
+    genvar k;
+
+    logic [WIDTH-1:0] q[STAGES-1:0];
+
+    always_ff @(posedge aclk or negedge areset_n) begin
+        if (!areset_n) begin
+            q[0] <= '0;
+        end
+        else begin
+            q[0] <= i;
+        end
+    end
+
     generate
-        case (TARGET)
-        logic_pkg::TARGET_INTEL,
-        logic_pkg::TARGET_INTEL_ARRIA_10: begin: target_intel
-            logic_basic_synchronizer_intel #(
-                .WIDTH(WIDTH),
-                .STAGES(STAGES)
-            )
-            unit (
-                .*
-            );
+        for (k = 1; k < STAGES; ++k) begin: stages
+            always_ff @(posedge aclk or negedge areset_n) begin
+                if (!areset_n) begin
+                    q[k] <= '0;
+                end
+                else begin
+                    q[k] <= q[k - 1];
+                end
+            end
         end
-        default: begin: target_generic
-            logic_basic_synchronizer_generic #(
-                .WIDTH(WIDTH),
-                .STAGES(STAGES)
-            )
-            unit (
-                .*
-            );
-        end
-        endcase
     endgenerate
+
+    always_comb o = q[STAGES-1];
 endmodule

@@ -15,7 +15,7 @@
 
 `include "logic.svh"
 
-/* Module: logic_basic_synchronizer
+/* Module: logic_basic_synchronizer_intel
  *
  * Synchronize input signal to clock.
  *
@@ -23,8 +23,7 @@
  *  WIDTH       - Number of bits for input and output signals.
  *  STAGES      - Number of pipeline stages from input to output.
  */
-module logic_basic_synchronizer #(
-    logic_pkg::target_t TARGET = `LOGIC_CONFIG_TARGET,
+module logic_basic_synchronizer_intel #(
     int WIDTH = 1,
     int STAGES = 2
 ) (
@@ -33,27 +32,19 @@ module logic_basic_synchronizer #(
     input [WIDTH-1:0] i,
     output logic [WIDTH-1:0] o
 );
+    genvar k;
+
     generate
-        case (TARGET)
-        logic_pkg::TARGET_INTEL,
-        logic_pkg::TARGET_INTEL_ARRIA_10: begin: target_intel
-            logic_basic_synchronizer_intel #(
-                .WIDTH(WIDTH),
-                .STAGES(STAGES)
+        for (k = 0; k < WIDTH; ++k) begin: width
+            altera_std_synchronizer #(
+                .depth(STAGES)
             )
-            unit (
-                .*
+            synchronizer (
+                .clk(aclk),
+                .reset_n(areset_n),
+                .din(i[k]),
+                .dout(o[k])
             );
         end
-        default: begin: target_generic
-            logic_basic_synchronizer_generic #(
-                .WIDTH(WIDTH),
-                .STAGES(STAGES)
-            )
-            unit (
-                .*
-            );
-        end
-        endcase
     endgenerate
 endmodule
