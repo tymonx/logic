@@ -307,7 +307,7 @@ function(add_quartus_project target_name)
         get_filename_component(name "${qsys_file}" NAME_WE)
 
         set(output_file "${ARG_PROJECT_DIRECTORY}/.qsys/${name}")
-        set_hdl_path(input_file "${ip_file}")
+        set_hdl_path(input_file "${qsys_file}")
 
         add_custom_command(
             OUTPUT
