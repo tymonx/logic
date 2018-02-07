@@ -14,9 +14,10 @@
 
 add_hdl_source(logic_basic_synchronizer.sv
     SOURCES
-        logic_pkg
         logic_basic_synchronizer_generic.sv
         logic_basic_synchronizer_intel.sv
+    DEPENDS
+        logic_pkg
     ANALYSIS
         TRUE
 )
