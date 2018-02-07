@@ -13,8 +13,11 @@
  * limitations under the License.
  */
 
+`include "logic.svh"
+
 module logic_clock_domain_crossing_generic_read_sync #(
-    int ADDRESS_WIDTH = 1
+    int ADDRESS_WIDTH = 1,
+    logic_pkg::target_t TARGET = `LOGIC_CONFIG_TARGET
 ) (
     input write_aclk,
     input write_areset_n,
@@ -36,19 +39,18 @@ module logic_clock_domain_crossing_generic_read_sync #(
         .o(write_pointer_gray)
     );
 
-    logic_basic_synchronizer #(
-        .WIDTH(ADDRESS_WIDTH),
-        .STAGES(1)
-    )
-    gray_write_synced (
-        .aclk(write_aclk),
-        .areset_n(write_areset_n),
-        .i(write_pointer_gray),
-        .o(write_pointer_gray_q)
-    );
+    always_ff @(posedge write_aclk or negedge write_areset_n) begin
+        if (!write_areset_n) begin
+            write_pointer_gray_q <= '0;
+        end
+        else begin
+            write_pointer_gray_q <= write_pointer_gray;
+        end
+    end
 
     logic_basic_synchronizer #(
         .WIDTH(ADDRESS_WIDTH),
+        .TARGET(TARGET),
         .STAGES(2)
     )
     gray_read_synced (
@@ -66,14 +68,12 @@ module logic_clock_domain_crossing_generic_read_sync #(
         .o(write_pointer_synced_binary)
     );
 
-    logic_basic_synchronizer #(
-        .WIDTH(ADDRESS_WIDTH),
-        .STAGES(1)
-    )
-    binary_synced (
-        .aclk(read_aclk),
-        .areset_n(read_areset_n),
-        .i(write_pointer_synced_binary),
-        .o(write_pointer_synced)
-    );
+    always_ff @(posedge read_aclk or negedge read_areset_n) begin
+        if (!write_areset_n) begin
+            write_pointer_synced <= '0;
+        end
+        else begin
+            write_pointer_synced <= write_pointer_synced_binary;
+        end
+    end
 endmodule

@@ -13,8 +13,11 @@
  * limitations under the License.
  */
 
+`include "logic.svh"
+
 module logic_clock_domain_crossing_generic_write_sync #(
-    int ADDRESS_WIDTH = 1
+    int ADDRESS_WIDTH = 1,
+    logic_pkg::target_t TARGET = `LOGIC_CONFIG_TARGET
 ) (
     input read_aclk,
     input read_areset_n,
@@ -24,6 +27,7 @@ module logic_clock_domain_crossing_generic_write_sync #(
     output logic [ADDRESS_WIDTH-1:0] read_pointer_synced
 );
     logic_clock_domain_crossing_generic_read_sync #(
+        .TARGET(TARGET),
         .ADDRESS_WIDTH(ADDRESS_WIDTH)
     )
     synced (

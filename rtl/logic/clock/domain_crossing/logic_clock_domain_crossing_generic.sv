@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+`include "logic.svh"
+
 /* Module: logic_clock_domain_crossing_generic
  *
  * Parameters:
@@ -33,7 +35,8 @@
 module logic_clock_domain_crossing_generic #(
     int WIDTH = 1,
     int CAPACITY = 256,
-    int ADDRESS_WIDTH = $clog2(CAPACITY)
+    int ADDRESS_WIDTH = $clog2(CAPACITY),
+    logic_pkg::target_t SYNCHRONIZER_TARGET = `LOGIC_CONFIG_TARGET
 ) (
     input areset_n,
     input rx_aclk,
@@ -101,6 +104,7 @@ module logic_clock_domain_crossing_generic #(
     );
 
     logic_clock_domain_crossing_generic_write_sync #(
+        .TARGET(SYNCHRONIZER_TARGET),
         .ADDRESS_WIDTH(ADDRESS_WIDTH)
     )
     write_sync (
@@ -108,6 +112,7 @@ module logic_clock_domain_crossing_generic #(
     );
 
     logic_clock_domain_crossing_generic_read_sync #(
+        .TARGET(SYNCHRONIZER_TARGET),
         .ADDRESS_WIDTH(ADDRESS_WIDTH)
     )
     read_sync (
