@@ -197,11 +197,10 @@ interface logic_axi4_stream_if #(
                 break;
             end
             else if (1'b1 === cb_rx.tready) begin
-                if (0 == idle) begin
-                    if (index >= total_size) begin
-                        break;
-                    end
-
+                if (index >= total_size) begin
+                    break;
+                end
+                else if (0 == idle) begin
                     idle = $urandom_range(idle_max, idle_min);
 
                     for (int i = 0; i < TDATA_BYTES; ++i) begin

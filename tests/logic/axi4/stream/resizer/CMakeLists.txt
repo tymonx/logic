@@ -12,17 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(assign)
-add_subdirectory(buffer)
-add_subdirectory(delay)
-add_subdirectory(queue)
-add_subdirectory(clock_crossing)
-add_subdirectory(packet_buffer)
-add_subdirectory(timer)
-add_subdirectory(from_avalon_st)
-add_subdirectory(to_avalon_st)
-add_subdirectory(mux)
-add_subdirectory(demux)
-add_subdirectory(upsizer)
-add_subdirectory(downsizer)
-add_subdirectory(resizer)
+# SVUnit unit test
+
+add_hdl_unit_test(logic_axi4_stream_resizer_up_unit_test.sv
+    DEPENDS
+        logic_axi4_stream_resizer
+)
+
+add_hdl_unit_test(logic_axi4_stream_resizer_down_unit_test.sv
+    DEPENDS
+        logic_axi4_stream_resizer
+)
+
+add_hdl_unit_test(logic_axi4_stream_resizer_equal_unit_test.sv
+    DEPENDS
+        logic_axi4_stream_resizer
+)

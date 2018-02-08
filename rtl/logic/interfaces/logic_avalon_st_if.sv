@@ -209,12 +209,11 @@ interface logic_avalon_st_if #(
                 break;
             end
             else if (1'b1 === cb_rx.ready) begin
-                if (0 == idle) begin
+                if (index >= total_size) begin
+                    break;
+                end
+                else if (0 == idle) begin
                     int data_empty = 0;
-
-                    if (index >= total_size) begin
-                        break;
-                    end
 
                     idle = $urandom_range(idle_max, idle_min);
 
