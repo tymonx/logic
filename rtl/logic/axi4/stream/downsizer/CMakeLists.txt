@@ -12,16 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(assign)
-add_subdirectory(buffer)
-add_subdirectory(delay)
-add_subdirectory(queue)
-add_subdirectory(clock_crossing)
-add_subdirectory(packet_buffer)
-add_subdirectory(timer)
-add_subdirectory(from_avalon_st)
-add_subdirectory(to_avalon_st)
-add_subdirectory(mux)
-add_subdirectory(demux)
-add_subdirectory(upsizer)
-add_subdirectory(downsizer)
+add_hdl_source(logic_axi4_stream_downsizer.sv
+    SOURCES
+        logic_axi4_stream_downsizer_unit.sv
+        logic_axi4_stream_downsizer_main.sv
+    DEPENDS
+        logic_axi4_stream_if
+        logic_axi4_stream_buffer
+        logic_reset_synchronizer
+    MODELSIM_SUPPRESS
+        2583
+)
+
+add_hdl_source(logic_axi4_stream_downsizer_top.sv
+    DEPENDS
+        logic_axi4_stream_downsizer
+    ANALYSIS
+        TRUE
+)
