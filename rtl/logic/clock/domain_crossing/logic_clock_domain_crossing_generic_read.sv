@@ -50,7 +50,7 @@ module logic_clock_domain_crossing_generic_read #(
         `LOGIC_DRC_EQUAL_OR_GREATER_THAN(ADDRESS_WIDTH, 3)
     end
 
-    localparam ALMOST_EMPTY = 4;
+    localparam ALMOST_EMPTY = 2;
 
     enum logic [0:0] {
         FSM_IDLE,
@@ -80,7 +80,7 @@ module logic_clock_domain_crossing_generic_read #(
     end
 
     always_comb empty = almost_empty &&
-        (write_pointer_synced[2:0] == read_pointer[2:0]);
+        (write_pointer_synced[1:0] == read_pointer[1:0]);
 
     always_ff @(posedge tx_aclk or negedge tx_areset_n) begin
         if (!tx_areset_n) begin
