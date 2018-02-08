@@ -18,6 +18,7 @@ add_hdl_source(logic_basic_synchronizer.sv
         logic_basic_synchronizer_intel.sv
     DEPENDS
         logic_pkg
+        altera_mf
     ANALYSIS
         TRUE
 )
