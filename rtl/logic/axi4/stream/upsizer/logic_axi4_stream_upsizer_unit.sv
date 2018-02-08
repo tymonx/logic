@@ -58,7 +58,6 @@ module logic_axi4_stream_upsizer_unit #(
     localparam TKEEP_WIDTH = (USE_TKEEP > 0) ? TDATA_BYTES : 0;
 
     enum logic [1:0] {
-        FSM_IDLE,
         FSM_UPSIZE,
         FSM_UPSIZE_NEXT,
         FSM_UPSIZE_LAST
@@ -89,13 +88,10 @@ module logic_axi4_stream_upsizer_unit #(
 
     always_ff @(posedge aclk or negedge areset_n) begin
         if (!areset_n) begin
-            fsm_state <= FSM_IDLE;
+            fsm_state <= FSM_UPSIZE;
         end
         else begin
             unique case (fsm_state)
-            FSM_IDLE: begin
-                fsm_state <= FSM_UPSIZE;
-            end
             FSM_UPSIZE: begin
                 if (rx.tvalid) begin
                     if (rx.tlast) begin
@@ -125,7 +121,7 @@ module logic_axi4_stream_upsizer_unit #(
                 end
             end
             default: begin
-                fsm_state <= FSM_IDLE;
+                fsm_state <= FSM_UPSIZE;
             end
             endcase
         end
@@ -133,9 +129,6 @@ module logic_axi4_stream_upsizer_unit #(
 
     always_comb begin
         unique case (fsm_state)
-        FSM_IDLE: begin
-            rx.tready = '0;
-        end
         FSM_UPSIZE: begin
             rx.tready = '1;
         end
