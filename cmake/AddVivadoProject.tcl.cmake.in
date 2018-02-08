@@ -14,9 +14,9 @@
 
 create_project @ARG_TOP_LEVEL_ENTITY@ -in_memory
 
-set includes []
-set defines []
-set sources []
+set includes {}
+set defines {}
+set sources {}
 
 @vivado_defines_list@
 
@@ -26,13 +26,13 @@ set sources []
 
 add_files $sources
 
-set synth_arguments []
+set synth_arguments {}
 
 lappend synth_arguments -name @ARG_TOP_LEVEL_ENTITY@
 lappend synth_arguments -top @ARG_TOP_LEVEL_ENTITY@
 lappend synth_arguments -rtl
 
-foreach def {*}$defines {
+foreach def $defines {
     lappend synth_arguments -verilog_define $def
 }
 
