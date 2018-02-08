@@ -59,12 +59,12 @@ module logic_axi4_stream_clock_crossing_unit_test;
         svunit_ut.setup();
 
         areset_n = 0;
-        @(posedge rx_aclk);
-        @(posedge tx_aclk);
+        @(rx.cb_rx);
+        @(tx.cb_tx);
 
         areset_n = 1;
-        @(posedge rx_aclk);
-        @(posedge tx_aclk);
+        @(rx.cb_rx);
+        @(tx.cb_tx);
     endtask
 
     task teardown();
@@ -85,11 +85,9 @@ module logic_axi4_stream_clock_crossing_unit_test;
 
     fork
     begin
-        @(rx.cb_rx);
         rx.cb_write(data);
     end
     begin
-        @(tx.cb_tx);
         tx.cb_read(captured);
     end
     join
@@ -110,11 +108,9 @@ module logic_axi4_stream_clock_crossing_unit_test;
 
     fork
     begin
-        @(rx.cb_rx);
         rx.cb_write(data);
     end
     begin
-        @(tx.cb_tx);
         tx.cb_read(captured);
     end
     join
@@ -122,6 +118,39 @@ module logic_axi4_stream_clock_crossing_unit_test;
     `FAIL_UNLESS_EQUAL(data.size(), captured.size())
     foreach (data[i]) begin
         `FAIL_UNLESS_EQUAL(data[i], captured[i])
+    end
+`SVTEST_END
+
+`SVTEST(multi)
+    byte data[16][];
+    byte captured[16][];
+
+    foreach (data[i]) begin
+        data[i] = new [$urandom_range(1, 256)];
+    end
+
+    foreach (data[i, j]) begin
+        data[i][j] = $urandom;
+    end
+
+    fork
+    begin
+        foreach (data[i]) begin
+            rx.cb_write(data[i]);
+        end
+    end
+    begin
+        foreach (captured[i]) begin
+            tx.cb_read(captured[i]);
+        end
+    end
+    join
+
+    foreach (data[i]) begin
+        `FAIL_UNLESS_EQUAL(data[i].size(), captured[i].size())
+        foreach (data[i, j]) begin
+            `FAIL_UNLESS_EQUAL(data[i][j], captured[i][j])
+        end
     end
 `SVTEST_END
 
@@ -135,11 +164,9 @@ module logic_axi4_stream_clock_crossing_unit_test;
 
     fork
     begin
-        @(rx.cb_rx);
         rx.cb_write(data);
     end
     begin
-        @(tx.cb_tx);
         tx.cb_read(captured, 0, 0, 3, 0);
     end
     join
@@ -160,11 +187,9 @@ module logic_axi4_stream_clock_crossing_unit_test;
 
     fork
     begin
-        @(rx.cb_rx);
         rx.cb_write(data, 0, 0, 3, 0);
     end
     begin
-        @(tx.cb_tx);
         tx.cb_read(captured);
     end
     join
@@ -185,11 +210,9 @@ module logic_axi4_stream_clock_crossing_unit_test;
 
     fork
     begin
-        @(rx.cb_rx);
         rx.cb_write(data, 0, 0, 3, 0);
     end
     begin
-        @(tx.cb_tx);
         tx.cb_read(captured, 0, 0, 3, 0);
     end
     join

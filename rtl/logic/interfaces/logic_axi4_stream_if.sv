@@ -255,7 +255,7 @@ interface logic_axi4_stream_if #(
                 end
 
                 if (1'b1 === cb_tx.tlast) begin
-                    cb_tx.tready <= '0;
+                    cb_tx.tready <= '1;
                     @(cb_tx);
                     break;
                 end

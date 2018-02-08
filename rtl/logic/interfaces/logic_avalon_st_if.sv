@@ -274,7 +274,7 @@ interface logic_avalon_st_if #(
                 end
 
                 if (1'b1 === cb_tx.endofpacket) begin
-                    cb_tx.ready <= '0;
+                    cb_tx.ready <= '1;
                     @(cb_tx);
                     break;
                 end
