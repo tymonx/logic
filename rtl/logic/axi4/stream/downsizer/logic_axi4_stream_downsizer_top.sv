@@ -16,10 +16,11 @@
 `include "logic.svh"
 
 module logic_axi4_stream_downsizer_top #(
-    int DOWNSIZE = 4,
-    int TDATA_BYTES = `LOGIC_AXI4_STREAM_TDATA_BYTES,
+    int RX_TDATA_BYTES = 4 * `LOGIC_AXI4_STREAM_TDATA_BYTES,
+    int TX_TDATA_BYTES = `LOGIC_AXI4_STREAM_TDATA_BYTES,
+    int RX_TUSER_WIDTH = `LOGIC_AXI4_STREAM_TUSER_WIDTH,
+    int TX_TUSER_WIDTH = `LOGIC_AXI4_STREAM_TUSER_WIDTH,
     int TDEST_WIDTH = `LOGIC_AXI4_STREAM_TDEST_WIDTH,
-    int TUSER_WIDTH = `LOGIC_AXI4_STREAM_TUSER_WIDTH,
     int TID_WIDTH = `LOGIC_AXI4_STREAM_TID_WIDTH
 ) (
     input aclk,
@@ -27,34 +28,34 @@ module logic_axi4_stream_downsizer_top #(
     /* Rx */
     input rx_tlast,
     input rx_tvalid,
-    input [DOWNSIZE-1:0][TDATA_BYTES-1:0][7:0] rx_tdata,
-    input [DOWNSIZE-1:0][TDATA_BYTES-1:0] rx_tstrb,
-    input [DOWNSIZE-1:0][TDATA_BYTES-1:0] rx_tkeep,
-    input [DOWNSIZE-1:0][TUSER_WIDTH-1:0] rx_tuser,
+    input [RX_TDATA_BYTES-1:0][7:0] rx_tdata,
+    input [RX_TDATA_BYTES-1:0] rx_tstrb,
+    input [RX_TDATA_BYTES-1:0] rx_tkeep,
+    input [RX_TUSER_WIDTH-1:0] rx_tuser,
     input [TDEST_WIDTH-1:0] rx_tdest,
     input [TID_WIDTH-1:0] rx_tid,
     output logic rx_tready,
     /* Tx */
     output logic tx_tlast,
     output logic tx_tvalid,
-    output logic [TDATA_BYTES-1:0][7:0] tx_tdata,
-    output logic [TDATA_BYTES-1:0] tx_tstrb,
-    output logic [TDATA_BYTES-1:0] tx_tkeep,
-    output logic [TUSER_WIDTH-1:0] tx_tuser,
+    output logic [TX_TDATA_BYTES-1:0][7:0] tx_tdata,
+    output logic [TX_TDATA_BYTES-1:0] tx_tstrb,
+    output logic [TX_TDATA_BYTES-1:0] tx_tkeep,
+    output logic [TX_TUSER_WIDTH-1:0] tx_tuser,
     output logic [TDEST_WIDTH-1:0] tx_tdest,
     output logic [TID_WIDTH-1:0] tx_tid,
     input tx_tready
 );
     logic_axi4_stream_if #(
-        .TDATA_BYTES(DOWNSIZE * TDATA_BYTES),
-        .TUSER_WIDTH(DOWNSIZE * TUSER_WIDTH),
+        .TDATA_BYTES(RX_TDATA_BYTES),
+        .TUSER_WIDTH(RX_TUSER_WIDTH),
         .TDEST_WIDTH(TDEST_WIDTH),
         .TID_WIDTH(TID_WIDTH)
     ) rx (.*);
 
     logic_axi4_stream_if #(
-        .TDATA_BYTES(TDATA_BYTES),
-        .TUSER_WIDTH(TUSER_WIDTH),
+        .TDATA_BYTES(TX_TDATA_BYTES),
+        .TUSER_WIDTH(TX_TUSER_WIDTH),
         .TDEST_WIDTH(TDEST_WIDTH),
         .TID_WIDTH(TID_WIDTH)
     ) tx (.*);
@@ -62,10 +63,11 @@ module logic_axi4_stream_downsizer_top #(
     `LOGIC_AXI4_STREAM_IF_RX_ASSIGN(rx, rx);
 
     logic_axi4_stream_downsizer #(
-        .DOWNSIZE(DOWNSIZE),
-        .TDATA_BYTES(TDATA_BYTES),
+        .RX_TDATA_BYTES(RX_TDATA_BYTES),
+        .TX_TDATA_BYTES(TX_TDATA_BYTES),
+        .RX_TUSER_WIDTH(RX_TUSER_WIDTH),
+        .TX_TUSER_WIDTH(TX_TUSER_WIDTH),
         .TDEST_WIDTH(TDEST_WIDTH),
-        .TUSER_WIDTH(TUSER_WIDTH),
         .TID_WIDTH(TID_WIDTH)
     ) unit (.*);
 

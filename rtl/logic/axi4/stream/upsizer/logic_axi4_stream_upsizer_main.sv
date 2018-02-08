@@ -20,14 +20,15 @@
  * Upsize tdata and tuser output signals for next module.
  *
  * Parameters:
- *  UPSIZE      - Upsize tdata and tuser output signals by this value.
- *  TDATA_BYTES - Number of bytes for tdata signal.
- *  TDEST_WIDTH - Number of bits for tdest signal.
- *  TUSER_WIDTH - Number of bits for tuser signal.
- *  TID_WIDTH   - Number of bits for tid signal.
- *  USE_TLAST   - Enable or disable tlast signal.
- *  USE_TKEEP   - Enable or disable tkeep signal.
- *  USE_TSTRB   - Enable or disable tstrb signal.
+ *  RX_TDATA_BYTES  - Number of bytes for tdata signal.
+ *  TX_TDATA_BYTES  - Number of bytes for tdata signal.
+ *  RX_TUSER_WIDTH  - Number of bits for tuser signal.
+ *  TX_TUSER_WIDTH  - Number of bits for tuser signal.
+ *  TDEST_WIDTH     - Number of bits for tdest signal.
+ *  TID_WIDTH       - Number of bits for tid signal.
+ *  USE_TLAST       - Enable or disable tlast signal.
+ *  USE_TKEEP       - Enable or disable tkeep signal.
+ *  USE_TSTRB       - Enable or disable tstrb signal.
   *
  * Ports:
  *  aclk        - Clock.
@@ -36,10 +37,11 @@
  *  tx          - AXI4-Stream interface.
  */
 module logic_axi4_stream_upsizer_main #(
-    int UPSIZE = 1,
-    int TDATA_BYTES = 1,
+    int RX_TDATA_BYTES = 1,
+    int TX_TDATA_BYTES = 1,
+    int RX_TUSER_WIDTH = 1,
+    int TX_TUSER_WIDTH = 1,
     int TDEST_WIDTH = 1,
-    int TUSER_WIDTH = 1,
     int TID_WIDTH = 1,
     int USE_TLAST = 1,
     int USE_TKEEP = 1,
@@ -50,9 +52,9 @@ module logic_axi4_stream_upsizer_main #(
     `LOGIC_MODPORT(logic_axi4_stream_if, rx) rx,
     `LOGIC_MODPORT(logic_axi4_stream_if, tx) tx
 );
-    localparam int M_TDATA_BYTES = (TDATA_BYTES > 0) ? TDATA_BYTES : 1;
+    localparam int M_TDATA_BYTES = (RX_TDATA_BYTES > 0) ? RX_TDATA_BYTES : 1;
+    localparam int M_TUSER_WIDTH = (RX_TUSER_WIDTH > 0) ? RX_TUSER_WIDTH : 1;
     localparam int M_TDEST_WIDTH = (TDEST_WIDTH > 0) ? TDEST_WIDTH : 1;
-    localparam int M_TUSER_WIDTH = (TUSER_WIDTH > 0) ? TUSER_WIDTH : 1;
     localparam int M_TID_WIDTH = (TID_WIDTH > 0) ? TID_WIDTH : 1;
 
     logic_axi4_stream_if #(
@@ -66,9 +68,9 @@ module logic_axi4_stream_upsizer_main #(
     );
 
     logic_axi4_stream_buffer #(
-        .TDATA_BYTES(TDATA_BYTES),
+        .TDATA_BYTES(RX_TDATA_BYTES),
+        .TUSER_WIDTH(RX_TUSER_WIDTH),
         .TDEST_WIDTH(TDEST_WIDTH),
-        .TUSER_WIDTH(TUSER_WIDTH),
         .TID_WIDTH(TID_WIDTH),
         .USE_TLAST(USE_TLAST),
         .USE_TKEEP(USE_TKEEP),
@@ -80,10 +82,11 @@ module logic_axi4_stream_upsizer_main #(
     );
 
     logic_axi4_stream_upsizer_unit #(
-        .UPSIZE(UPSIZE),
-        .TDATA_BYTES(TDATA_BYTES),
+        .RX_TDATA_BYTES(RX_TDATA_BYTES),
+        .TX_TDATA_BYTES(TX_TDATA_BYTES),
+        .RX_TUSER_WIDTH(RX_TUSER_WIDTH),
+        .TX_TUSER_WIDTH(TX_TUSER_WIDTH),
         .TDEST_WIDTH(TDEST_WIDTH),
-        .TUSER_WIDTH(TUSER_WIDTH),
         .TID_WIDTH(TID_WIDTH),
         .USE_TLAST(USE_TLAST),
         .USE_TKEEP(USE_TKEEP),

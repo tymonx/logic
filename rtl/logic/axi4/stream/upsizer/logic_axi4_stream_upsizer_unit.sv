@@ -20,14 +20,15 @@
  * Upsize tdata and tuser output signals for next module.
  *
  * Parameters:
- *  UPSIZE      - Upsize tdata and tuser output signals by this value.
- *  TDATA_BYTES - Number of bytes for tdata signal.
- *  TDEST_WIDTH - Number of bits for tdest signal.
- *  TUSER_WIDTH - Number of bits for tuser signal.
- *  TID_WIDTH   - Number of bits for tid signal.
- *  USE_TLAST   - Enable or disable tlast signal.
- *  USE_TKEEP   - Enable or disable tkeep signal.
- *  USE_TSTRB   - Enable or disable tstrb signal.
+ *  RX_TDATA_BYTES  - Number of bytes for tdata signal.
+ *  TX_TDATA_BYTES  - Number of bytes for tdata signal.
+ *  RX_TUSER_WIDTH  - Number of bits for tuser signal.
+ *  TX_TUSER_WIDTH  - Number of bits for tuser signal.
+ *  TDEST_WIDTH     - Number of bits for tdest signal.
+ *  TID_WIDTH       - Number of bits for tid signal.
+ *  USE_TLAST       - Enable or disable tlast signal.
+ *  USE_TKEEP       - Enable or disable tkeep signal.
+ *  USE_TSTRB       - Enable or disable tstrb signal.
   *
  * Ports:
  *  aclk        - Clock.
@@ -36,14 +37,16 @@
  *  tx          - AXI4-Stream interface.
  */
 module logic_axi4_stream_upsizer_unit #(
-    int UPSIZE = 1,
-    int TDATA_BYTES = 1,
+    int RX_TDATA_BYTES = 1,
+    int TX_TDATA_BYTES = 1,
+    int RX_TUSER_WIDTH = 1,
+    int TX_TUSER_WIDTH = 1,
     int TDEST_WIDTH = 1,
-    int TUSER_WIDTH = 1,
     int TID_WIDTH = 1,
     int USE_TLAST = 1,
     int USE_TKEEP = 1,
     int USE_TSTRB = 1,
+    int UPSIZE = TX_TDATA_BYTES / RX_TDATA_BYTES,
     int INDEX_WIDTH = (UPSIZE >= 2) ? $clog2(UPSIZE) : 1
 ) (
     input aclk,
@@ -51,11 +54,22 @@ module logic_axi4_stream_upsizer_unit #(
     `LOGIC_MODPORT(logic_axi4_stream_if, rx) rx,
     `LOGIC_MODPORT(logic_axi4_stream_if, tx) tx
 );
-    localparam INDEX_MAX = UPSIZE - 1;
-    localparam TLAST_WIDTH = (USE_TLAST > 0) ? 1 : 0;
-    localparam TDATA_WIDTH = TDATA_BYTES * 8;
-    localparam TSTRB_WIDTH = (USE_TSTRB > 0) ? TDATA_BYTES : 0;
-    localparam TKEEP_WIDTH = (USE_TKEEP > 0) ? TDATA_BYTES : 0;
+    localparam int TDATA_BYTES = RX_TDATA_BYTES;
+
+    localparam int INDEX_MAX = UPSIZE - 1;
+    localparam int TLAST_WIDTH = (USE_TLAST > 0) ? 1 : 0;
+    localparam int TDATA_WIDTH = TDATA_BYTES * 8;
+    localparam int TSTRB_WIDTH = (USE_TSTRB > 0) ? TDATA_BYTES : 0;
+    localparam int TKEEP_WIDTH = (USE_TKEEP > 0) ? TDATA_BYTES : 0;
+
+    localparam real UPSIZE_REAL = real'(TX_TDATA_BYTES)/real'(RX_TDATA_BYTES);
+    localparam int UPSIZE_FLOOR = int'(UPSIZE_REAL + 0.499);
+
+    initial begin: design_rule_checks
+        `LOGIC_DRC_EQUAL(UPSIZE, UPSIZE_FLOOR)
+        `LOGIC_DRC_EQUAL_OR_LESS_THAN(RX_TDATA_BYTES, TX_TDATA_BYTES)
+        `LOGIC_DRC_EQUAL_OR_LESS_THAN(RX_TUSER_WIDTH, TX_TUSER_WIDTH)
+    end
 
     enum logic [1:0] {
         FSM_UPSIZE,
@@ -313,29 +327,51 @@ module logic_axi4_stream_upsizer_unit #(
 `endif
         end
 
-        if (TUSER_WIDTH > 0) begin: tuser_enabled
-            logic [UPSIZE-1:0][TUSER_WIDTH-1:0] buffer;
+        if ((RX_TUSER_WIDTH > 0) && (TX_TUSER_WIDTH > 0)) begin: tuser_enabled
+            if (RX_TUSER_WIDTH == TX_TUSER_WIDTH) begin: pass
+                logic [RX_TUSER_WIDTH-1:0] buffer;
 
-            always_ff @(posedge aclk) begin
-                if (write[0]) begin
-                    buffer[0] <= rx.tuser;
-                end
-            end
-
-            for (k = 1; k < UPSIZE; ++k) begin: upsize
                 always_ff @(posedge aclk) begin
                     if (write[0]) begin
-                        buffer[k] <= '0;
+                        buffer <= rx.tuser;
                     end
-                    else if (write[k]) begin
-                        buffer[k] <= rx.tuser;
+                end
+
+                always_ff @(posedge aclk) begin
+                    if (tx.tready) begin
+                        tx.tuser <= buffer;
                     end
                 end
             end
+            else if ((UPSIZE * RX_TUSER_WIDTH) == TX_TUSER_WIDTH) begin: up
+                logic [UPSIZE-1:0][RX_TUSER_WIDTH-1:0] buffer;
 
-            always_ff @(posedge aclk) begin
-                if (tx.tready) begin
-                    tx.tuser <= buffer;
+                always_ff @(posedge aclk) begin
+                    if (write[0]) begin
+                        buffer[0] <= rx.tuser;
+                    end
+                end
+
+                for (k = 1; k < UPSIZE; ++k) begin: upsize
+                    always_ff @(posedge aclk) begin
+                        if (write[0]) begin
+                            buffer[k] <= '0;
+                        end
+                        else if (write[k]) begin
+                            buffer[k] <= rx.tuser;
+                        end
+                    end
+                end
+
+                always_ff @(posedge aclk) begin
+                    if (tx.tready) begin
+                        tx.tuser <= buffer;
+                    end
+                end
+            end
+            else begin: not_supported
+                initial begin
+                    `LOGIC_DRC_NOT_SUPPORTED(RX_TUSER_WIDTH)
                 end
             end
         end

@@ -20,14 +20,15 @@
  * Downsize tdata and tuser output signals for next module.
  *
  * Parameters:
- *  DOWNSIZE    - Downsize tdata and tuser output signals by this value.
- *  TDATA_BYTES - Number of bytes for tdata signal.
- *  TDEST_WIDTH - Number of bits for tdest signal.
- *  TUSER_WIDTH - Number of bits for tuser signal.
- *  TID_WIDTH   - Number of bits for tid signal.
- *  USE_TLAST   - Enable or disable tlast signal.
- *  USE_TKEEP   - Enable or disable tkeep signal.
- *  USE_TSTRB   - Enable or disable tstrb signal.
+ *  RX_TDATA_BYTES  - Number of bytes for tdata signal.
+ *  TX_TDATA_BYTES  - Number of bytes for tdata signal.
+ *  RX_TUSER_WIDTH  - Number of bits for tuser signal.
+ *  TX_TUSER_WIDTH  - Number of bits for tuser signal.
+ *  TDEST_WIDTH     - Number of bits for tdest signal.
+ *  TID_WIDTH       - Number of bits for tid signal.
+ *  USE_TLAST       - Enable or disable tlast signal.
+ *  USE_TKEEP       - Enable or disable tkeep signal.
+ *  USE_TSTRB       - Enable or disable tstrb signal.
  *
  * Ports:
  *  aclk        - Clock.
@@ -36,10 +37,11 @@
  *  tx          - AXI4-Stream interface.
  */
 module logic_axi4_stream_downsizer #(
-    int DOWNSIZE = 1,
-    int TDATA_BYTES = 1,
+    int RX_TDATA_BYTES = 1,
+    int TX_TDATA_BYTES = 1,
+    int RX_TUSER_WIDTH = 1,
+    int TX_TUSER_WIDTH = 1,
     int TDEST_WIDTH = 1,
-    int TUSER_WIDTH = 1,
     int TID_WIDTH = 1,
     int USE_TLAST = 1,
     int USE_TKEEP = 1,
@@ -58,10 +60,11 @@ module logic_axi4_stream_downsizer #(
     );
 
     logic_axi4_stream_downsizer_main #(
-        .DOWNSIZE(DOWNSIZE),
-        .TDATA_BYTES(TDATA_BYTES),
+        .RX_TDATA_BYTES(RX_TDATA_BYTES),
+        .TX_TDATA_BYTES(TX_TDATA_BYTES),
+        .RX_TUSER_WIDTH(RX_TUSER_WIDTH),
+        .TX_TUSER_WIDTH(TX_TUSER_WIDTH),
         .TDEST_WIDTH(TDEST_WIDTH),
-        .TUSER_WIDTH(TUSER_WIDTH),
         .TID_WIDTH(TID_WIDTH),
         .USE_TLAST(USE_TLAST),
         .USE_TKEEP(USE_TKEEP),

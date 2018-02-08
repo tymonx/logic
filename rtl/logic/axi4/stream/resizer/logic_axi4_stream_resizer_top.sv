@@ -15,9 +15,9 @@
 
 `include "logic.svh"
 
-module logic_axi4_stream_upsizer_top #(
+module logic_axi4_stream_resizer_top #(
     int RX_TDATA_BYTES = `LOGIC_AXI4_STREAM_TDATA_BYTES,
-    int TX_TDATA_BYTES = 4 * `LOGIC_AXI4_STREAM_TDATA_BYTES,
+    int TX_TDATA_BYTES = 2 * `LOGIC_AXI4_STREAM_TDATA_BYTES,
     int RX_TUSER_WIDTH = `LOGIC_AXI4_STREAM_TUSER_WIDTH,
     int TX_TUSER_WIDTH = `LOGIC_AXI4_STREAM_TUSER_WIDTH,
     int TDEST_WIDTH = `LOGIC_AXI4_STREAM_TDEST_WIDTH,
@@ -62,7 +62,7 @@ module logic_axi4_stream_upsizer_top #(
 
     `LOGIC_AXI4_STREAM_IF_RX_ASSIGN(rx, rx);
 
-    logic_axi4_stream_upsizer #(
+    logic_axi4_stream_resizer #(
         .RX_TDATA_BYTES(RX_TDATA_BYTES),
         .TX_TDATA_BYTES(TX_TDATA_BYTES),
         .RX_TUSER_WIDTH(RX_TUSER_WIDTH),

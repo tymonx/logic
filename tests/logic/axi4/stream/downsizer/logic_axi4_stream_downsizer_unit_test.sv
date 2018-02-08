@@ -21,8 +21,8 @@ module logic_axi4_stream_downsizer_unit_test;
     string name = "logic_axi4_stream_downsizer_unit_test";
     svunit_testcase svunit_ut;
 
-    localparam int TDATA_BYTES = 4;
-    localparam int DOWNSIZE = 4;
+    localparam int RX_TDATA_BYTES = 8;
+    localparam int TX_TDATA_BYTES = 4;
 
     logic aclk = 0;
     logic areset_n = 0;
@@ -30,21 +30,20 @@ module logic_axi4_stream_downsizer_unit_test;
     initial forever #1 aclk = ~aclk;
 
     logic_axi4_stream_if #(
-        .TDATA_BYTES(DOWNSIZE * TDATA_BYTES),
-        .TUSER_WIDTH(DOWNSIZE)
+        .TDATA_BYTES(RX_TDATA_BYTES)
     ) rx (
         .*
     );
 
     logic_axi4_stream_if #(
-        .TDATA_BYTES(TDATA_BYTES)
+        .TDATA_BYTES(TX_TDATA_BYTES)
     ) tx (
         .*
     );
 
     logic_axi4_stream_downsizer #(
-        .DOWNSIZE(DOWNSIZE),
-        .TDATA_BYTES(TDATA_BYTES)
+        .RX_TDATA_BYTES(RX_TDATA_BYTES),
+        .TX_TDATA_BYTES(TX_TDATA_BYTES)
     )
     dut (
         .*
