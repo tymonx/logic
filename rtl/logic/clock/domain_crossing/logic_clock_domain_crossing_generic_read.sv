@@ -34,7 +34,7 @@
  */
 module logic_clock_domain_crossing_generic_read #(
     int DATA_WIDTH = 1,
-    int ADDRESS_WIDTH = 1
+    int ADDRESS_WIDTH = 3
 ) (
     input tx_aclk,
     input tx_areset_n,
@@ -47,16 +47,14 @@ module logic_clock_domain_crossing_generic_read #(
     input [ADDRESS_WIDTH-1:0] write_pointer_synced
 );
     initial begin: design_rule_checks
-        `LOGIC_DRC_EQUAL_OR_GREATER_THAN(ADDRESS_WIDTH, 2)
+        `LOGIC_DRC_EQUAL_OR_GREATER_THAN(ADDRESS_WIDTH, 3)
     end
 
     localparam ALMOST_EMPTY = 4;
 
-    enum logic [1:0] {
+    enum logic [0:0] {
         FSM_IDLE,
-        FSM_WAIT,
-        FSM_READ,
-        FSM_BURST
+        FSM_DATA
     } fsm_state;
 
     logic empty;
@@ -74,21 +72,15 @@ module logic_clock_domain_crossing_generic_read #(
 
     always_ff @(posedge tx_aclk or negedge tx_areset_n) begin
         if (!tx_areset_n) begin
-            empty <= '1;
-        end
-        else begin
-            empty <= (write_pointer_synced == read_pointer);
-        end
-    end
-
-    always_ff @(posedge tx_aclk or negedge tx_areset_n) begin
-        if (!tx_areset_n) begin
             almost_empty <= '1;
         end
         else begin
             almost_empty <= (difference <= ALMOST_EMPTY[ADDRESS_WIDTH-1:0]);
         end
     end
+
+    always_comb empty = almost_empty &&
+        (write_pointer_synced[2:0] == read_pointer[2:0]);
 
     always_ff @(posedge tx_aclk or negedge tx_areset_n) begin
         if (!tx_areset_n) begin
@@ -97,36 +89,14 @@ module logic_clock_domain_crossing_generic_read #(
         else begin
             unique case (fsm_state)
             FSM_IDLE: begin
-                if (!almost_empty) begin
-                    fsm_state <= FSM_BURST;
-                end
-                else if (!empty) begin
-                    fsm_state <= FSM_WAIT;
+                if (!empty) begin
+                    fsm_state <= FSM_DATA;
                 end
             end
-            FSM_WAIT: begin
-                fsm_state <= FSM_READ;
-            end
-            FSM_READ: begin
-                if (tx_tready) begin
-                    if (!almost_empty) begin
-                        fsm_state <= FSM_BURST;
-                    end
-                    else if (!empty) begin
-                        fsm_state <= FSM_WAIT;
-                    end
-                    else begin
-                        fsm_state <= FSM_IDLE;
-                    end
+            FSM_DATA: begin
+                if (tx_tready && empty) begin
+                    fsm_state <= FSM_IDLE;
                 end
-            end
-            FSM_BURST: begin
-                if (tx_tready && almost_empty) begin
-                    fsm_state <= FSM_READ;
-                end
-            end
-            default: begin
-                fsm_state <= FSM_IDLE;
             end
             endcase
         end
@@ -137,11 +107,8 @@ module logic_clock_domain_crossing_generic_read #(
         FSM_IDLE: begin
             read_enable = !empty;
         end
-        FSM_READ: begin
+        FSM_DATA: begin
             read_enable = !empty && tx_tready;
-        end
-        FSM_BURST: begin
-            read_enable = tx_tready;
         end
         default: begin
             read_enable = '0;
@@ -163,7 +130,7 @@ module logic_clock_domain_crossing_generic_read #(
             tx_tvalid <= '0;
         end
         else if (tx_tready) begin
-            tx_tvalid <= (FSM_READ == fsm_state) || (FSM_BURST == fsm_state);
+            tx_tvalid <= (FSM_DATA == fsm_state);
         end
     end
 

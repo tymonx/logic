@@ -162,8 +162,20 @@ module logic_clock_domain_crossing_intel #(
         endcase
     end
 
-    always_comb tx_tvalid = (FSM_DATA == fsm_state);
-    always_comb tx_tdata = read_data;
+    always_ff @(posedge tx_aclk or negedge areset_n) begin
+        if (!areset_n) begin
+            tx_tvalid <= '0;
+        end
+        else if (tx_tready) begin
+            tx_tvalid <= (FSM_DATA == fsm_state);
+        end
+    end
+
+    always_ff @(posedge tx_aclk) begin
+        if (tx_tready) begin
+            tx_tdata <= read_data;
+        end
+    end
 
 `ifndef LOGIC_STD_OVL_DISABLED
     logic [`OVL_FIRE_WIDTH-1:0] assert_wrusedw_overflow_fire;

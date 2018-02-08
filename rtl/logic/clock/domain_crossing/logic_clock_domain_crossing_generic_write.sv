@@ -34,7 +34,7 @@
  */
 module logic_clock_domain_crossing_generic_write #(
     int DATA_WIDTH = 1,
-    int ADDRESS_WIDTH = 1
+    int ADDRESS_WIDTH = 3
 ) (
     input rx_aclk,
     input rx_areset_n,
@@ -47,7 +47,7 @@ module logic_clock_domain_crossing_generic_write #(
     input [ADDRESS_WIDTH-1:0] read_pointer_synced
 );
     initial begin: design_rule_checks
-        `LOGIC_DRC_EQUAL_OR_GREATER_THAN(ADDRESS_WIDTH, 2)
+        `LOGIC_DRC_EQUAL_OR_GREATER_THAN(ADDRESS_WIDTH, 3)
     end
 
     localparam ALMOST_FULL = (2**ADDRESS_WIDTH) - 4;
