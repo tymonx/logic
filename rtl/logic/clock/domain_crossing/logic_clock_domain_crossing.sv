@@ -20,8 +20,8 @@
  * Parameters:
  *  WIDTH       - Number of bits for input and output data signals.
  *  CAPACITY    - Number of elements that can be stored inside module.
+ *  GENERIC     - Enable or disable generic implementation.
  *  TARGET      - Target implementation.
- *  SYNCHRONIZER_TARGET - Target implementation for synchronizer.
  *
  * Ports:
  *  areset_n    - Asynchronous active-low reset.
@@ -37,8 +37,8 @@
 module logic_clock_domain_crossing #(
     int WIDTH = 1,
     int CAPACITY = 256,
-    logic_pkg::target_t TARGET = `LOGIC_CONFIG_TARGET,
-    logic_pkg::target_t SYNCHRONIZER_TARGET = `LOGIC_CONFIG_TARGET
+    int GENERIC = 1,
+    logic_pkg::target_t TARGET = `LOGIC_CONFIG_TARGET
 ) (
     input areset_n,
     input rx_aclk,
@@ -51,11 +51,14 @@ module logic_clock_domain_crossing #(
     output logic [WIDTH-1:0] tx_tdata
 );
     initial begin: design_rule_checks
-        `LOGIC_DRC_EQUAL_OR_GREATER_THAN(CAPACITY, 4)
+        `LOGIC_DRC_EQUAL_OR_GREATER_THAN(CAPACITY, 8)
     end
 
+    localparam logic_pkg::target_t M_TARGET = (GENERIC > 0) ?
+        logic_pkg::TARGET_GENERIC : TARGET;
+
     generate
-        case (TARGET)
+        case (M_TARGET)
         logic_pkg::TARGET_INTEL,
         logic_pkg::TARGET_INTEL_ARRIA_10: begin: intel
             logic_clock_domain_crossing_intel #(
@@ -67,7 +70,7 @@ module logic_clock_domain_crossing #(
             logic_clock_domain_crossing_generic #(
                 .WIDTH(WIDTH),
                 .CAPACITY(CAPACITY),
-                .SYNCHRONIZER_TARGET(SYNCHRONIZER_TARGET)
+                .TARGET(TARGET)
             ) unit (.*);
         end
         endcase

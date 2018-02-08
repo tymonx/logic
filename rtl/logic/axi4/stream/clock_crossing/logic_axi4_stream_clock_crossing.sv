@@ -29,6 +29,7 @@
  *  USE_TSTRB   - Enable or disable tstrb signal.
  *  CAPACITY    - Number of single data transactions that can be store in
  *                internal queue memory (FIFO capacity).
+ *  GENERIC     - Enable or disable generic implementation.
  *  TARGET      - Target device implementation.
  *
  * Ports:
@@ -47,6 +48,7 @@ module logic_axi4_stream_clock_crossing #(
     int USE_TKEEP = 1,
     int USE_TSTRB = 1,
     int CAPACITY = 256,
+    int GENERIC = 1,
     logic_pkg::target_t TARGET = `LOGIC_CONFIG_TARGET
 ) (
     input areset_n,
@@ -174,6 +176,7 @@ module logic_axi4_stream_clock_crossing #(
     logic_clock_domain_crossing #(
         .WIDTH(WIDTH),
         .TARGET(TARGET),
+        .GENERIC(GENERIC),
         .CAPACITY(CAPACITY)
     )
     unit (

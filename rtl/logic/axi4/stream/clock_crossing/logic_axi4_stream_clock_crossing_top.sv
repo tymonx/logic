@@ -21,6 +21,7 @@ module logic_axi4_stream_clock_crossing_top #(
     int TUSER_WIDTH = `LOGIC_AXI4_STREAM_TUSER_WIDTH,
     int TID_WIDTH = `LOGIC_AXI4_STREAM_TID_WIDTH,
     int CAPACITY = 256,
+    int GENERIC = 1,
     logic_pkg::target_t TARGET = `LOGIC_CONFIG_TARGET
 ) (
     input areset_n,
@@ -75,6 +76,7 @@ module logic_axi4_stream_clock_crossing_top #(
         .TUSER_WIDTH(TUSER_WIDTH),
         .TID_WIDTH(TID_WIDTH),
         .CAPACITY(CAPACITY),
+        .GENERIC(GENERIC),
         .TARGET(TARGET)
     ) unit (.*);
 

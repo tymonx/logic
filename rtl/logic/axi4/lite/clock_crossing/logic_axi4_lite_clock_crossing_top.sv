@@ -19,6 +19,7 @@ module logic_axi4_lite_clock_crossing_top #(
     int DATA_BYTES = 4,
     int ADDRESS_WIDTH = 1,
     int CAPACITY = 256,
+    int GENERIC = 1,
     logic_pkg::target_t TARGET = `LOGIC_CONFIG_TARGET
 ) (
     input areset_n,
@@ -93,6 +94,7 @@ module logic_axi4_lite_clock_crossing_top #(
 
     logic_axi4_lite_clock_crossing #(
         .TARGET(TARGET),
+        .GENERIC(GENERIC),
         .CAPACITY(CAPACITY),
         .DATA_BYTES(DATA_BYTES),
         .ADDRESS_WIDTH(ADDRESS_WIDTH)

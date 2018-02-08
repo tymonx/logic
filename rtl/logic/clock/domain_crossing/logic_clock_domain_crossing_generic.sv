@@ -20,6 +20,7 @@
  * Parameters:
  *  WIDTH       - Number of bits for input and output data signals.
  *  CAPACITY    - Number of elements that can be stored inside module.
+ *  TARGET      - Target implementation.
  *
  * Ports:
  *  areset_n    - Asynchronous active-low reset.
@@ -36,7 +37,7 @@ module logic_clock_domain_crossing_generic #(
     int WIDTH = 1,
     int CAPACITY = 256,
     int ADDRESS_WIDTH = $clog2(CAPACITY),
-    logic_pkg::target_t SYNCHRONIZER_TARGET = `LOGIC_CONFIG_TARGET
+    logic_pkg::target_t TARGET = `LOGIC_CONFIG_TARGET
 ) (
     input areset_n,
     input rx_aclk,
@@ -104,7 +105,7 @@ module logic_clock_domain_crossing_generic #(
     );
 
     logic_clock_domain_crossing_generic_write_sync #(
-        .TARGET(SYNCHRONIZER_TARGET),
+        .TARGET(TARGET),
         .ADDRESS_WIDTH(ADDRESS_WIDTH)
     )
     write_sync (
@@ -112,7 +113,7 @@ module logic_clock_domain_crossing_generic #(
     );
 
     logic_clock_domain_crossing_generic_read_sync #(
-        .TARGET(SYNCHRONIZER_TARGET),
+        .TARGET(TARGET),
         .ADDRESS_WIDTH(ADDRESS_WIDTH)
     )
     read_sync (

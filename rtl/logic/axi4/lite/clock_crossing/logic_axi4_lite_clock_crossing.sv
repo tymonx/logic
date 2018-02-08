@@ -24,6 +24,7 @@
  *  ADDRESS_WIDTH   - Number of bits for awaddr and araddr signals.
  *  CAPACITY        - Number of single data transactions that can be store in
  *                    internal queue memory (FIFO capacity).
+ *  GENERIC         - Enable or disable generic implementation.
  *  TARGET          - Target implementation.
  *
  * Ports:
@@ -37,6 +38,7 @@ module logic_axi4_lite_clock_crossing #(
     int DATA_BYTES = 4,
     int ADDRESS_WIDTH = 1,
     int CAPACITY = 256,
+    int GENERIC = 1,
     logic_pkg::target_t TARGET = `LOGIC_CONFIG_TARGET
 ) (
     input areset_n,
@@ -59,6 +61,7 @@ module logic_axi4_lite_clock_crossing #(
     logic_clock_domain_crossing #(
         .WIDTH(PROT_WIDTH + ADDRESS_WIDTH),
         .CAPACITY(CAPACITY),
+        .GENERIC(GENERIC),
         .TARGET(TARGET)
     )
     write_address_channel (
@@ -76,6 +79,7 @@ module logic_axi4_lite_clock_crossing #(
     logic_clock_domain_crossing #(
         .WIDTH(STRB_WIDTH + DATA_WIDTH),
         .CAPACITY(CAPACITY),
+        .GENERIC(GENERIC),
         .TARGET(TARGET)
     )
     write_data_channel (
@@ -93,6 +97,7 @@ module logic_axi4_lite_clock_crossing #(
     logic_clock_domain_crossing #(
         .WIDTH(RESP_WIDTH),
         .CAPACITY(CAPACITY),
+        .GENERIC(GENERIC),
         .TARGET(TARGET)
     )
     write_response_channel (
@@ -110,6 +115,7 @@ module logic_axi4_lite_clock_crossing #(
     logic_clock_domain_crossing #(
         .WIDTH(PROT_WIDTH + ADDRESS_WIDTH),
         .CAPACITY(CAPACITY),
+        .GENERIC(GENERIC),
         .TARGET(TARGET)
     )
     read_address_channel (
@@ -127,6 +133,7 @@ module logic_axi4_lite_clock_crossing #(
     logic_clock_domain_crossing #(
         .WIDTH(RESP_WIDTH + DATA_WIDTH),
         .CAPACITY(CAPACITY),
+        .GENERIC(GENERIC),
         .TARGET(TARGET)
     )
     read_data_channel (
