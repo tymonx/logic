@@ -19,7 +19,7 @@
  *
  * Parameters:
  *  GROUP       - Group outputs.
- *  OFFSET      - Offset ID.
+ *  MAP         - Map tdest (or tid) to demultiplexer output.
  *  OUTPUTS     - Number of outputs.
  *  TDATA_BYTES - Number of bytes for tdata signal.
  *  TDEST_WIDTH - Number of bits for tdest signal.
@@ -38,7 +38,6 @@
  */
 module logic_axi4_stream_demux_main #(
     int GROUP = 8,
-    int OFFSET = 0,
     int OUTPUTS = 2,
     int TDATA_BYTES = 1,
     int TDEST_WIDTH = 1,
@@ -47,7 +46,9 @@ module logic_axi4_stream_demux_main #(
     int USE_TKEEP = 1,
     int USE_TSTRB = 1,
     int USE_TLAST = 1,
-    int USE_TID = 0
+    int USE_TID = 0,
+    int MAP_WIDTH = (USE_TID > 0) ? TID_WIDTH : TUSER_WIDTH,
+    bit [OUTPUTS-1:0][MAP_WIDTH-1:0] MAP = init_map()
 ) (
     input aclk,
     input areset_n,
@@ -57,14 +58,27 @@ module logic_axi4_stream_demux_main #(
     localparam int DEMUXES = (OUTPUTS + GROUP - 1) / GROUP;
     localparam int STAGES = DEMUXES + 1;
 
+    localparam int M_TDATA_BYTES = (TDATA_BYTES > 0) ? TDATA_BYTES : 1;
+    localparam int M_TDEST_WIDTH = (TDEST_WIDTH > 0) ? TDEST_WIDTH : 1;
+    localparam int M_TUSER_WIDTH = (TUSER_WIDTH > 0) ? TUSER_WIDTH : 1;
+    localparam int M_TID_WIDTH = (TID_WIDTH > 0) ? TID_WIDTH : 1;
+
+    typedef bit [OUTPUTS-1:0][MAP_WIDTH-1:0] map_t;
+
+    function map_t init_map;
+        for (int i = 0; i < OUTPUTS; ++i) begin
+            init_map[i] = i[MAP_WIDTH-1:0];
+        end
+    endfunction
+
     genvar k;
     genvar n;
 
     logic_axi4_stream_if #(
-        .TDATA_BYTES((TDATA_BYTES > 0) ? TDATA_BYTES : 1),
-        .TDEST_WIDTH((TDEST_WIDTH > 0) ? TDEST_WIDTH : 1),
-        .TUSER_WIDTH((TUSER_WIDTH > 0) ? TUSER_WIDTH : 1),
-        .TID_WIDTH((TID_WIDTH > 0) ? TID_WIDTH : 1)
+        .TDATA_BYTES(M_TDATA_BYTES),
+        .TDEST_WIDTH(M_TDEST_WIDTH),
+        .TUSER_WIDTH(M_TUSER_WIDTH),
+        .TID_WIDTH(M_TID_WIDTH)
     )
     stages [STAGES-1:0] (
         .aclk(aclk),
@@ -92,12 +106,13 @@ module logic_axi4_stream_demux_main #(
             localparam int STAGE = (k / GROUP);
             localparam int REMAINDER = (OUTPUTS - k);
             localparam int WIDTH = (GROUP < REMAINDER) ? GROUP : REMAINDER;
+            localparam bit [WIDTH-1:0][MAP_WIDTH-1:0] SUBMAP = MAP[k+:WIDTH];
 
             logic_axi4_stream_if #(
-                .TDATA_BYTES((TDATA_BYTES > 0) ? TDATA_BYTES : 1),
-                .TDEST_WIDTH((TDEST_WIDTH > 0) ? TDEST_WIDTH : 1),
-                .TUSER_WIDTH((TUSER_WIDTH > 0) ? TUSER_WIDTH : 1),
-                .TID_WIDTH((TID_WIDTH > 0) ? TID_WIDTH : 1)
+                .TDATA_BYTES(M_TDATA_BYTES),
+                .TDEST_WIDTH(M_TDEST_WIDTH),
+                .TUSER_WIDTH(M_TUSER_WIDTH),
+                .TID_WIDTH(M_TID_WIDTH)
             )
             demuxed [WIDTH-1:0] (
                 .aclk(aclk),
@@ -105,7 +120,7 @@ module logic_axi4_stream_demux_main #(
             );
 
             logic_axi4_stream_demux_stage #(
-                .OFFSET(OFFSET + k),
+                .MAP(SUBMAP),
                 .OUTPUTS(WIDTH),
                 .TDATA_BYTES(TDATA_BYTES),
                 .TDEST_WIDTH(TDEST_WIDTH),

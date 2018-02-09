@@ -19,8 +19,8 @@
  *
  * Parameters:
  *  GROUP       - Group outputs.
- *  OFFSET      - Offset ID.
  *  OUTPUTS     - Number of outputs.
+ *  MAP         - Map tdest (or tid) to demultiplexer output.
  *  TDATA_BYTES - Number of bytes for tdata signal.
  *  TDEST_WIDTH - Number of bits for tdest signal.
  *  TUSER_WIDTH - Number of bits for tuser signal.
@@ -38,7 +38,6 @@
  */
 module logic_axi4_stream_demux #(
     int GROUP = 8,
-    int OFFSET = 0,
     int OUTPUTS = 2,
     int TDATA_BYTES = 1,
     int TDEST_WIDTH = 1,
@@ -47,13 +46,23 @@ module logic_axi4_stream_demux #(
     int USE_TLAST = 1,
     int USE_TKEEP = 1,
     int USE_TSTRB = 1,
-    int USE_TID = 1
+    int USE_TID = 1,
+    int MAP_WIDTH = (USE_TID > 0) ? TID_WIDTH : TUSER_WIDTH,
+    bit [OUTPUTS-1:0][MAP_WIDTH-1:0] MAP = init_map()
 ) (
     input aclk,
     input areset_n,
     `LOGIC_MODPORT(logic_axi4_stream_if, rx) rx,
     `LOGIC_MODPORT(logic_axi4_stream_if, tx) tx[OUTPUTS-1:0]
 );
+    typedef bit [OUTPUTS-1:0][MAP_WIDTH-1:0] map_t;
+
+    function map_t init_map;
+        for (int i = 0; i < OUTPUTS; ++i) begin
+            init_map[i] = i[MAP_WIDTH-1:0];
+        end
+    endfunction
+
     logic areset_n_synced;
 
     logic_reset_synchronizer
@@ -62,8 +71,8 @@ module logic_axi4_stream_demux #(
     );
 
     logic_axi4_stream_demux_main #(
+        .MAP(MAP),
         .GROUP(GROUP),
-        .OFFSET(OFFSET),
         .OUTPUTS(OUTPUTS),
         .TDATA_BYTES(TDATA_BYTES),
         .TDEST_WIDTH(TDEST_WIDTH),

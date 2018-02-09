@@ -17,7 +17,6 @@
 
 module logic_axi4_stream_demux_top #(
     int GROUP = 8,
-    int OFFSET = 0,
     int OUTPUTS = 16,
     int TDATA_BYTES = `LOGIC_AXI4_STREAM_TDATA_BYTES,
     int TDEST_WIDTH = `LOGIC_AXI4_STREAM_TDEST_WIDTH,
@@ -26,7 +25,9 @@ module logic_axi4_stream_demux_top #(
     int USE_TLAST = 1,
     int USE_TKEEP = 1,
     int USE_TSTRB = 1,
-    int USE_TID = 0
+    int USE_TID = 0,
+    int MAP_WIDTH = (USE_TID > 0) ? TID_WIDTH : TUSER_WIDTH,
+    bit [OUTPUTS-1:0][MAP_WIDTH-1:0] MAP = init_map()
 ) (
     input aclk,
     input areset_n,
@@ -51,6 +52,14 @@ module logic_axi4_stream_demux_top #(
     output logic [OUTPUTS-1:0][TID_WIDTH-1:0] tx_tid,
     input [OUTPUTS-1:0] tx_tready
 );
+    typedef bit [OUTPUTS-1:0][MAP_WIDTH-1:0] map_t;
+
+    function map_t init_map;
+        for (int i = 0; i < OUTPUTS; ++i) begin
+            init_map[i] = i[MAP_WIDTH-1:0];
+        end
+    endfunction
+
     genvar k;
 
     logic_axi4_stream_if #(
@@ -75,8 +84,8 @@ module logic_axi4_stream_demux_top #(
     `LOGIC_AXI4_STREAM_IF_RX_ASSIGN(rx, rx);
 
     logic_axi4_stream_demux #(
+        .MAP(MAP),
         .GROUP(GROUP),
-        .OFFSET(OFFSET),
         .OUTPUTS(OUTPUTS),
         .TDATA_BYTES(TDATA_BYTES),
         .TDEST_WIDTH(TDEST_WIDTH),

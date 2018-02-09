@@ -18,8 +18,8 @@
 /* Module: logic_axi4_stream_demux_stage
  *
  * Parameters:
- *  OFFSET      - Offset ID.
  *  OUTPUTS     - Number of outputs.
+ *  MAP         - Map tdest (or tid) to demultiplexer output.
  *  TDATA_BYTES - Number of bytes for tdata signal.
  *  TDEST_WIDTH - Number of bits for tdest signal.
  *  TUSER_WIDTH - Number of bits for tuser signal.
@@ -37,7 +37,6 @@
  *  tx          - AXI4-Stream Tx interface.
  */
 module logic_axi4_stream_demux_stage #(
-    int OFFSET = 0,
     int OUTPUTS = 2,
     int TDATA_BYTES = 1,
     int TDEST_WIDTH = 1,
@@ -46,7 +45,9 @@ module logic_axi4_stream_demux_stage #(
     int USE_TKEEP = 1,
     int USE_TSTRB = 1,
     int USE_TLAST = 1,
-    int USE_TID = 0
+    int USE_TID = 0,
+    int MAP_WIDTH = (USE_TID > 0) ? TID_WIDTH : TUSER_WIDTH,
+    bit [OUTPUTS-1:0][MAP_WIDTH-1:0] MAP = init_map()
 ) (
     input aclk,
     input areset_n,
@@ -54,6 +55,14 @@ module logic_axi4_stream_demux_stage #(
     `LOGIC_MODPORT(logic_axi4_stream_if, tx) next,
     `LOGIC_MODPORT(logic_axi4_stream_if, tx) tx[OUTPUTS-1:0]
 );
+    typedef bit [OUTPUTS-1:0][MAP_WIDTH-1:0] map_t;
+
+    function map_t init_map;
+        for (int i = 0; i < OUTPUTS; ++i) begin
+            init_map[i] = i[MAP_WIDTH-1:0];
+        end
+    endfunction
+
     logic_axi4_stream_if #(
         .TDATA_BYTES(TDATA_BYTES),
         .TDEST_WIDTH(TDEST_WIDTH),
@@ -80,7 +89,7 @@ module logic_axi4_stream_demux_stage #(
     );
 
     logic_axi4_stream_demux_unit #(
-        .OFFSET(OFFSET),
+        .MAP(MAP),
         .OUTPUTS(OUTPUTS),
         .TDATA_BYTES(TDATA_BYTES),
         .TDEST_WIDTH(TDEST_WIDTH),

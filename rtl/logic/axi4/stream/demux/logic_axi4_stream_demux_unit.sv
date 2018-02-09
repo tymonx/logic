@@ -18,8 +18,8 @@
 /* Module: logic_axi4_stream_demux_unit
  *
  * Parameters:
- *  OFFSET      - Offset ID.
  *  OUTPUTS     - Number of outputs.
+ *  MAP         - Map tdest (or tid) to demultiplexer output.
  *  TDATA_BYTES - Number of bytes for tdata signal.
  *  TDEST_WIDTH - Number of bits for tdest signal.
  *  TUSER_WIDTH - Number of bits for tuser signal.
@@ -37,7 +37,6 @@
  *  tx          - AXI4-Stream Tx interface.
  */
 module logic_axi4_stream_demux_unit #(
-    int OFFSET = 0,
     int OUTPUTS = 2,
     int TDATA_BYTES = 1,
     int TDEST_WIDTH = 1,
@@ -46,7 +45,9 @@ module logic_axi4_stream_demux_unit #(
     int USE_TKEEP = 1,
     int USE_TSTRB = 1,
     int USE_TLAST = 1,
-    int USE_TID = 0
+    int USE_TID = 0,
+    int MAP_WIDTH = (USE_TID > 0) ? TID_WIDTH : TUSER_WIDTH,
+    bit [OUTPUTS-1:0][MAP_WIDTH-1:0] MAP = init_map()
 ) (
     input aclk,
     input areset_n,
@@ -55,8 +56,14 @@ module logic_axi4_stream_demux_unit #(
     `LOGIC_MODPORT(logic_axi4_stream_if, tx) tx[OUTPUTS-1:0]
 );
     localparam SELECT = OUTPUTS + 1;
-    localparam FIRST = OFFSET;
-    localparam LAST = OFFSET + OUTPUTS;
+
+    typedef bit [OUTPUTS-1:0][MAP_WIDTH-1:0] map_t;
+
+    function map_t init_map;
+        for (int i = 0; i < OUTPUTS; ++i) begin
+            init_map[i] = i[MAP_WIDTH-1:0];
+        end
+    endfunction
 
     genvar k;
 
@@ -246,8 +253,8 @@ module logic_axi4_stream_demux_unit #(
         if (USE_TID > 0) begin: use_tid
             always_comb begin
                 select = '0;
-                for (int i = FIRST; i < LAST; ++i) begin
-                    select[i - FIRST] = (prev.tid == i[TID_WIDTH-1:0]);
+                for (int i = 0; i < OUTPUTS; ++i) begin
+                    select[i] = (prev.tid == MAP[i]);
                 end
                 select[OUTPUTS] = ~|select[OUTPUTS-1:0];
             end
@@ -255,8 +262,8 @@ module logic_axi4_stream_demux_unit #(
         else begin: use_tdest
             always_comb begin
                 select = '0;
-                for (int i = FIRST; i < LAST; ++i) begin
-                    select[i - FIRST] = (prev.tdest == i[TDEST_WIDTH-1:0]);
+                for (int i = 0; i < OUTPUTS; ++i) begin
+                    select[i] = (prev.tdest == MAP[i]);
                 end
                 select[OUTPUTS] = ~|select[OUTPUTS-1:0];
             end
