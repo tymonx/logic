@@ -1,7 +1,7 @@
 " Copyright 2018 Tymoteusz Blazejczyk
 "
 " Licensed under the Apache License, Version 2.0 (the "License");
-" you may not use this file except in compliance with the License.
+" you may not use this source_file except in compliance with the License.
 " You may obtain a copy of the License at
 "
 "     http://www.apache.org/licenses/LICENSE-2.0
@@ -14,52 +14,50 @@
 
 let current_dir = expand('<sfile>:p:h')
 
-let verilog_includes = split(globpath(current_dir, '**/rtl/**/*.vh'), '\n')
-let verilog_files = split(globpath(current_dir, '**/rtl/**/*.v'), '\n')
+let glob_patterns = [
+    \ '**/rtl/**/*.h',
+    \ '**/rtl/**/*.vh',
+    \ '**/rtl/**/*.svh',
+    \ '**/rtl/**/*.v',
+    \ '**/rtl/**/*.sv'
+    \ ]
 
-let systemverilog_includes = split(globpath(current_dir, '**/rtl/**/*.svh'), '\n')
-let systemverilog_packages = split(globpath(current_dir, '**/rtl/**/*_pkg.sv'), '\n')
-let systemverilog_files = split(globpath(current_dir, '**/rtl/**/*.sv'), '\n')
+let source_files = []
 
-let verilator_sources = []
-for systemverilog_package in systemverilog_packages
-    call add(verilator_sources, fnamemodify(systemverilog_package, ":p"))
+for glob_pattern in glob_patterns
+    let source_files += split(globpath(current_dir, glob_pattern), '\n')
 endfor
 
-let verilator_includes = []
-for verilog_include in verilog_includes
-    call add(verilator_includes, fnamemodify(verilog_include, ":p:h"))
-endfor
+let rtl_sources = []
+let rtl_includes = []
 
-for verilog_file in verilog_files
-    call add(verilator_includes, fnamemodify(verilog_file, ":p:h"))
-endfor
-
-for systemverilog_include in systemverilog_includes
-    call add(verilator_includes, fnamemodify(systemverilog_include, ":p:h"))
-endfor
-
-for systemverilog_file in systemverilog_files
-    call add(verilator_includes, fnamemodify(systemverilog_file, ":p:h"))
+for source_file in source_files
+    if match(readfile(source_file), "^ *package ") != -1
+        let rtl_sources += [fnamemodify(source_file, ":p")]
+    endif
+    let rtl_includes += [fnamemodify(source_file, ":p:h")]
 endfor
 
 let dict = {}
-for verilator_include in  verilator_includes
-    let dict[verilator_include] = ''
+
+for rtl_include in rtl_includes
+    let dict[rtl_include] = ''
 endfor
 
-let verilator_includes = keys(dict)
+let rtl_includes = keys(dict)
 
-let verilator_options = []
+let verilator_options = ['-Wall --top-module logic_dummy']
 
-call add(verilator_options, '-Wall --top-module logic_dummy')
-
-for verilator_include in verilator_includes
-    call add(verilator_options, '-I' . verilator_include)
+for rtl_include in rtl_includes
+    let verilator_options += ['-I' . rtl_include]
 endfor
 
-for verilator_source in verilator_sources
-    call add(verilator_options, verilator_source)
+for rtl_source in rtl_sources
+    let verilator_options += [rtl_source]
 endfor
 
-let g:syntastic_systemverilog_compiler_options = join(verilator_options, ' ')
+let verilator_arguments = join(verilator_options, ' ')
+
+let g:ale_verilog_verilator_options = verilator_arguments
+let g:syntastic_verilog_compiler_options = verilator_arguments
+let g:syntastic_systemverilog_compiler_options = verilator_arguments
