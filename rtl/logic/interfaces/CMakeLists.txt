@@ -17,6 +17,8 @@ add_hdl_source(logic_axi4_stream_if.sv
         ovl_never_unknown
         ovl_win_unchange
         ovl_always
+    MODELSIM_SUPPRESS
+        2583
 )
 
 add_hdl_source(logic_axi4_lite_if.sv
@@ -28,6 +30,8 @@ add_hdl_source(logic_avalon_st_if.sv
     DEPENDS
         ovl_win_unchange
         ovl_always
+    MODELSIM_SUPPRESS
+        2583
 )
 
 add_hdl_source(logic_avalon_mm_if.sv
