@@ -38,4 +38,4 @@
 *.swp
 
 # Build directories
-build/**
+**/build*/**
