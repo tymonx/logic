@@ -28,7 +28,7 @@ add_library(logic-gtest-main STATIC
 )
 
 target_include_directories(logic-gtest-main
-    PUBLIC SYSTEM
+    SYSTEM PUBLIC
         ${LOGIC_INCLUDE_DIR}
         ${GTEST_INCLUDE_DIRS}
 )

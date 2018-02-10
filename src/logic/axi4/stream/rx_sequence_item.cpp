@@ -96,7 +96,7 @@ void rx_sequence_item::do_print(const uvm::uvm_printer& printer) const {
             "std::vector<std::uint8_t>");
 
     for (const auto& value : tdata) {
-        printer.print_field_int("", value, 8, uvm::UVM_HEX);
+        printer.print_field_int("", int(value), 8, uvm::UVM_HEX);
     }
 
     printer.print_array_footer();

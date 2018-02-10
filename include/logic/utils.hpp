@@ -29,12 +29,12 @@ namespace utils {
 
     template<std::size_t N, typename T>
     using enable_systemc_types = typename std::enable_if<
-        std::is_same<T, sc_dt::sc_bv<N>>::value ||
-        std::is_same<T, sc_dt::sc_lv<N>>::value ||
-        std::is_same<T, sc_dt::sc_int<N>>::value ||
-        std::is_same<T, sc_dt::sc_uint<N>>::value ||
-        std::is_same<T, sc_dt::sc_bigint<N>>::value ||
-        std::is_same<T, sc_dt::sc_biguint<N>>::value, unsigned>::type;
+        std::is_same<T, sc_dt::sc_bv<int(N)>>::value ||
+        std::is_same<T, sc_dt::sc_lv<int(N)>>::value ||
+        std::is_same<T, sc_dt::sc_int<int(N)>>::value ||
+        std::is_same<T, sc_dt::sc_uint<int(N)>>::value ||
+        std::is_same<T, sc_dt::sc_bigint<int(N)>>::value ||
+        std::is_same<T, sc_dt::sc_biguint<int(N)>>::value, unsigned>::type;
 
     template<std::size_t N, typename T, enable_integral<T> = 0>
     static inline void set(T& lhs, std::size_t offset,
@@ -83,7 +83,7 @@ namespace utils {
     }
 
     template<std::size_t T> struct bits_helper {
-        using type = sc_dt::sc_bv<T>;
+        using type = sc_dt::sc_bv<int(T)>;
     };
 
     template<> struct bits_helper<0> {
