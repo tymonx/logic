@@ -33,6 +33,13 @@ Benefits
   * Run the same unit tests with different parameters
   * Easy to integrate with other projects as git submodule
 
+Introduction
+------------
+
+  * [Commands](https://github.com/tymonx/logic/wiki/Commands) -
+    available CMake commands for creating project, adding HDL source files and
+    vendor IP core files, compiling and creating unit tests
+
 Examples
 --------
 
