@@ -15,13 +15,13 @@
 
 #include "logic_axi4_stream_buffer_top.h"
 
-#include <logic/trace.hpp>
-#include <logic/command_line.hpp>
 #include <logic/axi4/stream/bus_if.hpp>
 #include <logic/axi4/stream/reset_if.hpp>
+#include <logic/command_line.hpp>
+#include <logic/trace.hpp>
 
-#include <uvm>
 #include <systemc>
+#include <uvm>
 
 int sc_main(int argc, char* argv[]) {
     logic::command_line{argc, argv};

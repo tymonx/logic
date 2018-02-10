@@ -61,3 +61,29 @@ let verilator_arguments = join(verilator_options, ' ')
 let g:ale_verilog_verilator_options = verilator_arguments
 let g:syntastic_verilog_compiler_options = verilator_arguments
 let g:syntastic_systemverilog_compiler_options = verilator_arguments
+
+let cpp_includes = [
+    \ '/usr/local/systemc/2.3.2/include',
+    \ '/usr/local/share/verilator/include'
+    \ ]
+
+let verilator_output = current_dir . '/build/verilator/'
+let cpp_includes += split(globpath(verilator_output, '*/*.h'), '\n')
+
+let cpp_options = ['-std=c++11', '-I' . current_dir . '/include']
+
+for cpp_include in cpp_includes
+    let cpp_options += ['-isystem' . fnamemodify(cpp_include, ":p:h")]
+endfor
+
+let cpp_arguments = join(cpp_options, ' ')
+let cpp_clangcheck = []
+
+for cpp_option in cpp_options
+    let cpp_clangcheck += ['-extra-arg=' . cpp_option]
+endfor
+
+let g:ale_cpp_gcc_options = cpp_arguments
+let g:ale_cpp_clang_options = cpp_arguments
+let g:ale_cpp_clangtidy_options = cpp_arguments
+let g:ale_cpp_clangcheck_options = join(cpp_clangcheck, ' ')

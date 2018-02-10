@@ -30,6 +30,7 @@
 
 import os
 import ycm_core
+from glob import glob
 
 # These are the compilation flags that will be used in case there's no
 # compilation database set (by default, one is not set).
@@ -51,6 +52,10 @@ flags = [
 '-isystem/usr/local/share/verilator/include',
 ]
 
+if os.path.exists("./build/verilator/"):
+    headers = glob("./build/verilator/*/*.h")
+    for header in headers:
+        flags.append('-isystem' + os.path.dirname(os.path.realpath(header)))
 
 # Set this to the absolute path to the folder (NOT the file!) containing the
 # compile_commands.json file to use that instead of 'flags'. See here for
