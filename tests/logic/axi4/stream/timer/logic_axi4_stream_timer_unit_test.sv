@@ -21,9 +21,9 @@ module logic_axi4_stream_timer_unit_test;
     string name = "logic_axi4_stream_timer_unit_test";
     svunit_testcase svunit_ut;
 
-    localparam TDATA_BYTES = 4;
-    localparam PERIODIC_DEFAULT = 8;
-    localparam COUNTER_MAX = 256;
+    parameter TDATA_BYTES = 4;
+    parameter PERIODIC_DEFAULT = 8;
+    parameter COUNTER_MAX = 256;
 
     logic aclk = 0;
     logic areset_n = 0;

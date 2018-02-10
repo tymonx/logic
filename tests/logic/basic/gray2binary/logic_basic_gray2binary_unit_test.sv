@@ -22,7 +22,7 @@ module logic_basic_gray2binary_unit_test;
     string name = "logic_basic_gray2binary_unit_test";
     svunit_testcase svunit_ut;
 
-    localparam WIDTH = 16;
+    parameter WIDTH = 16;
 
     function automatic bit [WIDTH-1:0] gray2binary(bit [WIDTH-1:0] gray);
         gray2binary[WIDTH-1] = gray[WIDTH-1];

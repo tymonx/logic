@@ -21,8 +21,8 @@ module logic_axi4_stream_delay_unit_test;
     string name = "logic_axi4_stream_delay_unit_test";
     svunit_testcase svunit_ut;
 
-    localparam STAGES = 3;
-    localparam TDATA_BYTES = 4;
+    parameter STAGES = 3;
+    parameter TDATA_BYTES = 4;
 
     logic aclk = 0;
     logic areset_n = 0;

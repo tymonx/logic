@@ -21,10 +21,10 @@ module logic_axi4_stream_extract_unit_test;
     string name = "logic_axi4_stream_extract_unit_test";
     svunit_testcase svunit_ut;
 
-    localparam int PACKETS = 9;
-    localparam int OUTPUTS = 2;
-    localparam int TDATA_BYTES = 4;
-    localparam int TID_WIDTH = (PACKETS >= 2) ? $clog2(PACKETS) : 1;
+    parameter int PACKETS = 9;
+    parameter int OUTPUTS = 2;
+    parameter int TDATA_BYTES = 4;
+    parameter int TID_WIDTH = (PACKETS >= 2) ? $clog2(PACKETS) : 1;
 
     logic aclk = 0;
     logic areset_n = 0;

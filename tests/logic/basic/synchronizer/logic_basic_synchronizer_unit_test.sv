@@ -22,7 +22,7 @@ module logic_basic_synchronizer_unit_test;
     string name = "logic_basic_synchronizer_unit_test";
     svunit_testcase svunit_ut;
 
-    localparam WIDTH = 16;
+    parameter WIDTH = 16;
 
     logic aclk = '0;
     logic areset_n = '0;

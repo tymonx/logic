@@ -21,9 +21,9 @@ module logic_axi4_stream_mux_unit_test;
     string name = "logic_axi4_stream_mux_unit_test";
     svunit_testcase svunit_ut;
 
-    localparam INPUTS = 13;
-    localparam TDATA_BYTES = 4;
-    localparam TID_WIDTH = (INPUTS >= 2) ? $clog2(INPUTS) : 1;
+    parameter INPUTS = 13;
+    parameter TDATA_BYTES = 4;
+    parameter TID_WIDTH = (INPUTS >= 2) ? $clog2(INPUTS) : 1;
 
     logic aclk = 0;
     logic areset_n = 0;

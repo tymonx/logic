@@ -21,9 +21,9 @@ module logic_axi4_stream_demux_unit_test;
     string name = "logic_axi4_stream_demux_unit_test";
     svunit_testcase svunit_ut;
 
-    localparam OUTPUTS = 13;
-    localparam TDATA_BYTES = 4;
-    localparam TID_WIDTH = (OUTPUTS >= 2) ? $clog2(OUTPUTS) : 1;
+    parameter OUTPUTS = 13;
+    parameter TDATA_BYTES = 4;
+    parameter TID_WIDTH = (OUTPUTS >= 2) ? $clog2(OUTPUTS) : 1;
 
     logic aclk = 0;
     logic areset_n = 0;

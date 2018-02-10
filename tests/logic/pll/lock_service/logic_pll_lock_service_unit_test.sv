@@ -22,13 +22,13 @@ module logic_pll_lock_service_unit_test;
     string name = "logic_pll_lock_service_unit_test";
     svunit_testcase svunit_ut;
 
-    localparam CLOCK_FREQUENCY_HZ = 100_000_000;
-    localparam RESET_DURATION_NS = 100;
-    localparam WAIT_FOR_LOCK_NS = 1_000;
-    localparam PLL_LOCKED_STAGES = 4;
+    parameter CLOCK_FREQUENCY_HZ = 100_000_000;
+    parameter RESET_DURATION_NS = 100;
+    parameter WAIT_FOR_LOCK_NS = 1_000;
+    parameter PLL_LOCKED_STAGES = 4;
 
-    localparam real TIME_BASE = 1_000_000_000;
-    localparam real TIME_CLOCK = (TIME_BASE / real'(CLOCK_FREQUENCY_HZ)) / 2;
+    parameter real TIME_BASE = 1_000_000_000;
+    parameter real TIME_CLOCK = (TIME_BASE / real'(CLOCK_FREQUENCY_HZ)) / 2;
 
     logic aclk = 0;
     logic areset_n = 0;

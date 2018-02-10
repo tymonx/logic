@@ -21,8 +21,8 @@ module logic_axi4_stream_downsizer_unit_test;
     string name = "logic_axi4_stream_downsizer_unit_test";
     svunit_testcase svunit_ut;
 
-    localparam int RX_TDATA_BYTES = 8;
-    localparam int TX_TDATA_BYTES = 4;
+    parameter int RX_TDATA_BYTES = 8;
+    parameter int TX_TDATA_BYTES = 4;
 
     logic aclk = 0;
     logic areset_n = 0;

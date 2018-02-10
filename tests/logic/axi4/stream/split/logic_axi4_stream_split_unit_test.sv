@@ -21,8 +21,8 @@ module logic_axi4_stream_split_unit_test;
     string name = "logic_axi4_stream_split_unit_test";
     svunit_testcase svunit_ut;
 
-    localparam int OUTPUTS = 5;
-    localparam int TDATA_BYTES = 4;
+    parameter int OUTPUTS = 5;
+    parameter int TDATA_BYTES = 4;
 
     logic aclk = 0;
     logic areset_n = 0;
