@@ -16,8 +16,6 @@ if (NOT GTEST_FOUND)
     return()
 endif()
 
-include_directories(SYSTEM ${GTEST_INCLUDE_DIRS})
-
 if (CMAKE_CXX_COMPILER_ID MATCHES Clang)
     set_source_files_properties(factory.cpp
         PROPERTIES COMPILE_FLAGS "-Wno-exit-time-destructors"
@@ -29,9 +27,23 @@ add_library(logic-gtest-main STATIC
     main.cpp
 )
 
+target_include_directories(logic-gtest-main
+    PUBLIC SYSTEM
+        ${LOGIC_INCLUDE_DIR}
+        ${GTEST_INCLUDE_DIRS}
+)
+
+target_link_libraries(logic-gtest-main
+    PUBLIC
+        logic
+        ${GTEST_LIBRARIES}
+)
+
 if (CMAKE_CXX_COMPILER_ID MATCHES Clang)
     target_compile_options(logic-gtest-main PUBLIC
+        -Wno-zero-as-null-pointer-constant
         -Wno-global-constructors
         -Wno-over-aligned
+        -Wno-weak-vtables
     )
 endif()

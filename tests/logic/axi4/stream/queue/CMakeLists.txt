@@ -40,9 +40,6 @@ add_hdl_unit_test(logic_axi4_stream_queue_unit_test.sv
 
 # UVM-SystemC unit test
 
-set(MODULE_NAME logic_axi4_stream_queue)
-set(MODULE_TOP ${MODULE_NAME}_top)
-
 set(MODULE_DEFINITIONS
     LOGIC_AXI4_STREAM_TDATA_BYTES=4
     LOGIC_AXI4_STREAM_TID_WIDTH=1
@@ -50,31 +47,33 @@ set(MODULE_DEFINITIONS
     LOGIC_AXI4_STREAM_TUSER_WIDTH=1
 )
 
-add_hdl_systemc(${MODULE_TOP}
-    DEFINES ${MODULE_DEFINITIONS}
-    OUTPUT_INCLUDES module_includes
-    OUTPUT_LIBRARIES module_libraries
-)
-
-include_directories(SYSTEM
-    ${module_includes}
+add_hdl_systemc(logic_axi4_stream_queue_top
+    DEFINES
+        ${MODULE_DEFINITIONS}
+    OUTPUT_INCLUDES
+        module_includes
+    OUTPUT_LIBRARIES
+        module_libraries
 )
 
 set_source_files_properties(main.cpp PROPERTIES
     COMPILE_DEFINITIONS "${MODULE_DEFINITIONS}"
 )
 
-set(MODULE_NAME_TEST ${MODULE_NAME}_test)
-
-add_executable(${MODULE_NAME_TEST}
+add_executable(logic_axi4_stream_queue_test
     main.cpp
     long_test.cpp
     basic_test.cpp
 )
 
-target_link_libraries(${MODULE_NAME_TEST}
-    logic
+target_include_directories(logic_axi4_stream_queue_test
+    SYSTEM PRIVATE
+        ${module_includes}
+)
+
+target_link_libraries(logic_axi4_stream_queue_test
     ${module_libraries}
+    logic
 )
 
 set(TESTS
@@ -83,9 +82,16 @@ set(TESTS
 )
 
 foreach (test ${TESTS})
-    add_test(NAME ${MODULE_NAME}_${test}
-        COMMAND ${MODULE_NAME_TEST} +UVM_TESTNAME=${test}
-            +uvm_set_config_string=*,trace_filename,${MODULE_NAME}_${test}
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/output
+    set(module_test logic_axi4_stream_queue_${test})
+
+    add_test(
+        NAME
+            ${module_test}
+        COMMAND
+            logic_axi4_stream_queue_test
+            +UVM_TESTNAME=${test}
+            +uvm_set_config_string=*,trace_filename,${module_test}
+        WORKING_DIRECTORY
+            "${CMAKE_BINARY_DIR}/output"
     )
 endforeach()

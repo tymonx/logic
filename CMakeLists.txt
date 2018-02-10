@@ -41,6 +41,8 @@ endif()
 
 include(AddLogic)
 
+set(LOGIC_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
+
 include_directories(include)
 include_directories(SYSTEM ${SYSTEMC_INCLUDE_DIRS})
 
