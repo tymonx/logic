@@ -11,6 +11,26 @@ Includes:
   * Modern C++ framework for UVM with SystemC for creating high quality and
     performance efficient tests for RTL projects
 
+Benefits using **Logic**:
+
+  * Quick setup
+  * Cross platform, cross IDE
+  * No need to create separate scripts for simulation and synthesis
+  * No need to create separate scripts for different tools
+    (Intel Quartus, Xilinx Vivado, Verilator, ModelSim, ...)
+  * Supports incremental compilation, run slow vendor IP core regeneration and
+    different simulation and synthesis tools only if input source file changes
+  * Supports parallel compilation, run slow vendor IP core regeneration and
+    different simulation and synthesis tools in parallel
+  * Maintain the same file consistency between simulation and synthesis
+    for different tools
+  * Share the same HDL source code base and IP cores for various FPGA projects
+  * Integration with Continuous Integration (CI) and Continuous Deployment (CD)
+    like Jenkins, Hudson, GitLab, etc.
+  * Running RTL unit tests under ctest: pass/fail, time execution, timeout,
+    parallel execution, tests selection
+  * Easy to integrate with other projects as git submodule
+
 Examples
 --------
 
