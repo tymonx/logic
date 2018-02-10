@@ -59,6 +59,7 @@
 *.wlf
 *.sym
 *.vstf
+*.qdb
 _info
 _vmake
 transcript
@@ -130,7 +131,6 @@ xgui
 *.qpg
 *.qtl
 *.qws
-*.qsf
 *.gdb
 *.map
 *.rpt
@@ -163,6 +163,7 @@ xgui
 **/output_files/*
 **/hc_output/*
 **/hps_isw_handoff/*
+**/graybox_tmp/*
 **/tmp-clearbox/*
 **/incremental_db/*
 
