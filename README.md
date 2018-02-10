@@ -11,7 +11,8 @@ Includes:
   * Modern C++ framework for UVM with SystemC for creating high quality and
     performance efficient tests for RTL projects
 
-Benefits using **Logic**:
+Benefits
+--------
 
   * Quick setup
   * Cross platform, cross IDE
