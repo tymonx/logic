@@ -5,10 +5,12 @@
 *.d
 
 # Compiled Object files
-*.slo
-*.lo
 *.o
+*.x
+*.lo
 *.obj
+*.slo
+*.objdump
 
 # Precompiled Headers
 *.gch
@@ -16,26 +18,89 @@
 
 # Compiled Dynamic libraries
 *.so
-*.dylib
 *.dll
+*.dylib
 
 # Fortran module files
 *.mod
 *.smod
 
 # Compiled Static libraries
-*.lai
-*.la
 *.a
+*.la
+*.lai
 *.lib
 
 # Executables
 *.exe
 *.out
 *.app
+*.elf
 
 # Vim
 *.swp
+
+# ModelSim files
+*.ver
+*.wlf
+*.sym
+*.vstf
+_info
+_vmake
+transcript
+
+# Quartus files
+*~
+*.vo
+*.do
+*.qpg
+*.qtl
+*.qws
+*.gdb
+*.map
+*.rpt
+*.sof
+*.spd
+*.rbf
+*.bsf
+*.cmp
+*.qip
+*.pin
+*.ocp
+*.svd
+*.qgsimc
+*.regmap
+*.summary
+*.qgsynthc
+*.sopcinfo
+**/db/*
+**/qdb/*
+**/.qsys_edit/*
+**/output_files/*
+**/hps_isw_handoff/*
+**/tmp-clearbox/*
+**/incremental_db/*
+
+# Binary files
+*.hex
+*.dat
+*.pdf
+*.png
+*.bin
+*.doc
+*.docx
+*.html
+
+# Misc files
+*.csv
+*.ini
+*.xml
+*.log
+*.bak
+*.BAK*
+*.done
+*.setup
+*.stackdump
 
 # Build directories
 **/build*/**
