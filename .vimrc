@@ -67,7 +67,7 @@ let cpp_includes = [
     \ '/usr/local/share/verilator/include'
     \ ]
 
-let verilator_output = current_dir . '/build/verilator/'
+let verilator_output = current_dir . '/build/verilator/libraries/'
 let cpp_includes += split(globpath(verilator_output, '*/*.h'), '\n')
 
 let cpp_options = ['-std=c++11', '-I' . current_dir . '/include']

@@ -52,8 +52,8 @@ flags = [
 '-isystem/usr/local/share/verilator/include',
 ]
 
-if os.path.exists("./build/verilator/"):
-    headers = glob("./build/verilator/*/*.h")
+if os.path.exists("./build/verilator/libraries"):
+    headers = glob("./build/verilator/libraries/*/*.h")
     for header in headers:
         flags.append('-isystem' + os.path.dirname(os.path.realpath(header)))
 
