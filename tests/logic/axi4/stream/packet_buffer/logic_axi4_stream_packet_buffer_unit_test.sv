@@ -21,7 +21,8 @@ module logic_axi4_stream_packet_buffer_unit_test;
     string name = "logic_axi4_stream_packet_buffer_unit_test";
     svunit_testcase svunit_ut;
 
-    localparam TDATA_BYTES = 4;
+    parameter TDATA_BYTES = 4;
+    parameter TARGET = logic_pkg::TARGET_GENERIC;
 
     logic aclk = 0;
     logic areset_n = 0;
@@ -37,6 +38,7 @@ module logic_axi4_stream_packet_buffer_unit_test;
     ) tx (.*);
 
     logic_axi4_stream_packet_buffer #(
+        .TARGET(TARGET),
         .TDATA_BYTES(TDATA_BYTES)
     )
     dut (

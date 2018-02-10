@@ -21,7 +21,8 @@ module logic_axi4_stream_clock_crossing_unit_test;
     string name = "logic_axi4_stream_clock_crossing_unit_test";
     svunit_testcase svunit_ut;
 
-    localparam TDATA_BYTES = 4;
+    parameter TDATA_BYTES = 4;
+    parameter TARGET = logic_pkg::TARGET_GENERIC;
 
     logic rx_aclk = 0;
     logic tx_aclk = 0;
@@ -45,6 +46,8 @@ module logic_axi4_stream_clock_crossing_unit_test;
     );
 
     logic_axi4_stream_clock_crossing #(
+        .GENERIC(0),
+        .TARGET(TARGET),
         .TDATA_BYTES(TDATA_BYTES)
     )
     dut (

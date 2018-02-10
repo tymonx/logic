@@ -46,6 +46,7 @@ function(add_hdl_unit_test hdl_file)
         NAME
         SOURCE
         LIBRARY
+        UNIT_TEST_NAME
     )
 
     set(multi_value_arguments
@@ -53,6 +54,7 @@ function(add_hdl_unit_test hdl_file)
         DEPENDS
         DEFINES
         INCLUDES
+        PARAMETERS
         INPUT_FILES
         MODELSIM_FLAGS
         MODELSIM_SUPPRESS
@@ -69,11 +71,13 @@ function(add_hdl_unit_test hdl_file)
     endmacro()
 
     set_default_value(NAME ${hdl_name})
+    set_default_value(UNIT_TEST_NAME ${hdl_name})
     set_default_value(SOURCE "${hdl_file}")
     set_default_value(SOURCES "")
     set_default_value(DEPENDS "")
     set_default_value(DEFINES "")
     set_default_value(INCLUDES "")
+    set_default_value(PARAMETERS "")
     set_default_value(INPUT_FILES "")
     set_default_value(LIBRARY unit_test)
     set_default_value(MODELSIM_FLAGS "")
@@ -91,6 +95,8 @@ function(add_hdl_unit_test hdl_file)
             FALSE
         SOURCES
             ${ARG_SOURCES}
+        NAME
+            ${ARG_NAME}
         LIBRARY
             ${ARG_LIBRARY}
         DEPENDS
@@ -163,6 +169,11 @@ function(add_hdl_unit_test hdl_file)
                 list(APPEND modelsim_flags -suppress ${suppress})
             endif()
         endif()
+
+        foreach (modelsim_parameter ${ARG_PARAMETERS})
+            list(APPEND modelsim_flags
+                -G/${ARG_NAME}_testrunner/ut/${modelsim_parameter})
+        endforeach()
 
         if (ARG_MODELSIM_WARNING_AS_ERROR)
             list(APPEND modelsim_flags -warning error)

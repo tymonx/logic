@@ -30,6 +30,7 @@ Benefits
     like Jenkins, Hudson, GitLab, etc.
   * Running RTL unit tests under ctest: pass/fail, time execution, timeout,
     parallel execution, tests selection
+  * Run the same unit tests with different parameters
   * Easy to integrate with other projects as git submodule
 
 Examples

@@ -22,7 +22,7 @@ module @ARG_NAME@_testrunner;
     svunit_testrunner svunit_tr;
     svunit_testsuite svunit_ts;
 
-    @ARG_NAME@ ut();
+    @ARG_UNIT_TEST_NAME@ ut();
 
     initial begin
         build();

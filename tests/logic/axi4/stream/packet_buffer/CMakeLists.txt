@@ -15,14 +15,23 @@
 # SVUnit unit test
 
 add_hdl_unit_test(logic_axi4_stream_packet_buffer_unit_test.sv
-    DEPENDS
-        logic_axi4_stream_packet_buffer
-)
-
-add_hdl_unit_test(logic_axi4_stream_packet_buffer_intel_unit_test.sv
+    NAME
+        logic_axi4_stream_packet_buffer_generic_unit_test
     DEPENDS
         logic_pkg
         logic_axi4_stream_packet_buffer
+    PARAMETERS
+        TARGET=logic_pkg::TARGET_GENERIC
+)
+
+add_hdl_unit_test(logic_axi4_stream_packet_buffer_unit_test.sv
+    NAME
+        logic_axi4_stream_packet_buffer_intel_unit_test
+    DEPENDS
+        logic_pkg
+        logic_axi4_stream_packet_buffer
+    PARAMETERS
+        TARGET=logic_pkg::TARGET_INTEL
     MODELSIM_SUPPRESS
         3009
         3017
