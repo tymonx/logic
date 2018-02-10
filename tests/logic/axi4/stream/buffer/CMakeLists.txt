@@ -35,6 +35,8 @@ add_hdl_systemc(logic_axi4_stream_buffer_top
         module_includes
     OUTPUT_LIBRARIES
         module_libraries
+    OUTPUT_WORKING_DIRECTORY
+        module_working_directory
 )
 
 set_source_files_properties(main.cpp PROPERTIES
@@ -73,6 +75,6 @@ foreach (test ${TESTS})
             +UVM_TESTNAME=${test}
             +uvm_set_config_string=*,trace_filename,${module_test}
         WORKING_DIRECTORY
-            "${CMAKE_BINARY_DIR}/output"
+            "${module_working_directory}"
     )
 endforeach()

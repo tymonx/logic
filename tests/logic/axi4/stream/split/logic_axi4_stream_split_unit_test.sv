@@ -100,7 +100,7 @@ module logic_axi4_stream_split_unit_test;
             fork
                 automatic int index = i;
             begin
-                foreach (captured[, j]) begin
+                for (int j = 0; j < $size(data); ++j) begin
                     tx_if[index].cb_read(captured[index][j]);
                 end
             end
@@ -146,7 +146,7 @@ module logic_axi4_stream_split_unit_test;
             fork
                 automatic int index = i;
             begin
-                foreach (captured[, j]) begin
+                for (int j = 0; j < $size(data); ++j) begin
                     tx_if[index].cb_read(captured[index][j]);
                 end
             end
@@ -192,7 +192,7 @@ module logic_axi4_stream_split_unit_test;
             fork
                 automatic int index = i;
             begin
-                foreach (captured[, j]) begin
+                for (int j = 0; j < $size(data); ++j) begin
                     tx_if[index].cb_read(captured[index][j], 0, 0, 3, 0);
                 end
             end
@@ -238,7 +238,7 @@ module logic_axi4_stream_split_unit_test;
             fork
                 automatic int index = i;
             begin
-                foreach (captured[, j]) begin
+                for (int j = 0; j < $size(data); ++j) begin
                     tx_if[index].cb_read(captured[index][j], 0, 0, 3, 0);
                 end
             end

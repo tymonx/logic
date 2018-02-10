@@ -152,6 +152,10 @@ Waveforms from unit tests run under ModelSim are stored in:
 
     modelsim/unit_tests/<unit_test_name>
 
+Waveforms from unit tests run under Verilator are stored in:
+
+    verilator/unit_tests/<unit_test_name>
+
 All unit tests logs are stored in:
 
     Testing/Temporary/LastTest.log

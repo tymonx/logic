@@ -26,6 +26,8 @@ add_hdl_systemc(logic_reset_synchronizer
         module_includes
     OUTPUT_LIBRARIES
         module_libraries
+    OUTPUT_WORKING_DIRECTORY
+        module_working_directory
 )
 
 add_executable(logic_reset_synchronizer_test
@@ -48,5 +50,5 @@ add_test(
     COMMAND
         logic_reset_synchronizer_test
     WORKING_DIRECTORY
-        "${CMAKE_BINARY_DIR}/output"
+        "${module_working_directory}"
 )
