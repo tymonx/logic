@@ -22,8 +22,8 @@ find_package(ModelSim)
 
 if (MODELSIM_FOUND)
     file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/modelsim)
-    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/modelsim/.modules)
     file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/modelsim/libraries)
+    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/logic/deps)
 
     if (NOT EXISTS "${CMAKE_BINARY_DIR}/modelsim/libraries/work/_info")
         execute_process(COMMAND ${MODELSIM_VLIB} work
@@ -125,7 +125,6 @@ function(add_hdl_modelsim hdl_name)
 
     list(APPEND modelsim_flags ${ARG_MODELSIM_FLAGS})
 
-    set(modelsim_modules_dir "${CMAKE_BINARY_DIR}/modelsim/.modules")
     set(modelsim_libraries_dir "${CMAKE_BINARY_DIR}/modelsim/libraries")
     set(modelsim_library_dir "${modelsim_libraries_dir}/${ARG_LIBRARY}")
 
@@ -137,10 +136,6 @@ function(add_hdl_modelsim hdl_name)
 
         execute_process(COMMAND ${MODELSIM_VMAP} ${ARG_LIBRARY} "${library_dir}"
             WORKING_DIRECTORY "${modelsim_libraries_dir}" OUTPUT_QUIET)
-    endif()
-
-    if (NOT EXISTS "${modelsim_modules_dir}/${ARG_LIBRARY}")
-        file(MAKE_DIRECTORY "${modelsim_modules_dir}/${ARG_LIBRARY}")
     endif()
 
     set(modelsim_sources "")
@@ -197,7 +192,8 @@ function(add_hdl_modelsim hdl_name)
         set(modelsim_flags ${modelsim_flags} -L ${modelsim_library})
     endforeach()
 
-    set(hdl_module_file "${modelsim_modules_dir}/${ARG_LIBRARY}/${ARG_NAME}")
+    set(hdl_module_file
+        "${CMAKE_BINARY_DIR}/logic/deps/modelsim.${ARG_LIBRARY}.${ARG_NAME}")
 
     add_custom_command(
         OUTPUT

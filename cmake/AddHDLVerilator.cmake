@@ -28,14 +28,13 @@ find_package(SystemC REQUIRED COMPONENTS SCV UVM)
 find_package(Verilator)
 
 if (VERILATOR_FOUND)
-    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/output)
-    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/verilator/.coverage)
-    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/verilator/.configs)
+    file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/output")
+    file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/coverage/verilator")
 
     add_custom_target(verilator-coverage
         ${VERILATOR_COVERAGE_EXECUTABLE}
             --annotate-all
-            --annotate ${CMAKE_BINARY_DIR}/verilator/.coverage
+            --annotate ${CMAKE_BINARY_DIR}/coverage/verilator
             ${CMAKE_BINARY_DIR}/output/*.dat
     )
 
@@ -96,11 +95,16 @@ function(add_hdl_verilator hdl_name)
         set(ARG_TARGET ${ARG_NAME})
     endif()
 
+    set(verilator_target ${ARG_TARGET})
     set(verilator_sources "")
     set(verilator_defines "")
     set(verilator_includes "")
     set(verilator_parameters "")
     set(verilator_configurations "")
+    set(verilator_output_directory
+        "${CMAKE_BINARY_DIR}/verilator/${verilator_target}")
+
+    file(MAKE_DIRECTORY "${verilator_output_directory}")
 
     list(APPEND verilator_defines ${ARG_DEFINES})
     list(APPEND verilator_parameters ${ARG_PARAMETERS})
@@ -134,7 +138,7 @@ function(add_hdl_verilator hdl_name)
     list(REMOVE_DUPLICATES verilator_configurations)
 
     set(verilator_configuration_file
-        ${CMAKE_BINARY_DIR}/verilator/.configs/${ARG_TARGET}.vlt)
+        "${verilator_output_directory}/${ARG_TARGET}.vlt")
 
     set(verilator_config "")
     foreach (config ${verilator_configurations})
@@ -162,12 +166,6 @@ function(add_hdl_verilator hdl_name)
 
     list(APPEND verilator_flags ${verilator_configuration_file})
     list(APPEND verilator_flags ${verilator_sources})
-
-    set(verilator_target ${ARG_TARGET})
-
-    if (ARG_PREFIX)
-        set(verilator_target ${ARG_PREFIX})
-    endif()
 
     if (verilator_analysis AND
             NOT TARGET verilator-analysis-${verilator_target})
@@ -216,11 +214,6 @@ function(add_hdl_verilator hdl_name)
 
             list(APPEND compile_flags -CFLAGS '${flags}')
         endif()
-
-        set(verilator_output_directory
-            ${CMAKE_BINARY_DIR}/verilator/${verilator_target})
-
-        file(MAKE_DIRECTORY ${verilator_output_directory})
 
         set(verilator_library ${verilator_target}__ALL.a)
 

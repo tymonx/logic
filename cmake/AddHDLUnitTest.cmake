@@ -28,6 +28,7 @@ include(GetHDLDepends)
 include(GetHDLProperty)
 include(CMakeParseArguments)
 
+file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/logic/deps")
 file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/modelsim/unit_tests")
 
 function(add_hdl_unit_test hdl_file)
@@ -123,12 +124,11 @@ function(add_hdl_unit_test hdl_file)
     )
 
     if (MODELSIM_FOUND)
+        set(modelsim_dep "${CMAKE_BINARY_DIR}/logic/deps/modelsim.unit_tests")
         set(modelsim_target modelsim-compile-${ARG_LIBRARY}-${ARG_NAME})
         set(unit_test_dir "${CMAKE_BINARY_DIR}/modelsim/unit_tests/${ARG_NAME}")
 
-        if (NOT EXISTS "${unit_test_dir}")
-            file(MAKE_DIRECTORY "${unit_test_dir}")
-        endif()
+        file(MAKE_DIRECTORY "${unit_test_dir}")
 
         set(modelsim_ini "${CMAKE_BINARY_DIR}/modelsim/libraries/modelsim.ini")
         set(modelsim_waveform "${unit_test_dir}/${ARG_NAME}.wlf")
@@ -139,8 +139,6 @@ function(add_hdl_unit_test hdl_file)
         set_hdl_path(modelsim_run_tcl "${modelsim_run_tcl}")
         set_hdl_path(modelsim_waveform "${modelsim_waveform}")
         set_hdl_path(modelsim_ini "${modelsim_ini}")
-
-        file(MAKE_DIRECTORY "${unit_test_dir}/.deps")
 
         set(hdl_depends "")
         set(hdl_libraries "")
@@ -213,8 +211,8 @@ function(add_hdl_unit_test hdl_file)
             endforeach()
 
             foreach (spd_file ${spd_files})
-                get_filename_component(name "${spd_file}" NAME_WE)
-                set(modelsim_file "${unit_test_dir}/.spd/${name}")
+                get_filename_component(name "${spd_file}" NAME)
+                set(modelsim_file "${modelsim_dep}.${ARG_NAME}.${name}")
 
                 add_custom_command(
                     OUTPUT
@@ -272,11 +270,11 @@ function(add_hdl_unit_test hdl_file)
         string(REGEX REPLACE ";" " " modelsim_flags "${modelsim_flags}")
 
         configure_file("${_HDL_CMAKE_ROOT_DIR}/ModelSim.tcl.in"
-            "${unit_test_dir}/.tmp/run_modelsim.tcl")
+            "${CMAKE_BINARY_DIR}/logic/deps/run_modelsim.tcl")
 
         file(
             COPY
-                "${unit_test_dir}/.tmp/run_modelsim.tcl"
+                "${CMAKE_BINARY_DIR}/logic/deps/run_modelsim.tcl"
             DESTINATION
                 "${unit_test_dir}"
             FILE_PERMISSIONS

@@ -21,6 +21,8 @@ find_package(Quartus)
 include(SetHDLPath)
 include(CMakeParseArguments)
 
+file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/logic/deps")
+
 if (NOT DEFINED _HDL_CMAKE_ROOT_DIR)
     set(_HDL_CMAKE_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}" CACHE INTERNAL
         "HDL CMake root directory" FORCE)
@@ -251,15 +253,14 @@ function(add_quartus_project target_name)
         list(APPEND ip_files "${ip_file}")
     endforeach()
 
-    file(MAKE_DIRECTORY "${ARG_PROJECT_DIRECTORY}/.ip")
-
     string(REPLACE ";" "," qsys_search_path "${ip_search_paths}")
 
     foreach (ip_file ${ip_files})
         get_filename_component(ip_file "${ip_file}" REALPATH)
-        get_filename_component(name "${ip_file}" NAME_WE)
+        get_filename_component(name "${ip_file}" NAME)
 
-        set(output_file "${ARG_PROJECT_DIRECTORY}/.ip/${name}")
+        set(output_file
+            "${CMAKE_BINARY_DIR}/logic/deps/quartus.${target_name}.${name}")
         set_hdl_path(input_file "${ip_file}")
 
         add_custom_command(
@@ -290,7 +291,7 @@ function(add_quartus_project target_name)
             DEPENDS
                 "${ip_file}"
             COMMENT
-                "Platform Designer is generating IP core from ${name}.ip"
+                "Platform Designer is generating IP core from ${name}"
             WORKING_DIRECTORY
                 "${ARG_PROJECT_DIRECTORY}"
         )
@@ -300,13 +301,12 @@ function(add_quartus_project target_name)
             "set_global_assignment -name IP_FILE ${input_file}")
     endforeach()
 
-    file(MAKE_DIRECTORY "${ARG_PROJECT_DIRECTORY}/.qsys")
-
     foreach (qsys_file ${qsys_files})
         get_filename_component(qsys_file "${qsys_file}" REALPATH)
-        get_filename_component(name "${qsys_file}" NAME_WE)
+        get_filename_component(name "${qsys_file}" NAME)
 
-        set(output_file "${ARG_PROJECT_DIRECTORY}/.qsys/${name}")
+        set(output_file
+            "${CMAKE_BINARY_DIR}/logic/deps/quartus.${target_name}.${name}")
         set_hdl_path(input_file "${qsys_file}")
 
         add_custom_command(
@@ -338,7 +338,7 @@ function(add_quartus_project target_name)
                 "${qsys_file}"
                 ${quartus_depends}
             COMMENT
-                "Platform Designer is generating IP core from ${name}.qsys"
+                "Platform Designer is generating IP core from ${name}"
             WORKING_DIRECTORY
                 "${ARG_PROJECT_DIRECTORY}"
         )

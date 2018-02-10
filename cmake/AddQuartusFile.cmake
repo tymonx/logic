@@ -26,6 +26,8 @@ find_package(ModelSim)
 
 include(SetHDLPath)
 
+file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/logic/deps")
+
 if (NOT TARGET modelsim-compile-all)
     add_custom_target(modelsim-compile-all ALL)
 endif()
@@ -121,8 +123,8 @@ function(add_quartus_file file)
     endif()
 
     set_hdl_path(input_file "${qsys_file}")
-    set(modules_dir "${CMAKE_BINARY_DIR}/modelsim/.modules")
     set(modelsim_libraries_dir "${CMAKE_BINARY_DIR}/modelsim/libraries")
+    set(modelsim_file "${CMAKE_BINARY_DIR}/logic/deps/modelsim.${name}.${name}")
 
     if (NOT EXISTS "${modelsim_libraries_dir}/${name}")
         set_hdl_path(library_dir
@@ -133,10 +135,6 @@ function(add_quartus_file file)
 
         execute_process(COMMAND ${MODELSIM_VMAP} ${name} "${library_dir}"
             WORKING_DIRECTORY "${modelsim_libraries_dir}" OUTPUT_QUIET)
-    endif()
-
-    if (NOT EXISTS "${modules_dir}/${name}")
-        file(MAKE_DIRECTORY "${modules_dir}/${name}")
     endif()
 
     add_custom_command(
@@ -160,7 +158,7 @@ function(add_quartus_file file)
 
     add_custom_command(
         OUTPUT
-            "${modules_dir}/${name}/${name}"
+            "${modelsim_file}"
         COMMAND
             ${CMAKE_COMMAND}
         ARGS
@@ -173,7 +171,7 @@ function(add_quartus_file file)
         COMMAND
             ${CMAKE_COMMAND}
         ARGS
-            -E touch "${modules_dir}/${name}/${name}"
+            -E touch "${modelsim_file}"
         DEPENDS
             "${spd_file}"
         WORKING_DIRECTORY
@@ -181,7 +179,7 @@ function(add_quartus_file file)
     )
 
     add_custom_target(modelsim-compile-${name}-${name}
-        DEPENDS "${modules_dir}/${name}/${name}"
+        DEPENDS "${modelsim_file}"
     )
 
     if (NOT TARGET modelsim-compile-${name})
