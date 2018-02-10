@@ -23,6 +23,7 @@ endif()
 
 find_package(ModelSim)
 
+include(SetHDLPath)
 include(GetHDLDepends)
 include(GetHDLProperty)
 include(CMakeParseArguments)
@@ -135,19 +136,9 @@ function(add_hdl_unit_test hdl_file)
         get_filename_component(modelsim_run_tcl
             "${_HDL_CMAKE_ROOT_DIR}/../scripts/modelsim_run.tcl" REALPATH)
 
-        if (CYGWIN)
-            execute_process(COMMAND cygpath -m "${modelsim_run_tcl}"
-                OUTPUT_VARIABLE modelsim_run_tcl
-                OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-            execute_process(COMMAND cygpath -m "${modelsim_waveform}"
-                OUTPUT_VARIABLE modelsim_waveform
-                OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-            execute_process(COMMAND cygpath -m "${modelsim_ini}"
-                OUTPUT_VARIABLE modelsim_ini
-                OUTPUT_STRIP_TRAILING_WHITESPACE)
-        endif()
+        set_hdl_path(modelsim_run_tcl "${modelsim_run_tcl}")
+        set_hdl_path(modelsim_waveform "${modelsim_waveform}")
+        set_hdl_path(modelsim_ini "${modelsim_ini}")
 
         file(MAKE_DIRECTORY "${unit_test_dir}/.deps")
 

@@ -16,6 +16,8 @@ if (COMMAND add_vivado_project)
     return()
 endif()
 
+include(SetHDLPath)
+
 find_package(Vivado)
 
 if (VIVADO_FOUND)
@@ -107,12 +109,7 @@ function(add_vivado_project target_name)
 
     foreach (vivado_include ${ARG_INCLUDES})
         get_filename_component(vivado_include "${vivado_include}" REALPATH)
-
-        if (CYGWIN)
-            execute_process(COMMAND cygpath -m ${vivado_include}
-                OUTPUT_VARIABLE vivado_include
-                OUTPUT_STRIP_TRAILING_WHITESPACE)
-        endif()
+        set_hdl_path(vivado_include "${vivado_include}")
 
         list(APPEND vivado_includes_list "lappend includes ${vivado_include}")
     endforeach()
@@ -128,12 +125,7 @@ function(add_vivado_project target_name)
             set(vivado_type_file VERILOG_FILE)
         endif()
 
-        if (CYGWIN)
-            execute_process(COMMAND cygpath -m "${vivado_source}"
-                OUTPUT_VARIABLE vivado_source
-                OUTPUT_STRIP_TRAILING_WHITESPACE)
-        endif()
-
+        set_hdl_path(vivado_source "${vivado_source}")
         list(APPEND vivado_sources_list "lappend sources ${vivado_source}")
     endforeach()
 

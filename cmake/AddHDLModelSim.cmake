@@ -16,6 +16,8 @@ if (COMMAND add_hdl_modelsim)
     return()
 endif()
 
+include(SetHDLPath)
+
 find_package(ModelSim)
 
 if (MODELSIM_FOUND)
@@ -30,13 +32,7 @@ if (MODELSIM_FOUND)
     endif()
 
     if (NOT EXISTS "${CMAKE_BINARY_DIR}/modelsim/libraries/modelsim.ini")
-        set(library_dir "${CMAKE_BINARY_DIR}/modelsim/libraries/work")
-
-        if (CYGWIN)
-            execute_process(COMMAND cygpath -m "${library_dir}"
-                OUTPUT_VARIABLE library_dir
-                OUTPUT_STRIP_TRAILING_WHITESPACE)
-        endif()
+        set_hdl_path(library_dir "${CMAKE_BINARY_DIR}/modelsim/libraries/work")
 
         execute_process(COMMAND ${MODELSIM_VMAP} work "${library_dir}"
             WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/modelsim/libraries"
@@ -120,12 +116,7 @@ function(add_hdl_modelsim hdl_name)
         endforeach()
 
         foreach (hdl_include ${ARG_INCLUDES})
-            if (CYGWIN)
-                execute_process(COMMAND cygpath -m "${hdl_include}"
-                    OUTPUT_VARIABLE hdl_include
-                    OUTPUT_STRIP_TRAILING_WHITESPACE)
-            endif()
-
+            set_hdl_path(hdl_include "${hdl_include}")
             list(APPEND modelsim_flags +incdir+"${hdl_include}")
         endforeach()
     elseif (ARG_TYPE MATCHES VHDL)
@@ -139,13 +130,7 @@ function(add_hdl_modelsim hdl_name)
     set(modelsim_library_dir "${modelsim_libraries_dir}/${ARG_LIBRARY}")
 
     if (NOT EXISTS "${modelsim_library_dir}")
-        set(library_dir "${modelsim_library_dir}")
-
-        if (CYGWIN)
-            execute_process(COMMAND cygpath -m "${library_dir}"
-                OUTPUT_VARIABLE library_dir
-                OUTPUT_STRIP_TRAILING_WHITESPACE)
-        endif()
+        set_hdl_path(library_dir "${modelsim_library_dir}")
 
         execute_process(COMMAND ${MODELSIM_VLIB} ${ARG_LIBRARY}
             WORKING_DIRECTORY "${modelsim_libraries_dir}" OUTPUT_QUIET)
@@ -161,12 +146,7 @@ function(add_hdl_modelsim hdl_name)
     set(modelsim_sources "")
 
     foreach (modelsim_source ${ARG_SOURCES} ${ARG_SOURCE})
-        if (CYGWIN)
-            execute_process(COMMAND cygpath -m "${modelsim_source}"
-                OUTPUT_VARIABLE modelsim_source
-                OUTPUT_STRIP_TRAILING_WHITESPACE)
-        endif()
-
+        set_hdl_path(modelsim_source "${modelsim_source}")
         list(APPEND modelsim_sources ${modelsim_source})
     endforeach()
 
