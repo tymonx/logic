@@ -1,4 +1,4 @@
-Format: 2.0.1
+﻿Format: 2.0.1
 
 # This is the file you use to provide information about your project.  It can
 # also be used to specify input and output settings so you don't have to
@@ -20,9 +20,9 @@ Timestamp: d month year
 #    d     - Single digit day, when possible.  1 is "1".
 #    dd    - Always double digit day.  1 is "01".
 #    day   - Day with text extension.  1 is "1st".
-#    yy    - Double digit year.  2018 is "17".
-#    yyyy  - Four digit year.  2018 is "2018".
-#    year  - Four digit year.  2018 is "2018".
+#    yy    - Double digit year.  2017 is "17".
+#    yyyy  - Four digit year.  2017 is "2017".
+#    year  - Four digit year.  2017 is "2017".
 
 
 # This is where you specify general information about your project.

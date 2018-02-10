@@ -12,19 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(assign)
-add_subdirectory(timer)
-add_subdirectory(buffer)
-add_subdirectory(delay)
-add_subdirectory(mux)
-add_subdirectory(demux)
-add_subdirectory(queue)
-add_subdirectory(to_avalon_st)
-add_subdirectory(from_avalon_st)
-add_subdirectory(clock_crossing)
-add_subdirectory(packet_buffer)
-add_subdirectory(upsizer)
-add_subdirectory(downsizer)
-add_subdirectory(resizer)
-add_subdirectory(extract)
-add_subdirectory(split)
+add_hdl_source(logic_axi4_stream_split.sv
+    SOURCES
+        logic_axi4_stream_split_unit.sv
+        logic_axi4_stream_split_main.sv
+    DEPENDS
+        logic_axi4_stream_if
+        logic_axi4_stream_buffer
+        logic_reset_synchronizer
+    MODELSIM_SUPPRESS
+        2583
+)
+
+add_hdl_source(logic_axi4_stream_split_top.sv
+    DEPENDS
+        logic_axi4_stream_split
+    ANALYSIS
+        TRUE
+    MODELSIM_SUPPRESS
+        2583
+)
