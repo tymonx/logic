@@ -20,6 +20,10 @@
  * Parameters:
  *  GROUP       - Group outputs.
  *  OUTPUTS     - Number of outputs.
+ *  EXTRACT     - Enable or disable additional Tx output port for packets
+ *                with tdest (or tid) values not handled by demultiplexer.
+ *                It is the last Tx output port with port index equal to
+ *                OUTPUTS.
  *  MAP         - Map tdest (or tid) to demultiplexer output.
  *  TDATA_BYTES - Number of bytes for tdata signal.
  *  TDEST_WIDTH - Number of bits for tdest signal.
@@ -39,6 +43,7 @@
 module logic_axi4_stream_demux #(
     int GROUP = 8,
     int OUTPUTS = 2,
+    int EXTRACT = 0,
     int TDATA_BYTES = 1,
     int TDEST_WIDTH = 1,
     int TUSER_WIDTH = 1,
@@ -53,8 +58,12 @@ module logic_axi4_stream_demux #(
     input aclk,
     input areset_n,
     `LOGIC_MODPORT(logic_axi4_stream_if, rx) rx,
-    `LOGIC_MODPORT(logic_axi4_stream_if, tx) tx[OUTPUTS-1:0]
+    `LOGIC_MODPORT(logic_axi4_stream_if, tx) tx[OUTPUTS+EXTRACT]
 );
+    initial begin: design_rule_checks
+        `LOGIC_DRC_TRUE_FALSE(EXTRACT)
+    end
+
     typedef bit [OUTPUTS-1:0][MAP_WIDTH-1:0] map_t;
 
     function map_t init_map;
@@ -73,6 +82,7 @@ module logic_axi4_stream_demux #(
     logic_axi4_stream_demux_main #(
         .MAP(MAP),
         .GROUP(GROUP),
+        .EXTRACT(EXTRACT),
         .OUTPUTS(OUTPUTS),
         .TDATA_BYTES(TDATA_BYTES),
         .TDEST_WIDTH(TDEST_WIDTH),

@@ -21,6 +21,10 @@
  *  GROUP       - Group outputs.
  *  MAP         - Map tdest (or tid) to demultiplexer output.
  *  OUTPUTS     - Number of outputs.
+ *  EXTRACT     - Enable or disable additional Tx output port for packets
+ *                with tdest (or tid) values not handled by demultiplexer.
+ *                It is the last Tx output port with port index equal to
+ *                OUTPUTS.
  *  TDATA_BYTES - Number of bytes for tdata signal.
  *  TDEST_WIDTH - Number of bits for tdest signal.
  *  TUSER_WIDTH - Number of bits for tuser signal.
@@ -39,6 +43,7 @@
 module logic_axi4_stream_demux_main #(
     int GROUP = 8,
     int OUTPUTS = 2,
+    int EXTRACT = 0,
     int TDATA_BYTES = 1,
     int TDEST_WIDTH = 1,
     int TUSER_WIDTH = 1,
@@ -53,7 +58,7 @@ module logic_axi4_stream_demux_main #(
     input aclk,
     input areset_n,
     `LOGIC_MODPORT(logic_axi4_stream_if, rx) rx,
-    `LOGIC_MODPORT(logic_axi4_stream_if, tx) tx[OUTPUTS-1:0]
+    `LOGIC_MODPORT(logic_axi4_stream_if, tx) tx[OUTPUTS+EXTRACT]
 );
     localparam int DEMUXES = (OUTPUTS + GROUP - 1) / GROUP;
     localparam int STAGES = DEMUXES + 1;
@@ -80,7 +85,7 @@ module logic_axi4_stream_demux_main #(
         .TUSER_WIDTH(M_TUSER_WIDTH),
         .TID_WIDTH(M_TID_WIDTH)
     )
-    stages [STAGES-1:0] (
+    stages [STAGES] (
         .aclk(aclk),
         .areset_n(areset_n)
     );
@@ -92,16 +97,40 @@ module logic_axi4_stream_demux_main #(
         .*
     );
 
-    always_ff @(posedge aclk or negedge areset_n) begin
-        if (!areset_n) begin
-            stages[STAGES-1].tready <= '0;
-        end
-        else begin
-            stages[STAGES-1].tready <= '1;
-        end
-    end
-
     generate
+        if (EXTRACT > 0) begin: extract_enabled
+            logic_axi4_stream_assign
+            extract_assigned (
+                .rx(stages[STAGES-1]),
+                .tx(tx[OUTPUTS])
+            );
+        end
+        else begin: extract_disabled
+            always_ff @(posedge aclk or negedge areset_n) begin
+                if (!areset_n) begin
+                    stages[STAGES-1].tready <= '0;
+                end
+                else begin
+                    stages[STAGES-1].tready <= '1;
+                end
+            end
+
+`ifdef VERILATOR
+            logic _unused_ports = &{
+                1'b0,
+                stages[STAGES-1].tvalid,
+                stages[STAGES-1].tdata,
+                stages[STAGES-1].tlast,
+                stages[STAGES-1].tkeep,
+                stages[STAGES-1].tstrb,
+                stages[STAGES-1].tdest,
+                stages[STAGES-1].tuser,
+                stages[STAGES-1].tid,
+                1'b0
+            };
+`endif
+        end
+
         for (k = 0; k < OUTPUTS; k += GROUP) begin: demuxes
             localparam int STAGE = (k / GROUP);
             localparam int REMAINDER = (OUTPUTS - k);
@@ -114,7 +143,7 @@ module logic_axi4_stream_demux_main #(
                 .TUSER_WIDTH(M_TUSER_WIDTH),
                 .TID_WIDTH(M_TID_WIDTH)
             )
-            demuxed [WIDTH-1:0] (
+            demuxed [WIDTH] (
                 .aclk(aclk),
                 .areset_n(areset_n)
             );
@@ -149,18 +178,4 @@ module logic_axi4_stream_demux_main #(
         end
     endgenerate
 
-`ifdef VERILATOR
-    logic _unused_ports = &{
-        1'b0,
-        stages[STAGES-1].tvalid,
-        stages[STAGES-1].tdata,
-        stages[STAGES-1].tlast,
-        stages[STAGES-1].tkeep,
-        stages[STAGES-1].tstrb,
-        stages[STAGES-1].tdest,
-        stages[STAGES-1].tuser,
-        stages[STAGES-1].tid,
-        1'b0
-    };
-`endif
 endmodule

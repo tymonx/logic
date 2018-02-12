@@ -26,6 +26,7 @@ module logic_axi4_stream_demux_top #(
     int USE_TKEEP = 1,
     int USE_TSTRB = 1,
     int USE_TID = 0,
+    int EXTRACT = 0,
     int MAP_WIDTH = (USE_TID > 0) ? TID_WIDTH : TUSER_WIDTH,
     bit [OUTPUTS-1:0][MAP_WIDTH-1:0] MAP = init_map()
 ) (
@@ -42,15 +43,15 @@ module logic_axi4_stream_demux_top #(
     input [TID_WIDTH-1:0] rx_tid,
     output logic rx_tready,
     /* Tx */
-    output logic [OUTPUTS-1:0]tx_tlast,
-    output logic [OUTPUTS-1:0]tx_tvalid,
-    output logic [OUTPUTS-1:0][TDATA_BYTES-1:0][7:0] tx_tdata,
-    output logic [OUTPUTS-1:0][TDATA_BYTES-1:0] tx_tstrb,
-    output logic [OUTPUTS-1:0][TDATA_BYTES-1:0] tx_tkeep,
-    output logic [OUTPUTS-1:0][TDEST_WIDTH-1:0] tx_tdest,
-    output logic [OUTPUTS-1:0][TUSER_WIDTH-1:0] tx_tuser,
-    output logic [OUTPUTS-1:0][TID_WIDTH-1:0] tx_tid,
-    input [OUTPUTS-1:0] tx_tready
+    output logic [OUTPUTS+EXTRACT-1:0]tx_tlast,
+    output logic [OUTPUTS+EXTRACT-1:0]tx_tvalid,
+    output logic [OUTPUTS+EXTRACT-1:0][TDATA_BYTES-1:0][7:0] tx_tdata,
+    output logic [OUTPUTS+EXTRACT-1:0][TDATA_BYTES-1:0] tx_tstrb,
+    output logic [OUTPUTS+EXTRACT-1:0][TDATA_BYTES-1:0] tx_tkeep,
+    output logic [OUTPUTS+EXTRACT-1:0][TDEST_WIDTH-1:0] tx_tdest,
+    output logic [OUTPUTS+EXTRACT-1:0][TUSER_WIDTH-1:0] tx_tuser,
+    output logic [OUTPUTS+EXTRACT-1:0][TID_WIDTH-1:0] tx_tid,
+    input [OUTPUTS+EXTRACT-1:0] tx_tready
 );
     typedef bit [OUTPUTS-1:0][MAP_WIDTH-1:0] map_t;
 
@@ -76,7 +77,7 @@ module logic_axi4_stream_demux_top #(
         .TDEST_WIDTH(TDEST_WIDTH),
         .TUSER_WIDTH(TUSER_WIDTH),
         .TID_WIDTH(TID_WIDTH)
-    ) tx [OUTPUTS-1:0] (
+    ) tx [OUTPUTS + EXTRACT] (
         .aclk(aclk),
         .areset_n(areset_n)
     );
@@ -86,6 +87,7 @@ module logic_axi4_stream_demux_top #(
     logic_axi4_stream_demux #(
         .MAP(MAP),
         .GROUP(GROUP),
+        .EXTRACT(EXTRACT),
         .OUTPUTS(OUTPUTS),
         .TDATA_BYTES(TDATA_BYTES),
         .TDEST_WIDTH(TDEST_WIDTH),
@@ -100,7 +102,7 @@ module logic_axi4_stream_demux_top #(
     );
 
     generate
-        for (k = 0; k < OUTPUTS; ++k) begin: outputs
+        for (k = 0; k < (OUTPUTS + EXTRACT); ++k) begin: outputs
             always_comb tx_tvalid[k] = tx[k].tvalid;
             always_comb tx_tlast[k] = tx[k].tlast;
             always_comb tx_tdata[k] = tx[k].tdata;
