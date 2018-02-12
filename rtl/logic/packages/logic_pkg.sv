@@ -19,18 +19,42 @@
  */
 package logic_pkg;
 
+    /* Enum: system_t
+     *
+     * System select.
+     *
+     * SYSTEM_GENERIC           - Generic system
+     * SYSTEM_SIMULATION        - Default system targeted for simulation.
+     * SYSTEM_INTEL_HPS         - Intel Hard Processor System (ARM).
+     * SYSTEM_INTEL_NIOS_II     - Intel soft-processor Nios-II.
+     * SYSTEM_XILINX_ZYNQ       - Xilinx hard-processor Zynq.
+     * SYSTEM_XILINX_MICROBLAZE - Xilinx soft-processor MicroBlaze.
+     */
+    typedef enum {
+        SYSTEM_GENERIC,
+        SYSTEM_SIMULATION,
+        SYSTEM_INTEL_HPS,
+        SYSTEM_INTEL_NIOS_II,
+        SYSTEM_XILINX_ZYNQ,
+        SYSTEM_XILINX_MICROBLAZE
+    } system_t;
+
     /* Enum: target_t
      *
      * Optimize project using dedicated target.
      *
-     * TARGET_GENERIC          - Generic target not related to any vendor or
-     *                           device.
-     * TARGET_INTEL            - Optimized for non-specific Intel FPGAs.
-     * TARGET_INTEL_ARRIA_10   - Optimized for Intel Arria 10 without HPS.
+     * TARGET_GENERIC            - Generic target not related to any vendor or
+     *                             device.
+     * TARGET_SIMULATION         - Optimized for simulation.
+     * TARGET_INTEL              - Optimized for non-specific Intel FPGAs.
+     * TARGET_INTEL_ARRIA_10     - Optimized for Intel Arria 10 without HPS.
+     * TARGET_INTEL_ARRIA_10_SOC - Optimized for Intel Arria 10 with HPS.
      */
     typedef enum {
         TARGET_GENERIC,
+        TARGET_SIMULATION,
         TARGET_INTEL,
-        TARGET_INTEL_ARRIA_10
+        TARGET_INTEL_ARRIA_10,
+        TARGET_INTEL_ARRIA_10_SOC
     } target_t;
 endpackage
