@@ -14,6 +14,7 @@
 
 add_hdl_source(logic_pll_lock_service.sv
     SOURCES
+        logic_pll_lock_service_unit.sv
         logic_pll_lock_service_main.sv
     DEPENDS
         logic_axi4_stream_if
