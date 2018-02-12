@@ -22,6 +22,7 @@ add_hdl_source(logic_axi4_stream_delay.sv
 
 add_hdl_source(logic_axi4_stream_delay_top.sv
     DEPENDS
+        logic_axi4_stream_if
         logic_axi4_stream_delay
     ANALYSIS
         TRUE

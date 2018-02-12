@@ -28,6 +28,7 @@ add_hdl_source(logic_axi4_stream_demux.sv
 
 add_hdl_source(logic_axi4_stream_demux_top.sv
     DEPENDS
+        logic_axi4_stream_if
         logic_axi4_stream_demux
     ANALYSIS
         TRUE
