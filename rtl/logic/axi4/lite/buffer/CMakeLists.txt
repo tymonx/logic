@@ -20,6 +20,7 @@ add_hdl_source(logic_axi4_lite_buffer.sv
 
 add_hdl_source(logic_axi4_lite_buffer_top.sv
     DEPENDS
+        logic_axi4_lite_if
         logic_axi4_lite_buffer
     ANALYSIS
         TRUE
