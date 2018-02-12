@@ -45,31 +45,54 @@ module logic_axi4_stream_pack_join #(
 ) (
     input aclk,
     input areset_n,
-    input half_low_full,
-    input half_high_valid,
     `LOGIC_MODPORT(logic_axi4_stream_if, rx) rx[1:0],
     `LOGIC_MODPORT(logic_axi4_stream_if, tx) tx
 );
+    logic valid;
+    logic [TDATA_BYTES-1:0][7:0] data;
+
+    logic [TDATA_BYTES-1:0][7:0] buffer;
+
     enum logic [1:0] {
         FSM_IDLE,
-        FSM_PACK
+        FSM_PACK,
+        FSM_ALIGNED
     } fsm_state;
 
     always_comb rx.tready = tx.tready;
+
+    always_ff @(posedge aclk) begin
+        if (rx[1].tvalid && tx.tready) begin
+            buffer <= rx[1].tdata;
+        end
+    end
 
     always_ff @(posedge aclk or negedge areset_n) begin
         if (!areset_n) begin
             fsm_state <= FSM_IDLE;
         end
-        else if (tx.tready && rx.tvalid) begin
+        else if (tx.tready && rx[0].tvalid) begin
             unique case (fsm_state)
             FSM_IDLE: begin
-                if (!rx.tlast) begin
-                    fsm_stat <= FSM_PACK;
+                if (!rx[0].tlast) begin
+                    if (rx[0].tkeep[TDATA_BYTES-1]) begin
+                        fsm_state <= FSM_ALIGNED;
+                    end
+                    else begin
+                        fsm_state <= FSM_PACK;
+                    end
                 end
             end
             FSM_PACK: begin
 
+            end
+            FSM_ALIGNED: begin
+                if (rx[0].tlast) begin
+                    fsm_state <= FSM_IDLE;
+                end
+                else if (!rx[0].tkeep[TDATA_BYTES-1]) begin
+                    fsm_state <= FSM_PACK;
+                end
             end
             default: begin
                 fsm_state <= FSM_IDLE;
@@ -78,19 +101,29 @@ module logic_axi4_stream_pack_join #(
         end
     end
 
+    always_comb begin
+        unique case (fsm_state)
+        FSM_IDLE, FSM_ALIGNED: begin
+            valid = rx[0].tvalid && (rx[0].tlast ||
+                rx[0].tkeep[TDATA_BYTES-1]);
+        end
+        default: begin
+            valid = '0;
+        end
+        endcase
+    end
+
     always_ff @(posedge aclk or negedge areset_n) begin
         if (!areset_n) begin
             tx.tvalid <= '0;
         end
         else if (tx.tready) begin
-            tx.tvalid <= rx.tvalid;
+            tx.tvalid <= valid;
         end
     end
 
     always_ff @(posedge aclk) begin
         if (tx.tready) begin
-            half_low_full <= &rx.tkeep[0+:HALF_TDATA_BYTES];
-            half_high_valid <= |rx.tkeep[HALF_TDATA_BYTES+:HALF_TDATA_BYTES];
             tx.tkeep <= rx.tkeep;
             tx.tdata <= rx.tdata;
         end

@@ -49,65 +49,15 @@ module logic_axi4_stream_pack #(
     `LOGIC_MODPORT(logic_axi4_stream_if, rx) rx,
     `LOGIC_MODPORT(logic_axi4_stream_if, tx) tx
 );
-    localparam int M_TDATA_BYTES = (TDATA_BYTES > 0) ? TDATA_BYTES : 1;
-    localparam int M_TDEST_WIDTH = (TDEST_WIDTH > 0) ? TDEST_WIDTH : 1;
-    localparam int M_TUSER_WIDTH = (TUSER_WIDTH > 0) ? TUSER_WIDTH : 1;
-    localparam int M_TID_WIDTH = (TID_WIDTH > 0) ? TID_WIDTH : 1;
-    localparam int STAGES_ALIGNED = (M_TDATA_BYTES + STAGES - 1) / STAGES;
+    logic areset_n_synced;
 
-    genvar k;
-
-    logic_axi4_stream_if #(
-        .TDATA_BYTES(M_TDATA_BYTES),
-        .TDEST_WIDTH(M_TDEST_WIDTH),
-        .TUSER_WIDTH(M_TUSER_WIDTH),
-        .TID_WIDTH(M_TID_WIDTH)
-    )
-    buffered (
+    logic_reset_synchronizer
+    reset_synchronizer (
         .*
     );
 
-    logic_axi4_stream_if #(
-        .TDATA_BYTES(M_TDATA_BYTES),
-        .TDEST_WIDTH(M_TDEST_WIDTH),
-        .TUSER_WIDTH(M_TUSER_WIDTH),
-        .TID_WIDTH(M_TID_WIDTH)
-    )
-    counted (
-        .*
-    );
-
-    logic_axi4_stream_if #(
-        .TDATA_BYTES(2 * M_TDATA_BYTES),
-        .TDEST_WIDTH(M_TDEST_WIDTH),
-        .TUSER_WIDTH(M_TUSER_WIDTH),
-        .TID_WIDTH(M_TID_WIDTH)
-    )
-    shifted[STAGES_ALIGNED:0] (
-        .*
-    );
-
-    logic_axi4_stream_if #(
-        .TDATA_BYTES(2 * M_TDATA_BYTES),
-        .TDEST_WIDTH(M_TDEST_WIDTH),
-        .TUSER_WIDTH(M_TUSER_WIDTH),
-        .TID_WIDTH(M_TID_WIDTH)
-    )
-    split[1:0] (
-        .*
-    );
-
-    logic_axi4_stream_if #(
-        .TDATA_BYTES(2 * M_TDATA_BYTES),
-        .TDEST_WIDTH(M_TDEST_WIDTH),
-        .TUSER_WIDTH(M_TUSER_WIDTH),
-        .TID_WIDTH(M_TID_WIDTH)
-    )
-    delayed[1:0] (
-        .*
-    );
-
-    logic_axi4_stream_buffer #(
+    logic_axi4_stream_pack_main #(
+        .STAGES(STAGES),
         .TDATA_BYTES(TDATA_BYTES),
         .TDEST_WIDTH(TDEST_WIDTH),
         .TUSER_WIDTH(TUSER_WIDTH),
@@ -116,104 +66,8 @@ module logic_axi4_stream_pack #(
         .USE_TKEEP(USE_TKEEP),
         .USE_TLAST(USE_TLAST)
     )
-    buffer (
-        .tx(buffered),
-        .*
-    );
-
-    logic_axi4_stream_pack_count #(
-        .TDATA_BYTES(TDATA_BYTES),
-        .TDEST_WIDTH(TDEST_WIDTH),
-        .TUSER_WIDTH(TUSER_WIDTH),
-        .TID_WIDTH(TID_WIDTH),
-        .USE_TLAST(USE_TLAST),
-        .USE_TKEEP(USE_TKEEP),
-        .USE_TLAST(USE_TLAST)
-    )
-    count (
-        .rx(buffered),
-        .tx(counted),
-        .*
-    );
-
-    logic_axi4_stream_pack_restore #(
-        .TDATA_BYTES(TDATA_BYTES),
-        .TDEST_WIDTH(TDEST_WIDTH),
-        .TUSER_WIDTH(TUSER_WIDTH),
-        .TID_WIDTH(TID_WIDTH),
-        .USE_TLAST(USE_TLAST),
-        .USE_TKEEP(USE_TKEEP),
-        .USE_TLAST(USE_TLAST)
-    )
-    count (
-        .rx(counted),
-        .tx(shifted[0]),
-        .*
-    );
-
-    for (k = 0; k < STAGES_ALIGNED; ++k) begin: stages
-        localparam int SHIFT_STAGES = ((k * STAGES) < TDATA_BYTES) ?
-            STAGES : (TDATA_BYTES - k * STAGES);
-
-        logic_axi4_stream_pack_shift #(
-            .STAGES(SHIFT_STAGES),
-            .TDATA_BYTES(TDATA_BYTES),
-            .TDEST_WIDTH(TDEST_WIDTH),
-            .TUSER_WIDTH(TUSER_WIDTH),
-            .TID_WIDTH(TID_WIDTH),
-            .USE_TLAST(USE_TLAST),
-            .USE_TKEEP(USE_TKEEP),
-            .USE_TLAST(USE_TLAST)
-        )
-        shift (
-            .rx(shifted[k]),
-            .tx(shifted[k + 1]),
-            .*
-        );
-    end
-
-    logic_axi4_stream_pack_split
-    split_unit (
-        .rx(shifted[STAGES_ALIGNED]),
-        .tx(split),
-        .*
-    );
-
-    logic_axi4_stream_delay #(
-        .STAGES(SHIFT_STAGES),
-        .TDATA_BYTES(TDATA_BYTES),
-        .TDEST_WIDTH(TDEST_WIDTH),
-        .TUSER_WIDTH(TUSER_WIDTH),
-        .TID_WIDTH(TID_WIDTH),
-        .USE_TLAST(USE_TLAST),
-        .USE_TKEEP(USE_TKEEP),
-        .USE_TLAST(USE_TLAST)
-    )
-    delay (
-        .rx(split[0]),
-        .tx(delayed[0]),
-        .*
-    );
-
-    logic_axi4_stream_assign
-    split_assigned (
-        .rx(split[1]),
-        .tx(delayed[1]),
-        .*
-    );
-
-    logic_axi4_stream_pack_join #(
-        .STAGES(SHIFT_STAGES),
-        .TDATA_BYTES(TDATA_BYTES),
-        .TDEST_WIDTH(TDEST_WIDTH),
-        .TUSER_WIDTH(TUSER_WIDTH),
-        .TID_WIDTH(TID_WIDTH),
-        .USE_TLAST(USE_TLAST),
-        .USE_TKEEP(USE_TKEEP),
-        .USE_TLAST(USE_TLAST)
-    )
-    join_unit (
-        .rx(delayed),
+    main (
+        .areset_n(areset_n_synced),
         .*
     );
 endmodule
