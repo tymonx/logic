@@ -83,7 +83,17 @@ module logic_axi4_stream_pack_main #(
         .TUSER_WIDTH(M_TUSER_WIDTH),
         .TID_WIDTH(M_TID_WIDTH)
     )
-    shifted[STAGES_ALIGNED:0] (
+    shifted[STAGES_ALIGNED] (
+        .*
+    );
+
+    logic_axi4_stream_if #(
+        .TDATA_BYTES(M_TDATA_BYTES),
+        .TDEST_WIDTH(M_TDEST_WIDTH),
+        .TUSER_WIDTH(M_TUSER_WIDTH),
+        .TID_WIDTH(M_TID_WIDTH)
+    )
+    split[2] (
         .*
     );
 
@@ -93,17 +103,7 @@ module logic_axi4_stream_pack_main #(
         .TUSER_WIDTH(M_TUSER_WIDTH),
         .TID_WIDTH(M_TID_WIDTH)
     )
-    split[1:0] (
-        .*
-    );
-
-    logic_axi4_stream_if #(
-        .TDATA_BYTES(2 * M_TDATA_BYTES),
-        .TDEST_WIDTH(M_TDEST_WIDTH),
-        .TUSER_WIDTH(M_TUSER_WIDTH),
-        .TID_WIDTH(M_TID_WIDTH)
-    )
-    delayed[1:0] (
+    delayed[2] (
         .*
     );
 
@@ -172,7 +172,9 @@ module logic_axi4_stream_pack_main #(
         );
     end
 
-    logic_axi4_stream_pack_split
+    logic_axi4_stream_pack_split #(
+        .TDATA_BYTES(TDATA_BYTES)
+    )
     split_unit (
         .rx(shifted[STAGES_ALIGNED]),
         .tx(split),

@@ -23,9 +23,11 @@
  *  rx          - AXI4-Stream Rx interface.
  *  tx          - AXI4-Stream Tx interface.
  */
-module logic_axi4_stream_pack_split (
+module logic_axi4_stream_pack_split #(
+    int TDATA_BYTES = 4
+) (
     `LOGIC_MODPORT(logic_axi4_stream_if, rx) rx,
-    `LOGIC_MODPORT(logic_axi4_stream_if, tx) tx[1:0]
+    `LOGIC_MODPORT(logic_axi4_stream_if, tx) tx[2]
 );
     localparam int OUTPUTS = 2;
 
@@ -37,9 +39,9 @@ module logic_axi4_stream_pack_split (
         for (k = 0; k < OUTPUTS; ++k) begin: map
             always_comb tx[k].tvalid = rx.tvalid;
             always_comb tx[k].tlast = rx.tlast;
-            always_comb tx[k].tdata = rx.tdata;
-            always_comb tx[k].tstrb = rx.tstrb;
-            always_comb tx[k].tkeep = rx.tkeep;
+            always_comb tx[k].tdata = rx.tdata[k*TDATA_BYTES+:TDATA_BYTES];
+            always_comb tx[k].tstrb = rx.tstrb[k*TDATA_BYTES+:TDATA_BYTES];
+            always_comb tx[k].tkeep = rx.tkeep[k*TDATA_BYTES+:TDATA_BYTES];
             always_comb tx[k].tuser = rx.tuser;
             always_comb tx[k].tdest = rx.tdest;
             always_comb tx[k].tid = rx.tid;
