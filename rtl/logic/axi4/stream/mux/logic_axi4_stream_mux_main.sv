@@ -70,7 +70,12 @@ module logic_axi4_stream_mux_main #(
         .areset_n(areset_n)
     );
 
-    logic_axi4_stream_assign
+    logic_axi4_stream_assign #(
+        .TDATA_BYTES(TDATA_BYTES),
+        .TDEST_WIDTH(TDEST_WIDTH),
+        .TUSER_WIDTH(TUSER_WIDTH),
+        .TID_WIDTH(TID_WIDTH)
+    )
     output_assigned (
         .rx(muxed[0]),
         .tx(tx)
@@ -79,7 +84,12 @@ module logic_axi4_stream_mux_main #(
     generate
         for (k = 0; k < INPUTS_NORMALIZED; ++k) begin: inputs
             if (k < INPUTS) begin: enabled
-                logic_axi4_stream_assign
+                logic_axi4_stream_assign #(
+                    .TDATA_BYTES(TDATA_BYTES),
+                    .TDEST_WIDTH(TDEST_WIDTH),
+                    .TUSER_WIDTH(TUSER_WIDTH),
+                    .TID_WIDTH(TID_WIDTH)
+                )
                 input_assigned (
                     .rx(rx[k]),
                     .tx(muxed[MUXED-1-k])
@@ -127,7 +137,12 @@ module logic_axi4_stream_mux_main #(
             );
 
             for (n = 0; n < MUXED_IN; ++n) begin: map_in
-                logic_axi4_stream_assign
+                logic_axi4_stream_assign #(
+                    .TDATA_BYTES(TDATA_BYTES),
+                    .TDEST_WIDTH(TDEST_WIDTH),
+                    .TUSER_WIDTH(TUSER_WIDTH),
+                    .TID_WIDTH(TID_WIDTH)
+                )
                 mux_in_assigned (
                     .rx(muxed[k - 1 + n]),
                     .tx(muxed_in[n])
@@ -135,7 +150,12 @@ module logic_axi4_stream_mux_main #(
             end
 
             for (n = 0; n < MUXED_OUT; ++n) begin: map_out
-                logic_axi4_stream_assign
+                logic_axi4_stream_assign #(
+                    .TDATA_BYTES(TDATA_BYTES),
+                    .TDEST_WIDTH(TDEST_WIDTH),
+                    .TUSER_WIDTH(TUSER_WIDTH),
+                    .TID_WIDTH(TID_WIDTH)
+                )
                 mux_out_assigned (
                     .rx(muxed_out[n]),
                     .tx(muxed[k/2 - 1 + n])

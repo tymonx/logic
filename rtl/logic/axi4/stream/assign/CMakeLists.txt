@@ -15,6 +15,8 @@
 add_hdl_source(logic_axi4_stream_assign.sv
     DEPENDS
         logic_axi4_stream_if
+    MODELSIM_SUPPRESS
+        2583
 )
 
 add_hdl_source(logic_axi4_stream_assign_top.sv

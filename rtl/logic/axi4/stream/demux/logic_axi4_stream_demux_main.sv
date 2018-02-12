@@ -90,7 +90,12 @@ module logic_axi4_stream_demux_main #(
         .areset_n(areset_n)
     );
 
-    logic_axi4_stream_assign
+    logic_axi4_stream_assign #(
+        .TDATA_BYTES(TDATA_BYTES),
+        .TDEST_WIDTH(TDEST_WIDTH),
+        .TUSER_WIDTH(TUSER_WIDTH),
+        .TID_WIDTH(TID_WIDTH)
+    )
     input_assigned (
         .rx(rx),
         .tx(stages[0]),
@@ -99,7 +104,12 @@ module logic_axi4_stream_demux_main #(
 
     generate
         if (EXTRACT > 0) begin: extract_enabled
-            logic_axi4_stream_assign
+            logic_axi4_stream_assign #(
+                .TDATA_BYTES(TDATA_BYTES),
+                .TDEST_WIDTH(TDEST_WIDTH),
+                .TUSER_WIDTH(TUSER_WIDTH),
+                .TID_WIDTH(TID_WIDTH)
+            )
             extract_assigned (
                 .rx(stages[STAGES-1]),
                 .tx(tx[OUTPUTS])
@@ -168,7 +178,12 @@ module logic_axi4_stream_demux_main #(
             );
 
             for (n = 0; n < WIDTH; ++n) begin: map
-                logic_axi4_stream_assign
+                logic_axi4_stream_assign #(
+                    .TDATA_BYTES(TDATA_BYTES),
+                    .TDEST_WIDTH(TDEST_WIDTH),
+                    .TUSER_WIDTH(TUSER_WIDTH),
+                    .TID_WIDTH(TID_WIDTH)
+                )
                 output_assigned (
                     .rx(demuxed[n]),
                     .tx(tx[k + n]),

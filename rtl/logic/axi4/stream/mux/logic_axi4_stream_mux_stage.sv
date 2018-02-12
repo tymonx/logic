@@ -55,7 +55,12 @@ module logic_axi4_stream_mux_stage #(
 
     generate
         if (1 == INPUTS[0]) begin: odd
-            logic_axi4_stream_assign
+            logic_axi4_stream_assign #(
+                .TDATA_BYTES(TDATA_BYTES),
+                .TDEST_WIDTH(TDEST_WIDTH),
+                .TUSER_WIDTH(TUSER_WIDTH),
+                .TID_WIDTH(TID_WIDTH)
+            )
             bypass (
                 .rx(rx[INPUTS-1]),
                 .tx(tx[OUTPUTS-1]),
