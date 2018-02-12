@@ -44,7 +44,7 @@ module logic_axi4_stream_mux #(
 ) (
     input aclk,
     input areset_n,
-    `LOGIC_MODPORT(logic_axi4_stream_if, rx) rx[INPUTS-1:0],
+    `LOGIC_MODPORT(logic_axi4_stream_if, rx) rx[INPUTS],
     `LOGIC_MODPORT(logic_axi4_stream_if, tx) tx
 );
     logic areset_n_synced;

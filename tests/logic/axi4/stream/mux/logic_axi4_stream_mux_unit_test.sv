@@ -33,12 +33,12 @@ module logic_axi4_stream_mux_unit_test;
     logic_axi4_stream_if #(
         .TDATA_BYTES(TDATA_BYTES),
         .TID_WIDTH(TID_WIDTH)
-    ) rx [INPUTS-1:0] (.*);
+    ) rx [INPUTS] (.*);
 
     virtual logic_axi4_stream_if #(
         .TDATA_BYTES(TDATA_BYTES),
         .TID_WIDTH(TID_WIDTH)
-    ) rx_if [INPUTS-1:0];
+    ) rx_if [INPUTS];
 
     logic_axi4_stream_if #(
         .TDATA_BYTES(TDATA_BYTES),

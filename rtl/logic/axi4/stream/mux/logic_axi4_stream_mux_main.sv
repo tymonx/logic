@@ -45,7 +45,7 @@ module logic_axi4_stream_mux_main #(
 ) (
     input aclk,
     input areset_n,
-    `LOGIC_MODPORT(logic_axi4_stream_if, rx) rx[INPUTS-1:0],
+    `LOGIC_MODPORT(logic_axi4_stream_if, rx) rx[INPUTS],
     `LOGIC_MODPORT(logic_axi4_stream_if, tx) tx
 );
     localparam int INPUTS_NORMALIZED = 2**DEPTH;
@@ -65,7 +65,7 @@ module logic_axi4_stream_mux_main #(
         .TUSER_WIDTH(M_TUSER_WIDTH),
         .TID_WIDTH(M_TID_WIDTH)
     )
-    muxed [MUXED-1:0] (
+    muxed [MUXED] (
         .aclk(aclk),
         .areset_n(areset_n)
     );
@@ -110,7 +110,7 @@ module logic_axi4_stream_mux_main #(
                 .TUSER_WIDTH(M_TUSER_WIDTH),
                 .TID_WIDTH(M_TID_WIDTH)
             )
-            muxed_in [MUXED_IN-1:0] (
+            muxed_in [MUXED_IN] (
                 .aclk(aclk),
                 .areset_n(areset_n)
             );
@@ -121,7 +121,7 @@ module logic_axi4_stream_mux_main #(
                 .TUSER_WIDTH(M_TUSER_WIDTH),
                 .TID_WIDTH(M_TID_WIDTH)
             )
-            muxed_out [MUXED_OUT-1:0] (
+            muxed_out [MUXED_OUT] (
                 .aclk(aclk),
                 .areset_n(areset_n)
             );
