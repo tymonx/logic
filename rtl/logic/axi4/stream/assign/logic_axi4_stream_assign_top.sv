@@ -60,7 +60,12 @@ module logic_axi4_stream_assign_top #(
 
     `LOGIC_AXI4_STREAM_IF_RX_ASSIGN(rx, rx);
 
-    logic_axi4_stream_assign
+    logic_axi4_stream_assign #(
+        .TDATA_BYTES(TDATA_BYTES),
+        .TDEST_WIDTH(TDEST_WIDTH),
+        .TUSER_WIDTH(TUSER_WIDTH),
+        .TID_WIDTH(TID_WIDTH)
+    )
     unit (.*);
 
     `LOGIC_AXI4_STREAM_IF_TX_ASSIGN(tx, tx);

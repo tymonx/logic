@@ -86,7 +86,12 @@ module logic_axi4_stream_resizer #(
             );
         end
         else begin: bypass
-            logic_axi4_stream_assign
+            logic_axi4_stream_assign #(
+                .TDATA_BYTES(TX_TDATA_BYTES),
+                .TUSER_WIDTH(TX_TUSER_WIDTH),
+                .TDEST_WIDTH(TDEST_WIDTH),
+                .TID_WIDTH(TID_WIDTH)
+            )
             unit (
                 .*
             );

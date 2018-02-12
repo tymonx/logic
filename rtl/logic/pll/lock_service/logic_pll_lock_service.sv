@@ -46,69 +46,17 @@ module logic_pll_lock_service #(
     output logic pll_reset,
     output logic locked
 );
-    localparam real TIME_BASE = 1_000_000_000.0;
-    localparam real TIME_UNIT = (TIME_BASE / real'(CLOCK_FREQUENCY_HZ));
-
-    localparam int RESET_DURATION_CLOCKS = int'(
-        (real'(RESET_DURATION_NS) / TIME_UNIT) + 0.5);
-
-    localparam int WAIT_FOR_LOCK_CLOCKS = int'(
-        (real'(WAIT_FOR_LOCK_NS) / TIME_UNIT) + 0.5);
-
-    localparam int RESET_DURATION = (RESET_DURATION_CLOCKS >= 2) ?
-        RESET_DURATION_CLOCKS : 2;
-
-    localparam int WAIT_FOR_LOCK = (WAIT_FOR_LOCK_CLOCKS >= 2) ?
-        WAIT_FOR_LOCK_CLOCKS : 2;
-
-    localparam int COUNTER_MAX = (RESET_DURATION < WAIT_FOR_LOCK) ?
-        WAIT_FOR_LOCK : RESET_DURATION;
-
-    localparam int TDATA_BYTES = 4;
-
-    initial begin: design_rule_checks
-        `LOGIC_DRC_GREATER_THAN(CLOCK_FREQUENCY_HZ, 0)
-        `LOGIC_DRC_EQUAL_OR_LESS_THAN(CLOCK_FREQUENCY_HZ, TIME_BASE)
-    end
-
     logic areset_n_synced;
 
     logic_reset_synchronizer
-    reset_service (
-        .*
-    );
-
-    logic_axi4_stream_if #(
-        .TDATA_BYTES(TDATA_BYTES)
-    )
-    timer_config (
-        .areset_n(areset_n_synced),
-        .*
-    );
-
-    logic_axi4_stream_if #(
-        .TDATA_BYTES(TDATA_BYTES)
-    )
-    timer (
-        .areset_n(areset_n_synced),
-        .*
-    );
-
-    logic_axi4_stream_timer #(
-        .TDATA_BYTES(TDATA_BYTES),
-        .PERIODIC_DEFAULT(RESET_DURATION),
-        .COUNTER_MAX(COUNTER_MAX)
-    )
-    timer_unit (
-        .areset_n(areset_n_synced),
-        .rx(timer_config),
-        .tx(timer),
+    reset_synchronizer (
         .*
     );
 
     logic_pll_lock_service_main #(
-        .RESET_DURATION(RESET_DURATION),
-        .WAIT_FOR_LOCK(WAIT_FOR_LOCK),
+        .CLOCK_FREQUENCY_HZ(CLOCK_FREQUENCY_HZ),
+        .RESET_DURATION_NS(RESET_DURATION_NS),
+        .WAIT_FOR_LOCK_NS(WAIT_FOR_LOCK_NS),
         .PLL_LOCKED_STAGES(PLL_LOCKED_STAGES)
     )
     main (

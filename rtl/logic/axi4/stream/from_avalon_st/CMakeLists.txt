@@ -20,6 +20,7 @@ add_hdl_source(logic_axi4_stream_from_avalon_st.sv
 
 add_hdl_source(logic_axi4_stream_from_avalon_st_top.sv
     DEPENDS
+        logic_axi4_stream_if
         logic_axi4_stream_from_avalon_st
     ANALYSIS
         TRUE

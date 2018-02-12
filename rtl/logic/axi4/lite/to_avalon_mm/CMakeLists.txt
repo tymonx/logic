@@ -24,6 +24,8 @@ add_hdl_source(logic_axi4_lite_to_avalon_mm.sv
 
 add_hdl_source(logic_axi4_lite_to_avalon_mm_top.sv
     DEPENDS
+        logic_axi4_lite_if
+        logic_avalon_mm_if
         logic_axi4_lite_to_avalon_mm
     ANALYSIS
         TRUE

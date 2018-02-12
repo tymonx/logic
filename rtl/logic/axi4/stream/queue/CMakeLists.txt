@@ -23,6 +23,8 @@ add_hdl_source(logic_axi4_stream_queue.sv
 
 add_hdl_source(logic_axi4_stream_queue_top.sv
     DEPENDS
+        logic_pkg
+        logic_axi4_stream_if
         logic_axi4_stream_queue
     ANALYSIS
         TRUE

@@ -22,6 +22,7 @@ add_hdl_source(logic_axi4_stream_resizer.sv
 
 add_hdl_source(logic_axi4_stream_resizer_top.sv
     DEPENDS
+        logic_axi4_stream_if
         logic_axi4_stream_resizer
     ANALYSIS
         TRUE

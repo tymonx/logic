@@ -38,12 +38,12 @@ module logic_axi4_stream_demux_unit_test;
     logic_axi4_stream_if #(
         .TDATA_BYTES(TDATA_BYTES),
         .TID_WIDTH(TID_WIDTH)
-    ) tx [OUTPUTS-1:0] (.*);
+    ) tx [OUTPUTS] (.*);
 
     virtual logic_axi4_stream_if #(
         .TDATA_BYTES(TDATA_BYTES),
         .TID_WIDTH(TID_WIDTH)
-    ) tx_if [OUTPUTS-1:0];
+    ) tx_if [OUTPUTS];
 
     generate
         for (genvar k = 0; k < OUTPUTS; ++k) begin: map

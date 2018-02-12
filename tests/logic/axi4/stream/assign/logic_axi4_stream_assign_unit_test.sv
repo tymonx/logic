@@ -36,7 +36,9 @@ module logic_axi4_stream_assign_unit_test;
         .TDATA_BYTES(TDATA_BYTES)
     ) tx (.*);
 
-    logic_axi4_stream_assign
+    logic_axi4_stream_assign #(
+        .TDATA_BYTES(TDATA_BYTES)
+    )
     dut (
         .*
     );

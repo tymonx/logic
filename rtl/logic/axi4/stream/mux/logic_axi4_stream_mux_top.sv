@@ -55,7 +55,7 @@ module logic_axi4_stream_mux_top #(
         .TDEST_WIDTH(TDEST_WIDTH),
         .TUSER_WIDTH(TUSER_WIDTH),
         .TID_WIDTH(TID_WIDTH)
-    ) rx [INPUTS-1:0] (
+    ) rx [INPUTS] (
         .aclk(aclk),
         .areset_n(areset_n)
     );

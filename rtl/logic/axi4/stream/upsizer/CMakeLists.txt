@@ -26,6 +26,7 @@ add_hdl_source(logic_axi4_stream_upsizer.sv
 
 add_hdl_source(logic_axi4_stream_upsizer_top.sv
     DEPENDS
+        logic_axi4_stream_if
         logic_axi4_stream_upsizer
     ANALYSIS
         TRUE

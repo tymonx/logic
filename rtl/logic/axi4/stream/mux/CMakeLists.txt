@@ -28,6 +28,7 @@ add_hdl_source(logic_axi4_stream_mux.sv
 
 add_hdl_source(logic_axi4_stream_mux_top.sv
     DEPENDS
+        logic_axi4_stream_if
         logic_axi4_stream_mux
     ANALYSIS
         TRUE

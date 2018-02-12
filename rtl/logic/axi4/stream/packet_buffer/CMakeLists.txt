@@ -24,6 +24,8 @@ add_hdl_source(logic_axi4_stream_packet_buffer.sv
 
 add_hdl_source(logic_axi4_stream_packet_buffer_top.sv
     DEPENDS
+        logic_pkg
+        logic_axi4_stream_if
         logic_axi4_stream_packet_buffer
     ANALYSIS
         TRUE
