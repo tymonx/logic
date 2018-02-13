@@ -59,6 +59,9 @@ module logic_basic_queue_generic_read #(
                     fsm_state <= FSM_IDLE;
                 end
             end
+            default: begin
+                fsm_state <= FSM_IDLE;
+            end
             endcase
         end
     end
