@@ -15,13 +15,12 @@
 
 `include "logic.svh"
 
-/* Module: logic_reset_synchronizer
+/* Module: logic_reset_synchronizer_unit
  *
  * Synchronize asynchronous reset de-assertion to clock.
  *
  * Parameters:
  *  STAGES          - Number of registers used for reset synchronization.
- *  RESETS          - Number of input resets.
  *
  * Ports:
  *  aclk            - Clock.
@@ -29,45 +28,27 @@
  *  areset_n_synced - Asynchronous reset assertion.
  *                    Synchronous reset de-assertion.
  */
-module logic_reset_synchronizer #(
-    int STAGES = 2,
-    int RESETS = 1
+module logic_reset_synchronizer_unit #(
+    int STAGES = 2
 ) (
     input aclk,
-    input [RESETS-1:0] areset_n,
+    input areset_n,
     output logic areset_n_synced
 );
     initial begin: design_rule_checks
         `LOGIC_DRC_EQUAL_OR_GREATER_THAN(STAGES, 2)
     end
 
-    genvar k;
+    logic [STAGES-1:0] q;
 
-    logic [RESETS-1:0] areset_n_q;
+    always_ff @(posedge aclk or negedge areset_n) begin
+        if (!areset_n) begin
+            q <= '0;
+        end
+        else begin
+            q <= {1'b1, q[STAGES-1:1]};
+        end
+    end
 
-    generate
-        for (k = 0; k < RESETS; ++k) begin: resets
-            logic_reset_synchronizer_unit #(
-                .STAGES(STAGES)
-            )
-            unit (
-                .areset_n(areset_n[k]),
-                .areset_n_synced(areset_n_q[k]),
-                .*
-            );
-        end
-
-        if (RESETS > 1) begin: enabled_multi_resets
-            logic_reset_synchronizer_unit #(
-                .STAGES(STAGES)
-            )
-            unit (
-                .areset_n(&areset_n_q),
-                .*
-            );
-        end
-        else begin: enabled_one_reset
-            always_comb areset_n_synced = areset_n_q[0];
-        end
-    endgenerate
+    always_comb areset_n_synced = q[0];
 endmodule

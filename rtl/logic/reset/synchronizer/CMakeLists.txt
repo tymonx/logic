@@ -13,6 +13,10 @@
 # limitations under the License.
 
 add_hdl_source(logic_reset_synchronizer.sv
+    SOURCES
+        logic_reset_synchronizer_unit.sv
     ANALYSIS
         TRUE
+    MODELSIM_SUPPRESS
+        2583
 )
