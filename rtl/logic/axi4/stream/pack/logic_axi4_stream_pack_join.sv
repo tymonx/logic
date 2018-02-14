@@ -53,11 +53,12 @@ module logic_axi4_stream_pack_join #(
 
     enum logic [1:0] {
         FSM_IDLE,
-        FSM_RX0_PACK,
+        FSM_RX0_LOAD,
         FSM_RX0_ALIGNED,
         FSM_RX1_PACK,
         FSM_RX1_ALIGNED,
-        FSM_RX1_IDLE
+        FSM_RX1_IDLE,
+        FSM_RX1_LOAD_LAST
     } fsm_state;
 
     always_comb rx.tready = tx.tready;
@@ -68,20 +69,20 @@ module logic_axi4_stream_pack_join #(
         end
         else if (tx.tready) begin
             unique case (fsm_state)
-            FSM_IDLE, FSM_RX0_ALIGNED, FSM_RX0_PACK: begin
+            FSM_IDLE: begin
                 if (rx[0].tvalid) begin
                     if (rx[0].tlast) begin
                         fsm_state <= FSM_IDLE;
                     end
                     else if (rx[0].tkeep[TDATA_BYTES-1]) begin
-                        fsm_state <= FSM_RX0_ALIGNED;
+                        fsm_state <= FSM_RX0_LOAD;
                     end
                     else if (rx[1].tvalid) begin
-                        if (rx[1].tlast) begin
-                            fsm_state <= FSM_RX1_IDLE;
+                        if (rx[1].tkeep[TDATA_BYTES]) begin
+                            fsm_state <= FSM_RX1_LOAD;
                         end
                         else if (rx[1].tkeep[TDATA_BYTES-1]) begin
-                            fsm_state <= FSM_RX1_ALIGNED;
+
                         end
                         else begin
                             fsm_state <= FSM_RX1_PACK;

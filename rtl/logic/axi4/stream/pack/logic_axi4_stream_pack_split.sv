@@ -35,10 +35,12 @@ module logic_axi4_stream_pack_split #(
 
     always_comb rx.tready = tx[0].tready;
 
+    always_comb tx[0].tlast = rx.tlast && ~|rx.tkeep[TDATA_BYTES+:TDATA_BYTES];
+    always_comb tx[1].tlast = rx.tlast;
+
     generate
         for (k = 0; k < OUTPUTS; ++k) begin: map
             always_comb tx[k].tvalid = rx.tvalid;
-            always_comb tx[k].tlast = rx.tlast;
             always_comb tx[k].tdata = rx.tdata[k*TDATA_BYTES+:TDATA_BYTES];
             always_comb tx[k].tstrb = rx.tstrb[k*TDATA_BYTES+:TDATA_BYTES];
             always_comb tx[k].tkeep = rx.tkeep[k*TDATA_BYTES+:TDATA_BYTES];
