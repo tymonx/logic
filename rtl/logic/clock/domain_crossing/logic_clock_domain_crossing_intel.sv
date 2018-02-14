@@ -52,7 +52,7 @@ module logic_clock_domain_crossing_intel #(
     end
 
     localparam DATA_WIDTH = WIDTH;
-    localparam ALMOST_FULL = (2**ADDRESS_WIDTH) - 4;
+    localparam ALMOST_FULL = (2**ADDRESS_WIDTH) - 1;
 
     logic wrfull;
     logic wrempty;
@@ -75,16 +75,9 @@ module logic_clock_domain_crossing_intel #(
         FSM_DATA
     } fsm_state;
 
+    always_comb write_enable = rx_tvalid && rx_tready;
+    always_comb write_data = rx_tdata;
     always_comb almost_full = (wrusedw >= ALMOST_FULL[ADDRESS_WIDTH-1:0]);
-
-    always_ff @(posedge rx_aclk or negedge areset_n) begin
-        if (!areset_n) begin
-            write_enable <= '0;
-        end
-        else begin
-            write_enable <= rx_tvalid && rx_tready;
-        end
-    end
 
     always_ff @(posedge rx_aclk or negedge areset_n) begin
         if (!areset_n) begin
@@ -93,10 +86,6 @@ module logic_clock_domain_crossing_intel #(
         else begin
             rx_tready <= !almost_full;
         end
-    end
-
-    always_ff @(posedge rx_aclk) begin
-        write_data <= rx_tdata;
     end
 
     /* verilator lint_off PINMISSING */

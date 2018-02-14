@@ -34,7 +34,7 @@ module logic_basic_queue_intel #(
     end
 
     localparam DATA_WIDTH = WIDTH;
-    localparam ALMOST_FULL = (2**ADDRESS_WIDTH) - 3;
+    localparam ALMOST_FULL = (2**ADDRESS_WIDTH) - 1;
 
     logic full;
     logic almost_full;
@@ -53,14 +53,8 @@ module logic_basic_queue_intel #(
         FSM_DATA
     } fsm_state;
 
-    always_ff @(posedge aclk or negedge areset_n) begin
-        if (!areset_n) begin
-            write <= '0;
-        end
-        else begin
-            write <= rx_tvalid && rx_tready;
-        end
-    end
+    always_comb write = rx_tvalid && rx_tready;
+    always_comb write_data = rx_tdata;
 
     always_ff @(posedge aclk or negedge areset_n) begin
         if (!areset_n) begin
@@ -69,10 +63,6 @@ module logic_basic_queue_intel #(
         else begin
             rx_tready <= !almost_full;
         end
-    end
-
-    always_ff @(posedge aclk) begin
-        write_data <= rx_tdata;
     end
 
     /* verilator lint_off PINMISSING */

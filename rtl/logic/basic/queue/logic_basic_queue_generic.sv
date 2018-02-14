@@ -41,8 +41,7 @@ module logic_basic_queue_generic #(
     logic [DATA_WIDTH-1:0] read_data;
     logic [ADDRESS_WIDTH-1:0] read_pointer;
 
-    logic capacity_valid;
-    logic [ADDRESS_WIDTH-1:0] capacity_data;
+    logic [ADDRESS_WIDTH:0] capacity;
 
     logic_basic_queue_generic_write #(
         .DATA_WIDTH(DATA_WIDTH),

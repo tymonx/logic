@@ -50,7 +50,7 @@ module logic_clock_domain_crossing_generic_write #(
         `LOGIC_DRC_EQUAL_OR_GREATER_THAN(ADDRESS_WIDTH, 3)
     end
 
-    localparam ALMOST_FULL = (2**ADDRESS_WIDTH) - 4;
+    localparam ALMOST_FULL = (2**ADDRESS_WIDTH) - 3;
 
     logic almost_full;
     logic [ADDRESS_WIDTH-1:0] difference;
@@ -64,6 +64,8 @@ module logic_clock_domain_crossing_generic_write #(
         end
     end
 
+    always_comb write_data = rx_tdata;
+    always_comb write_enable = rx_tvalid && rx_tready;
     always_comb almost_full = (difference >= ALMOST_FULL[ADDRESS_WIDTH-1:0]);
 
     always_ff @(posedge rx_aclk or negedge rx_areset_n) begin
@@ -73,19 +75,6 @@ module logic_clock_domain_crossing_generic_write #(
         else begin
             rx_tready <= !almost_full;
         end
-    end
-
-    always_ff @(posedge rx_aclk or negedge rx_areset_n) begin
-        if (!rx_areset_n) begin
-            write_enable <= '0;
-        end
-        else begin
-            write_enable <= rx_tvalid && rx_tready;
-        end
-    end
-
-    always_ff @(posedge rx_aclk) begin
-        write_data <= rx_tdata;
     end
 
     always_ff @(posedge rx_aclk or negedge rx_areset_n) begin

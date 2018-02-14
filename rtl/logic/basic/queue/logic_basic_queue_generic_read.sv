@@ -27,12 +27,28 @@ module logic_basic_queue_generic_read #(
     input [DATA_WIDTH-1:0] read_data,
     output logic [ADDRESS_WIDTH-1:0] read_pointer,
     output logic read_enable,
-    input capacity_valid
+    input [ADDRESS_WIDTH:0] capacity
 );
+    localparam int ALMOST_EMPTY = 1;
+
     enum logic [0:0] {
         FSM_IDLE,
         FSM_DATA
     } fsm_state;
+
+    logic empty;
+    logic almost_empty;
+
+    always_ff @(posedge aclk or negedge areset_n) begin
+        if (!areset_n) begin
+            almost_empty <= '1;
+        end
+        else begin
+            almost_empty <= (capacity <= ALMOST_EMPTY[ADDRESS_WIDTH:0]);
+        end
+    end
+
+    always_comb empty = almost_empty && (1'b0 == capacity[0]);
 
     always_ff @(posedge aclk or negedge areset_n) begin
         if (!areset_n) begin
@@ -50,12 +66,12 @@ module logic_basic_queue_generic_read #(
         else begin
             unique case (fsm_state)
             FSM_IDLE: begin
-                if (capacity_valid) begin
+                if (!empty) begin
                     fsm_state <= FSM_DATA;
                 end
             end
             FSM_DATA: begin
-                if (tx_tready && !capacity_valid) begin
+                if (tx_tready && empty) begin
                     fsm_state <= FSM_IDLE;
                 end
             end
@@ -69,10 +85,10 @@ module logic_basic_queue_generic_read #(
     always_comb begin
         unique case (fsm_state)
         FSM_IDLE: begin
-            read_enable = capacity_valid;
+            read_enable = !empty;
         end
         FSM_DATA: begin
-            read_enable = capacity_valid && tx_tready;
+            read_enable = !empty && tx_tready;
         end
         default: begin
             read_enable = '0;

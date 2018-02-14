@@ -22,17 +22,11 @@ module logic_basic_queue_generic_capacity #(
     input areset_n,
     input write_enable,
     input read_enable,
-    output logic capacity_valid,
-    output logic [ADDRESS_WIDTH-1:0] capacity_data
+    output logic [ADDRESS_WIDTH:0] capacity
 );
-    struct packed {
-        logic valid;
-        logic [ADDRESS_WIDTH-1:0] data;
-    } capacity;
-
     always_ff @(posedge aclk or negedge areset_n) begin
         if (!areset_n) begin
-            capacity <= '{valid: 1'b0, data: '1};
+            capacity <= '0;
         end
         else if (write_enable && !read_enable) begin
             capacity <= capacity + 1'b1;
@@ -42,6 +36,41 @@ module logic_basic_queue_generic_capacity #(
         end
     end
 
-    always_comb capacity_valid = capacity.valid;
-    always_comb capacity_data = capacity.data;
+`ifndef LOGIC_STD_OVL_DISABLED
+    logic [`OVL_FIRE_WIDTH-1:0] assert_capacity_overflow_fire;
+    logic [`OVL_FIRE_WIDTH-1:0] assert_capacity_underflow_fire;
+
+    ovl_no_transition #(
+        .severity_level(`OVL_FATAL),
+        .width(ADDRESS_WIDTH + 1),
+        .property_type(`OVL_ASSERT),
+        .msg("capacity cannot overflow")
+    )
+    assert_capacity_overflow (
+        .clock(aclk),
+        .reset(areset_n),
+        .enable(1'b1),
+        .test_expr(capacity),
+        .start_state('1),
+        .next_state('0),
+        .fire(assert_capacity_overflow_fire)
+    );
+
+    ovl_no_transition #(
+        .severity_level(`OVL_FATAL),
+        .width(ADDRESS_WIDTH + 1),
+        .property_type(`OVL_ASSERT),
+        .msg("capacity cannot underflow")
+    )
+    assert_capacity_underflow (
+        .clock(aclk),
+        .reset(areset_n),
+        .enable(1'b1),
+        .test_expr(capacity),
+        .start_state('0),
+        .next_state('1),
+        .fire(assert_capacity_underflow_fire)
+    );
+`endif
+
 endmodule
