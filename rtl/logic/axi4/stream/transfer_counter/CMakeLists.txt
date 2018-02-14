@@ -23,4 +23,6 @@ add_hdl_source(logic_axi4_stream_transfer_counter_top.sv
     DEPENDS
         logic_axi4_stream_if
         logic_axi4_stream_transfer_counter
+    ANALYSIS
+        TRUE
 )
