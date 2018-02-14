@@ -21,8 +21,9 @@ module logic_axi4_stream_transfer_counter_unit_test;
     string name = "logic_axi4_stream_transfer_counter_unit_test";
     svunit_testcase svunit_ut;
 
-    parameter TDATA_BYTES = 4;
-    parameter COUNTER_MAX = 256;
+    parameter int PACKETS = 0;
+    parameter int TDATA_BYTES = 4;
+    parameter int COUNTER_MAX = 256;
 
     typedef bit [TDATA_BYTES-1:0][7:0] tdata_t;
 
@@ -54,6 +55,7 @@ module logic_axi4_stream_transfer_counter_unit_test;
     ) counter (.*);
 
     logic_axi4_stream_transfer_counter #(
+        .PACKETS(PACKETS),
         .COUNTER_MAX(COUNTER_MAX),
         .TDATA_BYTES(TDATA_BYTES)
     )
@@ -112,7 +114,7 @@ module logic_axi4_stream_transfer_counter_unit_test;
     counter.cb_read(value);
     counter.cb_tx.tready <= '1;
 
-    `FAIL_UNLESS_EQUAL(tdata_t'({<<8{value}}), COUNTER_MAX)
+    `FAIL_UNLESS_EQUAL(tdata_t'({<<8{value}}), PACKETS ? 1 : COUNTER_MAX)
 
     tx.cb_read(captured);
 
@@ -136,7 +138,7 @@ module logic_axi4_stream_transfer_counter_unit_test;
     counter.cb_read(value);
     counter.cb_tx.tready <= '1;
 
-    `FAIL_UNLESS_EQUAL(tdata_t'({<<8{value}}), COUNTER_MAX)
+    `FAIL_UNLESS_EQUAL(tdata_t'({<<8{value}}), PACKETS ? 1 : COUNTER_MAX)
 
     tx.cb_read(captured);
 
@@ -160,7 +162,7 @@ module logic_axi4_stream_transfer_counter_unit_test;
     counter.cb_read(value);
     counter.cb_tx.tready <= '1;
 
-    `FAIL_UNLESS_EQUAL(tdata_t'({<<8{value}}), COUNTER_MAX)
+    `FAIL_UNLESS_EQUAL(tdata_t'({<<8{value}}), PACKETS ? 1 : COUNTER_MAX)
 
     tx.cb_read(captured, 0, 0, 3, 0);
 
@@ -184,7 +186,7 @@ module logic_axi4_stream_transfer_counter_unit_test;
     counter.cb_read(value);
     counter.cb_tx.tready <= '1;
 
-    `FAIL_UNLESS_EQUAL(tdata_t'({<<8{value}}), COUNTER_MAX)
+    `FAIL_UNLESS_EQUAL(tdata_t'({<<8{value}}), PACKETS ? 1 : COUNTER_MAX)
 
     tx.cb_read(captured, 0, 0, 3, 0);
 
@@ -205,7 +207,7 @@ module logic_axi4_stream_transfer_counter_unit_test;
     counter.cb_read(value);
     counter.cb_tx.tready <= '1;
 
-    `FAIL_UNLESS_EQUAL(tdata_t'({<<8{value}}), 13)
+    `FAIL_UNLESS_EQUAL(tdata_t'({<<8{value}}), PACKETS ? 1 : 13)
 
     data = create_data(7 * TDATA_BYTES);
     rx.cb_write(data);
@@ -214,7 +216,7 @@ module logic_axi4_stream_transfer_counter_unit_test;
     counter.cb_read(value);
     counter.cb_tx.tready <= '1;
 
-    `FAIL_UNLESS_EQUAL(tdata_t'({<<8{value}}), 20)
+    `FAIL_UNLESS_EQUAL(tdata_t'({<<8{value}}), PACKETS ? 2 : 20)
 
     data = create_data(26 * TDATA_BYTES);
     rx.cb_write(data);
@@ -223,7 +225,7 @@ module logic_axi4_stream_transfer_counter_unit_test;
     counter.cb_read(value);
     counter.cb_tx.tready <= '1;
 
-    `FAIL_UNLESS_EQUAL(tdata_t'({<<8{value}}), 46)
+    `FAIL_UNLESS_EQUAL(tdata_t'({<<8{value}}), PACKETS ? 3 : 46)
 `SVTEST_END
 
 `SVUNIT_TESTS_END

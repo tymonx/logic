@@ -23,6 +23,7 @@
  *  COUNTER_MAX     - Maximum number of transfers to count.
  *  COUNTER_WIDTH   - Number of bits for internal counter.
  *  TDATA_BYTES     - Number of bytes for tdata signal.
+ *  PACKETS         - Enable or disable packets count mode.
  *
  * Ports:
  *  aclk        - Clock.
@@ -34,7 +35,8 @@
 module logic_axi4_stream_transfer_counter #(
     int COUNTER_MAX = 256,
     int COUNTER_WIDTH = (COUNTER_MAX >= 2) ? $clog2(COUNTER_MAX + 1) : 2,
-    int TDATA_BYTES = 8 * ((COUNTER_WIDTH + 7) / 8)
+    int TDATA_BYTES = 8 * ((COUNTER_WIDTH + 7) / 8),
+    int PACKETS = 0
 ) (
     input aclk,
     input areset_n,
@@ -59,8 +61,19 @@ module logic_axi4_stream_transfer_counter #(
     always_comb empty = almost_empty && (1'b0 == counter[0]);
     always_comb full = almost_full && (COUNTER_MAX[0] == counter[0]);
 
-    always_comb write = monitor_rx.tvalid && monitor_rx.tready;
-    always_comb read = monitor_tx.tvalid && monitor_tx.tready;
+    generate
+        if (PACKETS > 0) begin: enabled_packets
+            always_comb write = monitor_rx.tvalid && monitor_rx.tready &&
+                monitor_rx.tlast;
+
+            always_comb read = monitor_tx.tvalid && monitor_tx.tready &&
+                monitor_tx.tlast;
+        end
+        else begin: disabled_packets
+            always_comb write = monitor_rx.tvalid && monitor_rx.tready;
+            always_comb read = monitor_tx.tvalid && monitor_tx.tready;
+        end
+    endgenerate
 
     always_ff @(posedge aclk or negedge areset_n) begin
         if (!areset_n) begin

@@ -17,6 +17,7 @@
 
 module logic_axi4_stream_transfer_counter_top #(
     int COUNTER_MAX = 256,
+    int PACKETS = 0,
     int TDATA_BYTES = `LOGIC_AXI4_STREAM_TDATA_BYTES,
     int TDEST_WIDTH = `LOGIC_AXI4_STREAM_TDEST_WIDTH,
     int TUSER_WIDTH = `LOGIC_AXI4_STREAM_TUSER_WIDTH,
@@ -94,6 +95,7 @@ module logic_axi4_stream_transfer_counter_top #(
     always_comb monitor_tx.tready = monitor_tx_tready;
 
     logic_axi4_stream_transfer_counter #(
+        .PACKETS(PACKETS),
         .COUNTER_MAX(COUNTER_MAX),
         .TDATA_BYTES(TDATA_BYTES)
     ) unit (.*);
