@@ -69,6 +69,26 @@ module logic_axi4_stream_packet_buffer_main #(
     );
 
     logic_axi4_stream_if #(
+        .TDATA_BYTES(M_TDATA_BYTES),
+        .TDEST_WIDTH(M_TDEST_WIDTH),
+        .TUSER_WIDTH(M_TUSER_WIDTH),
+        .TID_WIDTH(M_TID_WIDTH)
+    )
+    monitor_rx (
+        .*
+    );
+
+    logic_axi4_stream_if #(
+        .TDATA_BYTES(M_TDATA_BYTES),
+        .TDEST_WIDTH(M_TDEST_WIDTH),
+        .TUSER_WIDTH(M_TUSER_WIDTH),
+        .TID_WIDTH(M_TID_WIDTH)
+    )
+    monitor_tx (
+        .*
+    );
+
+    logic_axi4_stream_if #(
         .TDATA_BYTES(COUNTER_TDATA_BYTES)
     )
     packets_counted (
@@ -81,6 +101,28 @@ module logic_axi4_stream_packet_buffer_main #(
     transfers_counted (
         .*
     );
+
+    /* Workaround for Intel Quartus Lite/Standard */
+    always_comb monitor_rx.tvalid = rx.tvalid;
+    always_comb monitor_rx.tready = rx.tready;
+    always_comb monitor_rx.tlast = rx.tlast;
+    always_comb monitor_rx.tdata = rx.tdata;
+    always_comb monitor_rx.tstrb = rx.tstrb;
+    always_comb monitor_rx.tkeep = rx.tkeep;
+    always_comb monitor_rx.tdest = rx.tdest;
+    always_comb monitor_rx.tuser = rx.tuser;
+    always_comb monitor_rx.tid = rx.tid;
+
+    /* Workaround for Intel Quartus Lite/Standard */
+    always_comb monitor_tx.tvalid = queued.tvalid;
+    always_comb monitor_tx.tready = queued.tready;
+    always_comb monitor_tx.tlast = queued.tlast;
+    always_comb monitor_tx.tdata = queued.tdata;
+    always_comb monitor_tx.tstrb = queued.tstrb;
+    always_comb monitor_tx.tkeep = queued.tkeep;
+    always_comb monitor_tx.tdest = queued.tdest;
+    always_comb monitor_tx.tuser = queued.tuser;
+    always_comb monitor_tx.tid = queued.tid;
 
     logic_axi4_stream_queue #(
         .TDATA_BYTES(TDATA_BYTES),
@@ -103,8 +145,6 @@ module logic_axi4_stream_packet_buffer_main #(
         .TDATA_BYTES(COUNTER_TDATA_BYTES)
     )
     transfers_count (
-        .monitor_rx(rx),
-        .monitor_tx(queued),
         .tx(transfers_counted),
         .*
     );
@@ -115,8 +155,6 @@ module logic_axi4_stream_packet_buffer_main #(
         .TDATA_BYTES(COUNTER_TDATA_BYTES)
     )
     packets_count (
-        .monitor_rx(rx),
-        .monitor_tx(queued),
         .tx(packets_counted),
         .*
     );

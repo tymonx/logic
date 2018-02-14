@@ -20,6 +20,7 @@ add_hdl_source(logic_axi4_stream_packet_buffer.sv
         logic_pkg
         logic_axi4_stream_if
         logic_axi4_stream_queue
+        logic_axi4_stream_transfer_counter
 )
 
 add_hdl_source(logic_axi4_stream_packet_buffer_top.sv

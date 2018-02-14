@@ -61,6 +61,15 @@ module logic_axi4_stream_packet_buffer_unit #(
     always_comb packets_counted.tready = '1;
     always_comb transfers_counted.tready = '1;
 
+`ifdef VERILATOR
+    logic _unused_ports = &{
+            1'b0,
+            packets_counted.tvalid,
+            transfers_counted.tvalid,
+            1'b0
+        };
+`endif
+
     always_ff @(posedge aclk or negedge areset_n) begin
         if (!areset_n) begin
             almost_empty <= '1;
@@ -78,7 +87,7 @@ module logic_axi4_stream_packet_buffer_unit #(
             almost_full <= '0;
         end
         else begin
-            almost_full = (capacity_t'(transfers_counted.tdata) >=
+            almost_full <= (capacity_t'(transfers_counted.tdata) >=
                 ALMOST_FULL[CAPACITY_WIDTH-1:0]);
         end
     end
