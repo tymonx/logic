@@ -24,6 +24,8 @@
  *  TDEST_WIDTH - Number of bits for tdest signal.
  *  TUSER_WIDTH - Number of bits for tuser signal.
  *  TID_WIDTH   - Number of bits for tid signal.
+ *  USE_TKEEP   - Enable or disable tkeep signal.
+ *  USE_TSTRB   - Enable or disable tstrb signal.
  *  CAPACITY    - Number of single data transactions that can be store in
  *                internal queue memory (FIFO capacity).
  *  TARGET      - Target device implementation.
@@ -39,6 +41,8 @@ module logic_axi4_stream_packet_buffer_main #(
     int TDEST_WIDTH = 1,
     int TUSER_WIDTH = 1,
     int TID_WIDTH = 1,
+    int USE_TSTRB = 1,
+    int USE_TKEEP = 1,
     int CAPACITY = 256,
     logic_pkg::target_t TARGET = `LOGIC_CONFIG_TARGET
 ) (
@@ -47,42 +51,44 @@ module logic_axi4_stream_packet_buffer_main #(
     `LOGIC_MODPORT(logic_axi4_stream_if, rx) rx,
     `LOGIC_MODPORT(logic_axi4_stream_if, tx) tx
 );
+    localparam int M_TDATA_BYTES = (TDATA_BYTES > 0) ? TDATA_BYTES : 1;
+    localparam int M_TUSER_WIDTH = (TUSER_WIDTH > 0) ? TUSER_WIDTH : 1;
+    localparam int M_TDEST_WIDTH = (TDEST_WIDTH > 0) ? TDEST_WIDTH : 1;
+    localparam int M_TID_WIDTH = (TID_WIDTH > 0) ? TID_WIDTH : 1;
+
+    localparam int COUNTER_TDATA_BYTES = 4;
+
     logic_axi4_stream_if #(
-        .TDATA_BYTES(TDATA_BYTES),
-        .TDEST_WIDTH(TDEST_WIDTH),
-        .TUSER_WIDTH(TUSER_WIDTH),
-        .TID_WIDTH(TID_WIDTH)
+        .TDATA_BYTES(M_TDATA_BYTES),
+        .TDEST_WIDTH(M_TDEST_WIDTH),
+        .TUSER_WIDTH(M_TUSER_WIDTH),
+        .TID_WIDTH(M_TID_WIDTH)
     )
     queued (
         .*
     );
 
     logic_axi4_stream_if #(
-        .TDATA_BYTES(TDATA_BYTES),
-        .TDEST_WIDTH(TDEST_WIDTH),
-        .TUSER_WIDTH(TUSER_WIDTH),
-        .TID_WIDTH(TID_WIDTH)
+        .TDATA_BYTES(COUNTER_TDATA_BYTES)
     )
-    monitor (
+    packets_counted (
         .*
     );
 
-    /* Workaround for Quartus Lite/Standard Prime */
-    always_comb monitor.tready = rx.tready;
-    always_comb monitor.tvalid = rx.tvalid;
-    always_comb monitor.tlast = rx.tlast;
-    always_comb monitor.tuser = rx.tuser;
-    always_comb monitor.tdest = rx.tdest;
-    always_comb monitor.tstrb = rx.tstrb;
-    always_comb monitor.tkeep = rx.tkeep;
-    always_comb monitor.tdata = rx.tdata;
-    always_comb monitor.tid = rx.tid;
+    logic_axi4_stream_if #(
+        .TDATA_BYTES(COUNTER_TDATA_BYTES)
+    )
+    transfers_counted (
+        .*
+    );
 
     logic_axi4_stream_queue #(
         .TDATA_BYTES(TDATA_BYTES),
         .TDEST_WIDTH(TDEST_WIDTH),
         .TUSER_WIDTH(TUSER_WIDTH),
         .TID_WIDTH(TID_WIDTH),
+        .USE_TSTRB(USE_TSTRB),
+        .USE_TKEEP(USE_TKEEP),
         .CAPACITY(CAPACITY),
         .TARGET(TARGET)
     )
@@ -91,10 +97,34 @@ module logic_axi4_stream_packet_buffer_main #(
         .*
     );
 
-    logic_axi4_stream_packet_buffer_count #(
+    logic_axi4_stream_transfer_counter #(
+        .PACKETS(0),
+        .COUNTER_MAX(CAPACITY),
+        .TDATA_BYTES(COUNTER_TDATA_BYTES)
+    )
+    transfers_count (
+        .monitor_rx(rx),
+        .monitor_tx(queued),
+        .tx(transfers_counted),
+        .*
+    );
+
+    logic_axi4_stream_transfer_counter #(
+        .PACKETS(1),
+        .COUNTER_MAX(CAPACITY),
+        .TDATA_BYTES(COUNTER_TDATA_BYTES)
+    )
+    packets_count (
+        .monitor_rx(rx),
+        .monitor_tx(queued),
+        .tx(packets_counted),
+        .*
+    );
+
+    logic_axi4_stream_packet_buffer_unit #(
         .CAPACITY(CAPACITY)
     )
-    count (
+    unit (
         .rx(queued),
         .*
     );

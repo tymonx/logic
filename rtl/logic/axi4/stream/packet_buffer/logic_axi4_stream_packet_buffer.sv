@@ -28,6 +28,8 @@
  *  TDEST_WIDTH - Number of bits for tdest signal.
  *  TUSER_WIDTH - Number of bits for tuser signal.
  *  TID_WIDTH   - Number of bits for tid signal.
+ *  USE_TKEEP   - Enable or disable tkeep signal.
+ *  USE_TSTRB   - Enable or disable tstrb signal.
  *  CAPACITY    - Number of single data transactions that can be store in
  *                internal queue memory (FIFO capacity).
  *  TARGET      - Target device implementation.
@@ -43,6 +45,8 @@ module logic_axi4_stream_packet_buffer #(
     int TDEST_WIDTH = 1,
     int TUSER_WIDTH = 1,
     int TID_WIDTH = 1,
+    int USE_TKEEP = 1,
+    int USE_TSTRB = 1,
     int CAPACITY = 256,
     logic_pkg::target_t TARGET = `LOGIC_CONFIG_TARGET
 ) (
@@ -63,6 +67,8 @@ module logic_axi4_stream_packet_buffer #(
         .TDEST_WIDTH(TDEST_WIDTH),
         .TUSER_WIDTH(TUSER_WIDTH),
         .TID_WIDTH(TID_WIDTH),
+        .USE_TKEEP(USE_TKEEP),
+        .USE_TSTRB(USE_TSTRB),
         .CAPACITY(CAPACITY),
         .TARGET(TARGET)
     )

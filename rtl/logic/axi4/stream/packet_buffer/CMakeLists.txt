@@ -15,7 +15,7 @@
 add_hdl_source(logic_axi4_stream_packet_buffer.sv
     SOURCES
         logic_axi4_stream_packet_buffer_main.sv
-        logic_axi4_stream_packet_buffer_count.sv
+        logic_axi4_stream_packet_buffer_unit.sv
     DEPENDS
         logic_pkg
         logic_axi4_stream_if
