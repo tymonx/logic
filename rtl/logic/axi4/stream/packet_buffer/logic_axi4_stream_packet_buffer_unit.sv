@@ -46,7 +46,7 @@ module logic_axi4_stream_packet_buffer_unit #(
     localparam int ALMOST_EMPTY = 1;
     localparam int ALMOST_FULL = (2**CAPACITY_WIDTH) - 1;
 
-    typedef logic [CAPACITY_WIDTH-1:0] capacity_t;
+    typedef logic [CAPACITY_WIDTH:0] capacity_t;
 
     enum logic [1:0] {
         FSM_IDLE,
@@ -54,9 +54,15 @@ module logic_axi4_stream_packet_buffer_unit #(
         FSM_FLUSH
     } fsm_state;
 
+    capacity_t packets;
+    capacity_t transfers;
+
     logic almost_full;
     logic almost_empty;
     logic empty;
+
+    always_comb packets = capacity_t'(packets_counted.tdata);
+    always_comb transfers = capacity_t'(transfers_counted.tdata);
 
     always_comb packets_counted.tready = '1;
     always_comb transfers_counted.tready = '1;
@@ -75,20 +81,18 @@ module logic_axi4_stream_packet_buffer_unit #(
             almost_empty <= '1;
         end
         else begin
-            almost_empty <= (capacity_t'(packets_counted.tdata) <=
-                ALMOST_EMPTY[CAPACITY_WIDTH-1:0]);
+            almost_empty <= (packets <= ALMOST_EMPTY[CAPACITY_WIDTH:0]);
         end
     end
 
-    always_comb empty = almost_empty && (1'b0 == packets_counted.tdata[0][0]);
+    always_comb empty = almost_empty && (2'b00 == packets[1:0]);
 
     always_ff @(posedge aclk or negedge areset_n) begin
         if (!areset_n) begin
             almost_full <= '0;
         end
         else begin
-            almost_full <= (capacity_t'(transfers_counted.tdata) >=
-                ALMOST_FULL[CAPACITY_WIDTH-1:0]);
+            almost_full <= (transfers >= ALMOST_FULL[CAPACITY_WIDTH:0]);
         end
     end
 
