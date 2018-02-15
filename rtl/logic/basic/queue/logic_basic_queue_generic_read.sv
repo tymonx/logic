@@ -48,7 +48,7 @@ module logic_basic_queue_generic_read #(
         end
     end
 
-    always_comb empty = almost_empty && (1'b0 == capacity[0]);
+    always_comb empty = almost_empty && (2'b00 == capacity[1:0]);
 
     always_ff @(posedge aclk or negedge areset_n) begin
         if (!areset_n) begin

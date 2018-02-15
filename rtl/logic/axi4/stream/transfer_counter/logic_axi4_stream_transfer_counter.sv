@@ -58,8 +58,8 @@ module logic_axi4_stream_transfer_counter #(
     logic almost_full;
     logic almost_empty;
 
-    always_comb empty = almost_empty && (1'b0 == counter[0]);
-    always_comb full = almost_full && (COUNTER_MAX[0] == counter[0]);
+    always_comb empty = almost_empty && (2'b00 == counter[1:0]);
+    always_comb full = almost_full && (COUNTER_MAX[1:0] == counter[1:0]);
 
     generate
         if (PACKETS > 0) begin: enabled_packets
