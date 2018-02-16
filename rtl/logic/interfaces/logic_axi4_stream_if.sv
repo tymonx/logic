@@ -24,6 +24,9 @@
  *  TDEST_WIDTH - Number of bits for tdest signal.
  *  TUSER_WIDTH - Number of bits for tuser signal.
  *  TID_WIDTH   - Number of bits for tid signal.
+ *  USE_TLAST   - Enable or disable tlast signal.
+ *  USE_TKEEP   - Enable or disable tkeep signal.
+ *  USE_TSTRB   - Enable or disable tstrb signal.
  *
  * Ports:
  *  aclk        - Clock. Used only for internal checkers and assertions
@@ -34,31 +37,46 @@ interface logic_axi4_stream_if #(
     int TDATA_BYTES = 1,
     int TDEST_WIDTH = 1,
     int TUSER_WIDTH = 1,
-    int TID_WIDTH = 1
+    int TID_WIDTH = 1,
+    int USE_TLAST = 1,
+    int USE_TKEEP = 1,
+    int USE_TSTRB = 1
 ) (
     input aclk,
     input areset_n
 );
-    localparam TDATA_WIDTH = TDATA_BYTES * 8;
-    localparam TSTRB_WIDTH = TDATA_BYTES;
-    localparam TKEEP_WIDTH = TDATA_BYTES;
+    localparam int TDATA_WIDTH = 8 * TDATA_BYTES;
+    localparam int TSTRB_WIDTH = (USE_TSTRB > 0) ? TDATA_BYTES : 0;
+    localparam int TKEEP_WIDTH = (USE_TKEEP > 0) ? TDATA_BYTES : 0;
+    localparam int TLAST_WIDTH = (USE_TLAST > 0) ? 1 : 0;
 
-    typedef logic [TDATA_BYTES-1:0][7:0] tdata_t;
-    typedef logic [TSTRB_WIDTH-1:0] tstrb_t;
-    typedef logic [TKEEP_WIDTH-1:0] tkeep_t;
-    typedef logic [TDEST_WIDTH-1:0] tdest_t;
-    typedef logic [TUSER_WIDTH-1:0] tuser_t;
-    typedef logic [TID_WIDTH-1:0] tid_t;
+    localparam int TOTAL_WIDTH = TUSER_WIDTH + TDEST_WIDTH + TID_WIDTH +
+        TLAST_WIDTH + TKEEP_WIDTH + TSTRB_WIDTH + TDATA_WIDTH;
 
-    typedef struct packed {
-        tuser_t tuser;
-        tdest_t tdest;
-        tid_t tid;
-        logic tlast;
-        tkeep_t tkeep;
-        tstrb_t tstrb;
-        tdata_t tdata;
-    } packet_t;
+    localparam int M_TDATA_BYTES = (TDATA_BYTES > 0) ? TDATA_BYTES : 1;
+    localparam int M_TDEST_WIDTH = (TDEST_WIDTH > 0) ? TDEST_WIDTH : 1;
+    localparam int M_TUSER_WIDTH = (TUSER_WIDTH > 0) ? TUSER_WIDTH : 1;
+    localparam int M_TID_WIDTH = (TID_WIDTH > 0) ? TID_WIDTH : 1;
+
+    localparam int M_TDATA_WIDTH = M_TDATA_BYTES * 8;
+    localparam int M_TSTRB_WIDTH = M_TDATA_BYTES;
+    localparam int M_TKEEP_WIDTH = M_TDATA_BYTES;
+
+    localparam int M_TDATA_OFFSET = 0;
+    localparam int M_TSTRB_OFFSET = M_TDATA_OFFSET + TDATA_WIDTH;
+    localparam int M_TKEEP_OFFSET = M_TSTRB_OFFSET + TSTRB_WIDTH;
+    localparam int M_TLAST_OFFSET = M_TKEEP_OFFSET + TKEEP_WIDTH;
+    localparam int M_TDEST_OFFSET = M_TLAST_OFFSET + TLAST_WIDTH;
+    localparam int M_TUSER_OFFSET = M_TDEST_OFFSET + TDEST_WIDTH;
+    localparam int M_TID_OFFSET = M_TUSER_OFFSET + TUSER_WIDTH;
+
+    typedef logic [M_TDATA_BYTES-1:0][7:0] tdata_t;
+    typedef logic [M_TSTRB_WIDTH-1:0] tstrb_t;
+    typedef logic [M_TKEEP_WIDTH-1:0] tkeep_t;
+    typedef logic [M_TDEST_WIDTH-1:0] tdest_t;
+    typedef logic [M_TUSER_WIDTH-1:0] tuser_t;
+    typedef logic [M_TID_WIDTH-1:0] tid_t;
+    typedef logic tlast_t;
 
 `ifndef LOGIC_SYNTHESIS
     `define INIT = '0
@@ -68,7 +86,7 @@ interface logic_axi4_stream_if #(
 
     logic tready `INIT;
     logic tvalid `INIT;
-    logic tlast `INIT;
+    tlast_t tlast `INIT;
     tdata_t tdata `INIT;
     tstrb_t tstrb `INIT;
     tkeep_t tkeep `INIT;
@@ -76,16 +94,136 @@ interface logic_axi4_stream_if #(
     tuser_t tuser `INIT;
     tid_t tid `INIT;
 
-    function automatic packet_t read();
-        return '{tuser, tdest, tid, tlast, tkeep, tstrb, tdata};
+    function automatic logic [TOTAL_WIDTH-1:0] read();
+        if (TDATA_WIDTH > 0) begin
+            read[M_TDATA_OFFSET+:$bits(tdata_t)] = tdata;
+        end
+
+        if (TKEEP_WIDTH > 0) begin
+            read[M_TKEEP_OFFSET+:$bits(tkeep_t)] = tkeep;
+        end
+
+        if (TSTRB_WIDTH > 0) begin
+            read[M_TSTRB_OFFSET+:$bits(tstrb_t)] = tstrb;
+        end
+
+        if (TDEST_WIDTH > 0) begin
+            read[M_TDEST_OFFSET+:$bits(tdest_t)] = tdest;
+        end
+
+        if (TUSER_WIDTH > 0) begin
+            read[M_TUSER_OFFSET+:$bits(tuser_t)] = tuser;
+        end
+
+        if (TLAST_WIDTH > 0) begin
+            read[M_TLAST_OFFSET+:$bits(tlast_t)] = tlast;
+        end
+
+        if (TID_WIDTH > 0) begin
+            read[M_TID_OFFSET+:$bits(tid_t)] = tid;
+        end
     endfunction
 
-    task automatic write(input packet_t packet);
-        {tuser, tdest, tid, tlast, tkeep, tstrb, tdata} <= packet;
+    task automatic write(input [TOTAL_WIDTH-1:0] packet);
+        if (TDATA_WIDTH > 0) begin
+            tdata <= packet[M_TDATA_OFFSET+:$bits(tdata_t)];
+        end
+        else begin
+            tdata <= '0;
+        end
+
+        if (TKEEP_WIDTH > 0) begin
+            tkeep <= packet[M_TKEEP_OFFSET+:$bits(tkeep_t)];
+        end
+        else begin
+            tkeep <= '1;
+        end
+
+        if (TSTRB_WIDTH > 0) begin
+            tstrb <= packet[M_TSTRB_OFFSET+:$bits(tstrb_t)];
+        end
+        else begin
+            tstrb <= '1;
+        end
+
+        if (TDEST_WIDTH > 0) begin
+            tdest <= packet[M_TDEST_OFFSET+:$bits(tdest_t)];
+        end
+        else begin
+            tdest <= '0;
+        end
+
+        if (TUSER_WIDTH > 0) begin
+            tuser <= packet[M_TUSER_OFFSET+:$bits(tuser_t)];
+        end
+        else begin
+            tuser <= '0;
+        end
+
+        if (TLAST_WIDTH > 0) begin
+            tlast <= packet[M_TLAST_OFFSET+:$bits(tlast_t)];
+        end
+        else begin
+            tlast <= '1;
+        end
+
+        if (TID_WIDTH > 0) begin
+            tid <= packet[M_TID_OFFSET+:$bits(tid_t)];
+        end
+        else begin
+            tid <= '0;
+        end
     endtask
 
-    task automatic comb_write(input packet_t packet);
-        {tuser, tdest, tid, tlast, tkeep, tstrb, tdata} = packet;
+    task automatic comb_write(input [TOTAL_WIDTH-1:0] packet);
+        if (TDATA_WIDTH > 0) begin
+            tdata = packet[M_TDATA_OFFSET+:$bits(tdata_t)];
+        end
+        else begin
+            tdata = '0;
+        end
+
+        if (TKEEP_WIDTH > 0) begin
+            tkeep = packet[M_TKEEP_OFFSET+:$bits(tkeep_t)];
+        end
+        else begin
+            tkeep = '1;
+        end
+
+        if (TSTRB_WIDTH > 0) begin
+            tstrb = packet[M_TSTRB_OFFSET+:$bits(tstrb_t)];
+        end
+        else begin
+            tstrb = '1;
+        end
+
+        if (TDEST_WIDTH > 0) begin
+            tdest = packet[M_TDEST_OFFSET+:$bits(tdest_t)];
+        end
+        else begin
+            tdest = '0;
+        end
+
+        if (TUSER_WIDTH > 0) begin
+            tuser = packet[M_TUSER_OFFSET+:$bits(tuser_t)];
+        end
+        else begin
+            tuser = '0;
+        end
+
+        if (TLAST_WIDTH > 0) begin
+            tlast = packet[M_TLAST_OFFSET+:$bits(tlast_t)];
+        end
+        else begin
+            tlast = '1;
+        end
+
+        if (TID_WIDTH > 0) begin
+            tid = packet[M_TID_OFFSET+:$bits(tid_t)];
+        end
+        else begin
+            tid = '0;
+        end
     endtask
 
 `ifndef LOGIC_MODPORT_DISABLED
@@ -203,7 +341,7 @@ interface logic_axi4_stream_if #(
                 else if (0 == idle) begin
                     idle = $urandom_range(idle_max, idle_min);
 
-                    for (int i = 0; i < TDATA_BYTES; ++i) begin
+                    for (int i = 0; i < M_TDATA_BYTES; ++i) begin
                         if (index < total_size) begin
                             cb_rx.tkeep[i] <= '1;
                             cb_rx.tstrb[i] <= '1;
@@ -246,7 +384,7 @@ interface logic_axi4_stream_if #(
             else if ((1'b1 === cb_tx.tready) && (1'b1 === cb_tx.tvalid) &&
                     (tid_t'(id) === cb_tx.tid) &&
                     (tdest_t'(dest) === cb_tx.tdest)) begin
-                for (int i = 0; i < TDATA_BYTES; ++i) begin
+                for (int i = 0; i < M_TDATA_BYTES; ++i) begin
                     if ((1'b1 === cb_tx.tkeep[i]) &&
                             (1'b1 === cb_tx.tstrb[i])) begin
                         q.push_back(byte'(cb_tx.tdata[i]));
@@ -342,7 +480,7 @@ interface logic_axi4_stream_if #(
 
             ovl_never_unknown #(
                 .severity_level(`OVL_FATAL),
-                .width(TDATA_WIDTH),
+                .width(M_TDATA_WIDTH),
                 .property_type(`OVL_ASSERT),
                 .msg("tdata signal cannot be unknown during active transfer")
             )
@@ -359,7 +497,7 @@ interface logic_axi4_stream_if #(
 
             ovl_never_unknown #(
                 .severity_level(`OVL_FATAL),
-                .width(TDATA_BYTES),
+                .width(M_TDATA_BYTES),
                 .property_type(`OVL_ASSERT),
                 .msg("tkeep signal cannot be unknown during active transfer")
             )
@@ -376,7 +514,7 @@ interface logic_axi4_stream_if #(
 
             ovl_never_unknown #(
                 .severity_level(`OVL_FATAL),
-                .width(TDATA_BYTES),
+                .width(M_TDATA_BYTES),
                 .property_type(`OVL_ASSERT),
                 .msg("tstrb signal cannot be unknown during active transfer")
             )
@@ -409,7 +547,7 @@ interface logic_axi4_stream_if #(
 
             ovl_never_unknown #(
                 .severity_level(`OVL_FATAL),
-                .width(TDEST_WIDTH),
+                .width(M_TDEST_WIDTH),
                 .property_type(`OVL_ASSERT),
                 .msg("tdest signal cannot be unknown during active transfer")
             )
@@ -426,7 +564,7 @@ interface logic_axi4_stream_if #(
 
             ovl_never_unknown #(
                 .severity_level(`OVL_FATAL),
-                .width(TUSER_WIDTH),
+                .width(M_TUSER_WIDTH),
                 .property_type(`OVL_ASSERT),
                 .msg("tuser signal cannot be unknown during active transfer")
             )
@@ -443,7 +581,7 @@ interface logic_axi4_stream_if #(
 
             ovl_never_unknown #(
                 .severity_level(`OVL_FATAL),
-                .width(TID_WIDTH),
+                .width(M_TID_WIDTH),
                 .property_type(`OVL_ASSERT),
                 .msg("tid signal cannot be unknown during active transfer")
             )
@@ -471,7 +609,7 @@ interface logic_axi4_stream_if #(
                 .fire(assert_tvalid_always_reset_fire)
             );
 
-            for (k = 0; k < TDATA_BYTES; ++k) begin: tdata_bytes
+            for (k = 0; k < M_TDATA_BYTES; ++k) begin: tdata_bytes
                 logic [`OVL_FIRE_WIDTH-1:0]
                     assert_tkeep_tstrb_always_valid_fire;
 
@@ -534,7 +672,7 @@ interface logic_axi4_stream_if #(
 
             ovl_win_unchange #(
                 .severity_level(`OVL_FATAL),
-                .width(TDATA_WIDTH),
+                .width(M_TDATA_WIDTH),
                 .property_type(`OVL_ASSERT),
                 .msg("tdata signal cannot change value during bus hold")
             )
@@ -552,7 +690,7 @@ interface logic_axi4_stream_if #(
 
             ovl_win_unchange #(
                 .severity_level(`OVL_FATAL),
-                .width(TDATA_BYTES),
+                .width(M_TDATA_BYTES),
                 .property_type(`OVL_ASSERT),
                 .msg("tkeep signal cannot change value during bus hold")
             )
@@ -570,7 +708,7 @@ interface logic_axi4_stream_if #(
 
             ovl_win_unchange #(
                 .severity_level(`OVL_FATAL),
-                .width(TDATA_BYTES),
+                .width(M_TDATA_BYTES),
                 .property_type(`OVL_ASSERT),
                 .msg("tstrb signal cannot change value during bus hold")
             )
@@ -588,7 +726,7 @@ interface logic_axi4_stream_if #(
 
             ovl_win_unchange #(
                 .severity_level(`OVL_FATAL),
-                .width(TUSER_WIDTH),
+                .width(M_TUSER_WIDTH),
                 .property_type(`OVL_ASSERT),
                 .msg("tuser signal cannot change value during bus hold")
             )
@@ -606,7 +744,7 @@ interface logic_axi4_stream_if #(
 
             ovl_win_unchange #(
                 .severity_level(`OVL_FATAL),
-                .width(TDEST_WIDTH),
+                .width(M_TDEST_WIDTH),
                 .property_type(`OVL_ASSERT),
                 .msg("tdest signal cannot change value during bus hold")
             )
@@ -624,7 +762,7 @@ interface logic_axi4_stream_if #(
 
             ovl_win_unchange #(
                 .severity_level(`OVL_FATAL),
-                .width(TID_WIDTH),
+                .width(M_TID_WIDTH),
                 .property_type(`OVL_ASSERT),
                 .msg("tid signal cannot change value during bus hold")
             )
