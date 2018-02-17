@@ -81,7 +81,7 @@ module logic_axi4_stream_to_avalon_st #(
     always_comb begin
         empty = '0;
 
-        for (int i = 0; i < $bits(rx.tstrb); ++i) begin
+        for (int i = 0; i < TDATA_BYTES; ++i) begin
             if (rx.tstrb[i] && rx.tkeep[i]) begin
                 --empty;
             end

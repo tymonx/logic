@@ -49,7 +49,13 @@ module logic_axi4_stream_from_avalon_st #(
     `LOGIC_MODPORT(logic_avalon_st_if, rx) rx,
     `LOGIC_MODPORT(logic_axi4_stream_if, tx) tx
 );
-    logic [TDATA_BYTES-1:0] strb;
+    localparam int M_TDATA_BYTES = (TDATA_BYTES > 0) ? TDATA_BYTES : 1;
+    localparam int M_TSTRB_WIDTH = (TDATA_BYTES > 0) ? TDATA_BYTES : 1;
+    localparam int M_TID_WIDTH = (TID_WIDTH > 0) ? TID_WIDTH : 1;
+
+    typedef logic [M_TID_WIDTH-1:0] tid_t;
+    typedef logic [M_TSTRB_WIDTH-1:0] tstrb_t;
+    typedef logic [M_TDATA_BYTES-1:0][7:0] tdata_t;
 
     always_comb rx.ready = tx.tready;
     always_comb tx.tkeep = '1;
@@ -65,20 +71,12 @@ module logic_axi4_stream_from_avalon_st #(
         end
     end
 
-    always_comb begin
-        strb = '1;
-
-        if (TDATA_BYTES > 1) begin
-            strb = strb >> rx.empty;
-        end
-    end
-
     always_ff @(posedge aclk) begin
         if (tx.tready) begin
             tx.tlast <= rx.endofpacket;
-            tx.tid <= rx.channel;
-            tx.tstrb <= strb;
-            tx.tdata <= rx.data;
+            tx.tid <= tid_t'(rx.channel);
+            tx.tstrb <= tstrb_t'({M_TSTRB_WIDTH{1'b1}} >> rx.empty);
+            tx.tdata <= tdata_t'(rx.data);
         end
     end
 endmodule
