@@ -30,7 +30,7 @@ bitstream_reference::bitstream_reference(pointer bits,
 auto bitstream_reference::operator=(
         bool value) noexcept -> bitstream_reference& {
     auto mask = std::uint8_t(1 << (m_index % BITS));
-    auto data = reinterpret_cast<std::uint8_t*>(m_bits) + (m_index / BITS);
+    auto data = static_cast<std::uint8_t*>(m_bits) + (m_index / BITS);
 
     if (value) {
         *data |= mask;
@@ -44,7 +44,7 @@ auto bitstream_reference::operator=(
 
 bitstream_reference::operator bool() const noexcept {
     auto mask = std::uint8_t(1 << (m_index % BITS));
-    auto data = reinterpret_cast<std::uint8_t*>(m_bits) + (m_index / BITS);
+    auto data = static_cast<std::uint8_t*>(m_bits) + (m_index / BITS);
 
     return (*data & mask) == mask;
 }

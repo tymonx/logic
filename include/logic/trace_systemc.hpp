@@ -20,25 +20,29 @@
 
 #include <systemc>
 
-#include <string>
 #include <cstddef>
+#include <string>
 
 namespace logic {
 
 class trace_systemc : public trace_base {
+public:
+    trace_systemc(trace_systemc&&) = delete;
+
+    trace_systemc(const trace_systemc&) = delete;
+
+    trace_systemc& operator=(trace_systemc&&) = delete;
+
+    trace_systemc& operator=(const trace_systemc&) = delete;
 protected:
     trace_systemc(const sc_core::sc_object& object,
             const std::string& filename, std::size_t level);
 
-    virtual ~trace_systemc() override;
+    ~trace_systemc() override;
 private:
-    trace_systemc(const trace_systemc&) = delete;
-
-    trace_systemc& operator=(const trace_systemc&) = delete;
-
     sc_core::sc_trace_file* m_trace_file{nullptr};
 };
 
-}
+} /* namespace logic */
 
 #endif /* LOGIC_TRACE_SYSTEMC_HPP */

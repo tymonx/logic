@@ -16,10 +16,10 @@
 #ifndef LOGIC_GTEST_FACTORY_HPP
 #define LOGIC_GTEST_FACTORY_HPP
 
-#include <map>
-#include <string>
-#include <memory>
 #include <functional>
+#include <map>
+#include <memory>
+#include <string>
 
 namespace logic {
 namespace gtest {
@@ -31,9 +31,9 @@ public:
     template<typename T, typename ...Args>
     class add {
     public:
-        add(Args&&... args);
+        explicit add(Args&&... args);
 
-        add(const std::string& name, Args&&... args);
+        explicit add(const std::string& name, Args&&... args);
     };
 
     template<typename T>
@@ -42,6 +42,16 @@ public:
     void create();
 
     void destroy();
+
+    factory(factory&& other) = delete;
+
+    factory(const factory& other) = delete;
+
+    factory& operator=(factory&& other) = delete;
+
+    factory& operator=(const factory& other) = delete;
+
+    ~factory();
 private:
     using destructor = std::function<void(void*)>;
     using object = std::unique_ptr<void, destructor>;
@@ -49,11 +59,7 @@ private:
 
     factory();
 
-    factory(const factory& other) = delete;
-
-    factory& operator=(const factory& other) = delete;
-
-    void add_object(const std::string& name, constructor create);
+    void add_object(const std::string& name, const constructor& create);
 
     void* get_object(const std::string& name);
 
@@ -85,7 +91,7 @@ factory::get(const std::string& name) -> T* {
     return static_cast<T*>(factory::get_instance().get_object(name));
 }
 
-}
-}
+} /* namespace gtest */
+} /* namespace logic */
 
 #endif /* LOGIC_GTEST_FACTORY_HPP */

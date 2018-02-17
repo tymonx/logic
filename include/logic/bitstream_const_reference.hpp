@@ -25,7 +25,8 @@ public:
     using size_type = std::size_t;
     using const_pointer = const void*;
 
-    bitstream_const_reference(const bitstream_reference& other) noexcept;
+    explicit bitstream_const_reference(
+            const bitstream_reference& other) noexcept;
 
     bitstream_const_reference(const_pointer bits, size_type index) noexcept;
 
@@ -41,11 +42,13 @@ public:
     bitstream_const_reference& operator=(
             const bitstream_const_reference& other) noexcept = default;
 
-    operator bool() const noexcept;
+    explicit operator bool() const noexcept;
+
+    ~bitstream_const_reference() = default;
 private:
     bitstream_reference m_reference;
 };
 
-}
+} /* namespace logic */
 
 #endif /* LOGIC_BITSTREAM_CONST_REFERENCE_HPP */

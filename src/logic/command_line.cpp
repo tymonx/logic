@@ -19,13 +19,13 @@
 
 #include <uvm>
 
+#include <algorithm>
 #include <array>
-#include <string>
 #include <cstddef>
 #include <cstdint>
-#include <utility>
-#include <algorithm>
 #include <stdexcept>
+#include <string>
+#include <utility>
 
 using logic::command_line;
 

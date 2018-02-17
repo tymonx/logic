@@ -30,7 +30,7 @@ auto command_line_argument::name() const noexcept -> const char* {
 auto command_line_argument::length() const noexcept -> std::size_t {
     std::size_t count{0u};
 
-    if (m_name) {
+    if (m_name != nullptr) {
         auto it = m_name;
 
         while (*it++ != '\0') {
@@ -44,7 +44,7 @@ auto command_line_argument::length() const noexcept -> std::size_t {
 bool command_line_argument::match(const char* argument_name) const noexcept {
     bool ok{false};
 
-    if (m_name && argument_name) {
+    if ((m_name != nullptr) && (argument_name != nullptr)) {
         auto it = m_name;
 
         ok = true;

@@ -87,3 +87,7 @@ let g:ale_cpp_gcc_options = cpp_arguments
 let g:ale_cpp_clang_options = cpp_arguments
 let g:ale_cpp_clangtidy_options = cpp_arguments
 let g:ale_cpp_clangcheck_options = join(cpp_clangcheck, ' ')
+
+let g:ale_linters = {
+\   'cpp': ['gcc', 'clang', 'clangtidy', 'clangcheck', 'cppcheck'],
+\}

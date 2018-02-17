@@ -37,7 +37,8 @@ static void trace_helper(sc_trace_file* trace_file, const sc_object* object) {
 
 template<typename T, typename std::enable_if<!std::is_class<T>::value,
     unsigned>::type = 0>
-static void trace_helper(sc_trace_file*, const sc_object*) { }
+static void trace_helper(sc_trace_file* /* trace_file*/,
+        const sc_object* /* object */) { }
 
 template<typename T>
 static void trace(sc_trace_file* trace_file, const sc_object* object) {
@@ -86,7 +87,7 @@ static void trace(sc_trace_file* trace_file, const sc_object* object) {
 
 static void trace(sc_trace_file* trace_file, const sc_object* parent,
         std::size_t level) {
-    if (parent && level--) {
+    if ((parent != nullptr) && (0 != level--)) {
         for (const auto& object : parent->get_child_objects()) {
             trace(trace_file, object);
             trace(trace_file, object, level);

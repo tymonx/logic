@@ -23,6 +23,6 @@ public:
     command_line(int argc, char* argv[]);
 };
 
-}
+} /* namespace logic */
 
 #endif /* LOGIC_COMMAND_LINE_HPP */

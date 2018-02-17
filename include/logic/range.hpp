@@ -28,7 +28,7 @@ public:
 
     range() = default;
 
-    range(size_type value) noexcept;
+    explicit range(size_type value) noexcept;
 
     range(size_type lhs, size_type rhs) noexcept;
 
@@ -40,7 +40,7 @@ private:
     size_type m_max;
 };
 
-}
+} /* namespace logic */
 
 namespace uvm {
 
@@ -54,6 +54,6 @@ uvm_config_db<logic::range>::get(uvm_component* cntxt,
         const std::string& instname, const std::string& fieldname,
         logic::range& value);
 
-}
+} /* namespace uvm*/
 
 #endif /* LOGIC_RANGE_HPP */

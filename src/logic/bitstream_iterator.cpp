@@ -43,7 +43,7 @@ auto bitstream_iterator::operator++() noexcept -> bitstream_iterator& {
     return *this;
 }
 
-auto bitstream_iterator::operator++(int) noexcept -> bitstream_iterator {
+auto bitstream_iterator::operator++(int) noexcept -> const bitstream_iterator {
     bitstream_iterator tmp{*this};
     ++m_index;
     return tmp;
@@ -54,7 +54,7 @@ auto bitstream_iterator::operator--() noexcept -> bitstream_iterator& {
     return *this;
 }
 
-auto bitstream_iterator::operator--(int) noexcept -> bitstream_iterator {
+auto bitstream_iterator::operator--(int) noexcept -> const bitstream_iterator {
     bitstream_iterator tmp{*this};
     --m_index;
     return tmp;
@@ -103,11 +103,11 @@ auto bitstream_iterator::operator*() const noexcept -> reference {
 }
 
 auto bitstream_iterator::operator->() noexcept -> pointer {
-    return reinterpret_cast<std::uint8_t*>(m_bits) + (m_index / BITS);
+    return static_cast<std::uint8_t*>(m_bits) + (m_index / BITS);
 }
 
 auto bitstream_iterator::operator->() const noexcept -> pointer {
-    return reinterpret_cast<std::uint8_t*>(m_bits) + (m_index / BITS);
+    return static_cast<std::uint8_t*>(m_bits) + (m_index / BITS);
 }
 
 bitstream_iterator::operator bool() const noexcept {

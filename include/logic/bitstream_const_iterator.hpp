@@ -30,9 +30,9 @@ public:
     using reference = bitstream_const_reference;
     using iterator_category = std::random_access_iterator_tag;
 
-    bitstream_const_iterator(const bitstream_iterator& other) noexcept;
+    explicit bitstream_const_iterator(const bitstream_iterator& other) noexcept;
 
-    bitstream_const_iterator(pointer bits) noexcept;
+    explicit bitstream_const_iterator(pointer bits) noexcept;
 
     bitstream_const_iterator(pointer bits, size_type index) noexcept;
 
@@ -52,11 +52,11 @@ public:
 
     bitstream_const_iterator& operator++() noexcept;
 
-    bitstream_const_iterator operator++(int) noexcept;
+    const bitstream_const_iterator operator++(int) noexcept;
 
     bitstream_const_iterator& operator--() noexcept;
 
-    bitstream_const_iterator operator--(int) noexcept;
+    const bitstream_const_iterator operator--(int) noexcept;
 
     bitstream_const_iterator operator+(difference_type n) const noexcept;
 
@@ -78,7 +78,7 @@ public:
 
     pointer operator->() const noexcept;
 
-    operator bool() const noexcept;
+    explicit operator bool() const noexcept;
 
     bool operator<(const bitstream_const_iterator& other) const noexcept;
 
@@ -91,10 +91,12 @@ public:
     bool operator==(const bitstream_const_iterator& other) const noexcept;
 
     bool operator!=(const bitstream_const_iterator& other) const noexcept;
+
+    ~bitstream_const_iterator() = default;
 private:
     bitstream_iterator m_iterator;
 };
 
-}
+} /* namespace logic */
 
 #endif /* LOGIC_BITSTREAM_CONST_ITERATOR_HPP */

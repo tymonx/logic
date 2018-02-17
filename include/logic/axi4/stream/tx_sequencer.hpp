@@ -30,13 +30,13 @@ public:
 
     tx_sequencer();
 
-    tx_sequencer(const uvm::uvm_component_name& name);
+    explicit tx_sequencer(const uvm::uvm_component_name& name);
 
-    virtual ~tx_sequencer() override;
+    ~tx_sequencer() override;
 };
 
-}
-}
-}
+} /* namespace stream */
+} /* namespace axi4 */
+} /* namespace logic */
 
 #endif /* LOGIC_AXI4_STREAM_TX_SEQUENCER_HPP */

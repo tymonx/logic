@@ -19,8 +19,8 @@
 #include "trace_systemc.hpp"
 #include "trace_verilated.hpp"
 
-#include <limits>
 #include <cstddef>
+#include <limits>
 #include <type_traits>
 
 namespace logic {
@@ -28,26 +28,42 @@ namespace logic {
 template<typename T, typename enable = void>
 class trace final : public trace_systemc {
 public:
-    trace(const T& module, const std::string& filename = {}, std::size_t level =
-            std::numeric_limits<std::size_t>::max()) :
+    explicit trace(T& module, const std::string& filename = {},
+            std::size_t level = std::numeric_limits<std::size_t>::max()) :
         trace_systemc{module, filename, level}
     { }
 
-    virtual ~trace() override { }
+    trace(trace&&) = delete;
+
+    trace(const trace&) = delete;
+
+    trace& operator=(trace&&) = delete;
+
+    trace& operator=(const trace&) = delete;
+
+    ~trace() override = default;
 };
 
 template<typename T>
 class trace<T, typename std::enable_if<has_verilated_vcd_trace_method<T>::value
     >::type> final : public trace_verilated {
 public:
-    trace(const T& module, const std::string& filename = {}, std::size_t level =
-            std::numeric_limits<std::size_t>::max()) :
+    explicit trace(T& module, const std::string& filename = {},
+            std::size_t level = std::numeric_limits<std::size_t>::max()) :
         trace_verilated{module, filename, level}
     { }
 
-    virtual ~trace() override { }
+    trace(trace&&) = delete;
+
+    trace(const trace&) = delete;
+
+    trace& operator=(trace&&) = delete;
+
+    trace& operator=(const trace&) = delete;
+
+    ~trace() override = default;
 };
 
-}
+} /* namespace logic */
 
 #endif /* LOGIC_TRACE_HPP */

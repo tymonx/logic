@@ -28,12 +28,12 @@ static size_type size(size_type bits) noexcept {
 }
 
 static void copy_n(const void* src, size_type n, void* dst) noexcept {
-    std::copy_n(reinterpret_cast<const std::uint8_t*>(src), n,
-            reinterpret_cast<std::uint8_t*>(dst));
+    std::copy_n(static_cast<const std::uint8_t*>(src), n,
+            static_cast<std::uint8_t*>(dst));
 }
 
 static void fill_n(void* dst, size_type n, std::uint8_t value) noexcept {
-    std::fill_n(reinterpret_cast<std::uint8_t*>(dst), n, value);
+    std::fill_n(static_cast<std::uint8_t*>(dst), n, value);
 }
 
 bitstream::bitstream() noexcept :
@@ -63,7 +63,7 @@ bitstream::bitstream(const bitstream& other) :
 
 auto bitstream::operator=(bitstream&& other) noexcept -> bitstream& {
     if (this != &other) {
-        delete [] reinterpret_cast<std::uint8_t*>(m_bits);
+        delete [] static_cast<std::uint8_t*>(m_bits);
 
         m_bits = other.m_bits;
         m_size = other.m_size;
@@ -77,7 +77,7 @@ auto bitstream::operator=(bitstream&& other) noexcept -> bitstream& {
 auto bitstream::operator=(const bitstream& other) -> bitstream& {
     if (this != &other) {
         auto bits = new std::uint8_t[::size(other.m_size)];
-        delete [] reinterpret_cast<std::uint8_t*>(m_bits);
+        delete [] static_cast<std::uint8_t*>(m_bits);
 
         m_bits = bits;
         m_size = other.m_size;
@@ -99,7 +99,7 @@ auto bitstream::resize(size_type value) -> bitstream& {
     if (m_size != value) {
         auto bits = new std::uint8_t[::size(value)] {};
         ::copy_n(m_bits, ::size(std::min(m_size, value)), bits);
-        delete [] reinterpret_cast<std::uint8_t*>(m_bits);
+        delete [] static_cast<std::uint8_t*>(m_bits);
         m_bits = bits;
         m_size = value;
     }
@@ -120,15 +120,15 @@ auto bitstream::data() const noexcept -> const_pointer {
 }
 
 auto bitstream::begin() noexcept -> iterator {
-    return {m_bits};
+    return iterator{m_bits};
 }
 
 auto bitstream::begin() const noexcept -> const_iterator {
-    return {m_bits};
+    return const_iterator{m_bits};
 }
 
 auto bitstream::cbegin() const noexcept -> const_iterator {
-    return {m_bits};
+    return const_iterator{m_bits};
 }
 
 auto bitstream::end() noexcept -> iterator {
@@ -184,7 +184,7 @@ auto bitstream::assign(std::uintmax_t val) noexcept -> bitstream& {
 
 auto bitstream::assign(std::uintmax_t val,
         size_type bits) noexcept -> bitstream& {
-    auto byte = reinterpret_cast<std::uint8_t*>(m_bits);
+    auto byte = static_cast<std::uint8_t*>(m_bits);
 
     if (m_size < bits) {
         bits = m_size;
@@ -196,7 +196,7 @@ auto bitstream::assign(std::uintmax_t val,
         bits -= 8;
     }
 
-    if (bits) {
+    if (bool(bits)) {
         auto mask = std::uint8_t(~(0xFF << bits));
         *byte &= std::uint8_t(~mask);
         *byte |= (mask & std::uint8_t(val));
@@ -218,12 +218,12 @@ auto bitstream::assign(const void* src, size_type bits) noexcept -> bitstream& {
 
     bits %= BITS;
 
-    if (bits) {
-        auto byte = reinterpret_cast<std::uint8_t*>(m_bits);
+    if (bits > 0) {
+        auto byte = static_cast<std::uint8_t*>(m_bits);
         auto mask = std::uint8_t(~(0xFF << bits));
 
         *byte &= std::uint8_t(~mask);
-        *byte |= (mask & *reinterpret_cast<const std::uint8_t*>(src));
+        *byte |= (mask & *static_cast<const std::uint8_t*>(src));
     }
 
     return *this;
@@ -234,7 +234,7 @@ auto bitstream::value() const noexcept -> std::uintmax_t {
 }
 
 auto bitstream::value(size_type bits) const noexcept -> std::uintmax_t {
-    auto byte = reinterpret_cast<const std::uint8_t*>(m_bits);
+    auto byte = static_cast<const std::uint8_t*>(m_bits);
     size_type offset = 0;
     std::uintmax_t val = 0;
 
@@ -248,7 +248,7 @@ auto bitstream::value(size_type bits) const noexcept -> std::uintmax_t {
         bits -= 8;
     }
 
-    if (bits) {
+    if (bits > 0) {
         auto mask = std::uint8_t(~(0xFF << bits));
         val |= (std::uintmax_t(mask & *byte++) << offset);
     }
@@ -270,20 +270,20 @@ auto bitstream::copy(void* dst,
 
     bits %= BITS;
 
-    if (bits) {
-        auto byte = reinterpret_cast<std::uint8_t*>(dst);
+    if (bits > 0) {
+        auto byte = static_cast<std::uint8_t*>(dst);
         auto mask = std::uint8_t(~(0xFF << bits));
 
         *byte &= std::uint8_t(~mask);
-        *byte |= (mask & *reinterpret_cast<const std::uint8_t*>(m_bits));
+        *byte |= (mask & *static_cast<const std::uint8_t*>(m_bits));
     }
 
     return *this;
 }
 
 auto bitstream::operator=(bool val) noexcept -> bitstream& {
-    if (m_size) {
-        auto byte = reinterpret_cast<std::uint8_t*>(m_bits);
+    if (m_size > 0) {
+        auto byte = static_cast<std::uint8_t*>(m_bits);
 
         if (val) {
             *byte |= 0x01;
@@ -296,13 +296,13 @@ auto bitstream::operator=(bool val) noexcept -> bitstream& {
 }
 
 bitstream::operator bool() const noexcept {
-    auto byte = reinterpret_cast<const std::uint8_t*>(m_bits);
-    return (m_size && (*byte & 0x01)) ? true : false;
+    auto byte = static_cast<const std::uint8_t*>(m_bits);
+    return ((m_size > 0) && (0x01 == (*byte & 0x01)));
 }
 
 auto bitstream::operator==(const bitstream& other) const noexcept -> bool {
-    auto first = reinterpret_cast<const std::uint8_t*>(m_bits);
-    auto second = reinterpret_cast<const std::uint8_t*>(other.m_bits);
+    auto first = static_cast<const std::uint8_t*>(m_bits);
+    auto second = static_cast<const std::uint8_t*>(other.m_bits);
     auto bytes = ::size(std::min(m_size, other.m_size));
 
     auto result = std::equal(first, first + bytes, second);
@@ -343,5 +343,5 @@ auto bitstream::operator>=(const bitstream& other) const noexcept -> bool {
 }
 
 bitstream::~bitstream() {
-    delete [] reinterpret_cast<std::uint8_t*>(m_bits);
+    delete [] static_cast<std::uint8_t*>(m_bits);
 }

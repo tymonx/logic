@@ -47,14 +47,22 @@ public:
     sc_core::sc_signal<tdest_type> tdest{"tdest"};
     sc_core::sc_signal<tuser_type> tuser{"tuser"};
 
-    bus_if(const sc_core::sc_module_name& name) :
+    explicit bus_if(const sc_core::sc_module_name& name) :
         bus_if_base{name}
     { }
 
-    virtual void trace(sc_core::sc_trace_file* trace_file) const override {
+    bus_if(bus_if&&) = delete;
+
+    bus_if(const bus_if&) = delete;
+
+    bus_if& operator=(bus_if&&) = delete;
+
+    bus_if& operator=(const bus_if&) = delete;
+
+    void trace(sc_core::sc_trace_file* trace_file) const override {
         bus_if_base::trace(trace_file);
 
-        if (trace_file) {
+        if (trace_file != nullptr) {
             sc_core::sc_trace(trace_file, tid, tid.name());
             sc_core::sc_trace(trace_file, tdata, tdata.name());
             sc_core::sc_trace(trace_file, tstrb, tstrb.name());
@@ -63,38 +71,38 @@ public:
         }
     }
 
-    virtual std::size_t size() const noexcept override {
+    std::size_t size() const noexcept override {
         return M_TDATA_BYTES;
     }
 
-    virtual std::uint8_t get_tdata(std::size_t offset) const override {
+    std::uint8_t get_tdata(std::size_t offset) const override {
         return utils::get_uint8<8 * M_TDATA_BYTES>(tdata.read(), 8 * offset);
     }
 
-    virtual void set_tdata(std::size_t offset, std::uint8_t value) override {
+    void set_tdata(std::size_t offset, std::uint8_t value) override {
         utils::set<8 * M_TDATA_BYTES>(m_tdata, 8 * offset, value);
         tdata.write(m_tdata);
     }
 
-    virtual bool get_tkeep(std::size_t offset) const override {
+    bool get_tkeep(std::size_t offset) const override {
         return utils::get_bool<M_TDATA_BYTES>(tkeep.read(), offset);
     }
 
-    virtual void set_tkeep(std::size_t offset, bool value) override {
+    void set_tkeep(std::size_t offset, bool value) override {
         utils::set<M_TDATA_BYTES>(m_tkeep, offset, value);
         tkeep.write(m_tkeep);
     }
 
-    virtual bool get_tstrb(std::size_t offset) const override {
+    bool get_tstrb(std::size_t offset) const override {
         return utils::get_bool<M_TDATA_BYTES>(tstrb.read(), offset);
     }
 
-    virtual void set_tstrb(std::size_t offset, bool value) override {
+    void set_tstrb(std::size_t offset, bool value) override {
         utils::set<M_TDATA_BYTES>(m_tstrb, offset, value);
         tstrb.write(m_tstrb);
     }
 
-    virtual bitstream get_tid() const override {
+    bitstream get_tid() const override {
         bitstream bits(M_TID_WIDTH);
         for (std::size_t i = 0; i < M_TID_WIDTH; ++i) {
             bits[i] = utils::get_bool<M_TID_WIDTH>(tid.read(), i);
@@ -102,18 +110,18 @@ public:
         return bits;
     }
 
-    virtual void set_tid(const bitstream& bits) override {
+    void set_tid(const bitstream& bits) override {
         auto size = (bits.size() < M_TID_WIDTH)
             ? bits.size() : M_TID_WIDTH;
 
         tid_type value{};
         for (std::size_t i = 0; i < size; ++i) {
-            utils::set<M_TID_WIDTH>(value, i, bits[i]);
+            utils::set<M_TID_WIDTH>(value, i, bool(bits[i]));
         }
         tid.write(value);
     }
 
-    virtual bitstream get_tdest() const override {
+    bitstream get_tdest() const override {
         bitstream bits(M_TDEST_WIDTH);
         for (std::size_t i = 0; i < M_TDEST_WIDTH; ++i) {
             bits[i] = utils::get_bool<M_TDEST_WIDTH>(tdest.read(), i);
@@ -121,18 +129,18 @@ public:
         return bits;
     }
 
-    virtual void set_tdest(const bitstream& bits) override {
+    void set_tdest(const bitstream& bits) override {
         auto size = (bits.size() < M_TDEST_WIDTH)
             ? bits.size() : M_TDEST_WIDTH;
 
         tdest_type value{};
         for (std::size_t i = 0; i < size; ++i) {
-            utils::set<M_TDEST_WIDTH>(value, i, bits[i]);
+            utils::set<M_TDEST_WIDTH>(value, i, bool(bits[i]));
         }
         tdest.write(value);
     }
 
-    virtual bitstream get_tuser() const override {
+    bitstream get_tuser() const override {
         bitstream bits(M_TUSER_WIDTH);
         for (std::size_t i = 0; i < M_TUSER_WIDTH; ++i) {
             bits[i] = utils::get_bool<M_TUSER_WIDTH>(tuser.read(), i);
@@ -140,26 +148,26 @@ public:
         return bits;
     }
 
-    virtual void set_tuser(const bitstream& bits) override {
+    void set_tuser(const bitstream& bits) override {
         auto size = (bits.size() < M_TUSER_WIDTH)
             ? bits.size() : M_TUSER_WIDTH;
 
         tuser_type value{};
         for (std::size_t i = 0; i < size; ++i) {
-            utils::set<M_TUSER_WIDTH>(value, i, bits[i]);
+            utils::set<M_TUSER_WIDTH>(value, i, bool(bits[i]));
         }
         tuser.write(value);
     }
 
-    virtual ~bus_if() override { }
+    ~bus_if() override = default;
 private:
     tdata_type m_tdata{};
     tkeep_type m_tkeep{};
     tstrb_type m_tstrb{};
 };
 
-}
-}
-}
+} /* namespace stream */
+} /* namespace axi4 */
+} /* namespace logic */
 
 #endif /* LOGIC_AXI4_STREAM_BUS_IF_HPP */

@@ -17,4 +17,4 @@
 
 using logic::trace_base;
 
-trace_base::~trace_base() { }
+trace_base::~trace_base() = default;

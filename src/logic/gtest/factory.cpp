@@ -24,10 +24,9 @@ auto factory::get_instance() -> factory& {
     return instance;
 }
 
-factory::factory() :
-    m_constructors{},
-    m_objects{}
-{ }
+factory::factory() = default;
+
+factory::~factory() = default;
 
 void factory::create() {
     for (const auto& item : m_constructors) {
@@ -39,7 +38,7 @@ void factory::destroy() {
     m_objects.clear();
 }
 
-void factory::add_object(const std::string& name, constructor create) {
+void factory::add_object(const std::string& name, const constructor& create) {
     auto it = m_constructors.find(name);
 
     if (it == m_constructors.cend()) {

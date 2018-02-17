@@ -16,13 +16,13 @@
 #ifndef LOGIC_BITSTREAM_HPP
 #define LOGIC_BITSTREAM_HPP
 
-#include "bitstream_reference.hpp"
+#include "bitstream_const_iterator.hpp"
 #include "bitstream_const_reference.hpp"
 #include "bitstream_iterator.hpp"
-#include "bitstream_const_iterator.hpp"
+#include "bitstream_reference.hpp"
 
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 #include <iterator>
 #include <type_traits>
 
@@ -66,7 +66,7 @@ public:
 
     template<typename T>
     using enable_class = typename std::enable_if<
-            std::is_class<T>::value, long>::type;
+            std::is_class<T>::value, char>::type;
 
     /* ----------------------------------------------------------------------
      * Group: Constructors
@@ -87,7 +87,7 @@ public:
      * Parameters:
      *  n - Bits width.
      */
-    bitstream(size_type n);
+    explicit bitstream(size_type n);
 
     /* Constructor: bitstream
      *
@@ -261,19 +261,19 @@ public:
     template<typename T, enable_class<T> = 0>
     bitstream& operator=(const T& val) noexcept;
 
-    operator bool() const noexcept;
+    explicit operator bool() const noexcept;
 
     template<typename T, enable_integral<T> = 0>
-    operator T() const noexcept;
+    explicit operator T() const noexcept;
 
     template<typename T, enable_enum<T> = 0>
-    operator T() const noexcept;
+    explicit operator T() const noexcept;
 
     template<typename T, enable_class<T> = 0>
-    operator T&() noexcept;
+    explicit operator T&() noexcept;
 
     template<typename T, enable_class<T> = 0>
-    operator const T&() const noexcept;
+    explicit operator const T&() const noexcept;
 
     bool operator==(const bitstream& other) const noexcept;
 
@@ -358,6 +358,6 @@ get(const bitstream& bits) noexcept -> const T& {
     return *static_cast<const T*>(bits.data());
 }
 
-}
+} /* namespace logic */
 
-#endif /* LOGIC_BISTREAM_HPP */
+#endif /* LOGIC_BITSTREAM_HPP */

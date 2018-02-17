@@ -109,7 +109,7 @@ namespace utils {
             (N <= 32) ? 32 :
             (N <= 64) ? 64 : N>::type;
     };
-}
-}
+} /* namespace utils */
+} /* namespace logic */
 
 #endif /* LOGIC_UTILS_HPP */

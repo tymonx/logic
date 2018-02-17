@@ -15,8 +15,8 @@
 
 #include "logic/gtest/factory.hpp"
 
-#include <systemc>
 #include <gtest/gtest.h>
+#include <systemc>
 
 int sc_main(int argc, char* argv[]) {
 

@@ -26,4 +26,4 @@ tx_sequencer::tx_sequencer(const uvm::uvm_component_name& name) :
     uvm::uvm_sequencer<tx_sequence_item>(name)
 { }
 
-tx_sequencer::~tx_sequencer() { }
+tx_sequencer::~tx_sequencer() = default;

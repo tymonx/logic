@@ -20,8 +20,8 @@
 
 #include <systemc>
 
-#include <string>
 #include <cstddef>
+#include <string>
 
 class VerilatedVcdC;
 class VerilatedVcdSc;
@@ -47,17 +47,21 @@ public:
 };
 
 class trace_verilated : public trace_base {
-protected:
-    template<typename T>
-    trace_verilated(const T& object, const std::string& filename,
-            std::size_t level);
-
-    virtual ~trace_verilated() override;
-private:
+public:
     trace_verilated(const trace_verilated&) = delete;
 
     trace_verilated& operator=(const trace_verilated&) = delete;
 
+    trace_verilated(trace_verilated&&) = delete;
+
+    trace_verilated& operator=(trace_verilated&&) = delete;
+protected:
+    template<typename T>
+    trace_verilated(T& object, const std::string& filename,
+            std::size_t level);
+
+    ~trace_verilated() override;
+private:
     trace_verilated(const std::string& name, const std::string& filename);
 
     void open();
@@ -69,14 +73,14 @@ private:
 };
 
 template<typename T>
-trace_verilated::trace_verilated(const T& object, const std::string& filename,
+trace_verilated::trace_verilated(T& object, const std::string& filename,
         std::size_t level) :
     trace_verilated{object.basename(), filename}
 {
-    const_cast<T&>(object).trace(get(m_trace_file), int(level));
+    object.trace(get(m_trace_file), int(level));
     open();
 }
 
-}
+} /* namespace logic */
 
 #endif /* LOGIC_TRACE_VERILATED_HPP */

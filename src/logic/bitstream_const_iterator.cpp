@@ -43,8 +43,8 @@ auto bitstream_const_iterator::operator++() noexcept
 }
 
 auto bitstream_const_iterator::operator++(int) noexcept
-        -> bitstream_const_iterator {
-    return m_iterator++;
+        -> const bitstream_const_iterator {
+    return bitstream_const_iterator{m_iterator++};
 }
 
 auto bitstream_const_iterator::operator--() noexcept
@@ -54,13 +54,13 @@ auto bitstream_const_iterator::operator--() noexcept
 }
 
 auto bitstream_const_iterator::operator--(int) noexcept
-        -> bitstream_const_iterator {
-    return m_iterator--;
+        -> const bitstream_const_iterator {
+    return bitstream_const_iterator{m_iterator--};
 }
 
 auto bitstream_const_iterator::operator+(
         difference_type n) const noexcept -> bitstream_const_iterator {
-    return m_iterator + n;
+    return bitstream_const_iterator{m_iterator + n};
 }
 
 auto bitstream_const_iterator::operator+=(
@@ -71,7 +71,7 @@ auto bitstream_const_iterator::operator+=(
 
 auto bitstream_const_iterator::operator-(
         difference_type n) const noexcept -> bitstream_const_iterator {
-    return m_iterator - n;
+    return bitstream_const_iterator{m_iterator - n};
 }
 
 auto bitstream_const_iterator::operator-=(
@@ -82,20 +82,20 @@ auto bitstream_const_iterator::operator-=(
 
 auto bitstream_const_iterator::operator[](
         difference_type n) noexcept -> reference {
-    return m_iterator[n];
+    return reference{m_iterator[n]};
 }
 
 auto bitstream_const_iterator::operator[](
         difference_type n) const noexcept -> reference {
-    return m_iterator[n];
+    return reference{m_iterator[n]};
 }
 
 auto bitstream_const_iterator::operator*() noexcept -> reference {
-    return *m_iterator;
+    return reference{*m_iterator};
 }
 
 auto bitstream_const_iterator::operator*() const noexcept -> reference {
-    return *m_iterator;
+    return reference{*m_iterator};
 }
 
 auto bitstream_const_iterator::operator->() noexcept -> pointer {

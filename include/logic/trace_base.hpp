@@ -19,16 +19,20 @@
 namespace logic {
 
 class trace_base {
+public:
+    trace_base(trace_base&&) = delete;
+
+    trace_base(const trace_base&) = delete;
+
+    trace_base& operator=(trace_base&&) = delete;
+
+    trace_base& operator=(const trace_base&) = delete;
 protected:
     trace_base() = default;
 
     virtual ~trace_base();
-private:
-    trace_base(const trace_base&) = delete;
-
-    trace_base& operator=(const trace_base&) = delete;
 };
 
-}
+} /* namespace logic */
 
 #endif /* LOGIC_TRACE_BASE_HPP */

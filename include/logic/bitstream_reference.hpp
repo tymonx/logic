@@ -39,12 +39,14 @@ public:
 
     bitstream_reference& operator=(bool value) noexcept;
 
-    operator bool() const noexcept;
+    explicit operator bool() const noexcept;
+
+    ~bitstream_reference() = default;
 private:
     pointer m_bits;
     size_type m_index;
 };
 
-}
+} /* namespace logic */
 
 #endif /* LOGIC_BITSTREAM_REFERENCE_HPP */

@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef LOGIC_COMMAND_LINE_ARGUMENT_HPP
-#define LOGIC_COMMAND_LINE_ARGUMENT_HPP
+#ifndef COMMAND_LINE_ARGUMENT_HPP
+#define COMMAND_LINE_ARGUMENT_HPP
 
-#include <string>
 #include <cstddef>
+#include <string>
 
 namespace logic {
 
@@ -40,6 +40,6 @@ private:
     callback m_callback;
 };
 
-}
+} /* namespace logic */
 
-#endif /* LOGIC_COMMAND_LINE_HPP */
+#endif /* COMMAND_LINE_ARGUMENT_HPP */
