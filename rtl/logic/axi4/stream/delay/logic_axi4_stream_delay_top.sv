@@ -17,10 +17,13 @@
 
 module logic_axi4_stream_delay_top #(
     int STAGES = 1,
-    int TDATA_BYTES = `LOGIC_AXI4_STREAM_TDATA_BYTES,
-    int TDEST_WIDTH = `LOGIC_AXI4_STREAM_TDEST_WIDTH,
-    int TUSER_WIDTH = `LOGIC_AXI4_STREAM_TUSER_WIDTH,
-    int TID_WIDTH = `LOGIC_AXI4_STREAM_TID_WIDTH
+    int TDATA_BYTES = 4,
+    int TDEST_WIDTH = 1,
+    int TUSER_WIDTH = 1,
+    int TID_WIDTH = 1,
+    int USE_TKEEP = 1,
+    int USE_TSTRB = 1,
+    int USE_TLAST = 1
 ) (
     input aclk,
     input areset_n,
@@ -49,14 +52,20 @@ module logic_axi4_stream_delay_top #(
         .TDATA_BYTES(TDATA_BYTES),
         .TDEST_WIDTH(TDEST_WIDTH),
         .TUSER_WIDTH(TUSER_WIDTH),
-        .TID_WIDTH(TID_WIDTH)
+        .TID_WIDTH(TID_WIDTH),
+        .USE_TKEEP(USE_TKEEP),
+        .USE_TSTRB(USE_TSTRB),
+        .USE_TLAST(USE_TLAST)
     ) rx (.*);
 
     logic_axi4_stream_if #(
         .TDATA_BYTES(TDATA_BYTES),
         .TDEST_WIDTH(TDEST_WIDTH),
         .TUSER_WIDTH(TUSER_WIDTH),
-        .TID_WIDTH(TID_WIDTH)
+        .TID_WIDTH(TID_WIDTH),
+        .USE_TKEEP(USE_TKEEP),
+        .USE_TSTRB(USE_TSTRB),
+        .USE_TLAST(USE_TLAST)
     ) tx (.*);
 
     `LOGIC_AXI4_STREAM_IF_RX_ASSIGN(rx, rx);
@@ -66,7 +75,10 @@ module logic_axi4_stream_delay_top #(
         .TDATA_BYTES(TDATA_BYTES),
         .TDEST_WIDTH(TDEST_WIDTH),
         .TUSER_WIDTH(TUSER_WIDTH),
-        .TID_WIDTH(TID_WIDTH)
+        .TID_WIDTH(TID_WIDTH),
+        .USE_TKEEP(USE_TKEEP),
+        .USE_TSTRB(USE_TSTRB),
+        .USE_TLAST(USE_TLAST)
     ) unit (.*);
 
     `LOGIC_AXI4_STREAM_IF_TX_ASSIGN(tx, tx);

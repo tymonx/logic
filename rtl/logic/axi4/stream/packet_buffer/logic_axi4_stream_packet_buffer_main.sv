@@ -24,6 +24,7 @@
  *  TDEST_WIDTH - Number of bits for tdest signal.
  *  TUSER_WIDTH - Number of bits for tuser signal.
  *  TID_WIDTH   - Number of bits for tid signal.
+ *  USE_TLAST   - Enable or disable tlast signal.
  *  USE_TKEEP   - Enable or disable tkeep signal.
  *  USE_TSTRB   - Enable or disable tstrb signal.
  *  CAPACITY    - Number of single data transactions that can be store in
@@ -37,66 +38,83 @@
  *  tx          - AXI4-Stream interface.
  */
 module logic_axi4_stream_packet_buffer_main #(
+    logic_pkg::target_t TARGET = logic_pkg::TARGET_GENERIC,
     int TDATA_BYTES = 1,
     int TDEST_WIDTH = 1,
     int TUSER_WIDTH = 1,
     int TID_WIDTH = 1,
+    int USE_TLAST = 1,
     int USE_TSTRB = 1,
     int USE_TKEEP = 1,
-    int CAPACITY = 256,
-    logic_pkg::target_t TARGET = `LOGIC_CONFIG_TARGET
+    int CAPACITY = 256
 ) (
     input aclk,
     input areset_n,
     `LOGIC_MODPORT(logic_axi4_stream_if, rx) rx,
     `LOGIC_MODPORT(logic_axi4_stream_if, tx) tx
 );
-    localparam int M_TDATA_BYTES = (TDATA_BYTES > 0) ? TDATA_BYTES : 1;
-    localparam int M_TUSER_WIDTH = (TUSER_WIDTH > 0) ? TUSER_WIDTH : 1;
-    localparam int M_TDEST_WIDTH = (TDEST_WIDTH > 0) ? TDEST_WIDTH : 1;
-    localparam int M_TID_WIDTH = (TID_WIDTH > 0) ? TID_WIDTH : 1;
-
     localparam int COUNTER_TDATA_BYTES = 4;
 
     logic_axi4_stream_if #(
-        .TDATA_BYTES(M_TDATA_BYTES),
-        .TDEST_WIDTH(M_TDEST_WIDTH),
-        .TUSER_WIDTH(M_TUSER_WIDTH),
-        .TID_WIDTH(M_TID_WIDTH)
+        .TDATA_BYTES(TDATA_BYTES),
+        .TDEST_WIDTH(TDEST_WIDTH),
+        .TUSER_WIDTH(TUSER_WIDTH),
+        .TID_WIDTH(TID_WIDTH),
+        .USE_TLAST(USE_TLAST),
+        .USE_TKEEP(USE_TKEEP),
+        .USE_TSTRB(USE_TSTRB)
     )
     queued (
         .*
     );
 
     logic_axi4_stream_if #(
-        .TDATA_BYTES(M_TDATA_BYTES),
-        .TDEST_WIDTH(M_TDEST_WIDTH),
-        .TUSER_WIDTH(M_TUSER_WIDTH),
-        .TID_WIDTH(M_TID_WIDTH)
+        .TDATA_BYTES(TDATA_BYTES),
+        .TDEST_WIDTH(TDEST_WIDTH),
+        .TUSER_WIDTH(TUSER_WIDTH),
+        .TID_WIDTH(TID_WIDTH),
+        .USE_TLAST(USE_TLAST),
+        .USE_TKEEP(USE_TKEEP),
+        .USE_TSTRB(USE_TSTRB)
     )
     monitor_rx (
         .*
     );
 
     logic_axi4_stream_if #(
-        .TDATA_BYTES(M_TDATA_BYTES),
-        .TDEST_WIDTH(M_TDEST_WIDTH),
-        .TUSER_WIDTH(M_TUSER_WIDTH),
-        .TID_WIDTH(M_TID_WIDTH)
+        .TDATA_BYTES(TDATA_BYTES),
+        .TDEST_WIDTH(TDEST_WIDTH),
+        .TUSER_WIDTH(TUSER_WIDTH),
+        .TID_WIDTH(TID_WIDTH),
+        .USE_TLAST(USE_TLAST),
+        .USE_TKEEP(USE_TKEEP),
+        .USE_TSTRB(USE_TSTRB)
     )
     monitor_tx (
         .*
     );
 
     logic_axi4_stream_if #(
-        .TDATA_BYTES(COUNTER_TDATA_BYTES)
+        .TDATA_BYTES(COUNTER_TDATA_BYTES),
+        .TDEST_WIDTH(0),
+        .TUSER_WIDTH(0),
+        .TID_WIDTH(0),
+        .USE_TLAST(0),
+        .USE_TKEEP(0),
+        .USE_TSTRB(0)
     )
     packets_counted (
         .*
     );
 
     logic_axi4_stream_if #(
-        .TDATA_BYTES(COUNTER_TDATA_BYTES)
+        .TDATA_BYTES(COUNTER_TDATA_BYTES),
+        .TDEST_WIDTH(0),
+        .TUSER_WIDTH(0),
+        .TID_WIDTH(0),
+        .USE_TLAST(0),
+        .USE_TKEEP(0),
+        .USE_TSTRB(0)
     )
     transfers_counted (
         .*
@@ -129,6 +147,7 @@ module logic_axi4_stream_packet_buffer_main #(
         .TDEST_WIDTH(TDEST_WIDTH),
         .TUSER_WIDTH(TUSER_WIDTH),
         .TID_WIDTH(TID_WIDTH),
+        .USE_TLAST(USE_TLAST),
         .USE_TSTRB(USE_TSTRB),
         .USE_TKEEP(USE_TKEEP),
         .CAPACITY(CAPACITY),

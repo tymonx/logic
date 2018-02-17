@@ -35,11 +35,11 @@
  *  master      - AXI4-Lite master interface.
  */
 module logic_axi4_lite_clock_crossing #(
+    logic_pkg::target_t TARGET = logic_pkg::TARGET_GENERIC,
     int DATA_BYTES = 4,
     int ADDRESS_WIDTH = 1,
     int CAPACITY = 256,
-    int GENERIC = 1,
-    logic_pkg::target_t TARGET = `LOGIC_CONFIG_TARGET
+    int GENERIC = 1
 ) (
     input areset_n,
     input slave_aclk,

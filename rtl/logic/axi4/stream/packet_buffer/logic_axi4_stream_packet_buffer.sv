@@ -28,6 +28,7 @@
  *  TDEST_WIDTH - Number of bits for tdest signal.
  *  TUSER_WIDTH - Number of bits for tuser signal.
  *  TID_WIDTH   - Number of bits for tid signal.
+ *  USE_TLAST   - Enable or disable tlast signal.
  *  USE_TKEEP   - Enable or disable tkeep signal.
  *  USE_TSTRB   - Enable or disable tstrb signal.
  *  CAPACITY    - Number of single data transactions that can be store in
@@ -41,14 +42,15 @@
  *  tx          - AXI4-Stream interface.
  */
 module logic_axi4_stream_packet_buffer #(
+    logic_pkg::target_t TARGET = logic_pkg::TARGET_GENERIC,
     int TDATA_BYTES = 1,
     int TDEST_WIDTH = 1,
     int TUSER_WIDTH = 1,
     int TID_WIDTH = 1,
+    int USE_TLAST = 1,
     int USE_TKEEP = 1,
     int USE_TSTRB = 1,
-    int CAPACITY = 256,
-    logic_pkg::target_t TARGET = `LOGIC_CONFIG_TARGET
+    int CAPACITY = 256
 ) (
     input aclk,
     input areset_n,
@@ -67,6 +69,7 @@ module logic_axi4_stream_packet_buffer #(
         .TDEST_WIDTH(TDEST_WIDTH),
         .TUSER_WIDTH(TUSER_WIDTH),
         .TID_WIDTH(TID_WIDTH),
+        .USE_TLAST(USE_TLAST),
         .USE_TKEEP(USE_TKEEP),
         .USE_TSTRB(USE_TSTRB),
         .CAPACITY(CAPACITY),

@@ -82,84 +82,13 @@ module logic_axi4_stream_demux_unit #(
         end
     end
 
+    always_ff @(posedge aclk) begin
+        if (next.tready) begin
+            next.write(prev.read());
+        end
+    end
+
     generate
-        if (TDATA_BYTES > 0) begin: tdata_enabled
-            always_ff @(posedge aclk) begin
-                if (next.tready) begin
-                    next.tdata <= prev.tdata;
-                end
-            end
-        end
-        else begin: tdata_disabled
-            always_comb next.tdata = '0;
-        end
-
-        if ((TDATA_BYTES > 0) && (USE_TKEEP > 0)) begin: tkeep_enabled
-            always_ff @(posedge aclk) begin
-                if (next.tready) begin
-                    next.tkeep <= prev.tkeep;
-                end
-            end
-        end
-        else begin: tkeep_disabled
-            always_comb next.tkeep = '1;
-        end
-
-        if ((TDATA_BYTES > 0) && (USE_TSTRB > 0)) begin: tstrb_enabled
-            always_ff @(posedge aclk) begin
-                if (next.tready) begin
-                    next.tstrb <= prev.tstrb;
-                end
-            end
-        end
-        else begin: tstrb_disabled
-            always_comb next.tstrb = '1;
-        end
-
-        if (USE_TLAST > 0) begin: tlast_enabled
-            always_ff @(posedge aclk) begin
-                if (next.tready) begin
-                    next.tlast <= prev.tlast;
-                end
-            end
-        end
-        else begin: tlast_disabled
-            always_comb next.tlast = '1;
-        end
-
-        if (TUSER_WIDTH > 0) begin: tuser_enabled
-            always_ff @(posedge aclk) begin
-                if (next.tready) begin
-                    next.tuser <= prev.tuser;
-                end
-            end
-        end
-        else begin: tuser_disabled
-            always_comb next.tuser = '0;
-        end
-
-        if (TDEST_WIDTH > 0) begin: tdest_enabled
-            always_ff @(posedge aclk) begin
-                if (next.tready) begin
-                    next.tdest <= prev.tdest;
-                end
-            end
-        end
-        else begin: tdest_disabled
-            always_comb next.tdest = '0;
-        end
-
-        if (TID_WIDTH > 0) begin: tid_enabled
-            always_ff @(posedge aclk) begin
-                if (next.tready) begin
-                    next.tid <= prev.tid;
-                end
-            end
-        end
-        else begin: tid_disabled
-            always_comb next.tid = '0;
-        end
-
         for (k = 0; k < OUTPUTS; ++k) begin: outputs
             always_comb tready[k] = tx[k].tready;
 

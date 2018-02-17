@@ -19,10 +19,13 @@ module logic_axi4_stream_timer_top #(
     int PERIODIC_DEFAULT = 2,
     int COUNTER_MAX = PERIODIC_DEFAULT,
     int COUNTER_WIDTH = (COUNTER_MAX >= 2) ? $clog2(COUNTER_MAX) : 1,
-    int TDATA_BYTES = `LOGIC_AXI4_STREAM_TDATA_BYTES,
-    int TDEST_WIDTH = `LOGIC_AXI4_STREAM_TDEST_WIDTH,
-    int TUSER_WIDTH = `LOGIC_AXI4_STREAM_TUSER_WIDTH,
-    int TID_WIDTH = `LOGIC_AXI4_STREAM_TID_WIDTH
+    int TDATA_BYTES = 4,
+    int TDEST_WIDTH = 1,
+    int TUSER_WIDTH = 1,
+    int TID_WIDTH = 1,
+    int USE_TLAST = 1,
+    int USE_TKEEP = 1,
+    int USE_TSTRB = 1
 ) (
     input aclk,
     input areset_n,
@@ -51,14 +54,20 @@ module logic_axi4_stream_timer_top #(
         .TDATA_BYTES(TDATA_BYTES),
         .TDEST_WIDTH(TDEST_WIDTH),
         .TUSER_WIDTH(TUSER_WIDTH),
-        .TID_WIDTH(TID_WIDTH)
+        .TID_WIDTH(TID_WIDTH),
+        .USE_TLAST(USE_TLAST),
+        .USE_TKEEP(USE_TKEEP),
+        .USE_TSTRB(USE_TSTRB)
     ) rx (.*);
 
     logic_axi4_stream_if #(
         .TDATA_BYTES(TDATA_BYTES),
         .TDEST_WIDTH(TDEST_WIDTH),
         .TUSER_WIDTH(TUSER_WIDTH),
-        .TID_WIDTH(TID_WIDTH)
+        .TID_WIDTH(TID_WIDTH),
+        .USE_TLAST(USE_TLAST),
+        .USE_TKEEP(USE_TKEEP),
+        .USE_TSTRB(USE_TSTRB)
     ) tx (.*);
 
     `LOGIC_AXI4_STREAM_IF_RX_ASSIGN(rx, rx);

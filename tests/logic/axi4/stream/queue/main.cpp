@@ -23,6 +23,22 @@
 #include <uvm>
 #include <systemc>
 
+#ifndef TDATA_BYTES
+#define TDATA_BYTES 4
+#endif
+
+#ifndef TUSER_WIDTH
+#define TUSER_WIDTH 1
+#endif
+
+#ifndef TDEST_WIDTH
+#define TDEST_WIDTH 1
+#endif
+
+#ifndef TID_WIDTH
+#define TID_WIDTH 1
+#endif
+
 int sc_main(int argc, char* argv[]) {
     logic::command_line{argc, argv};
 
@@ -31,8 +47,20 @@ int sc_main(int argc, char* argv[]) {
     sc_core::sc_clock aclk{"aclk"};
     sc_core::sc_signal<bool> areset_n{"areset_n"};
 
-    logic::axi4::stream::bus_if<> rx{"rx"};
-    logic::axi4::stream::bus_if<> tx{"tx"};
+    logic::axi4::stream::bus_if<
+            TDATA_BYTES,
+            TID_WIDTH,
+            TDEST_WIDTH,
+            TUSER_WIDTH
+        > rx{"rx"};
+
+    logic::axi4::stream::bus_if<
+            TDATA_BYTES,
+            TID_WIDTH,
+            TDEST_WIDTH,
+            TUSER_WIDTH
+        > tx{"tx"};
+
     logic::axi4::stream::reset_if reset{};
 
     logic_axi4_stream_queue_top dut{"logic_axi4_stream_queue_top"};

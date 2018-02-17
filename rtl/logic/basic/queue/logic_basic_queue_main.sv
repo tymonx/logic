@@ -36,9 +36,9 @@
  *  tx_tready   - Tx ready signal.
  */
 module logic_basic_queue_main #(
-    int WIDTH = 1,
+    logic_pkg::target_t TARGET = logic_pkg::TARGET_GENERIC,
     int CAPACITY = 256,
-    logic_pkg::target_t TARGET = `LOGIC_CONFIG_TARGET
+    int WIDTH = 1
 ) (
     input aclk,
     input areset_n,
@@ -56,7 +56,8 @@ module logic_basic_queue_main #(
     generate
         case (TARGET)
         logic_pkg::TARGET_INTEL,
-        logic_pkg::TARGET_INTEL_ARRIA_10: begin: intel
+        logic_pkg::TARGET_INTEL_ARRIA_10,
+        logic_pkg::TARGET_INTEL_ARRIA_10_SOC: begin: intel
             logic_basic_queue_intel #(
                 .WIDTH(WIDTH),
                 .CAPACITY(CAPACITY)

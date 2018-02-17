@@ -59,11 +59,6 @@ module logic_axi4_stream_extract_main #(
     `LOGIC_MODPORT(logic_axi4_stream_if, rx) rx,
     `LOGIC_MODPORT(logic_axi4_stream_if, tx) tx[2]
 );
-    localparam int M_TDATA_BYTES = (TDATA_BYTES > 0) ? TDATA_BYTES : 1;
-    localparam int M_TDEST_WIDTH = (TDEST_WIDTH > 0) ? TDEST_WIDTH : 1;
-    localparam int M_TUSER_WIDTH = (TUSER_WIDTH > 0) ? TUSER_WIDTH : 1;
-    localparam int M_TID_WIDTH = (TID_WIDTH > 0) ? TID_WIDTH : 1;
-
     typedef bit [PACKETS-1:0][EXTRACT_WIDTH-1:0] extract_t;
 
     function extract_t init_extract;
@@ -73,10 +68,13 @@ module logic_axi4_stream_extract_main #(
     endfunction
 
     logic_axi4_stream_if #(
-        .TDATA_BYTES(M_TDATA_BYTES),
-        .TDEST_WIDTH(M_TDEST_WIDTH),
-        .TUSER_WIDTH(M_TUSER_WIDTH),
-        .TID_WIDTH(M_TID_WIDTH)
+        .TDATA_BYTES(TDATA_BYTES),
+        .TDEST_WIDTH(TDEST_WIDTH),
+        .TUSER_WIDTH(TUSER_WIDTH),
+        .TID_WIDTH(TID_WIDTH),
+        .USE_TLAST(USE_TLAST),
+        .USE_TKEEP(USE_TKEEP),
+        .USE_TSTRB(USE_TSTRB)
     )
     buffered (
         .*

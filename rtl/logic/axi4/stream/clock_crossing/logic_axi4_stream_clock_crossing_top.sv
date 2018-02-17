@@ -16,13 +16,16 @@
 `include "logic.svh"
 
 module logic_axi4_stream_clock_crossing_top #(
-    int TDATA_BYTES = `LOGIC_AXI4_STREAM_TDATA_BYTES,
-    int TDEST_WIDTH = `LOGIC_AXI4_STREAM_TDEST_WIDTH,
-    int TUSER_WIDTH = `LOGIC_AXI4_STREAM_TUSER_WIDTH,
-    int TID_WIDTH = `LOGIC_AXI4_STREAM_TID_WIDTH,
+    logic_pkg::target_t TARGET = logic_pkg::TARGET_GENERIC,
+    int TDATA_BYTES = 4,
+    int TDEST_WIDTH = 1,
+    int TUSER_WIDTH = 1,
+    int TID_WIDTH = 1,
+    int USE_TKEEP = 1,
+    int USE_TSTRB = 1,
+    int USE_TLAST = 1,
     int CAPACITY = 256,
-    int GENERIC = 1,
-    logic_pkg::target_t TARGET = `LOGIC_CONFIG_TARGET
+    int GENERIC = 1
 ) (
     input areset_n,
     /* Rx */
@@ -52,7 +55,10 @@ module logic_axi4_stream_clock_crossing_top #(
         .TDATA_BYTES(TDATA_BYTES),
         .TDEST_WIDTH(TDEST_WIDTH),
         .TUSER_WIDTH(TUSER_WIDTH),
-        .TID_WIDTH(TID_WIDTH)
+        .TID_WIDTH(TID_WIDTH),
+        .USE_TKEEP(USE_TKEEP),
+        .USE_TSTRB(USE_TSTRB),
+        .USE_TLAST(USE_TLAST)
     ) rx (
         .aclk(rx_aclk),
         .*
@@ -62,7 +68,10 @@ module logic_axi4_stream_clock_crossing_top #(
         .TDATA_BYTES(TDATA_BYTES),
         .TDEST_WIDTH(TDEST_WIDTH),
         .TUSER_WIDTH(TUSER_WIDTH),
-        .TID_WIDTH(TID_WIDTH)
+        .TID_WIDTH(TID_WIDTH),
+        .USE_TKEEP(USE_TKEEP),
+        .USE_TSTRB(USE_TSTRB),
+        .USE_TLAST(USE_TLAST)
     ) tx (
         .aclk(tx_aclk),
         .*
@@ -75,6 +84,9 @@ module logic_axi4_stream_clock_crossing_top #(
         .TDEST_WIDTH(TDEST_WIDTH),
         .TUSER_WIDTH(TUSER_WIDTH),
         .TID_WIDTH(TID_WIDTH),
+        .USE_TKEEP(USE_TKEEP),
+        .USE_TSTRB(USE_TSTRB),
+        .USE_TLAST(USE_TLAST),
         .CAPACITY(CAPACITY),
         .GENERIC(GENERIC),
         .TARGET(TARGET)

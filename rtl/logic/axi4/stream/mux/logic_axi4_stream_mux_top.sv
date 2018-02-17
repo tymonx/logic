@@ -17,10 +17,10 @@
 
 module logic_axi4_stream_mux_top #(
     int INPUTS = 13,
-    int TDATA_BYTES = `LOGIC_AXI4_STREAM_TDATA_BYTES,
-    int TDEST_WIDTH = `LOGIC_AXI4_STREAM_TDEST_WIDTH,
-    int TUSER_WIDTH = `LOGIC_AXI4_STREAM_TUSER_WIDTH,
-    int TID_WIDTH = `LOGIC_AXI4_STREAM_TID_WIDTH,
+    int TDATA_BYTES = 4,
+    int TDEST_WIDTH = 1,
+    int TUSER_WIDTH = 1,
+    int TID_WIDTH = 1,
     int USE_TLAST = 1,
     int USE_TKEEP = 1,
     int USE_TSTRB = 1
@@ -54,7 +54,10 @@ module logic_axi4_stream_mux_top #(
         .TDATA_BYTES(TDATA_BYTES),
         .TDEST_WIDTH(TDEST_WIDTH),
         .TUSER_WIDTH(TUSER_WIDTH),
-        .TID_WIDTH(TID_WIDTH)
+        .TID_WIDTH(TID_WIDTH),
+        .USE_TLAST(USE_TLAST),
+        .USE_TKEEP(USE_TKEEP),
+        .USE_TSTRB(USE_TSTRB)
     ) rx [INPUTS] (
         .aclk(aclk),
         .areset_n(areset_n)
@@ -64,7 +67,10 @@ module logic_axi4_stream_mux_top #(
         .TDATA_BYTES(TDATA_BYTES),
         .TDEST_WIDTH(TDEST_WIDTH),
         .TUSER_WIDTH(TUSER_WIDTH),
-        .TID_WIDTH(TID_WIDTH)
+        .TID_WIDTH(TID_WIDTH),
+        .USE_TLAST(USE_TLAST),
+        .USE_TKEEP(USE_TKEEP),
+        .USE_TSTRB(USE_TSTRB)
     ) tx (.*);
 
     generate

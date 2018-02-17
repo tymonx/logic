@@ -126,82 +126,9 @@ module logic_axi4_stream_mux_unit #(
         end
     end
 
-    generate
-        if (USE_TLAST > 0) begin: tlast_enabled
-            always_ff @(posedge aclk) begin
-                if (tx.tready) begin
-                    tx.tlast <= select ? rx[1].tlast : rx[0].tlast;
-                end
-            end
+    always_ff @(posedge aclk) begin
+        if (tx.tready) begin
+            tx.write(select ? rx[1].read() : rx[0].read());
         end
-        else begin: tlast_disabled
-            always_comb tx.tlast = '1;
-        end
-
-        if ((TDATA_BYTES > 0) && (USE_TKEEP > 0)) begin: tkeep_enabled
-            always_ff @(posedge aclk) begin
-                if (tx.tready) begin
-                    tx.tkeep <= select ? rx[1].tkeep : rx[0].tkeep;
-                end
-            end
-        end
-        else begin: tkeep_disabled
-            always_comb tx.tkeep = '1;
-        end
-
-        if ((TDATA_BYTES > 0) && (USE_TSTRB > 0)) begin: tstrb_enabled
-            always_ff @(posedge aclk) begin
-                if (tx.tready) begin
-                    tx.tstrb <= select ? rx[1].tstrb : rx[0].tstrb;
-                end
-            end
-        end
-        else begin: tstrb_disabled
-            always_comb tx.tstrb = '1;
-        end
-
-        if (TDATA_BYTES > 0) begin: tdata_enabled
-            always_ff @(posedge aclk) begin
-                if (tx.tready) begin
-                    tx.tdata <= select ? rx[1].tdata : rx[0].tdata;
-                end
-            end
-        end
-        else begin: tdata_disabled
-            always_comb tx.tdata = '0;
-        end
-
-        if (TUSER_WIDTH > 0) begin: tuser_enabled
-            always_ff @(posedge aclk) begin
-                if (tx.tready) begin
-                    tx.tuser <= select ? rx[1].tuser : rx[0].tuser;
-                end
-            end
-        end
-        else begin: tuser_disabled
-            always_comb tx.tuser = '0;
-        end
-
-        if (TDEST_WIDTH > 0) begin: tdest_enabled
-            always_ff @(posedge aclk) begin
-                if (tx.tready) begin
-                    tx.tdest <= select ? rx[1].tdest : rx[0].tdest;
-                end
-            end
-        end
-        else begin: tdest_disabled
-            always_comb tx.tdest = '0;
-        end
-
-        if (TID_WIDTH > 0) begin: tid_enabled
-            always_ff @(posedge aclk) begin
-                if (tx.tready) begin
-                    tx.tid <= select ? rx[1].tid : rx[0].tid;
-                end
-            end
-        end
-        else begin: tid_disabled
-            always_comb tx.tid = '0;
-        end
-    endgenerate
+    end
 endmodule

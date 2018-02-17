@@ -35,10 +35,10 @@
  *  tx_tready   - Tx ready signal.
  */
 module logic_clock_domain_crossing #(
-    int WIDTH = 1,
+    logic_pkg::target_t TARGET = logic_pkg::TARGET_GENERIC,
     int CAPACITY = 256,
     int GENERIC = 1,
-    logic_pkg::target_t TARGET = `LOGIC_CONFIG_TARGET
+    int WIDTH = 1
 ) (
     input areset_n,
     input rx_aclk,
@@ -60,7 +60,8 @@ module logic_clock_domain_crossing #(
     generate
         case (M_TARGET)
         logic_pkg::TARGET_INTEL,
-        logic_pkg::TARGET_INTEL_ARRIA_10: begin: intel
+        logic_pkg::TARGET_INTEL_ARRIA_10,
+        logic_pkg::TARGET_INTEL_ARRIA_10_SOC: begin: intel
             logic_clock_domain_crossing_intel #(
                 .WIDTH(WIDTH),
                 .CAPACITY(CAPACITY)
@@ -69,8 +70,8 @@ module logic_clock_domain_crossing #(
         default: begin: generic
             logic_clock_domain_crossing_generic #(
                 .WIDTH(WIDTH),
-                .CAPACITY(CAPACITY),
-                .TARGET(TARGET)
+                .TARGET(TARGET),
+                .CAPACITY(CAPACITY)
             ) unit (.*);
         end
         endcase

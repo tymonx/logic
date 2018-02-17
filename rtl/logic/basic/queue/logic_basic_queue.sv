@@ -36,9 +36,9 @@
  *  tx_tready   - Tx ready signal.
  */
 module logic_basic_queue #(
-    int WIDTH = 1,
+    logic_pkg::target_t TARGET = logic_pkg::TARGET_GENERIC,
     int CAPACITY = 256,
-    logic_pkg::target_t TARGET = `LOGIC_CONFIG_TARGET
+    int WIDTH = 1
 ) (
     input aclk,
     input areset_n,

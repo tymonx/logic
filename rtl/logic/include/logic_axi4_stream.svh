@@ -73,20 +73,4 @@
     always_comb lhs``_tid = rhs``.tid; \
     always_comb rhs``.tready = lhs``_tready
 
-`ifndef LOGIC_AXI4_STREAM_TDATA_BYTES
-    `define LOGIC_AXI4_STREAM_TDATA_BYTES 1
-`endif
-
-`ifndef LOGIC_AXI4_STREAM_TID_WIDTH
-    `define LOGIC_AXI4_STREAM_TID_WIDTH 1
-`endif
-
-`ifndef LOGIC_AXI4_STREAM_TDEST_WIDTH
-    `define LOGIC_AXI4_STREAM_TDEST_WIDTH 1
-`endif
-
-`ifndef LOGIC_AXI4_STREAM_TUSER_WIDTH
-    `define LOGIC_AXI4_STREAM_TUSER_WIDTH 1
-`endif
-
 `endif /* LOGIC_AXI4_STREAM_SVH */

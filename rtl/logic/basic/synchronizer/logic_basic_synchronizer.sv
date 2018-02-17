@@ -24,7 +24,7 @@
  *  STAGES      - Number of pipeline stages from input to output.
  */
 module logic_basic_synchronizer #(
-    logic_pkg::target_t TARGET = `LOGIC_CONFIG_TARGET,
+    logic_pkg::target_t TARGET = logic_pkg::TARGET_GENERIC,
     int WIDTH = 1,
     int STAGES = 2
 ) (
@@ -36,7 +36,8 @@ module logic_basic_synchronizer #(
     generate
         case (TARGET)
         logic_pkg::TARGET_INTEL,
-        logic_pkg::TARGET_INTEL_ARRIA_10: begin: target_intel
+        logic_pkg::TARGET_INTEL_ARRIA_10,
+        logic_pkg::TARGET_INTEL_ARRIA_10_SOC: begin: target_intel
             logic_basic_synchronizer_intel #(
                 .WIDTH(WIDTH),
                 .STAGES(STAGES)

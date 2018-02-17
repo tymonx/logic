@@ -37,7 +37,7 @@ module logic_clock_domain_crossing_generic #(
     int WIDTH = 1,
     int CAPACITY = 256,
     int ADDRESS_WIDTH = $clog2(CAPACITY),
-    logic_pkg::target_t TARGET = `LOGIC_CONFIG_TARGET
+    logic_pkg::target_t TARGET = logic_pkg::TARGET_GENERIC
 ) (
     input areset_n,
     input rx_aclk,

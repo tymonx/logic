@@ -59,7 +59,10 @@ module logic_axi4_stream_mux_stage #(
                 .TDATA_BYTES(TDATA_BYTES),
                 .TDEST_WIDTH(TDEST_WIDTH),
                 .TUSER_WIDTH(TUSER_WIDTH),
-                .TID_WIDTH(TID_WIDTH)
+                .TID_WIDTH(TID_WIDTH),
+                .USE_TLAST(USE_TLAST),
+                .USE_TKEEP(USE_TKEEP),
+                .USE_TSTRB(USE_TSTRB)
             )
             bypass (
                 .rx(rx[INPUTS-1]),
@@ -70,10 +73,13 @@ module logic_axi4_stream_mux_stage #(
 
         for (k = 0; k < NUM; k += 2) begin: muxes
             logic_axi4_stream_if #(
-                .TDATA_BYTES((TDATA_BYTES > 0) ? TDATA_BYTES : 1),
-                .TDEST_WIDTH((TDEST_WIDTH > 0) ? TDEST_WIDTH : 1),
-                .TUSER_WIDTH((TUSER_WIDTH > 0) ? TUSER_WIDTH : 1),
-                .TID_WIDTH((TID_WIDTH > 0) ? TID_WIDTH : 1)
+                .TDATA_BYTES(TDATA_BYTES),
+                .TDEST_WIDTH(TDEST_WIDTH),
+                .TUSER_WIDTH(TUSER_WIDTH),
+                .TID_WIDTH(TID_WIDTH),
+                .USE_TLAST(USE_TLAST),
+                .USE_TKEEP(USE_TKEEP),
+                .USE_TSTRB(USE_TSTRB)
             )
             buffered [2] (
                 .aclk(aclk),

@@ -38,6 +38,7 @@
  *  tx          - AXI4-Stream interface.
  */
 module logic_axi4_stream_queue #(
+    logic_pkg::target_t TARGET = logic_pkg::TARGET_GENERIC,
     int TDATA_BYTES = 1,
     int TDEST_WIDTH = 1,
     int TUSER_WIDTH = 1,
@@ -45,8 +46,7 @@ module logic_axi4_stream_queue #(
     int USE_TLAST = 1,
     int USE_TKEEP = 1,
     int USE_TSTRB = 1,
-    int CAPACITY = 256,
-    logic_pkg::target_t TARGET = `LOGIC_CONFIG_TARGET
+    int CAPACITY = 256
 ) (
     input aclk,
     input areset_n,

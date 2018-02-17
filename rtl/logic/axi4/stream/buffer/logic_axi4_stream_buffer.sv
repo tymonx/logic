@@ -42,29 +42,20 @@ module logic_axi4_stream_buffer #(
     int TID_WIDTH = 1,
     int USE_TLAST = 1,
     int USE_TKEEP = 1,
-    int USE_TSTRB = 1,
-    int TLAST = 1
+    int USE_TSTRB = 1
 ) (
     input aclk,
     input areset_n,
     `LOGIC_MODPORT(logic_axi4_stream_if, rx) rx,
     `LOGIC_MODPORT(logic_axi4_stream_if, tx) tx
 );
-    localparam TLAST_WIDTH = (USE_TLAST > 0) ? 1 : 0;
-    localparam TDATA_WIDTH = TDATA_BYTES * 8;
-    localparam TSTRB_WIDTH = (USE_TSTRB > 0) ? TDATA_BYTES : 0;
-    localparam TKEEP_WIDTH = (USE_TKEEP > 0) ? TDATA_BYTES : 0;
+    localparam int TLAST_WIDTH = (USE_TLAST > 0) ? 1 : 0;
+    localparam int TDATA_WIDTH = TDATA_BYTES * 8;
+    localparam int TSTRB_WIDTH = (USE_TSTRB > 0) ? TDATA_BYTES : 0;
+    localparam int TKEEP_WIDTH = (USE_TKEEP > 0) ? TDATA_BYTES : 0;
 
-    localparam WIDTH = TUSER_WIDTH + TDEST_WIDTH + TID_WIDTH + TLAST_WIDTH +
+    localparam int WIDTH = TUSER_WIDTH + TDEST_WIDTH + TID_WIDTH + TLAST_WIDTH +
         TKEEP_WIDTH + TSTRB_WIDTH + TDATA_WIDTH;
-
-    localparam TDATA_OFFSET = 0;
-    localparam TSTRB_OFFSET = TDATA_OFFSET + TDATA_WIDTH;
-    localparam TKEEP_OFFSET = TSTRB_OFFSET + TSTRB_WIDTH;
-    localparam TLAST_OFFSET = TKEEP_OFFSET + TKEEP_WIDTH;
-    localparam TDEST_OFFSET = TLAST_OFFSET + TLAST_WIDTH;
-    localparam TUSER_OFFSET = TDEST_OFFSET + TDEST_WIDTH;
-    localparam TID_OFFSET = TUSER_OFFSET + TUSER_WIDTH;
 
     logic rx_tvalid;
     logic rx_tready;
@@ -80,91 +71,8 @@ module logic_axi4_stream_buffer #(
     always_comb tx.tvalid = tx_tvalid;
     always_comb tx_tready = tx.tready;
 
-    generate
-        if (TDATA_BYTES > 0) begin: tdata_enabled
-            always_comb rx_tdata[TDATA_OFFSET+:TDATA_WIDTH] = rx.tdata;
-            always_comb tx.tdata = tx_tdata[TDATA_OFFSET+:TDATA_WIDTH];
-        end
-        else begin: tdata_disabled
-            always_comb tx.tdata = '0;
-
-`ifdef VERILATOR
-            logic _unused_ports = &{1'b0, rx.tdata, 1'b0};
-`endif
-        end
-
-        if (TKEEP_WIDTH > 0) begin: tkeep_enabled
-            always_comb rx_tdata[TKEEP_OFFSET+:TKEEP_WIDTH] = rx.tkeep;
-            always_comb tx.tkeep = tx_tdata[TKEEP_OFFSET+:TKEEP_WIDTH];
-        end
-        else begin: tkeep_disabled
-            always_comb tx.tkeep = '1;
-
-`ifdef VERILATOR
-            logic _unused_ports = &{1'b0, rx.tkeep, 1'b0};
-`endif
-        end
-
-        if (TSTRB_WIDTH > 0) begin: tstrb_enabled
-            always_comb rx_tdata[TSTRB_OFFSET+:TSTRB_WIDTH] = rx.tstrb;
-            always_comb tx.tstrb = tx_tdata[TSTRB_OFFSET+:TSTRB_WIDTH];
-        end
-        else begin: tstrb_disabled
-            always_comb tx.tstrb = '1;
-
-`ifdef VERILATOR
-            logic _unused_ports = &{1'b0, rx.tstrb, 1'b0};
-`endif
-        end
-
-        if (TLAST_WIDTH > 0) begin: tlast_enabled
-            always_comb rx_tdata[TLAST_OFFSET+:TLAST_WIDTH] = rx.tlast;
-            always_comb tx.tlast = tx_tdata[TLAST_OFFSET+:TLAST_WIDTH];
-        end
-        else begin: tlast_disabled
-            always_comb tx.tlast = '1;
-
-`ifdef VERILATOR
-            logic _unused_ports = &{1'b0, rx.tlast, 1'b0};
-`endif
-        end
-
-        if (TDEST_WIDTH > 0) begin: tdest_enabled
-            always_comb rx_tdata[TDEST_OFFSET+:TDEST_WIDTH] = rx.tdest;
-            always_comb tx.tdest = tx_tdata[TDEST_OFFSET+:TDEST_WIDTH];
-        end
-        else begin: tdest_disabled
-            always_comb tx.tdest = '0;
-
-`ifdef VERILATOR
-            logic _unused_ports = &{1'b0, rx.tdest, 1'b0};
-`endif
-        end
-
-        if (TUSER_WIDTH > 0) begin: tuser_enabled
-            always_comb rx_tdata[TUSER_OFFSET+:TUSER_WIDTH] = rx.tuser;
-            always_comb tx.tuser = tx_tdata[TUSER_OFFSET+:TUSER_WIDTH];
-        end
-        else begin: tuser_disabled
-            always_comb tx.tuser = '0;
-
-`ifdef VERILATOR
-            logic _unused_ports = &{1'b0, rx.tuser, 1'b0};
-`endif
-        end
-
-        if (TID_WIDTH > 0) begin: tid_enabled
-            always_comb rx_tdata[TID_OFFSET+:TID_WIDTH] = rx.tid;
-            always_comb tx.tid = tx_tdata[TID_OFFSET+:TID_WIDTH];
-        end
-        else begin: tid_disabled
-            always_comb tx.tid = '0;
-
-`ifdef VERILATOR
-            logic _unused_ports = &{1'b0, rx.tid, 1'b0};
-`endif
-        end
-    endgenerate
+    always_comb rx_tdata = rx.read();
+    always_comb tx.comb_write(tx_tdata);
 
     logic_basic_buffer #(
         .WIDTH(WIDTH)

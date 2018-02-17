@@ -63,11 +63,6 @@ module logic_axi4_stream_demux_main #(
     localparam int DEMUXES = (OUTPUTS + GROUP - 1) / GROUP;
     localparam int STAGES = DEMUXES + 1;
 
-    localparam int M_TDATA_BYTES = (TDATA_BYTES > 0) ? TDATA_BYTES : 1;
-    localparam int M_TDEST_WIDTH = (TDEST_WIDTH > 0) ? TDEST_WIDTH : 1;
-    localparam int M_TUSER_WIDTH = (TUSER_WIDTH > 0) ? TUSER_WIDTH : 1;
-    localparam int M_TID_WIDTH = (TID_WIDTH > 0) ? TID_WIDTH : 1;
-
     typedef bit [OUTPUTS-1:0][MAP_WIDTH-1:0] map_t;
 
     function map_t init_map;
@@ -80,10 +75,13 @@ module logic_axi4_stream_demux_main #(
     genvar n;
 
     logic_axi4_stream_if #(
-        .TDATA_BYTES(M_TDATA_BYTES),
-        .TDEST_WIDTH(M_TDEST_WIDTH),
-        .TUSER_WIDTH(M_TUSER_WIDTH),
-        .TID_WIDTH(M_TID_WIDTH)
+        .TDATA_BYTES(TDATA_BYTES),
+        .TDEST_WIDTH(TDEST_WIDTH),
+        .TUSER_WIDTH(TUSER_WIDTH),
+        .TID_WIDTH(TID_WIDTH),
+        .USE_TKEEP(USE_TKEEP),
+        .USE_TSTRB(USE_TSTRB),
+        .USE_TLAST(USE_TLAST)
     )
     stages [STAGES] (
         .aclk(aclk),
@@ -94,7 +92,10 @@ module logic_axi4_stream_demux_main #(
         .TDATA_BYTES(TDATA_BYTES),
         .TDEST_WIDTH(TDEST_WIDTH),
         .TUSER_WIDTH(TUSER_WIDTH),
-        .TID_WIDTH(TID_WIDTH)
+        .TID_WIDTH(TID_WIDTH),
+        .USE_TKEEP(USE_TKEEP),
+        .USE_TSTRB(USE_TSTRB),
+        .USE_TLAST(USE_TLAST)
     )
     input_assigned (
         .rx(rx),
@@ -108,7 +109,10 @@ module logic_axi4_stream_demux_main #(
                 .TDATA_BYTES(TDATA_BYTES),
                 .TDEST_WIDTH(TDEST_WIDTH),
                 .TUSER_WIDTH(TUSER_WIDTH),
-                .TID_WIDTH(TID_WIDTH)
+                .TID_WIDTH(TID_WIDTH),
+                .USE_TKEEP(USE_TKEEP),
+                .USE_TSTRB(USE_TSTRB),
+                .USE_TLAST(USE_TLAST)
             )
             extract_assigned (
                 .rx(stages[STAGES-1]),
@@ -148,10 +152,13 @@ module logic_axi4_stream_demux_main #(
             localparam bit [WIDTH-1:0][MAP_WIDTH-1:0] SUBMAP = MAP[k+:WIDTH];
 
             logic_axi4_stream_if #(
-                .TDATA_BYTES(M_TDATA_BYTES),
-                .TDEST_WIDTH(M_TDEST_WIDTH),
-                .TUSER_WIDTH(M_TUSER_WIDTH),
-                .TID_WIDTH(M_TID_WIDTH)
+                .TDATA_BYTES(TDATA_BYTES),
+                .TDEST_WIDTH(TDEST_WIDTH),
+                .TUSER_WIDTH(TUSER_WIDTH),
+                .TID_WIDTH(TID_WIDTH),
+                .USE_TKEEP(USE_TKEEP),
+                .USE_TSTRB(USE_TSTRB),
+                .USE_TLAST(USE_TLAST)
             )
             demuxed [WIDTH] (
                 .aclk(aclk),
@@ -182,7 +189,10 @@ module logic_axi4_stream_demux_main #(
                     .TDATA_BYTES(TDATA_BYTES),
                     .TDEST_WIDTH(TDEST_WIDTH),
                     .TUSER_WIDTH(TUSER_WIDTH),
-                    .TID_WIDTH(TID_WIDTH)
+                    .TID_WIDTH(TID_WIDTH),
+                    .USE_TKEEP(USE_TKEEP),
+                    .USE_TSTRB(USE_TSTRB),
+                    .USE_TLAST(USE_TLAST)
                 )
                 output_assigned (
                     .rx(demuxed[n]),

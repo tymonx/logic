@@ -19,6 +19,15 @@
  *
  * Avalon-ST interface to AXI4-Stream interface bridge.
  *
+ * Parameters:
+ *  TDATA_BYTES - Number of bytes for tdata signal.
+ *  TUSER_WIDTH - Number of bits for tuser signal.
+ *  TDEST_WIDTH - Number of bits for tdest signal.
+ *  TID_WIDTH   - Number of bits for tid signal.
+ *  USE_TLAST   - Enable or disable tlast signal.
+ *  USE_TKEEP   - Enable or disable tkeep signal.
+ *  USE_TSTRB   - Enable or disable tstrb signal.
+ *
  * Ports:
  *  aclk        - Clock.
  *  areset_n    - Asynchronous active-low reset.
@@ -30,6 +39,9 @@ module logic_axi4_stream_from_avalon_st #(
     int TDEST_WIDTH = 1,
     int TUSER_WIDTH = 1,
     int TID_WIDTH = 1,
+    int USE_TKEEP = 1,
+    int USE_TSTRB = 1,
+    int USE_TLAST = 1,
     int EMPTY_WIDTH = (TDATA_BYTES >= 2) ? $clog2(TDATA_BYTES) : 1
 ) (
     input aclk,
@@ -56,10 +68,8 @@ module logic_axi4_stream_from_avalon_st #(
     always_comb begin
         strb = '1;
 
-        if ($bits(tx.tstrb) > 1) begin
-            for (bit [EMPTY_WIDTH-1:0] i = '0; i < rx.empty; ++i) begin
-                strb = strb >> 1;
-            end
+        if (TDATA_BYTES > 1) begin
+            strb = strb >> rx.empty;
         end
     end
 

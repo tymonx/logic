@@ -51,19 +51,17 @@ module logic_axi4_stream_mux_main #(
     localparam int INPUTS_NORMALIZED = 2**DEPTH;
     localparam int MUXED = (2 * INPUTS_NORMALIZED) - 1;
 
-    localparam int M_TDATA_BYTES = (TDATA_BYTES > 0) ? TDATA_BYTES : 1;
-    localparam int M_TDEST_WIDTH = (TDEST_WIDTH > 0) ? TDEST_WIDTH : 1;
-    localparam int M_TUSER_WIDTH = (TUSER_WIDTH > 0) ? TUSER_WIDTH : 1;
-    localparam int M_TID_WIDTH = (TID_WIDTH > 0) ? TID_WIDTH : 1;
-
     genvar k;
     genvar n;
 
     logic_axi4_stream_if #(
-        .TDATA_BYTES(M_TDATA_BYTES),
-        .TDEST_WIDTH(M_TDEST_WIDTH),
-        .TUSER_WIDTH(M_TUSER_WIDTH),
-        .TID_WIDTH(M_TID_WIDTH)
+        .TDATA_BYTES(TDATA_BYTES),
+        .TDEST_WIDTH(TDEST_WIDTH),
+        .TUSER_WIDTH(TUSER_WIDTH),
+        .TID_WIDTH(TID_WIDTH),
+        .USE_TLAST(USE_TLAST),
+        .USE_TKEEP(USE_TKEEP),
+        .USE_TSTRB(USE_TSTRB)
     )
     muxed [MUXED] (
         .aclk(aclk),
@@ -74,7 +72,10 @@ module logic_axi4_stream_mux_main #(
         .TDATA_BYTES(TDATA_BYTES),
         .TDEST_WIDTH(TDEST_WIDTH),
         .TUSER_WIDTH(TUSER_WIDTH),
-        .TID_WIDTH(TID_WIDTH)
+        .TID_WIDTH(TID_WIDTH),
+        .USE_TLAST(USE_TLAST),
+        .USE_TKEEP(USE_TKEEP),
+        .USE_TSTRB(USE_TSTRB)
     )
     output_assigned (
         .rx(muxed[0]),
@@ -88,7 +89,10 @@ module logic_axi4_stream_mux_main #(
                     .TDATA_BYTES(TDATA_BYTES),
                     .TDEST_WIDTH(TDEST_WIDTH),
                     .TUSER_WIDTH(TUSER_WIDTH),
-                    .TID_WIDTH(TID_WIDTH)
+                    .TID_WIDTH(TID_WIDTH),
+                    .USE_TLAST(USE_TLAST),
+                    .USE_TKEEP(USE_TKEEP),
+                    .USE_TSTRB(USE_TSTRB)
                 )
                 input_assigned (
                     .rx(rx[k]),
@@ -115,10 +119,13 @@ module logic_axi4_stream_mux_main #(
             localparam int MUXED_OUT = k / 2;
 
             logic_axi4_stream_if #(
-                .TDATA_BYTES(M_TDATA_BYTES),
-                .TDEST_WIDTH(M_TDEST_WIDTH),
-                .TUSER_WIDTH(M_TUSER_WIDTH),
-                .TID_WIDTH(M_TID_WIDTH)
+                .TDATA_BYTES(TDATA_BYTES),
+                .TDEST_WIDTH(TDEST_WIDTH),
+                .TUSER_WIDTH(TUSER_WIDTH),
+                .TID_WIDTH(TID_WIDTH),
+                .USE_TLAST(USE_TLAST),
+                .USE_TKEEP(USE_TKEEP),
+                .USE_TSTRB(USE_TSTRB)
             )
             muxed_in [MUXED_IN] (
                 .aclk(aclk),
@@ -126,10 +133,13 @@ module logic_axi4_stream_mux_main #(
             );
 
             logic_axi4_stream_if #(
-                .TDATA_BYTES(M_TDATA_BYTES),
-                .TDEST_WIDTH(M_TDEST_WIDTH),
-                .TUSER_WIDTH(M_TUSER_WIDTH),
-                .TID_WIDTH(M_TID_WIDTH)
+                .TDATA_BYTES(TDATA_BYTES),
+                .TDEST_WIDTH(TDEST_WIDTH),
+                .TUSER_WIDTH(TUSER_WIDTH),
+                .TID_WIDTH(TID_WIDTH),
+                .USE_TLAST(USE_TLAST),
+                .USE_TKEEP(USE_TKEEP),
+                .USE_TSTRB(USE_TSTRB)
             )
             muxed_out [MUXED_OUT] (
                 .aclk(aclk),
@@ -141,7 +151,10 @@ module logic_axi4_stream_mux_main #(
                     .TDATA_BYTES(TDATA_BYTES),
                     .TDEST_WIDTH(TDEST_WIDTH),
                     .TUSER_WIDTH(TUSER_WIDTH),
-                    .TID_WIDTH(TID_WIDTH)
+                    .TID_WIDTH(TID_WIDTH),
+                    .USE_TLAST(USE_TLAST),
+                    .USE_TKEEP(USE_TKEEP),
+                    .USE_TSTRB(USE_TSTRB)
                 )
                 mux_in_assigned (
                     .rx(muxed[k - 1 + n]),
@@ -154,7 +167,10 @@ module logic_axi4_stream_mux_main #(
                     .TDATA_BYTES(TDATA_BYTES),
                     .TDEST_WIDTH(TDEST_WIDTH),
                     .TUSER_WIDTH(TUSER_WIDTH),
-                    .TID_WIDTH(TID_WIDTH)
+                    .TID_WIDTH(TID_WIDTH),
+                    .USE_TLAST(USE_TLAST),
+                    .USE_TKEEP(USE_TKEEP),
+                    .USE_TSTRB(USE_TSTRB)
                 )
                 mux_out_assigned (
                     .rx(muxed_out[n]),

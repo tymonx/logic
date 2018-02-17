@@ -17,7 +17,7 @@
 
 module logic_clock_domain_crossing_generic_write_sync #(
     int ADDRESS_WIDTH = 1,
-    logic_pkg::target_t TARGET = `LOGIC_CONFIG_TARGET
+    logic_pkg::target_t TARGET = logic_pkg::TARGET_GENERIC
 ) (
     input read_aclk,
     input read_areset_n,

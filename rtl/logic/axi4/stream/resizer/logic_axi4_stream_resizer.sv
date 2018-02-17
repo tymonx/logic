@@ -37,10 +37,12 @@
  *  tx          - AXI4-Stream interface.
  */
 module logic_axi4_stream_resizer #(
-    int RX_TDATA_BYTES = 1,
-    int TX_TDATA_BYTES = 1,
-    int RX_TUSER_WIDTH = 1,
-    int TX_TUSER_WIDTH = 1,
+    int TDATA_BYTES = 1,
+    int TUSER_WIDTH = 1,
+    int RX_TDATA_BYTES = TDATA_BYTES,
+    int TX_TDATA_BYTES = TDATA_BYTES,
+    int RX_TUSER_WIDTH = TUSER_WIDTH,
+    int TX_TUSER_WIDTH = TUSER_WIDTH,
     int TDEST_WIDTH = 1,
     int TID_WIDTH = 1,
     int USE_TLAST = 1,
@@ -90,7 +92,10 @@ module logic_axi4_stream_resizer #(
                 .TDATA_BYTES(TX_TDATA_BYTES),
                 .TUSER_WIDTH(TX_TUSER_WIDTH),
                 .TDEST_WIDTH(TDEST_WIDTH),
-                .TID_WIDTH(TID_WIDTH)
+                .TID_WIDTH(TID_WIDTH),
+                .USE_TLAST(USE_TLAST),
+                .USE_TKEEP(USE_TKEEP),
+                .USE_TSTRB(USE_TSTRB)
             )
             unit (
                 .*

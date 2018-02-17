@@ -21,16 +21,16 @@ add_hdl_unit_test(logic_axi4_stream_buffer_unit_test.sv
 
 # SVUnit unit test
 
-set(MODULE_DEFINITIONS
-    LOGIC_AXI4_STREAM_TDATA_BYTES=4
-    LOGIC_AXI4_STREAM_TID_WIDTH=1
-    LOGIC_AXI4_STREAM_TDEST_WIDTH=1
-    LOGIC_AXI4_STREAM_TUSER_WIDTH=1
+set(MODULE_PARAMETERS
+    TDATA_BYTES=4
+    TUSER_WIDTH=1
+    TDEST_WIDTH=1
+    TID_WIDTH=1
 )
 
 add_hdl_systemc(logic_axi4_stream_buffer_top
-    DEFINES
-        ${MODULE_DEFINITIONS}
+    PARAMETERS
+        ${MODULE_PARAMETERS}
     OUTPUT_INCLUDES
         module_includes
     OUTPUT_LIBRARIES
@@ -40,7 +40,7 @@ add_hdl_systemc(logic_axi4_stream_buffer_top
 )
 
 set_source_files_properties(main.cpp PROPERTIES
-    COMPILE_DEFINITIONS "${MODULE_DEFINITIONS}"
+    COMPILE_DEFINITIONS "${MODULE_PARAMETERS}"
 )
 
 add_executable(logic_axi4_stream_buffer_test

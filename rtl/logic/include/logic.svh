@@ -37,7 +37,6 @@
 `endif
 
 `include "logic_drc.svh"
-`include "logic_config.svh"
 `include "logic_axi4.svh"
 `include "logic_avalon.svh"
 `include "logic_modport.svh"

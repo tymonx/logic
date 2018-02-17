@@ -52,16 +52,14 @@ module logic_axi4_stream_downsizer_main #(
     `LOGIC_MODPORT(logic_axi4_stream_if, rx) rx,
     `LOGIC_MODPORT(logic_axi4_stream_if, tx) tx
 );
-    localparam int M_TDATA_BYTES = (RX_TDATA_BYTES > 0) ? RX_TDATA_BYTES : 1;
-    localparam int M_TUSER_WIDTH = (RX_TUSER_WIDTH > 0) ? RX_TUSER_WIDTH : 1;
-    localparam int M_TDEST_WIDTH = (TDEST_WIDTH > 0) ? TDEST_WIDTH : 1;
-    localparam int M_TID_WIDTH = (TID_WIDTH > 0) ? TID_WIDTH : 1;
-
     logic_axi4_stream_if #(
-        .TDATA_BYTES(M_TDATA_BYTES),
-        .TUSER_WIDTH(M_TUSER_WIDTH),
-        .TDEST_WIDTH(M_TDEST_WIDTH),
-        .TID_WIDTH(M_TID_WIDTH)
+        .TDATA_BYTES(RX_TDATA_BYTES),
+        .TUSER_WIDTH(RX_TUSER_WIDTH),
+        .TDEST_WIDTH(TDEST_WIDTH),
+        .TID_WIDTH(TID_WIDTH),
+        .USE_TKEEP(USE_TKEEP),
+        .USE_TSTRB(USE_TSTRB),
+        .USE_TLAST(USE_TLAST)
     )
     buffered (
         .*
