@@ -15,8 +15,6 @@
 
 #include "logic/axi4/stream/reset_sequence_item.hpp"
 
-#include <scv.h>
-
 using logic::axi4::stream::reset_sequence_item;
 
 reset_sequence_item::reset_sequence_item() :
@@ -25,24 +23,9 @@ reset_sequence_item::reset_sequence_item() :
 
 reset_sequence_item::reset_sequence_item(const std::string& name) :
     uvm::uvm_sequence_item{name},
-    duration{},
-    idle{}
+    duration{1},
+    idle{0}
 { }
-
-void reset_sequence_item::randomize() {
-    scv_smart_ptr<std::size_t> random_value;
-
-    random_value->keep_only(1, 4);
-    random_value->next();
-
-    duration = *random_value;
-
-    random_value->reset_distribution();
-    random_value->keep_only(0, 3);
-    random_value->next();
-
-    idle = *random_value;
-}
 
 std::string reset_sequence_item::convert2string() const {
     std::ostringstream ss;
@@ -51,7 +34,7 @@ std::string reset_sequence_item::convert2string() const {
     return ss.str();
 }
 
-reset_sequence_item::~reset_sequence_item() { }
+reset_sequence_item::~reset_sequence_item() = default;
 
 void reset_sequence_item::do_print(const uvm::uvm_printer& printer) const {
     printer.print_field_int("duration",
@@ -71,7 +54,7 @@ void reset_sequence_item::do_unpack(uvm::uvm_packer& p) {
 
 void reset_sequence_item::do_copy(const uvm::uvm_object& rhs) {
     auto other = dynamic_cast<const reset_sequence_item*>(&rhs);
-    if (other) {
+    if (other != nullptr) {
         *this = *other;;
     }
     else {
@@ -84,7 +67,7 @@ bool reset_sequence_item::do_compare(const uvm::uvm_object& rhs,
     auto other = dynamic_cast<const reset_sequence_item*>(&rhs);
     auto status = false;
 
-    if (other) {
+    if (other != nullptr) {
         status = (duration == other->duration) &&
             (idle == other->idle);
     }

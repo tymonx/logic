@@ -33,7 +33,7 @@ public:
 
     reset_sequence_item();
 
-    reset_sequence_item(const std::string& name);
+    explicit reset_sequence_item(const std::string& name);
 
     reset_sequence_item(reset_sequence_item&&) = default;
 
@@ -43,26 +43,24 @@ public:
 
     reset_sequence_item& operator=(const reset_sequence_item&) = default;
 
-    virtual void randomize();
+    std::string convert2string() const override;
 
-    virtual std::string convert2string() const override;
-
-    virtual ~reset_sequence_item() override;
+    ~reset_sequence_item() override;
 protected:
-    virtual void do_print(const uvm::uvm_printer& printer) const override;
+    void do_print(const uvm::uvm_printer& printer) const override;
 
-    virtual void do_pack(uvm::uvm_packer& p) const override;
+    void do_pack(uvm::uvm_packer& p) const override;
 
-    virtual void do_unpack(uvm::uvm_packer& p) override;
+    void do_unpack(uvm::uvm_packer& p) override;
 
-    virtual void do_copy(const uvm::uvm_object& rhs) override;
+    void do_copy(const uvm::uvm_object& rhs) override;
 
-    virtual bool do_compare(const uvm::uvm_object& rhs,
+    bool do_compare(const uvm::uvm_object& rhs,
             const uvm::uvm_comparer* comparer = nullptr) const override;
 };
 
-}
-}
-}
+} /* namespace stream */
+} /* namespace axi4 */
+} /* namespace logic */
 
 #endif /* LOGIC_AXI4_STREAM_RESET_SEQUENCE_ITEM_HPP */

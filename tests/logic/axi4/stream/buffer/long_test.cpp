@@ -13,42 +13,60 @@
  * limitations under the License.
  */
 
-#include "long_test.hpp"
+#include "logic/axi4/stream/rx_sequence.hpp"
 #include "logic/axi4/stream/sequence.hpp"
+#include "logic/axi4/stream/sequencer.hpp"
+#include "logic/axi4/stream/test.hpp"
+#include "logic/axi4/stream/testbench.hpp"
+#include "logic/axi4/stream/tx_sequence.hpp"
 
-long_test::long_test(
-        const uvm::uvm_component_name& name) :
-    logic::axi4::stream::test{name}
-{
-    scv_random::set_global_seed(33);
-}
+namespace {
 
-long_test::~long_test() { }
+class long_test : public logic::axi4::stream::test {
+public:
+    UVM_COMPONENT_UTILS(long_test)
 
-void long_test::build_phase(uvm::uvm_phase& phase) {
-    logic::axi4::stream::test::build_phase(phase);
+    using logic::axi4::stream::test::test;
 
-    m_sequence->reset_repeats->reset_distribution();
-    m_sequence->reset_repeats->keep_only(1);
+    long_test(long_test&&) = delete;
 
-    m_sequence->reset_duration->reset_distribution();
-    m_sequence->reset_duration->keep_only(1, 4);
+    long_test(const long_test&) = delete;
 
-    m_sequence->reset_idle->reset_distribution();
-    m_sequence->reset_idle->keep_only(0, 3);
+    long_test& operator=(long_test&&) = delete;
 
-    m_sequence->rx_number_of_packets->reset_distribution();;
-    m_sequence->rx_number_of_packets->keep_only(1, 4);
+    long_test& operator=(const long_test&) = delete;
 
-    m_sequence->rx_repeats->reset_distribution();
-    m_sequence->rx_repeats->keep_only(8);
+    ~long_test() override = default;
+protected:
+    void run_phase(uvm::uvm_phase& phase) override {
+        phase.raise_objection(this);
 
-    m_sequence->rx_packet_length->reset_distribution();
-    m_sequence->rx_packet_length->keep_only(256, 1024);
+        m_sequence->length = {1024, 4096};
+        m_sequence->packets = {8, 16};
+        m_sequence->rx_sequence->req.idle = {0, 0};
+        m_sequence->tx_sequence->req.idle = {0, 0};
+        m_sequence->start(m_testbench->sequencer);
 
-    m_sequence->rx_idle_scheme->reset_distribution();
-    m_sequence->rx_idle_scheme->keep_only(0, 3);
+        m_sequence->length = {1024, 4096};
+        m_sequence->packets = {8, 16};
+        m_sequence->rx_sequence->req.idle = {0, 3};
+        m_sequence->tx_sequence->req.idle = {0, 0};
+        m_sequence->start(m_testbench->sequencer);
 
-    m_sequence->tx_idle_scheme->reset_distribution();
-    m_sequence->tx_idle_scheme->keep_only(0, 3);
-}
+        m_sequence->length = {1024, 4096};
+        m_sequence->packets = {8, 16};
+        m_sequence->rx_sequence->req.idle = {0, 0};
+        m_sequence->tx_sequence->req.idle = {0, 3};
+        m_sequence->start(m_testbench->sequencer);
+
+        m_sequence->length = {1024, 4096};
+        m_sequence->packets = {8, 16};
+        m_sequence->rx_sequence->req.idle = {0, 3};
+        m_sequence->tx_sequence->req.idle = {0, 3};
+        m_sequence->start(m_testbench->sequencer);
+
+        phase.drop_objection(this);
+    }
+};
+
+} /* namespace */

@@ -31,27 +31,31 @@ public:
 
     monitor();
 
-    monitor(const uvm::uvm_component_name& name);
+    explicit monitor(const uvm::uvm_component_name& name);
 
-    virtual ~monitor() override;
+    monitor(monitor&&) = delete;
 
-    uvm::uvm_analysis_port<packet> analysis_port;
-protected:
     monitor(const monitor&) = delete;
+
+    monitor& operator=(monitor&&) = delete;
 
     monitor& operator=(const monitor&) = delete;
 
-    virtual void build_phase(uvm::uvm_phase& phase) override;
+    ~monitor() override;
 
-    [[noreturn]] virtual void run_phase(uvm::uvm_phase& phase) override;
+    uvm::uvm_analysis_port<packet> analysis_port;
+protected:
+    void build_phase(uvm::uvm_phase& phase) override;
+
+    [[noreturn]] void run_phase(uvm::uvm_phase& phase) override;
 
     bus_if_base* m_vif;
     bool m_checks_enable;
     bool m_coverage_enable;
 };
 
-}
-}
-}
+} /* namespace stream */
+} /* namespace axi4 */
+} /* namespace logic */
 
 #endif /* LOGIC_AXI4_STREAM_MONITOR_HPP */

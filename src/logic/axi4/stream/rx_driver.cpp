@@ -23,20 +23,6 @@
 using logic::axi4::stream::rx_driver;
 using logic::axi4::stream::rx_sequence_item;
 
-static std::size_t get_idle_count(const rx_sequence_item& item,
-        std::size_t count = 0) noexcept {
-    std::size_t idle;
-
-    if (!item.idle_scheme.empty()) {
-        idle = item.idle_scheme[count % item.idle_scheme.size()];
-    }
-    else {
-        idle = 0;
-    }
-
-    return idle;
-}
-
 rx_driver::rx_driver(const uvm::uvm_component_name& name) :
     uvm::uvm_driver<rx_sequence_item>{name}
 { }
@@ -44,6 +30,9 @@ rx_driver::rx_driver(const uvm::uvm_component_name& name) :
 void rx_driver::build_phase(uvm::uvm_phase& phase) {
     uvm::uvm_driver<rx_sequence_item>::build_phase(phase);
     UVM_INFO(get_name(), "Build phase", uvm::UVM_FULL);
+
+    std::random_device rd;
+    m_random_generator.seed(rd());
 
     auto ok = uvm::uvm_config_db<bus_if_base*>::get(this, "*", "vif", m_vif);
 
@@ -66,28 +55,30 @@ void rx_driver::run_phase(uvm::uvm_phase& /* phase */) {
 }
 
 void rx_driver::transfer(const rx_sequence_item& item) {
+    std::uniform_int_distribution<std::size_t>
+        random_idle{item.idle.min(), item.idle.max()};
+
     std::size_t index = 0;
     std::size_t count = 0;
-    std::size_t idle_index = 0;
-    std::size_t idle_count = get_idle_count(item, idle_index++);
-    std::size_t size_count = item.tdata.size();
+    std::size_t idle_count = random_idle(m_random_generator);
+    std::size_t size_count = item.data.size();
     std::size_t timeout = item.timeout;
     const std::size_t bus_size = m_vif->size();
 
-    while (size_count) {
+    while (size_count != 0) {
         if (!m_vif->get_areset_n()) {
             size_count = 0;
         }
         else if (m_vif->get_tready()) {
             timeout = item.timeout;
 
-            if (idle_count) {
+            if (idle_count != 0) {
                 --idle_count;
                 m_vif->set_tvalid(false);
                 m_vif->aclk_posedge();
             }
             else {
-                idle_count = get_idle_count(item, idle_index++);
+                idle_count = random_idle(m_random_generator);
                 m_vif->set_tvalid(true);
 
                 if (size_count <= bus_size) {
@@ -97,21 +88,21 @@ void rx_driver::transfer(const rx_sequence_item& item) {
                     m_vif->set_tlast(false);
                 }
 
-                m_vif->set_tid(item.tid);
-                m_vif->set_tdest(item.tdest);
+                m_vif->set_tid(item.id);
+                m_vif->set_tdest(item.destination);
 
-                if (item.tuser.empty()) {
+                if (item.user.empty()) {
                     m_vif->set_tuser({});
                 }
                 else {
-                    m_vif->set_tuser(item.tuser[count % item.tuser.size()]);
+                    m_vif->set_tuser(item.user[count % item.user.size()]);
                 }
 
                 for (std::size_t i = 0; i < bus_size; ++i) {
-                    if (size_count) {
+                    if (size_count != 0) {
                         m_vif->set_tkeep(i, true);
                         m_vif->set_tstrb(i, true);
-                        m_vif->set_tdata(i, item.tdata[index++]);
+                        m_vif->set_tdata(i, item.data[index++]);
                         --size_count;
                     }
                     else {
@@ -125,12 +116,12 @@ void rx_driver::transfer(const rx_sequence_item& item) {
 
                 do {
                     m_vif->aclk_posedge();
-                } while (!size_count && !m_vif->get_tready());
+                } while ((size_count > 0) && !m_vif->get_tready());
             }
         }
         else {
-            if (item.timeout) {
-                if (timeout) {
+            if (item.timeout > 0) {
+                if (timeout > 0) {
                     --timeout;
                 }
                 else {
@@ -146,4 +137,4 @@ void rx_driver::transfer(const rx_sequence_item& item) {
     m_vif->set_tvalid(false);
 }
 
-rx_driver::~rx_driver() { }
+rx_driver::~rx_driver() = default;

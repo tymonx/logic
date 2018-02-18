@@ -35,7 +35,7 @@ public:
     sc_core::sc_signal<bool> tready;
     sc_core::sc_signal<bool> tlast;
 
-    bus_if_base(const sc_core::sc_module_name& name);
+    explicit bus_if_base(const sc_core::sc_module_name& name);
 
     void aclk_posedge();
 
@@ -53,7 +53,7 @@ public:
 
     bool get_tlast() const;
 
-    virtual void trace(sc_core::sc_trace_file* trace_file) const override;
+    void trace(sc_core::sc_trace_file* trace_file) const override;
 
     virtual std::size_t size() const noexcept = 0;
 
@@ -81,11 +81,19 @@ public:
 
     virtual bitstream get_tuser() const = 0;
 
-    virtual ~bus_if_base() override;
+    bus_if_base(bus_if_base&&) = delete;
+
+    bus_if_base(const bus_if_base&) = delete;
+
+    bus_if_base& operator=(bus_if_base&&) = delete;
+
+    bus_if_base& operator=(const bus_if_base&) = delete;
+
+    ~bus_if_base() override;
 };
 
-}
-}
-}
+} /* namespace stream */
+} /* namespace axi4 */
+} /* namespace logic */
 
 #endif /* LOGIC_AXI4_STREAM_BUS_IF_BASE_HPP */

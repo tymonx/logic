@@ -26,4 +26,4 @@ reset_sequencer::reset_sequencer(const uvm::uvm_component_name& name) :
     uvm::uvm_sequencer<reset_sequence_item>(name)
 { }
 
-reset_sequencer::~reset_sequencer() { }
+reset_sequencer::~reset_sequencer() = default;

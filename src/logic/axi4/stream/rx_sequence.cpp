@@ -22,16 +22,13 @@ rx_sequence::rx_sequence() :
 { }
 
 rx_sequence::rx_sequence(const std::string& name) :
-    uvm::uvm_sequence<rx_sequence_item>{name},
-    packet_length{},
-    number_of_packets{},
-    idle_scheme{}
+    uvm::uvm_sequence<rx_sequence_item>{name}
 { }
 
-rx_sequence::~rx_sequence() { }
+rx_sequence::~rx_sequence() = default;
 
 void rx_sequence::pre_body() {
-    if (starting_phase) {
+    if (starting_phase != nullptr) {
         starting_phase->raise_objection(this);
     }
 }
@@ -39,32 +36,14 @@ void rx_sequence::pre_body() {
 void rx_sequence::body() {
     UVM_INFO(get_name(), "Starting sequence", uvm::UVM_FULL);
 
-    number_of_packets->next();
-    const std::size_t packets_count = *number_of_packets;
-
-    for (std::size_t i = 0; i < packets_count; ++i) {
-        rx_sequence_item item;
-
-        packet_length->next();
-        item.tdata.resize(*packet_length);
-        item.idle_scheme.resize(16);
-
-        item.randomize();
-
-        for (auto& idle : item.idle_scheme) {
-            idle_scheme->next();
-            idle = *idle_scheme;
-        }
-
-        start_item(&item);
-        finish_item(&item);
-    }
+    start_item(&req);
+    finish_item(&req);
 
     UVM_INFO(get_name(), "Finishing sequence", uvm::UVM_FULL);
 }
 
 void rx_sequence::post_body() {
-    if (starting_phase) {
+    if (starting_phase != nullptr) {
         starting_phase->drop_objection(this);
     }
 }

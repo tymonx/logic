@@ -34,23 +34,27 @@ public:
 
     reset_agent();
 
-    reset_agent(const uvm::uvm_component_name& name);
+    explicit reset_agent(const uvm::uvm_component_name& name);
 
-    virtual ~reset_agent() override;
-protected:
+    reset_agent(reset_agent&&) = delete;
+
     reset_agent(const reset_agent&) = delete;
+
+    reset_agent& operator=(reset_agent&&) = delete;
 
     reset_agent& operator=(const reset_agent&) = delete;
 
-    virtual void build_phase(uvm::uvm_phase& phase) override;
+    ~reset_agent() override;
+protected:
+    void build_phase(uvm::uvm_phase& phase) override;
 
-    virtual void connect_phase(uvm::uvm_phase& phase) override;
+    void connect_phase(uvm::uvm_phase& phase) override;
 
     reset_driver* m_driver;
 };
 
-}
-}
-}
+} /* namespace stream */
+} /* namespace axi4 */
+} /* namespace logic */
 
 #endif /* LOGIC_AXI4_STREAM_RESET_AGENT_HPP */

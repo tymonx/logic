@@ -30,13 +30,21 @@ public:
 
     reset_sequencer();
 
-    reset_sequencer(const uvm::uvm_component_name& name);
+    explicit reset_sequencer(const uvm::uvm_component_name& name);
 
-    virtual ~reset_sequencer() override;
+    reset_sequencer(reset_sequencer&&) = delete;
+
+    reset_sequencer(const reset_sequencer&) = delete;
+
+    reset_sequencer& operator=(reset_sequencer&&) = delete;
+
+    reset_sequencer& operator=(const reset_sequencer&) = delete;
+
+    ~reset_sequencer() override;
 };
 
-}
-}
-}
+} /* namespace stream */
+} /* namespace axi4 */
+} /* namespace logic */
 
 #endif /* LOGIC_AXI4_STREAM_RESET_SEQUENCER_HPP */

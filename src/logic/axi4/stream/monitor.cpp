@@ -57,7 +57,7 @@ monitor::monitor(const uvm::uvm_component_name& name) :
     m_coverage_enable{false}
 { }
 
-monitor::~monitor() { }
+monitor::~monitor() = default;
 
 void monitor::build_phase(uvm::uvm_phase& phase) {
     uvm::uvm_monitor::build_phase(phase);

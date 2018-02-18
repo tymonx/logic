@@ -15,8 +15,6 @@
 
 #include "logic/axi4/stream/tx_sequence_item.hpp"
 
-#include <scv.h>
-
 using logic::axi4::stream::tx_sequence_item;
 
 static constexpr std::size_t TIMEOUT{10000};
@@ -27,27 +25,16 @@ tx_sequence_item::tx_sequence_item() :
 
 tx_sequence_item::tx_sequence_item(const std::string& name) :
     uvm::uvm_sequence_item{name},
-    idle_scheme{},
-    timeout{TIMEOUT}
+    timeout{TIMEOUT},
+    idle{}
 { }
-
-void tx_sequence_item::randomize() {
-    scv_smart_ptr<std::size_t> random_idle;
-
-    random_idle->keep_only(0, 3);
-
-    for (auto& idle : idle_scheme) {
-        random_idle->next();
-        idle = *random_idle;
-    }
-}
 
 std::string tx_sequence_item::convert2string() const {
     std::ostringstream ss;
     return ss.str();
 }
 
-tx_sequence_item::~tx_sequence_item() { }
+tx_sequence_item::~tx_sequence_item() = default;
 
 void tx_sequence_item::do_print(const uvm::uvm_printer&) const { }
 
@@ -57,7 +44,7 @@ void tx_sequence_item::do_unpack(uvm::uvm_packer&) { }
 
 void tx_sequence_item::do_copy(const uvm::uvm_object& rhs) {
     auto other = dynamic_cast<const tx_sequence_item*>(&rhs);
-    if (other) {
+    if (other != nullptr) {
         *this = *other;
     }
     else {
@@ -70,7 +57,7 @@ bool tx_sequence_item::do_compare(const uvm::uvm_object& rhs,
     auto other = dynamic_cast<const tx_sequence_item*>(&rhs);
     auto status = false;
 
-    if (other) {
+    if (other != nullptr) {
         status = true;
     }
     else {

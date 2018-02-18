@@ -19,7 +19,6 @@
 #include "logic/axi4/stream/tx_sequence_item.hpp"
 
 #include <uvm>
-#include <scv.h>
 
 #include <cstddef>
 
@@ -31,24 +30,29 @@ class tx_sequence : public uvm::uvm_sequence<tx_sequence_item> {
 public:
     UVM_OBJECT_UTILS(logic::axi4::stream::tx_sequence)
 
-    scv_smart_ptr<std::size_t> idle_scheme;
-    scv_smart_ptr<std::size_t> number_of_packets;
-
     tx_sequence();
 
-    tx_sequence(const std::string& name);
+    explicit tx_sequence(const std::string& name);
 
-    virtual ~tx_sequence() override;
+    tx_sequence(tx_sequence&&) = delete;
+
+    tx_sequence(const tx_sequence&) = delete;
+
+    tx_sequence& operator=(tx_sequence&&) = delete;
+
+    tx_sequence& operator=(const tx_sequence&) = delete;
+
+    ~tx_sequence() override;
 protected:
-    virtual void pre_body() override;
+    void pre_body() override;
 
-    virtual void body() override;
+    void body() override;
 
-    virtual void post_body() override;
+    void post_body() override;
 };
 
-}
-}
-}
+} /* namespace stream */
+} /* namespace axi4 */
+} /* namespace logic */
 
 #endif /* LOGIC_AXI4_STREAM_TX_SEQUENCE_HPP */

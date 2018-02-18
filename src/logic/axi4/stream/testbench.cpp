@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#include "logic/axi4/stream/testbench.hpp"
-#include "logic/axi4/stream/rx_agent.hpp"
-#include "logic/axi4/stream/tx_agent.hpp"
-#include "logic/axi4/stream/sequencer.hpp"
-#include "logic/axi4/stream/scoreboard.hpp"
 #include "logic/axi4/stream/reset_agent.hpp"
+#include "logic/axi4/stream/rx_agent.hpp"
+#include "logic/axi4/stream/scoreboard.hpp"
+#include "logic/axi4/stream/sequencer.hpp"
+#include "logic/axi4/stream/testbench.hpp"
+#include "logic/axi4/stream/tx_agent.hpp"
 
 #include <uvm>
 
@@ -39,7 +39,7 @@ testbench::testbench(const uvm::uvm_component_name& name) :
     UVM_INFO(get_name(), "Constructor", uvm::UVM_FULL);
 }
 
-testbench::~testbench() { }
+testbench::~testbench() = default;
 
 void testbench::build_phase(uvm::uvm_phase& phase) {
     uvm::uvm_env::build_phase(phase);
@@ -47,31 +47,31 @@ void testbench::build_phase(uvm::uvm_phase& phase) {
     UVM_INFO(get_name(), "Build phase", uvm::UVM_FULL);
 
     m_rx_agent = rx_agent::type_id::create("rx_agent", this);
-    if (!m_rx_agent) {
+    if (m_rx_agent == nullptr) {
         UVM_FATAL(get_name(), "Cannot create Rx agent!"
                 " Simulation aborted!");
     }
 
     m_tx_agent = tx_agent::type_id::create("tx_agent", this);
-    if (!m_tx_agent) {
+    if (m_tx_agent == nullptr) {
         UVM_FATAL(get_name(), "Cannot create Tx agent!"
                 " Simulation aborted!");
     }
 
     m_reset_agent = reset_agent::type_id::create("reset_agent", this);
-    if (!m_reset_agent) {
+    if (m_reset_agent == nullptr) {
         UVM_FATAL(get_name(), "Cannot create reset agent!"
                 " Simulation aborted!");
     }
 
     m_scoreboard = scoreboard::type_id::create("scoreboard", this);
-    if (!m_scoreboard) {
+    if (m_scoreboard == nullptr) {
         UVM_FATAL(get_name(), "Cannot create scoreboard!"
                 " Simulation aborted!");
     }
 
     sequencer = sequencer::type_id::create("sequencer", this);
-    if (!sequencer) {
+    if (sequencer == nullptr) {
         UVM_FATAL(get_name(), "Cannot create sequencer!"
                 " Simulation aborted!");
     }

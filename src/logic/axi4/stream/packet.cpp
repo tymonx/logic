@@ -25,12 +25,6 @@ packet::packet() :
 
 packet::packet(const std::string& name) :
     uvm::uvm_object{name},
-    tid{},
-    tdest{},
-    tuser{},
-    tdata{},
-    tdata_timestamp{},
-    transfer_timestamp{},
     bus_size{}
 { }
 
@@ -57,7 +51,7 @@ std::string packet::convert2string() const {
     return ss.str();
 }
 
-packet::~packet() { }
+packet::~packet() = default;
 
 void packet::do_print(const uvm::uvm_printer& printer) const {
     printer.print_array_header("data", int(tdata.size()),
@@ -80,7 +74,7 @@ void packet::do_unpack(uvm::uvm_packer& p) {
 
 void packet::do_copy(const uvm::uvm_object& rhs) {
     auto other = dynamic_cast<const packet*>(&rhs);
-    if (other) {
+    if (other != nullptr) {
         *this = *other;
     }
     else {
@@ -93,7 +87,7 @@ bool packet::do_compare(const uvm::uvm_object& rhs,
     auto other = dynamic_cast<const packet*>(&rhs);
     auto status = false;
 
-    if (other) {
+    if (other != nullptr) {
         status = (tid == other->tid) && (tdest == other->tdest) &&
             (tdata == other->tdata);
     }

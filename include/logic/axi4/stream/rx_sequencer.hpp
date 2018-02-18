@@ -30,13 +30,21 @@ public:
 
     rx_sequencer();
 
-    rx_sequencer(const uvm::uvm_component_name& name);
+    explicit rx_sequencer(const uvm::uvm_component_name& name);
 
-    virtual ~rx_sequencer() override;
+    rx_sequencer(rx_sequencer&&) = delete;
+
+    rx_sequencer(const rx_sequencer&) = delete;
+
+    rx_sequencer& operator=(rx_sequencer&&) = delete;
+
+    rx_sequencer& operator=(const rx_sequencer&) = delete;
+
+    ~rx_sequencer() override;
 };
 
-}
-}
-}
+} /* namespace stream */
+} /* namespace axi4 */
+} /* namespace logic */
 
 #endif /* LOGIC_AXI4_STREAM_RX_SEQUENCER_HPP */

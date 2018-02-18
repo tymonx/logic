@@ -32,7 +32,7 @@ reset_agent::reset_agent(const uvm::uvm_component_name& name) :
     UVM_INFO(get_name(), "Constructor", uvm::UVM_FULL);
 }
 
-reset_agent::~reset_agent() { }
+reset_agent::~reset_agent() = default;
 
 void reset_agent::build_phase(uvm::uvm_phase& phase) {
     uvm::uvm_agent::build_phase(phase);
@@ -42,13 +42,13 @@ void reset_agent::build_phase(uvm::uvm_phase& phase) {
         UVM_INFO(get_name(), "is set to UVM_ACTIVE", uvm::UVM_FULL);
 
         sequencer = reset_sequencer::type_id::create("sequencer", this);
-        if (!sequencer) {
+        if (sequencer == nullptr) {
             UVM_FATAL(get_name(), "Sequencer not defined!"
                     " Simulation aborted!");
         }
 
         m_driver = reset_driver::type_id::create("driver", this);
-        if (!m_driver) {
+        if (m_driver == nullptr) {
             UVM_FATAL(get_name(), "Driver not defined!"
                     " Simulation aborted!");
         }

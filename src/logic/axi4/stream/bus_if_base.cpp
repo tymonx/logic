@@ -27,7 +27,7 @@ bus_if_base::bus_if_base(const sc_core::sc_module_name& name) :
 { }
 
 void bus_if_base::trace(sc_core::sc_trace_file* trace_file) const {
-    if (trace_file) {
+    if (trace_file != nullptr) {
         sc_core::sc_trace(trace_file, aclk, aclk.name());
         sc_core::sc_trace(trace_file, areset_n, areset_n.name());
         sc_core::sc_trace(trace_file, tvalid, tvalid.name());
@@ -68,4 +68,4 @@ bool bus_if_base::get_tlast() const {
     return tlast.read();
 }
 
-bus_if_base::~bus_if_base() { }
+bus_if_base::~bus_if_base() = default;

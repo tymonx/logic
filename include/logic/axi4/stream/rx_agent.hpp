@@ -33,27 +33,31 @@ public:
 
     rx_agent();
 
-    rx_agent(const uvm::uvm_component_name& name);
+    explicit rx_agent(const uvm::uvm_component_name& name);
 
-    virtual ~rx_agent() override;
+    rx_agent(rx_agent&&) = delete;
+
+    rx_agent(const rx_agent&) = delete;
+
+    rx_agent& operator=(rx_agent&&) = delete;
+
+    rx_agent& operator=(const rx_agent&) = delete;
+
+    ~rx_agent() override;
 
     uvm::uvm_analysis_port<packet> analysis_port;
     rx_sequencer* sequencer;
 protected:
-    rx_agent(const rx_agent&) = delete;
+    void build_phase(uvm::uvm_phase& phase) override;
 
-    rx_agent& operator=(const rx_agent&) = delete;
-
-    virtual void build_phase(uvm::uvm_phase& phase) override;
-
-    virtual void connect_phase(uvm::uvm_phase& phase) override;
+    void connect_phase(uvm::uvm_phase& phase) override;
 
     monitor* m_monitor;
     rx_driver* m_driver;
 };
 
-}
-}
-}
+} /* namespace stream */
+} /* namespace axi4 */
+} /* namespace logic */
 
 #endif /* LOGIC_AXI4_STREAM_RX_AGENT_HPP */

@@ -33,27 +33,31 @@ public:
 
     tx_agent();
 
-    tx_agent(const uvm::uvm_component_name& name);
+    explicit tx_agent(const uvm::uvm_component_name& name);
 
-    virtual ~tx_agent() override;
+    tx_agent(tx_agent&&) = delete;
+
+    tx_agent(const tx_agent&) = delete;
+
+    tx_agent& operator=(tx_agent&&) = delete;
+
+    tx_agent& operator=(const tx_agent&) = delete;
+
+    ~tx_agent() override;
 
     uvm::uvm_analysis_port<packet> analysis_port;
     tx_sequencer* sequencer;
 protected:
-    tx_agent(const tx_agent&) = delete;
+    void build_phase(uvm::uvm_phase& phase) override;
 
-    tx_agent& operator=(const tx_agent&) = delete;
-
-    virtual void build_phase(uvm::uvm_phase& phase) override;
-
-    virtual void connect_phase(uvm::uvm_phase& phase) override;
+    void connect_phase(uvm::uvm_phase& phase) override;
 
     monitor* m_monitor;
     tx_driver* m_driver;
 };
 
-}
-}
-}
+} /* namespace stream */
+} /* namespace axi4 */
+} /* namespace logic */
 
 #endif /* LOGIC_AXI4_STREAM_TX_AGENT_HPP */

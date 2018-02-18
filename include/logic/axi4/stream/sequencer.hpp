@@ -36,17 +36,21 @@ public:
 
     sequencer();
 
-    sequencer(const uvm::uvm_component_name& name);
+    explicit sequencer(const uvm::uvm_component_name& name);
 
-    virtual ~sequencer() override;
-private:
+    sequencer(sequencer&&) = delete;
+
     sequencer(const sequencer&) = delete;
 
+    sequencer& operator=(sequencer&&) = delete;
+
     sequencer& operator=(const sequencer&) = delete;
+
+    ~sequencer() override;
 };
 
-}
-}
-}
+} /* namespace stream */
+} /* namespace axi4 */
+} /* namespace logic */
 
 #endif /* LOGIC_AXI4_STREAM_SEQUENCER_HPP */

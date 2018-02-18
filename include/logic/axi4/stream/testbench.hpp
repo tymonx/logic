@@ -36,21 +36,25 @@ public:
 
     testbench();
 
-    testbench(const uvm::uvm_component_name& name);
+    explicit testbench(const uvm::uvm_component_name& name);
 
     bool passed() const noexcept;
 
     bool failed() const noexcept;
 
-    virtual ~testbench() override;
-protected:
+    testbench(testbench&&) = delete;
+
     testbench(const testbench&) = delete;
+
+    testbench& operator=(testbench&&) = delete;
 
     testbench& operator=(const testbench&) = delete;
 
-    virtual void build_phase(uvm::uvm_phase& phase) override;
+    ~testbench() override;
+protected:
+    void build_phase(uvm::uvm_phase& phase) override;
 
-    virtual void connect_phase(uvm::uvm_phase& phase) override;
+    void connect_phase(uvm::uvm_phase& phase) override;
 
     rx_agent* m_rx_agent;
     tx_agent* m_tx_agent;
@@ -58,8 +62,8 @@ protected:
     reset_agent* m_reset_agent;
 };
 
-}
-}
-}
+} /* namespace stream */
+} /* namespace axi4 */
+} /* namespace logic */
 
 #endif /* LOGIC_AXI4_STREAM_TESTBENCH_HPP */

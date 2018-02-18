@@ -20,7 +20,6 @@
 #include "rx_sequence_item.hpp"
 
 #include <uvm>
-#include <scv.h>
 
 #include <cstddef>
 
@@ -32,33 +31,29 @@ class rx_sequence : public uvm::uvm_sequence<rx_sequence_item> {
 public:
     UVM_OBJECT_UTILS(logic::axi4::stream::rx_sequence)
 
-    scv_smart_ptr<std::size_t> packet_length;
-    scv_smart_ptr<std::size_t> number_of_packets;
-    scv_smart_ptr<std::size_t> idle_scheme;
-
     rx_sequence();
 
-    rx_sequence(const std::string& name);
+    explicit rx_sequence(const std::string& name);
 
-    rx_sequence(rx_sequence&&) = default;
+    rx_sequence(rx_sequence&&) = delete;
 
-    rx_sequence(const rx_sequence& other) = default;
+    rx_sequence(const rx_sequence& other) = delete;
 
-    rx_sequence& operator=(rx_sequence&&) = default;
+    rx_sequence& operator=(rx_sequence&&) = delete;
 
-    rx_sequence& operator=(const rx_sequence& other) = default;
+    rx_sequence& operator=(const rx_sequence& other) = delete;
 
-    virtual ~rx_sequence() override;
+    ~rx_sequence() override;
 protected:
-    virtual void pre_body() override;
+    void pre_body() override;
 
-    virtual void body() override;
+    void body() override;
 
-    virtual void post_body() override;
+    void post_body() override;
 };
 
-}
-}
-}
+} /* namespace stream */
+} /* namespace axi4 */
+} /* namespace logic */
 
 #endif /* LOGIC_AXI4_STREAM_RX_SEQUENCE_HPP */

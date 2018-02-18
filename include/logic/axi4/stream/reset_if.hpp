@@ -29,19 +29,27 @@ public:
 
     reset_if();
 
-    reset_if(const sc_core::sc_module_name& name);
+    explicit reset_if(const sc_core::sc_module_name& name);
 
-    virtual void trace(sc_core::sc_trace_file* trace_file) const override;
+    void trace(sc_core::sc_trace_file* trace_file) const override;
 
     void set_areset_n(bool value);
 
     void aclk_posedge();
 
-    virtual ~reset_if() override;
+    reset_if(reset_if&&) = delete;
+
+    reset_if(const reset_if& other) = delete;
+
+    reset_if& operator=(reset_if&&) = delete;
+
+    reset_if& operator=(const reset_if& other) = delete;
+
+    ~reset_if() override;
 };
 
-}
-}
-}
+} /* namespace stream */
+} /* namespace axi4 */
+} /* namespace logic */
 
 #endif /* LOGIC_AXI4_STREAM_RESET_IF_HPP */

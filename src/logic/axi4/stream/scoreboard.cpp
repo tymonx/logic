@@ -89,7 +89,7 @@ bool scoreboard::failed() const noexcept {
     return m_error;
 }
 
-scoreboard::~scoreboard() { }
+scoreboard::~scoreboard() = default;
 
 void scoreboard::connect_phase(uvm::uvm_phase& phase) {
     uvm::uvm_scoreboard::connect_phase(phase);

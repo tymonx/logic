@@ -17,7 +17,6 @@
 #define LOGIC_AXI4_STREAM_TEST_HPP
 
 #include <uvm>
-#include <scv.h>
 
 namespace logic{
 namespace axi4 {
@@ -32,29 +31,33 @@ public:
 
     test();
 
-    test(const uvm::uvm_component_name& name);
+    explicit test(const uvm::uvm_component_name& name);
 
-    virtual ~test() override;
-protected:
+    test(test&&) = delete;
+
     test(const test&) = delete;
+
+    test& operator=(test&&) = delete;
 
     test& operator=(const test&) = delete;
 
-    virtual void build_phase(uvm::uvm_phase& phase) override;
+    ~test() override;
+protected:
+    void build_phase(uvm::uvm_phase& phase) override;
 
-    virtual void run_phase(uvm::uvm_phase& phase) override;
+    void run_phase(uvm::uvm_phase& phase) override;
 
-    virtual void extract_phase(uvm::uvm_phase& phase) override;
+    void extract_phase(uvm::uvm_phase& phase) override;
 
-    virtual void report_phase(uvm::uvm_phase& phase) override;
+    void report_phase(uvm::uvm_phase& phase) override;
 
     sequence* m_sequence;
     testbench* m_testbench;
     bool m_test_passed;
 };
 
-}
-}
-}
+} /* namespace stream */
+} /* namespace axi4 */
+} /* namespace logic */
 
 #endif /* LOGIC_AXI4_STREAM_TEST_HPP */

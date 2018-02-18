@@ -28,4 +28,4 @@ sequencer::sequencer(const uvm::uvm_component_name& name) :
     reset_sequencer{nullptr}
 { }
 
-sequencer::~sequencer() { }
+sequencer::~sequencer() = default;

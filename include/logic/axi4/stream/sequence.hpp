@@ -16,10 +16,12 @@
 #ifndef LOGIC_AXI4_STREAM_SEQUENCE_HPP
 #define LOGIC_AXI4_STREAM_SEQUENCE_HPP
 
+#include "logic/range.hpp"
+
 #include <uvm>
-#include <scv.h>
 
 #include <cstddef>
+#include <utility>
 
 namespace logic {
 namespace axi4 {
@@ -36,51 +38,40 @@ class sequence : public uvm::uvm_sequence<> {
 public:
     UVM_OBJECT_UTILS(logic::axi4::stream::sequence)
 
-    scv_smart_ptr<std::size_t> reset_idle;
-    scv_smart_ptr<std::size_t> reset_duration;
-    scv_smart_ptr<std::size_t> reset_repeats;
+    range length;
+    range packets;
 
-    scv_smart_ptr<std::size_t> rx_idle_scheme;
-    scv_smart_ptr<std::size_t> rx_number_of_packets;
-    scv_smart_ptr<std::size_t> rx_packet_length;
-    scv_smart_ptr<std::size_t> rx_repeats;
-
-    scv_smart_ptr<std::size_t> tx_idle_scheme;
-    scv_smart_ptr<std::size_t> tx_number_of_packets;
+    rx_sequence* rx_sequence;
+    tx_sequence* tx_sequence;
+    reset_sequence* reset_sequence;
 
     sequence();
 
-    sequence(const std::string& name);
+    explicit sequence(const std::string& name);
 
-    virtual ~sequence() override;
-protected:
+    sequence(sequence&&) = delete;
+
     sequence(const sequence&) = delete;
+
+    sequence& operator=(sequence&&) = delete;
 
     sequence& operator=(const sequence&) = delete;
 
-    virtual void pre_body() override;
+    ~sequence() override;
+protected:
+    void pre_body() override;
 
-    virtual void body() override;
+    void body() override;
 
-    virtual void post_body() override;
-
-    void tx_sequence_handler(std::size_t packets_count);
-
-    void rx_sequence_handler(std::size_t packets_count);
-
-    void reset_sequence_handler();
-
-    rx_sequence* m_rx_sequence;
-    tx_sequence* m_tx_sequence;
-    reset_sequence* m_reset_sequence;
+    void post_body() override;
 
     rx_sequencer* m_rx_sequencer;
     tx_sequencer* m_tx_sequencer;
     reset_sequencer* m_reset_sequencer;
 };
 
-}
-}
-}
+} /* namespace stream */
+} /* namespace axi4 */
+} /* namespace logic */
 
 #endif /* LOGIC_AXI4_STREAM_SEQUENCE_HPP */

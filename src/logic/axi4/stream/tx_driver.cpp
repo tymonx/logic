@@ -21,20 +21,6 @@
 using logic::axi4::stream::tx_driver;
 using logic::axi4::stream::tx_sequence_item;
 
-static std::size_t get_idle_count(const tx_sequence_item& item,
-        std::size_t count = 0) noexcept {
-    std::size_t idle;
-
-    if (!item.idle_scheme.empty()) {
-        idle = item.idle_scheme[count % item.idle_scheme.size()];
-    }
-    else {
-        idle = 0;
-    }
-
-    return idle;
-}
-
 tx_driver::tx_driver() :
     tx_driver{"tx_driver"}
 { }
@@ -44,11 +30,14 @@ tx_driver::tx_driver(const uvm::uvm_component_name& name) :
     m_vif{nullptr}
 { }
 
-tx_driver::~tx_driver() { }
+tx_driver::~tx_driver() = default;
 
 void tx_driver::build_phase(uvm::uvm_phase& phase) {
     uvm::uvm_driver<tx_sequence_item>::build_phase(phase);
     UVM_INFO(get_name(), "Build phase", uvm::UVM_FULL);
+
+    std::random_device rd;
+    m_random_generator.seed(rd());
 
     auto ok = uvm::uvm_config_db<bus_if_base*>::get(this, "*", "vif", m_vif);
 
@@ -72,12 +61,14 @@ void tx_driver::run_phase(uvm::uvm_phase& /* phase */) {
 void tx_driver::transfer(const tx_sequence_item& item) {
     auto tready_tmp = m_vif->get_tready();
 
+    std::uniform_int_distribution<std::size_t>
+        random_idle{item.idle.min(), item.idle.max()};
+
     std::size_t packets_count = 1;
-    std::size_t idle_index = 0;
-    std::size_t idle_count = get_idle_count(item, idle_index++);
+    std::size_t idle_count = random_idle(m_random_generator);
     std::size_t timeout = item.timeout;
 
-    while (packets_count) {
+    while (packets_count != 0) {
         if (!m_vif->get_areset_n()) {
             packets_count = 0;
         }
@@ -90,13 +81,13 @@ void tx_driver::transfer(const tx_sequence_item& item) {
                 }
             }
 
-            if (packets_count) {
-                if (idle_count) {
+            if (packets_count != 0) {
+                if (idle_count != 0) {
                     --idle_count;
                     m_vif->set_tready(false);
                 }
                 else {
-                    idle_count = get_idle_count(item, idle_index++);
+                    idle_count = random_idle(m_random_generator);
                     m_vif->set_tready(true);
                 }
             }
@@ -104,8 +95,8 @@ void tx_driver::transfer(const tx_sequence_item& item) {
                 m_vif->set_tready(tready_tmp);
             }
 
-            if (item.timeout) {
-                if (timeout) {
+            if (item.timeout != 0) {
+                if (timeout != 0) {
                     --timeout;
                 }
                 else {

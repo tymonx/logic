@@ -26,4 +26,4 @@ rx_sequencer::rx_sequencer(const uvm::uvm_component_name& name) :
     uvm::uvm_sequencer<rx_sequence_item>(name)
 { }
 
-rx_sequencer::~rx_sequencer() { }
+rx_sequencer::~rx_sequencer() = default;

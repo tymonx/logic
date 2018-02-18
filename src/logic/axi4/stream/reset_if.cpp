@@ -28,7 +28,7 @@ reset_if::reset_if(const sc_core::sc_module_name& name) :
 { }
 
 void reset_if::trace(sc_core::sc_trace_file* trace_file) const {
-    if (trace_file) {
+    if (trace_file != nullptr) {
         sc_core::sc_trace(trace_file, aclk, aclk.name());
         sc_core::sc_trace(trace_file, areset_n, areset_n.name());
     }
@@ -42,4 +42,4 @@ void reset_if::aclk_posedge() {
     sc_core::wait(aclk.posedge_event());
 }
 
-reset_if::~reset_if() { }
+reset_if::~reset_if() = default;

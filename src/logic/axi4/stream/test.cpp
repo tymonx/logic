@@ -15,11 +15,11 @@
 
 #include "logic/axi4/stream/test.hpp"
 
+#include "logic/axi4/stream/rx_sequencer.hpp"
+#include "logic/axi4/stream/scoreboard.hpp"
 #include "logic/axi4/stream/sequence.hpp"
 #include "logic/axi4/stream/sequencer.hpp"
 #include "logic/axi4/stream/testbench.hpp"
-#include "logic/axi4/stream/scoreboard.hpp"
-#include "logic/axi4/stream/rx_sequencer.hpp"
 
 #if defined(VERILATOR_ENABLED)
 #include <verilated.h>
@@ -36,35 +36,24 @@ test::test(const uvm::uvm_component_name& name) :
     m_sequence{nullptr},
     m_testbench{nullptr},
     m_test_passed{false}
-{
-    scv_random::set_global_seed(scv_random::pick_random_seed());
-}
+{ }
 
-test::~test() { }
+test::~test() = default;
 
 void test::build_phase(uvm::uvm_phase& phase) {
     uvm::uvm_test::build_phase(phase);
 
     m_testbench = testbench::type_id::create("testbench", this);
-    if (!m_testbench) {
+    if (nullptr == m_testbench) {
         UVM_FATAL(get_name(), "Cannot create testbench!"
                 " Simulation aborted!");
     }
 
     m_sequence = sequence::type_id::create("sequence", this);
-    if (!m_sequence) {
+    if (nullptr == m_sequence) {
         UVM_FATAL(get_name(), "Cannot create sequence!"
                 " Simulation aborted!");
     }
-
-    m_sequence->reset_repeats->keep_only(1);
-    m_sequence->reset_duration->keep_only(1);
-    m_sequence->reset_idle->keep_only(0);
-    m_sequence->rx_number_of_packets->keep_only(1);
-    m_sequence->rx_repeats->keep_only(1);
-    m_sequence->rx_packet_length->keep_only(1, 256);
-    m_sequence->rx_idle_scheme->keep_only(0);
-    m_sequence->tx_idle_scheme->keep_only(0);
 }
 
 void test::run_phase(uvm::uvm_phase& phase) {
@@ -87,7 +76,7 @@ void test::run_phase(uvm::uvm_phase& phase) {
 void test::extract_phase(uvm::uvm_phase& phase) {
     uvm::uvm_test::extract_phase(phase);
 
-    if (m_testbench) {
+    if (m_testbench != nullptr) {
         m_test_passed = m_testbench->passed();
     }
 
@@ -96,10 +85,6 @@ void test::extract_phase(uvm::uvm_phase& phase) {
 
 void test::report_phase(uvm::uvm_phase& phase) {
     uvm::uvm_test::report_phase(phase);
-
-    UVM_INFO(get_name(),
-            "Seed " + std::to_string(scv_random::get_global_seed()),
-            uvm::UVM_NONE);
 
     if (m_test_passed) {
         UVM_INFO(get_name(), "TEST PASSED", uvm::UVM_NONE);

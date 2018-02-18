@@ -31,25 +31,29 @@ public:
 
     reset_driver();
 
-    reset_driver(const uvm::uvm_component_name& name);
+    explicit reset_driver(const uvm::uvm_component_name& name);
 
-    virtual ~reset_driver() override;
-protected:
+    reset_driver(reset_driver&&) = delete;
+
     reset_driver(const reset_driver&) = delete;
+
+    reset_driver& operator=(reset_driver&&) = delete;
 
     reset_driver& operator=(const reset_driver&) = delete;
 
-    virtual void build_phase(uvm::uvm_phase& phase) override;
+    ~reset_driver() override;
+protected:
+    void build_phase(uvm::uvm_phase& phase) override;
 
-    [[noreturn]] virtual void run_phase(uvm::uvm_phase& phase) override;
+    [[noreturn]] void run_phase(uvm::uvm_phase& phase) override;
 
     void transfer(const reset_sequence_item& item);
 
     reset_if* m_vif;
 };
 
-}
-}
-}
+} /* namespace stream */
+} /* namespace axi4 */
+} /* namespace logic */
 
 #endif /* LOGIC_AXI4_STREAM_RESET_DRIVER_HPP */

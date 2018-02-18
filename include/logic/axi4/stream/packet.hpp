@@ -20,8 +20,8 @@
 
 #include <uvm>
 
-#include <vector>
 #include <cstdint>
+#include <vector>
 
 namespace logic {
 namespace axi4 {
@@ -41,7 +41,7 @@ public:
 
     packet();
 
-    packet(const std::string& name);
+    explicit packet(const std::string& name);
 
     packet(packet&&) = default;
 
@@ -53,24 +53,24 @@ public:
 
     packet& clear();
 
-    virtual std::string convert2string() const override;
+    std::string convert2string() const override;
 
-    virtual ~packet() override;
+    ~packet() override;
 protected:
-    virtual void do_print(const uvm::uvm_printer& printer) const override;
+    void do_print(const uvm::uvm_printer& printer) const override;
 
-    virtual void do_pack(uvm::uvm_packer& p) const override;
+    void do_pack(uvm::uvm_packer& p) const override;
 
-    virtual void do_unpack(uvm::uvm_packer& p) override;
+    void do_unpack(uvm::uvm_packer& p) override;
 
-    virtual void do_copy(const uvm::uvm_object& rhs) override;
+    void do_copy(const uvm::uvm_object& rhs) override;
 
-    virtual bool do_compare(const uvm::uvm_object& rhs,
+    bool do_compare(const uvm::uvm_object& rhs,
             const uvm::uvm_comparer* comparer = nullptr) const override;
 };
 
-}
-}
-}
+} /* namespace stream */
+} /* namespace axi4 */
+} /* namespace logic */
 
 #endif /* LOGIC_AXI4_STREAM_PACKET_HPP */

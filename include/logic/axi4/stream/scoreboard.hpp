@@ -33,28 +33,36 @@ public:
 
     scoreboard();
 
-    scoreboard(const uvm::uvm_component_name& name);
+    explicit scoreboard(const uvm::uvm_component_name& name);
 
     bool passed() const noexcept;
 
     bool failed() const noexcept;
 
-    virtual ~scoreboard() override;
+    scoreboard(scoreboard&&) = delete;
+
+    scoreboard(const scoreboard&) = delete;
+
+    scoreboard& operator=(scoreboard&&) = delete;
+
+    scoreboard& operator=(const scoreboard&) = delete;
+
+    ~scoreboard() override;
 
     uvm::uvm_analysis_export<packet> rx_analysis_export;
     uvm::uvm_analysis_export<packet> tx_analysis_export;
 protected:
-    virtual void connect_phase(uvm::uvm_phase& phase) override;
+    void connect_phase(uvm::uvm_phase& phase) override;
 
-    [[noreturn]] virtual void run_phase(uvm::uvm_phase& phase) override;
+    [[noreturn]] void run_phase(uvm::uvm_phase& phase) override;
 
     bool m_error;
     tlm::tlm_analysis_fifo<packet> m_rx_fifo;
     tlm::tlm_analysis_fifo<packet> m_tx_fifo;
 };
 
-}
-}
-}
+} /* namespace stream */
+} /* namespace axi4 */
+} /* namespace logic */
 
-#endif /* LOGIC_AXI4_STREAM_SCOREBAORD_HPP */
+#endif /* LOGIC_AXI4_STREAM_SCOREBOARD_HPP */

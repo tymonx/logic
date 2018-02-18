@@ -19,6 +19,7 @@
 #include <uvm>
 
 #include <cstddef>
+#include <random>
 
 namespace logic {
 namespace axi4 {
@@ -33,25 +34,31 @@ public:
 
     rx_driver();
 
-    rx_driver(const uvm::uvm_component_name& name);
+    explicit rx_driver(const uvm::uvm_component_name& name);
 
-    virtual ~rx_driver() override;
-protected:
+    rx_driver(rx_driver&&) = delete;
+
     rx_driver(const rx_driver&) = delete;
+
+    rx_driver& operator=(rx_driver&&) = delete;
 
     rx_driver& operator=(const rx_driver&) = delete;
 
-    virtual void build_phase(uvm::uvm_phase& phase) override;
+    ~rx_driver() override;
+protected:
+    void build_phase(uvm::uvm_phase& phase) override;
 
-    [[noreturn]] virtual void run_phase(uvm::uvm_phase& phase) override;
+    [[noreturn]] void run_phase(uvm::uvm_phase& phase) override;
 
     void transfer(const rx_sequence_item& item);
 
     bus_if_base* m_vif{nullptr};
+
+    std::mt19937 m_random_generator;
 };
 
-}
-}
-}
+} /* namespace stream */
+} /* namespace axi4 */
+} /* namespace logic */
 
 #endif /* LOGIC_AXI4_STREAM_RX_DRIVER_HPP */

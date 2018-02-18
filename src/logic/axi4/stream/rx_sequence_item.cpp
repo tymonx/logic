@@ -15,8 +15,6 @@
 
 #include "logic/axi4/stream/rx_sequence_item.hpp"
 
-#include <scv.h>
-
 #include <iomanip>
 
 static constexpr std::size_t TIMEOUT{10000};
@@ -29,59 +27,20 @@ rx_sequence_item::rx_sequence_item() :
 
 rx_sequence_item::rx_sequence_item(const std::string& name) :
     uvm::uvm_sequence_item{name},
-    tid{},
-    tdest{},
-    tuser{},
-    tdata{},
-    idle_scheme{},
+    idle{},
     timeout{TIMEOUT}
 {
-    tid.resize(1);
-    tdest.resize(1);
-    tuser.resize(1);
-    tuser[0].resize(1);
-}
-
-void rx_sequence_item::randomize() {
-    scv_smart_ptr<bool> random_bit;
-    scv_smart_ptr<std::uint8_t> random_byte;
-    scv_smart_ptr<std::size_t> random_idle;
-
-    random_idle->keep_only(0, 3);
-
-    for (auto bit : tid) {
-        random_bit->next();
-        bit = *random_bit;
-    }
-
-    for (auto bit : tdest) {
-        random_bit->next();
-        bit = *random_bit;
-    }
-
-    for (auto& item : tuser) {
-        for (auto bit : item) {
-            random_bit->next();
-            bit = *random_bit;
-        }
-    }
-
-    for (auto& byte : tdata) {
-        random_byte->next();
-        byte = *random_byte;
-    }
-
-    for (auto& idle : idle_scheme) {
-        random_idle->next();
-        idle = *random_idle;
-    }
+    id.resize(1);
+    destination.resize(1);
+    user.resize(1);
+    user[0].resize(1);
 }
 
 auto rx_sequence_item::convert2string() const -> std::string {
     std::ostringstream ss;
     ss << " data:";
 
-    for (const auto& value : tdata) {
+    for (const auto& value : data) {
         ss << " " << std::hex << std::setfill('0') << std::setw(2) <<
             unsigned(value);
     }
@@ -89,13 +48,13 @@ auto rx_sequence_item::convert2string() const -> std::string {
     return ss.str();
 }
 
-rx_sequence_item::~rx_sequence_item() { }
+rx_sequence_item::~rx_sequence_item() = default;
 
 void rx_sequence_item::do_print(const uvm::uvm_printer& printer) const {
-    printer.print_array_header("data", int(tdata.size()),
+    printer.print_array_header("data", int(data.size()),
             "std::vector<std::uint8_t>");
 
-    for (const auto& value : tdata) {
+    for (const auto& value : data) {
         printer.print_field_int("", int(value), 8, uvm::UVM_HEX);
     }
 
@@ -103,16 +62,16 @@ void rx_sequence_item::do_print(const uvm::uvm_printer& printer) const {
 }
 
 void rx_sequence_item::do_pack(uvm::uvm_packer& p) const {
-    p << tdata;
+    p << data;
 }
 
 void rx_sequence_item::do_unpack(uvm::uvm_packer& p) {
-    p >> tdata;
+    p >> data;
 }
 
 void rx_sequence_item::do_copy(const uvm::uvm_object& rhs) {
     auto other = dynamic_cast<const rx_sequence_item*>(&rhs);
-    if (other) {
+    if (other != nullptr) {
         *this = *other;
     }
     else {
@@ -125,8 +84,8 @@ bool rx_sequence_item::do_compare(const uvm::uvm_object& rhs,
     auto other = dynamic_cast<const rx_sequence_item*>(&rhs);
     auto status = false;
 
-    if (other) {
-        status = (tdata == other->tdata);
+    if (other != nullptr) {
+        status = (data == other->data);
     }
     else {
         UVM_ERROR(get_name(), "Error in do_compare");

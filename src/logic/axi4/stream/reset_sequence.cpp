@@ -22,16 +22,13 @@ reset_sequence::reset_sequence() :
 { }
 
 reset_sequence::reset_sequence(const std::string& name) :
-    uvm::uvm_sequence<reset_sequence_item>{name},
-    duration{},
-    idle{},
-    number_of_resets{}
+    uvm::uvm_sequence<reset_sequence_item>{name}
 { }
 
-reset_sequence::~reset_sequence() { }
+reset_sequence::~reset_sequence() = default;
 
 void reset_sequence::pre_body() {
-    if (starting_phase) {
+    if (starting_phase != nullptr) {
         starting_phase->raise_objection(this);
     }
 }
@@ -39,28 +36,14 @@ void reset_sequence::pre_body() {
 void reset_sequence::body() {
     UVM_INFO(get_name(), "Starting reset sequence", uvm::UVM_FULL);
 
-    number_of_resets->next();
-    const std::size_t resets = *number_of_resets;
-
-    for (std::size_t i = 0; i < resets; ++i) {
-        reset_sequence_item item;
-
-        duration->next();
-        idle->next();
-
-        item.randomize();
-        item.duration = *duration;
-        item.idle = *idle;
-
-        start_item(&item);
-        finish_item(&item);
-    }
+    start_item(&req);
+    finish_item(&req);
 
     UVM_INFO(get_name(), "Finishing reset sequence", uvm::UVM_FULL);
 }
 
 void reset_sequence::post_body() {
-    if (starting_phase) {
+    if (starting_phase != nullptr) {
         starting_phase->drop_objection(this);
     }
 }

@@ -19,7 +19,6 @@
 #include "reset_sequence_item.hpp"
 
 #include <uvm>
-#include <scv.h>
 
 #include <cstddef>
 
@@ -31,25 +30,29 @@ class reset_sequence : public uvm::uvm_sequence<reset_sequence_item> {
 public:
     UVM_OBJECT_UTILS(logic::axi4::stream::reset_sequence)
 
-    scv_smart_ptr<std::size_t> duration;
-    scv_smart_ptr<std::size_t> idle;
-    scv_smart_ptr<std::size_t> number_of_resets;
-
     reset_sequence();
 
-    reset_sequence(const std::string& name);
+    explicit reset_sequence(const std::string& name);
 
-    virtual ~reset_sequence() override;
+    reset_sequence(reset_sequence&&) = delete;
+
+    reset_sequence(const reset_sequence& other) = delete;
+
+    reset_sequence& operator=(reset_sequence&&) = delete;
+
+    reset_sequence& operator=(const reset_sequence& other) = delete;
+
+    ~reset_sequence() override;
 protected:
-    virtual void pre_body() override;
+    void pre_body() override;
 
-    virtual void body() override;
+    void body() override;
 
-    virtual void post_body() override;
+    void post_body() override;
 };
 
-}
-}
-}
+} /* namespace stream */
+} /* namespace axi4 */
+} /* namespace logic */
 
 #endif /* LOGIC_AXI4_STREAM_RESET_SEQUENCE_HPP */

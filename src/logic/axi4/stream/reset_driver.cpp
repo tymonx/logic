@@ -29,7 +29,7 @@ reset_driver::reset_driver(const uvm::uvm_component_name& name) :
     m_vif{nullptr}
 { }
 
-reset_driver::~reset_driver() { }
+reset_driver::~reset_driver() = default;
 
 void reset_driver::build_phase(uvm::uvm_phase& phase) {
     uvm::uvm_driver<reset_sequence_item>::build_phase(phase);
@@ -59,12 +59,12 @@ void reset_driver::transfer(const reset_sequence_item& item) {
     auto idle = item.idle;
 
     m_vif->set_areset_n(false);
-    while (duration--) {
+    while (0 != duration--) {
         m_vif->aclk_posedge();
     }
 
     m_vif->set_areset_n(true);
-    while (idle--) {
+    while (0 != idle--) {
         m_vif->aclk_posedge();
     }
 }
