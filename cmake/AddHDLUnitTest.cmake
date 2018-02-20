@@ -59,6 +59,7 @@ function(add_hdl_unit_test hdl_file)
         PARAMETERS
         INPUT_FILES
         MODELSIM_FLAGS
+        MODELSIM_DEPENDS
         MODELSIM_SUPPRESS
         MODELSIM_WARNING_AS_ERROR
     )
@@ -113,15 +114,7 @@ function(add_hdl_unit_test hdl_file)
             ${ARG_INPUT_FILES}
     )
 
-    add_hdl_source("${test_runner_source}"
-        SYNTHESIZABLE
-            FALSE
-        LIBRARY
-            ${ARG_LIBRARY}
-        DEPENDS
-            svunit_pkg
-            ${ARG_NAME}
-    )
+    set(modelsim_depends "")
 
     if (MODELSIM_FOUND)
         set(modelsim_dep "${CMAKE_BINARY_DIR}/logic/deps/modelsim.unit_tests")
@@ -174,11 +167,9 @@ function(add_hdl_unit_test hdl_file)
         list(APPEND modelsim_flags -do "${modelsim_run_tcl}")
         list(APPEND modelsim_flags ${ARG_MODELSIM_FLAGS})
 
-        set(modelsim_inputs "")
+        get_hdl_depends(${ARG_NAME} hdl_depends)
 
-        get_hdl_depends(${ARG_NAME}_testrunner hdl_depends)
-
-        foreach (hdl_name ${hdl_depends} ${ARG_NAME}_testrunner)
+        foreach (hdl_name ${hdl_depends} ${ARG_NAME})
             get_hdl_property(hdl_source ${hdl_name} SOURCE)
             get_filename_component(dir "${hdl_source}" DIRECTORY)
 
@@ -206,7 +197,7 @@ function(add_hdl_unit_test hdl_file)
                             "${file}"
                     )
 
-                    list(APPEND modelsim_inputs "${modelsim_file}")
+                    list(APPEND modelsim_depends "${modelsim_file}")
                 endif()
             endforeach()
 
@@ -232,19 +223,9 @@ function(add_hdl_unit_test hdl_file)
                         "${hdl_source}"
                 )
 
-                list(APPEND modelsim_inputs "${modelsim_file}")
+                list(APPEND modelsim_depends "${modelsim_file}")
             endforeach()
         endforeach()
-
-        if (modelsim_inputs)
-            add_custom_target(${modelsim_target}-init
-                DEPENDS ${modelsim_inputs}
-            )
-
-            add_dependencies(${modelsim_target}-init ${modelsim_target})
-            add_dependencies(${modelsim_target}_testrunner
-                ${modelsim_target}-init)
-        endif()
 
         list(APPEND hdl_libraries work)
         list(REMOVE_DUPLICATES hdl_libraries)
@@ -287,4 +268,17 @@ function(add_hdl_unit_test hdl_file)
                 WORLD_EXECUTE
         )
     endif()
+
+    add_hdl_source("${test_runner_source}"
+        SYNTHESIZABLE
+            FALSE
+        LIBRARY
+            ${ARG_LIBRARY}
+        DEPENDS
+            svunit_pkg
+            ${ARG_NAME}
+        MODELSIM_DEPENDS
+            ${ARG_MODELSIM_DEPENDS}
+            ${modelsim_depends}
+    )
 endfunction()

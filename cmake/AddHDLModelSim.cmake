@@ -215,7 +215,7 @@ function(add_hdl_modelsim hdl_name)
     )
 
     add_custom_target(modelsim-compile-${ARG_LIBRARY}-${ARG_NAME}
-        DEPENDS "${hdl_module_file}"
+        DEPENDS "${hdl_module_file}" ${ARG_MODELSIM_DEPENDS}
     )
 
     if (NOT TARGET modelsim-compile-${ARG_LIBRARY})
