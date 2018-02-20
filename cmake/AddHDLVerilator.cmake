@@ -152,7 +152,7 @@ function(add_hdl_verilator hdl_name)
     list(APPEND verilator_flags --top-module ${ARG_NAME})
 
     foreach (verilator_parameter ${verilator_parameters})
-        list(APPEND verilator_parameters -G${verilator_parameter})
+        list(APPEND verilator_flags -G${verilator_parameter})
     endforeach()
 
     foreach (verilator_define ${verilator_defines})
