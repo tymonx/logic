@@ -13,12 +13,10 @@
  * limitations under the License.
  */
 
-#include "logic/axi4/stream/rx_sequence.hpp"
 #include "logic/axi4/stream/sequence.hpp"
 #include "logic/axi4/stream/sequencer.hpp"
 #include "logic/axi4/stream/test.hpp"
 #include "logic/axi4/stream/testbench.hpp"
-#include "logic/axi4/stream/tx_sequence.hpp"
 
 namespace {
 
