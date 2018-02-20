@@ -38,28 +38,30 @@ sequence::sequence(const std::string& name) :
     uvm::uvm_sequence<>{name},
     length{1, 256},
     packets{1, 8},
-    rx_sequence{nullptr},
-    tx_sequence{nullptr},
-    reset_sequence{nullptr},
+    rx_idle{0},
+    tx_idle{0},
+    m_rx_sequence{nullptr},
+    m_tx_sequence{nullptr},
+    m_reset_sequence{nullptr},
     m_rx_sequencer{nullptr},
     m_tx_sequencer{nullptr},
     m_reset_sequencer{nullptr}
 
 {
-    rx_sequence = rx_sequence::type_id::create("rx_sequence", nullptr);
-    if (rx_sequence == nullptr) {
+    m_rx_sequence = rx_sequence::type_id::create("rx_sequence", nullptr);
+    if (m_rx_sequence == nullptr) {
         UVM_FATAL(get_name(), "Cannot create Rx sequence!"
                 " Simulation aborted!");
     }
 
-    tx_sequence = tx_sequence::type_id::create("tx_sequence", nullptr);
-    if (tx_sequence == nullptr) {
+    m_tx_sequence = tx_sequence::type_id::create("tx_sequence", nullptr);
+    if (m_tx_sequence == nullptr) {
         UVM_FATAL(get_name(), "Cannot create Tx sequence!"
                 " Simulation aborted!");
     }
 
-    reset_sequence = reset_sequence::type_id::create("reset_sequence", nullptr);
-    if (reset_sequence == nullptr) {
+    m_reset_sequence = reset_sequence::type_id::create("reset_sequence", nullptr);
+    if (m_reset_sequence == nullptr) {
         UVM_FATAL(get_name(), "Cannot create reset sequence!"
                 " Simulation aborted!");
     }
@@ -94,7 +96,10 @@ void sequence::body() {
 
     const std::size_t packets_count = random_packets(random_generator);
 
-    reset_sequence->start(m_reset_sequencer);
+    m_rx_sequence->req.idle = rx_idle;
+    m_tx_sequence->req.idle = tx_idle;
+
+    m_reset_sequence->start(m_reset_sequencer);
 
     SC_FORK
         sc_core::sc_spawn(sc_bind([&] () {
@@ -104,19 +109,19 @@ void sequence::body() {
 
                 std::uniform_int_distribution<std::uint8_t> random_data{};
 
-                rx_sequence->req.data.resize(
+                m_rx_sequence->req.data.resize(
                         random_length(random_generator));
 
-                for (auto& item : rx_sequence->req.data) {
+                for (auto& item : m_rx_sequence->req.data) {
                     item = random_data(random_generator);
                 }
 
-                rx_sequence->start(m_rx_sequencer);
+                m_rx_sequence->start(m_rx_sequencer);
             }
         }), "rx_sequence_handler", nullptr),
         sc_core::sc_spawn(sc_bind([&] () {
             for (std::size_t i = 0; i < packets_count; ++i) {
-                tx_sequence->start(m_tx_sequencer);
+                m_tx_sequence->start(m_tx_sequencer);
             }
         }), "tx_sequence_handler", nullptr)
     SC_JOIN

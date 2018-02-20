@@ -27,7 +27,8 @@ tx_driver::tx_driver() :
 
 tx_driver::tx_driver(const uvm::uvm_component_name& name) :
     uvm::uvm_driver<tx_sequence_item>(name),
-    m_vif{nullptr}
+    m_vif{nullptr},
+    m_random_generator{}
 { }
 
 tx_driver::~tx_driver() = default;

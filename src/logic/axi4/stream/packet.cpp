@@ -25,6 +25,12 @@ packet::packet() :
 
 packet::packet(const std::string& name) :
     uvm::uvm_object{name},
+    tid{},
+    tdest{},
+    tuser{},
+    tdata{},
+    tdata_timestamp{},
+    transfer_timestamp{},
     bus_size{}
 { }
 

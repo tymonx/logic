@@ -19,6 +19,11 @@
 
 using logic::range;
 
+range::range() noexcept :
+    m_min{0},
+    m_max{0}
+{ }
+
 range::range(size_type value) noexcept :
     m_min{value},
     m_max{value}

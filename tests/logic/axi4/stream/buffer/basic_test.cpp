@@ -43,26 +43,21 @@ protected:
 
         m_sequence->length = {1, 256};
         m_sequence->packets = {1, 8};
-        m_sequence->rx_sequence->req.idle = {0, 0};
-        m_sequence->tx_sequence->req.idle = {0, 0};
+
+        m_sequence->rx_idle = {0, 0};
+        m_sequence->tx_idle = {0, 0};
         m_sequence->start(m_testbench->sequencer);
 
-        m_sequence->length = {1, 256};
-        m_sequence->packets = {1, 8};
-        m_sequence->rx_sequence->req.idle = {0, 3};
-        m_sequence->tx_sequence->req.idle = {0, 0};
+        m_sequence->rx_idle = {0, 3};
+        m_sequence->tx_idle = {0, 0};
         m_sequence->start(m_testbench->sequencer);
 
-        m_sequence->length = {1, 256};
-        m_sequence->packets = {1, 8};
-        m_sequence->rx_sequence->req.idle = {0, 0};
-        m_sequence->tx_sequence->req.idle = {0, 3};
+        m_sequence->rx_idle = {0, 0};
+        m_sequence->tx_idle = {0, 3};
         m_sequence->start(m_testbench->sequencer);
 
-        m_sequence->length = {1, 256};
-        m_sequence->packets = {1, 8};
-        m_sequence->rx_sequence->req.idle = {0, 3};
-        m_sequence->tx_sequence->req.idle = {0, 3};
+        m_sequence->rx_idle = {0, 3};
+        m_sequence->tx_idle = {0, 3};
         m_sequence->start(m_testbench->sequencer);
 
         phase.drop_objection(this);

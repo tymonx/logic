@@ -27,6 +27,10 @@ rx_sequence_item::rx_sequence_item() :
 
 rx_sequence_item::rx_sequence_item(const std::string& name) :
     uvm::uvm_sequence_item{name},
+    id{},
+    destination{},
+    user{},
+    data{},
     idle{},
     timeout{TIMEOUT}
 {

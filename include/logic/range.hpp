@@ -26,7 +26,7 @@ class range {
 public:
     using size_type = std::size_t;
 
-    range() = default;
+    range() noexcept;
 
     explicit range(size_type value) noexcept;
 

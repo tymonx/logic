@@ -24,7 +24,8 @@ using logic::axi4::stream::rx_driver;
 using logic::axi4::stream::rx_sequence_item;
 
 rx_driver::rx_driver(const uvm::uvm_component_name& name) :
-    uvm::uvm_driver<rx_sequence_item>{name}
+    uvm::uvm_driver<rx_sequence_item>{name},
+    m_random_generator{}
 { }
 
 void rx_driver::build_phase(uvm::uvm_phase& phase) {

@@ -40,10 +40,8 @@ public:
 
     range length;
     range packets;
-
-    rx_sequence* rx_sequence;
-    tx_sequence* tx_sequence;
-    reset_sequence* reset_sequence;
+    range rx_idle;
+    range tx_idle;
 
     sequence();
 
@@ -64,6 +62,10 @@ protected:
     void body() override;
 
     void post_body() override;
+
+    rx_sequence* m_rx_sequence;
+    tx_sequence* m_tx_sequence;
+    reset_sequence* m_reset_sequence;
 
     rx_sequencer* m_rx_sequencer;
     tx_sequencer* m_tx_sequencer;
