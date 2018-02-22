@@ -419,7 +419,7 @@ interface logic_axi4_stream_if #(
     endtask
 `endif
 
-`ifndef LOGIC_STD_OVL_DISABLED
+`ifdef OVL_ASSERT_ON
     generate
         if (1) begin: assertions
             logic bus_hold;
@@ -441,6 +441,7 @@ interface logic_axi4_stream_if #(
                 end
             end
 
+            /* verilator lint_off UNUSED */
             /* verilator coverage_off */
             genvar k;
 
@@ -790,6 +791,7 @@ interface logic_axi4_stream_if #(
                 1'b0
             };
             /* verilator coverage_on */
+            /* verilator lint_on UNUSED */
         end
     endgenerate
 `endif

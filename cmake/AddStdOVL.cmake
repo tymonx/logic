@@ -72,6 +72,8 @@ foreach (std_ovl_source ${STD_OVL_SOURCES})
             "lint_off -msg STMTDLY      -file \"${STD_OVL_DIR}/std_ovl_task.h\""
             "lint_off -msg VARHIDDEN    -file \"${STD_OVL_DIR}/std_ovl_task.h\""
             "lint_off -msg BLKSEQ       -file \"${STD_OVL_DIR}/std_ovl_task.h\""
+            "lint_off -msg UNUSED       -file \"${STD_OVL_DIR}/std_ovl_task.h\""
+            "lint_off -msg WIDTH        -file \"${STD_OVL_DIR}/${std_ovl_source}\""
             "coverage_off -file \"${STD_OVL_DIR}/${std_ovl_source}\""
     )
 endforeach()

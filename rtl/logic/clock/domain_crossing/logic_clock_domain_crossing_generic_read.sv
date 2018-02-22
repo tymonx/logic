@@ -143,9 +143,11 @@ module logic_clock_domain_crossing_generic_read #(
         end
     end
 
-`ifndef LOGIC_STD_OVL_DISABLED
+`ifdef OVL_ASSERT_ON
+    /* verilator lint_off UNUSED */
     logic [`OVL_FIRE_WIDTH-1:0] assert_difference_overflow_fire;
     logic [`OVL_FIRE_WIDTH-1:0] assert_difference_underflow_fire;
+    /* verilator lint_on UNUSED */
 
     ovl_no_transition #(
         .severity_level(`OVL_FATAL),

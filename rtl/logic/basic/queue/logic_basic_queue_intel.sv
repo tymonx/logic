@@ -131,7 +131,7 @@ module logic_basic_queue_intel #(
     always_comb tx_tvalid = (FSM_DATA == fsm_state);
     always_comb tx_tdata = read_data;
 
-`ifndef LOGIC_STD_OVL_DISABLED
+`ifdef OVL_ASSERT_ON
     logic [`OVL_FIRE_WIDTH-1:0] assert_usedw_overflow_fire;
     logic [`OVL_FIRE_WIDTH-1:0] assert_usedw_underflow_fire;
 

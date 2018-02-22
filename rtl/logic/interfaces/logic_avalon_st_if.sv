@@ -300,7 +300,7 @@ interface logic_avalon_st_if #(
     endtask
 `endif
 
-`ifndef LOGIC_STD_OVL_DISABLED
+`ifdef OVL_ASSERT_ON
     generate
         if (1) begin: assertions
             logic bus_hold;
@@ -323,6 +323,7 @@ interface logic_avalon_st_if #(
             end
 
             /* verilator coverage_off */
+            /* verilator lint_off UNUSED */
             genvar k;
 
             logic [`OVL_FIRE_WIDTH-1:0] assert_valid_never_unknown_fire;
@@ -606,6 +607,7 @@ interface logic_avalon_st_if #(
                 assert_channel_unchange_fire,
                 1'b0
             };
+            /* verilator lint_on UNUSED */
             /* verilator coverage_on */
         end
     endgenerate

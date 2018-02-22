@@ -16,24 +16,16 @@
 `ifndef LOGIC_SVH
 `define LOGIC_SVH
 
-`ifndef SYNTHESIS
-    `ifdef VERILATOR
-        /* Define: SYNTHESIS
-         *
-         * Enable only synthesizable parts of HDL.
-         */
-        `define SYNTHESIS
-    `endif
-`endif
-
 `ifdef SYNTHESIS
-    `ifndef LOGIC_STD_OVL_DISABLED
-        /* Define: LOGIC_STD_OVL_DISABLED
-         *
-         * Disable OVL assertions.
-         */
-        `define LOGIC_STD_OVL_DISABLED
+    `ifdef OVL_ASSERT_ON
+        `undef OVL_ASSERT_ON
     `endif
+`elsif VERILATOR
+    /* Define: SYNTHESIS
+     *
+     * Enable only synthesizable parts of HDL.
+     */
+    `define SYNTHESIS
 `endif
 
 `include "logic_drc.svh"
@@ -41,7 +33,7 @@
 `include "logic_avalon.svh"
 `include "logic_modport.svh"
 
-`ifndef LOGIC_STD_OVL_DISABLED
+`ifdef OVL_ASSERT_ON
 `include "std_ovl_defines.h"
 `endif
 

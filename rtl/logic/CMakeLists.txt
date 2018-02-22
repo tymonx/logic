@@ -21,10 +21,6 @@ if (STD_OVL_FOUND)
     set(HDL_INCLUDES ${HDL_INCLUDES}
         ${STD_OVL_DIR}
     )
-else()
-    set(HDL_DEFINES ${HDL_DEFINES}
-        LOGIC_STD_OVL_DISABLED
-    )
 endif()
 
 add_subdirectory(packages)

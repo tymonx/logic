@@ -166,7 +166,7 @@ module logic_clock_domain_crossing_intel #(
         end
     end
 
-`ifndef LOGIC_STD_OVL_DISABLED
+`ifdef OVL_ASSERT_ON
     logic [`OVL_FIRE_WIDTH-1:0] assert_wrusedw_overflow_fire;
     logic [`OVL_FIRE_WIDTH-1:0] assert_wrusedw_underflow_fire;
     logic [`OVL_FIRE_WIDTH-1:0] assert_rdusedw_overflow_fire;
