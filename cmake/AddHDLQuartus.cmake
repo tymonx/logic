@@ -21,7 +21,7 @@ include(GetHDLProperty)
 
 function(add_hdl_quartus hdl_target)
     set(QUARTUS_DEFINES ${QUARTUS_DEFINES}
-        LOGIC_SYNTHESIS
+        SYNTHESIS
     )
 
     if (QUARTUS_EDITION MATCHES Pro)

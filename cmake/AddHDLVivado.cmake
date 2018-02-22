@@ -21,7 +21,7 @@ include(GetHDLProperty)
 
 function(add_hdl_vivado hdl_target)
     set(VIVADO_DEFINES ${VIVADO_DEFINES}
-        LOGIC_SYNTHESIS
+        SYNTHESIS
     )
 
     get_hdl_property(analysis ${hdl_target} ANALYSIS)
