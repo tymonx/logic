@@ -226,6 +226,44 @@ interface logic_axi4_stream_if #(
         end
     endtask
 
+`ifndef SYNTHESIS
+    clocking cb_rx @(posedge aclk);
+        output tvalid;
+        output tuser;
+        output tdest;
+        output tid;
+        output tlast;
+        output tkeep;
+        output tstrb;
+        output tdata;
+        input tready;
+    endclocking
+
+    clocking cb_tx @(posedge aclk);
+        input tvalid;
+        input tuser;
+        input tdest;
+        input tid;
+        input tlast;
+        input tkeep;
+        input tstrb;
+        input tdata;
+        inout tready;
+    endclocking
+
+    clocking cb_monitor @(posedge aclk);
+        input tvalid;
+        input tuser;
+        input tdest;
+        input tid;
+        input tlast;
+        input tkeep;
+        input tstrb;
+        input tdata;
+        input tready;
+    endclocking
+`endif
+
 `ifndef LOGIC_MODPORT_DISABLED
     modport rx (
         input tvalid,
@@ -237,6 +275,9 @@ interface logic_axi4_stream_if #(
         input tstrb,
         input tdata,
         output tready,
+`ifndef SYNTHESIS
+        clocking cb = cb_rx,
+`endif
         import read
     );
 
@@ -250,6 +291,9 @@ interface logic_axi4_stream_if #(
         output tstrb,
         output tdata,
         input tready,
+`ifndef SYNTHESIS
+        clocking cb = cb_tx,
+`endif
         import write,
         import comb_write
     );
@@ -264,6 +308,9 @@ interface logic_axi4_stream_if #(
         input tstrb,
         input tdata,
         input tready,
+`ifndef SYNTHESIS
+        clocking cb = cb_monitor,
+`endif
         import read
     );
 `endif
@@ -318,56 +365,6 @@ interface logic_axi4_stream_if #(
 
     task automatic cb_tx_clear();
         cb_tx.tready <= '0;
-    endtask
-
-    task automatic cb_write(const ref byte data[], input int id = 0,
-            int dest = 0, int idle_max = 0, int idle_min = 0);
-        int total_size = data.size();
-        int index = 0;
-        int idle = 0;
-
-        if (0 == data.size()) begin
-            return;
-        end
-
-        forever begin
-            if (!areset_n) begin
-                break;
-            end
-            else if (1'b1 === cb_rx.tready) begin
-                if (index >= total_size) begin
-                    break;
-                end
-                else if (0 == idle) begin
-                    idle = $urandom_range(idle_max, idle_min);
-
-                    for (int i = 0; i < M_TDATA_BYTES; ++i) begin
-                        if (index < total_size) begin
-                            cb_rx.tkeep[i] <= '1;
-                            cb_rx.tstrb[i] <= '1;
-                            cb_rx.tdata[i] <= data[index++];
-                        end
-                        else begin
-                            cb_rx.tkeep[i] <= '0;
-                            cb_rx.tstrb[i] <= '0;
-                            cb_rx.tdata[i] <= '0;
-                        end
-                    end
-
-                    cb_rx.tid <= tid_t'(id);
-                    cb_rx.tdest <= tdest_t'(dest);
-                    cb_rx.tlast <= (index >= total_size);
-                    cb_rx.tvalid <= '1;
-                end
-                else begin
-                    --idle;
-                    cb_rx.tvalid <= '0;
-                end
-            end
-            @(cb_rx);
-        end
-
-        cb_rx.tvalid <= '0;
     endtask
 
     task automatic cb_read(ref byte data[], input int id = 0, int dest = 0,
