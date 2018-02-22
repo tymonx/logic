@@ -16,17 +16,17 @@
 `ifndef LOGIC_SVH
 `define LOGIC_SVH
 
-`ifndef LOGIC_SYNTHESIS
+`ifndef SYNTHESIS
     `ifdef VERILATOR
-        /* Define: LOGIC_SYNTHESIS
+        /* Define: SYNTHESIS
          *
          * Enable only synthesizable parts of HDL.
          */
-        `define LOGIC_SYNTHESIS
+        `define SYNTHESIS
     `endif
 `endif
 
-`ifdef LOGIC_SYNTHESIS
+`ifdef SYNTHESIS
     `ifndef LOGIC_STD_OVL_DISABLED
         /* Define: LOGIC_STD_OVL_DISABLED
          *

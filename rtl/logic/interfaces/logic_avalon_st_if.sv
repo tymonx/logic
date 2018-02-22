@@ -80,7 +80,7 @@ interface logic_avalon_st_if #(
         data_t data;
     } packet_t;
 
-`ifndef LOGIC_SYNTHESIS
+`ifndef SYNTHESIS
     `define INIT = '0
 `else
     `define INIT
@@ -146,7 +146,7 @@ interface logic_avalon_st_if #(
     );
 `endif
 
-`ifndef LOGIC_SYNTHESIS
+`ifndef SYNTHESIS
     clocking cb_rx @(posedge clk);
         input ready;
         output valid;

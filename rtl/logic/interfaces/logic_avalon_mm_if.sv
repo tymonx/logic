@@ -47,7 +47,7 @@ interface logic_avalon_mm_if #(
     typedef logic [DATA_BYTES-1:0] byteenable_t;
     typedef logic [ADDRESS_WIDTH-1:0] address_t;
 
-`ifndef LOGIC_SYNTHESIS
+`ifndef SYNTHESIS
     `define INIT = '0
     `define INIT_RESPONSE = response_t'('0)
 `else
@@ -107,7 +107,7 @@ interface logic_avalon_mm_if #(
     );
 `endif
 
-`ifndef LOGIC_SYNTHESIS
+`ifndef SYNTHESIS
     clocking cb_slave @(posedge clk);
         output read;
         output write;

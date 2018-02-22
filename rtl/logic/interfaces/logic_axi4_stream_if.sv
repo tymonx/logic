@@ -78,7 +78,7 @@ interface logic_axi4_stream_if #(
     typedef logic [M_TID_WIDTH-1:0] tid_t;
     typedef logic tlast_t;
 
-`ifndef LOGIC_SYNTHESIS
+`ifndef SYNTHESIS
     `define INIT = '0
 `else
     `define INIT
@@ -268,7 +268,7 @@ interface logic_axi4_stream_if #(
     );
 `endif
 
-`ifndef LOGIC_SYNTHESIS
+`ifndef SYNTHESIS
     clocking cb_rx @(posedge aclk);
         output tvalid;
         output tuser;

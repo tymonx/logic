@@ -164,7 +164,7 @@ interface logic_axi4_lite_if #(
     );
 `endif
 
-`ifndef LOGIC_SYNTHESIS
+`ifndef SYNTHESIS
     clocking cb_slave @(posedge aclk);
         /* Write address channel */
         output awvalid;
