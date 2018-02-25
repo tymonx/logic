@@ -17,6 +17,7 @@
 #define LOGIC_AXI4_STREAM_TX_SEQUENCE_ITEM_HPP
 
 #include "logic/range.hpp"
+#include "logic/bitstream.hpp"
 
 #include <uvm>
 
@@ -31,6 +32,8 @@ class tx_sequence_item : public uvm::uvm_sequence_item {
 public:
     UVM_OBJECT_UTILS(logic::axi4::stream::tx_sequence_item)
 
+    bitstream id;
+    bitstream destination;
     std::size_t timeout;
     range idle;
 

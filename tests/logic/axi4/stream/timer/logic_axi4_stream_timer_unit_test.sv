@@ -17,6 +17,8 @@
 
 module logic_axi4_stream_timer_unit_test;
     import svunit_pkg::svunit_testcase;
+    import logic_unit_test_pkg::logic_axi4_stream_driver_rx;
+    import logic_unit_test_pkg::logic_axi4_stream_driver_tx;
 
     string name = "logic_axi4_stream_timer_unit_test";
     svunit_testcase svunit_ut;
@@ -34,9 +36,17 @@ module logic_axi4_stream_timer_unit_test;
         .TDATA_BYTES(TDATA_BYTES)
     ) rx (.*);
 
+    logic_axi4_stream_driver_rx #(
+        .TDATA_BYTES(TDATA_BYTES)
+    ) rx_drv = new (rx);
+
     logic_axi4_stream_if #(
         .TDATA_BYTES(TDATA_BYTES)
     ) tx (.*);
+
+    logic_axi4_stream_driver_tx #(
+        .TDATA_BYTES(TDATA_BYTES)
+    ) tx_drv = new (tx);
 
     logic_axi4_stream_timer #(
         .PERIODIC_DEFAULT(PERIODIC_DEFAULT),
@@ -53,85 +63,97 @@ module logic_axi4_stream_timer_unit_test;
     task setup();
         svunit_ut.setup();
 
+        rx_drv.reset();
+        tx_drv.reset();
+
         areset_n = 0;
-        @(posedge aclk);
+        fork
+            rx_drv.aclk_posedge();
+            tx_drv.aclk_posedge();
+        join
 
         areset_n = 1;
-        tx.cb_tx.tready <= 1;
-        @(posedge aclk);
+        fork
+            rx_drv.aclk_posedge();
+            tx_drv.aclk_posedge();
+        join
     endtask
 
     task teardown();
         svunit_ut.teardown();
 
         areset_n = 0;
-        tx.cb_tx.tready <= 0;
     endtask
 
 `SVUNIT_TESTS_BEGIN
 
 `SVTEST(basic_default)
-    @(tx.cb_tx);
+    for (int n = 0; n < 16; ++n) begin
+        byte captured[];
 
-    for (int i = 0; i < 16; ++i) begin
-        for (int j = 0; j < PERIODIC_DEFAULT; ++j) begin
-            if ((PERIODIC_DEFAULT - 1) == j) begin
-                `FAIL_UNLESS(tx.cb_tx.tlast)
-            end
+        tx_drv.read(captured);
 
-            `FAIL_UNLESS_EQUAL(j, tx.cb_tx.tdata)
-            @(tx.cb_tx);
+        `FAIL_UNLESS_EQUAL(captured.size(), TDATA_BYTES * PERIODIC_DEFAULT)
+
+        for (int i = 0; i < PERIODIC_DEFAULT; ++i) begin
+            `FAIL_UNLESS_EQUAL(captured[TDATA_BYTES * i], i)
         end
     end
 `SVTEST_END
 
-`SVTEST(basic_reload_short)
-    const int periodic = PERIODIC_DEFAULT - 3;
+`SVTEST(short_reload)
+    const int reload = 5;
 
-    repeat (17) @(tx.cb_tx);
+    byte data[] = new [TDATA_BYTES];
+    byte captured[];
 
-    rx.cb_rx.tvalid <= 1;
-    rx.cb_rx.tdata <= periodic;
-    @(rx.cb_rx);
+    tx_drv.read(captured);
 
-    rx.cb_rx.tvalid <= 0;
-    rx.cb_rx.tdata <= 0;
-    @(rx.cb_rx);
+    `FAIL_UNLESS_EQUAL(captured.size(), TDATA_BYTES * PERIODIC_DEFAULT)
 
-    for (int i = 0; i < 16; ++i) begin
-        for (int j = 0; j < periodic; ++j) begin
-            if ((periodic - 1) == j) begin
-                `FAIL_UNLESS(tx.cb_tx.tlast)
-            end
+    for (int i = 0; i < PERIODIC_DEFAULT; ++i) begin
+        `FAIL_UNLESS_EQUAL(captured[TDATA_BYTES * i], i)
+    end
 
-            `FAIL_UNLESS_EQUAL(j, tx.cb_tx.tdata)
-            @(tx.cb_tx);
-        end
+    {<<8{data}} = reload;
+
+    fork
+        rx_drv.write(data);
+        tx_drv.read(captured);
+    join
+
+    `FAIL_UNLESS_EQUAL(captured.size(), TDATA_BYTES * reload)
+
+    for (int i = 0; i < reload; ++i) begin
+        `FAIL_UNLESS_EQUAL(captured[TDATA_BYTES * i], i)
     end
 `SVTEST_END
 
-`SVTEST(basic_reload_long)
-    const int periodic = PERIODIC_DEFAULT + 5;
+`SVTEST(long_reload)
+    const int reload = 17;
 
-    repeat (17) @(tx.cb_tx);
+    byte data[] = new [TDATA_BYTES];
+    byte captured[];
 
-    rx.cb_rx.tvalid <= 1;
-    rx.cb_rx.tdata <= periodic;
-    @(rx.cb_rx);
+    tx_drv.read(captured);
 
-    rx.cb_rx.tvalid <= 0;
-    rx.cb_rx.tdata <= 0;
-    @(rx.cb_rx);
+    `FAIL_UNLESS_EQUAL(captured.size(), TDATA_BYTES * PERIODIC_DEFAULT)
 
-    for (int i = 0; i < 16; ++i) begin
-        for (int j = 0; j < periodic; ++j) begin
-            if ((periodic - 1) == j) begin
-                `FAIL_UNLESS(tx.cb_tx.tlast)
-            end
+    for (int i = 0; i < PERIODIC_DEFAULT; ++i) begin
+        `FAIL_UNLESS_EQUAL(captured[TDATA_BYTES * i], i)
+    end
 
-            `FAIL_UNLESS_EQUAL(j, tx.cb_tx.tdata)
-            @(tx.cb_tx);
-        end
+    {<<8{data}} = reload;
+
+    fork
+        rx_drv.write(data);
+        tx_drv.read(captured);
+    join
+
+    `FAIL_UNLESS_EQUAL(captured.size(), TDATA_BYTES * reload)
+
+    for (int i = 0; i < reload; ++i) begin
+        `FAIL_UNLESS_EQUAL(captured[TDATA_BYTES * i], i)
     end
 `SVTEST_END
 

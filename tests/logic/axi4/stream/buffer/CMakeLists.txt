@@ -16,6 +16,9 @@
 
 add_hdl_unit_test(logic_axi4_stream_buffer_unit_test.sv
     DEPENDS
+        logic_pkg
+        logic_unit_test_pkg
+        logic_axi4_stream_if
         logic_axi4_stream_buffer
 )
 
@@ -71,7 +74,7 @@ foreach (test ${TESTS})
         NAME
             ${module_test}
         COMMAND
-            logic_axi4_stream_queue_test
+            logic_axi4_stream_buffer_test
             +UVM_TESTNAME=${test}
             +uvm_set_config_string=*,trace_filename,${module_test}
         WORKING_DIRECTORY

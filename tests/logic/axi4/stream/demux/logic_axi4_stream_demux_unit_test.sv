@@ -17,6 +17,8 @@
 
 module logic_axi4_stream_demux_unit_test;
     import svunit_pkg::svunit_testcase;
+    import logic_unit_test_pkg::logic_axi4_stream_driver_rx;
+    import logic_unit_test_pkg::logic_axi4_stream_driver_tx;
 
     string name = "logic_axi4_stream_demux_unit_test";
     svunit_testcase svunit_ut;
@@ -35,19 +37,24 @@ module logic_axi4_stream_demux_unit_test;
         .TID_WIDTH(TID_WIDTH)
     ) rx (.*);
 
+    logic_axi4_stream_driver_rx #(
+        .TDATA_BYTES(TDATA_BYTES),
+        .TID_WIDTH(TID_WIDTH)
+    ) rx_drv = new (rx);
+
     logic_axi4_stream_if #(
         .TDATA_BYTES(TDATA_BYTES),
         .TID_WIDTH(TID_WIDTH)
     ) tx [OUTPUTS] (.*);
 
-    virtual logic_axi4_stream_if #(
+    logic_axi4_stream_driver_tx #(
         .TDATA_BYTES(TDATA_BYTES),
         .TID_WIDTH(TID_WIDTH)
-    ) tx_if [OUTPUTS];
+    ) tx_drv[OUTPUTS];
 
     generate
         for (genvar k = 0; k < OUTPUTS; ++k) begin: map
-            initial tx_if[k] = tx[k];
+            initial tx_drv[k] = new (tx[k]);
         end
     endgenerate
 
@@ -68,11 +75,22 @@ module logic_axi4_stream_demux_unit_test;
     task setup();
         svunit_ut.setup();
 
+        rx_drv.reset();
+        foreach (tx_drv[k]) begin
+            tx_drv[k].reset();
+        end
+
         areset_n = 0;
-        @(rx.cb_rx);
+        fork
+            rx_drv.aclk_posedge();
+            tx_drv[0].aclk_posedge();
+        join
 
         areset_n = 1;
-        @(rx.cb_rx);
+        fork
+            rx_drv.aclk_posedge();
+            tx_drv[0].aclk_posedge();
+        join
     endtask
 
     task teardown();
@@ -98,27 +116,29 @@ module logic_axi4_stream_demux_unit_test;
     fork
     begin
         foreach (data[i]) begin
-            rx.cb_write(data[i], i);
+            rx_drv.set_id(i);
+            rx_drv.write(data[i]);
         end
     end
     begin
         foreach (captured[i]) begin
             fork
-                automatic int index = i;
-                tx_if[index].cb_read(captured[index], index);
+                automatic int k = i;
+            begin
+                tx_drv[k].set_id(k);
+                tx_drv[k].read(captured[k]);
+
+                `FAIL_UNLESS_EQUAL(data[k].size(), captured[k].size())
+
+                for (int n = 0; n < data[k].size(); ++n) begin
+                    `FAIL_UNLESS_EQUAL(data[k][n], captured[k][n])
+                end
+            end
             join_none
         end
         wait fork;
     end
     join
-
-    foreach (data[i]) begin
-        `FAIL_UNLESS_EQUAL(data[i].size(), captured[i].size())
-    end
-
-    foreach (data[i, j]) begin
-        `FAIL_UNLESS_EQUAL(data[i][j], captured[i][j])
-    end
 `SVTEST_END
 
 `SVTEST(basic_short)
@@ -136,27 +156,29 @@ module logic_axi4_stream_demux_unit_test;
     fork
     begin
         foreach (data[i]) begin
-            rx.cb_write(data[i], i);
+            rx_drv.set_id(i);
+            rx_drv.write(data[i]);
         end
     end
     begin
         foreach (captured[i]) begin
             fork
-                automatic int index = i;
-                tx_if[index].cb_read(captured[index], index);
+                automatic int k = i;
+            begin
+                tx_drv[k].set_id(k);
+                tx_drv[k].read(captured[k]);
+
+                `FAIL_UNLESS_EQUAL(data[k].size(), captured[k].size())
+
+                for (int n = 0; n < data[k].size(); ++n) begin
+                    `FAIL_UNLESS_EQUAL(data[k][n], captured[k][n])
+                end
+            end
             join_none
         end
         wait fork;
     end
     join
-
-    foreach (data[i]) begin
-        `FAIL_UNLESS_EQUAL(data[i].size(), captured[i].size())
-    end
-
-    foreach (data[i, j]) begin
-        `FAIL_UNLESS_EQUAL(data[i][j], captured[i][j])
-    end
 `SVTEST_END
 
 `SVUNIT_TESTS_END

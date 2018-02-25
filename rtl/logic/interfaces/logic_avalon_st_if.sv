@@ -51,7 +51,7 @@ interface logic_avalon_st_if #(
     int CHANNEL_WIDTH = (MAX_CHANNEL >= 1) ? $clog2(MAX_CHANNEL + 1) : 1,
     int ERROR_WIDTH = 1,
     int EMPTY_WITHIN_PACKET = 0,
-    int FIRST_SYMBOL_IN_HIGH_ORDER_BITS = 1
+    int FIRST_SYMBOL_IN_HIGH_ORDER_BITS = 0
 ) (
     input clk,
     input reset_n
@@ -64,48 +64,43 @@ interface logic_avalon_st_if #(
         `LOGIC_DRC_TRUE_FALSE(FIRST_SYMBOL_IN_HIGH_ORDER_BITS)
     end
 
-    localparam DATA_WIDTH = SYMBOLS_PER_BEAT * DATA_BITS_PER_SYMBOL;
+    localparam int DATA_WIDTH = SYMBOLS_PER_BEAT * DATA_BITS_PER_SYMBOL;
 
-    typedef logic [SYMBOLS_PER_BEAT-1:0][DATA_BITS_PER_SYMBOL-1:0] data_t;
-    typedef logic [EMPTY_WIDTH-1:0] empty_t;
-    typedef logic [ERROR_WIDTH-1:0] error_t;
-    typedef logic [CHANNEL_WIDTH-1:0] channel_t;
+    localparam int M_DATA_WIDTH = (DATA_WIDTH > 0) ? DATA_WIDTH : 1;
+    localparam int M_EMPTY_WIDTH = (EMPTY_WIDTH > 0) ? EMPTY_WIDTH : 1;
+    localparam int M_ERROR_WIDTH = (ERROR_WIDTH > 0) ? ERROR_WIDTH : 1;
+    localparam int M_CHANNEL_WIDTH = (CHANNEL_WIDTH > 0) ? CHANNEL_WIDTH : 1;
 
-    typedef struct packed {
-        logic startofpacket;
-        logic endofpacket;
-        channel_t channel;
-        error_t error;
-        empty_t empty;
-        data_t data;
-    } packet_t;
+    localparam int M_SYMBOLS_PER_BEAT = (SYMBOLS_PER_BEAT > 0) ?
+        SYMBOLS_PER_BEAT : 1;
 
-`ifndef SYNTHESIS
-    `define INIT = '0
+    localparam int M_DATA_BITS_PER_SYMBOL = (DATA_BITS_PER_SYMBOL > 0) ?
+        DATA_BITS_PER_SYMBOL : 1;
+
+    typedef logic [M_SYMBOLS_PER_BEAT-1:0][M_DATA_BITS_PER_SYMBOL-1:0] data_t;
+    typedef logic [M_EMPTY_WIDTH-1:0] empty_t;
+    typedef logic [M_ERROR_WIDTH-1:0] error_t;
+    typedef logic [M_CHANNEL_WIDTH-1:0] channel_t;
+
+`ifdef SYNTHESIS
+    logic ready;
+    logic valid;
+    logic startofpacket;
+    logic endofpacket;
+    channel_t channel;
+    error_t error;
+    empty_t empty;
+    data_t data;
 `else
-    `define INIT
+    logic ready = 'X;
+    logic valid = 'X;
+    logic startofpacket = 'X;
+    logic endofpacket = 'X;
+    channel_t channel = 'X;
+    error_t error = 'X;
+    empty_t empty = 'X;
+    data_t data = 'X;
 `endif
-
-    logic ready `INIT;
-    logic valid `INIT;
-    logic startofpacket `INIT;
-    logic endofpacket `INIT;
-    channel_t channel `INIT;
-    error_t error `INIT;
-    empty_t empty `INIT;
-    data_t data `INIT;
-
-    function packet_t read();
-        return '{startofpacket, endofpacket, channel, error, empty, data};
-    endfunction
-
-    task write(input packet_t packet);
-        {startofpacket, endofpacket, channel, error, empty, data} <= packet;
-    endtask
-
-    task comb_write(input packet_t packet);
-        {startofpacket, endofpacket, channel, error, empty, data} = packet;
-    endtask
 
 `ifndef LOGIC_MODPORT_DISABLED
     modport rx (
@@ -116,8 +111,7 @@ interface logic_avalon_st_if #(
         input channel,
         input error,
         input empty,
-        input data,
-        import read
+        input data
     );
 
     modport tx (
@@ -129,8 +123,7 @@ interface logic_avalon_st_if #(
         output error,
         output empty,
         output data,
-        import write,
-        import comb_write
+        import write
     );
 
     modport monitor (
@@ -141,8 +134,7 @@ interface logic_avalon_st_if #(
         input channel,
         input error,
         input empty,
-        input data,
-        import read
+        input data
     );
 `endif
 
@@ -158,6 +150,11 @@ interface logic_avalon_st_if #(
         output data;
     endclocking
 
+    modport cb_rx_modport (
+        input reset_n,
+        clocking cb_rx
+    );
+
     clocking cb_tx @(posedge clk);
         inout ready;
         input valid;
@@ -169,7 +166,12 @@ interface logic_avalon_st_if #(
         input data;
     endclocking
 
-    clocking cb_mon @(posedge clk);
+    modport cb_tx_modport (
+        input reset_n,
+        clocking cb_tx
+    );
+
+    clocking cb_monitor @(posedge clk);
         input ready;
         input valid;
         input startofpacket;
@@ -180,124 +182,10 @@ interface logic_avalon_st_if #(
         input data;
     endclocking
 
-    task automatic cb_rx_clear();
-        cb_rx.error <= '0;
-        cb_rx.channel <= '0;
-        cb_rx.endofpacket <= '0;
-        cb_rx.startofpacket <= '0;
-        cb_rx.empty <= '0;
-        cb_rx.data <= '0;
-        cb_rx.valid <= '0;
-    endtask
-
-    task automatic cb_tx_clear();
-        cb_tx.ready <= '0;
-    endtask
-
-    task automatic cb_write(const ref byte data[], input int ch = 0,
-            int idle_max = 0, int idle_min = 0);
-        int total_size = data.size();
-        int index = 0;
-        int idle = 0;
-
-        if (0 == data.size()) begin
-            return;
-        end
-
-        forever begin
-            if (!reset_n) begin
-                break;
-            end
-            else if (1'b1 === cb_rx.ready) begin
-                if (index >= total_size) begin
-                    break;
-                end
-                else if (0 == idle) begin
-                    int data_empty = 0;
-
-                    idle = $urandom_range(idle_max, idle_min);
-
-                    cb_rx.startofpacket <= !index;
-
-                    for (int i = 0; i < SYMBOLS_PER_BEAT; ++i) begin
-                        if (index < total_size) begin
-                            cb_rx.data[i] <= data[index++];
-                        end
-                        else begin
-                            cb_rx.data[i] <= '0;
-                            ++data_empty;
-                        end
-                    end
-
-                    cb_rx.empty <= empty_t'(data_empty);
-                    cb_rx.channel <= channel_t'(ch);
-                    cb_rx.endofpacket <= (index >= total_size);
-                    cb_rx.valid <= '1;
-                end
-                else begin
-                    --idle;
-                    cb_rx.valid <= '0;
-                end
-            end
-            @(cb_rx);
-        end
-
-        cb_rx.valid <= '0;
-    endtask
-
-    task automatic cb_read(ref byte data[], input int ch = 0,
-            int idle_max = 0, int idle_min = 0);
-        int idle = 0;
-        byte q[$];
-
-        cb_tx.ready <= '1;
-
-        forever begin
-            if (!reset_n) begin
-                break;
-            end
-            else if ((1'b1 === cb_tx.ready) && (1'b1 === cb_tx.valid) &&
-                    (channel_t'(ch) === cb_tx.channel)) begin
-                int data_size = SYMBOLS_PER_BEAT;
-
-                if (EMPTY_WITHIN_PACKET || (1'b1 === cb_tx.endofpacket)) begin
-                    data_size -= cb_tx.empty;
-                end
-
-                if (1'b1 === cb_tx.startofpacket) begin
-                    q.delete();
-                end
-
-                for (int i = 0; i < data_size; ++i) begin
-                    q.push_back(byte'(cb_tx.data[i]));
-                end
-
-                if (1'b1 === cb_tx.endofpacket) begin
-                    cb_tx.ready <= '1;
-                    @(cb_tx);
-                    break;
-                end
-            end
-
-            if (0 == idle) begin
-                idle = $urandom_range(idle_max, idle_min);
-                cb_tx.ready <= '1;
-            end
-            else begin
-                --idle;
-                cb_tx.ready <= '0;
-            end
-
-            @(cb_tx);
-        end
-
-        cb_tx.ready <= '0;
-
-        data = new [q.size()];
-        foreach (q[i]) begin
-            data[i] = q[i];
-        end
-    endtask
+    modport cb_monitor_modport (
+        input reset_n,
+        clocking cb_monitor
+    );
 `endif
 
 `ifdef OVL_ASSERT_ON
@@ -362,7 +250,7 @@ interface logic_avalon_st_if #(
 
             ovl_never_unknown #(
                 .severity_level(`OVL_FATAL),
-                .width(DATA_WIDTH),
+                .width(M_DATA_WIDTH),
                 .property_type(`OVL_ASSERT),
                 .msg("data signal cannot be unknown during active transfer")
             )
@@ -379,7 +267,7 @@ interface logic_avalon_st_if #(
 
             ovl_never_unknown #(
                 .severity_level(`OVL_FATAL),
-                .width(EMPTY_WIDTH),
+                .width(M_EMPTY_WIDTH),
                 .property_type(`OVL_ASSERT),
                 .msg("empty signal cannot be unknown during active transfer")
             )
@@ -428,7 +316,7 @@ interface logic_avalon_st_if #(
 
             ovl_never_unknown #(
                 .severity_level(`OVL_FATAL),
-                .width(ERROR_WIDTH),
+                .width(M_ERROR_WIDTH),
                 .property_type(`OVL_ASSERT),
                 .msg("error signal cannot be unknown during active transfer")
             )
@@ -445,7 +333,7 @@ interface logic_avalon_st_if #(
 
             ovl_never_unknown #(
                 .severity_level(`OVL_FATAL),
-                .width(CHANNEL_WIDTH),
+                .width(M_CHANNEL_WIDTH),
                 .property_type(`OVL_ASSERT),
                 .msg("channel signal cannot be unknown during active transfer")
             )
@@ -528,7 +416,7 @@ interface logic_avalon_st_if #(
 
             ovl_win_unchange #(
                 .severity_level(`OVL_FATAL),
-                .width(DATA_WIDTH),
+                .width(M_DATA_WIDTH),
                 .property_type(`OVL_ASSERT),
                 .msg("data signal cannot change value during bus hold")
             )
@@ -546,7 +434,7 @@ interface logic_avalon_st_if #(
 
             ovl_win_unchange #(
                 .severity_level(`OVL_FATAL),
-                .width(EMPTY_WIDTH),
+                .width(M_EMPTY_WIDTH),
                 .property_type(`OVL_ASSERT),
                 .msg("empty signal cannot change value during bus hold")
             )
@@ -564,7 +452,7 @@ interface logic_avalon_st_if #(
 
             ovl_win_unchange #(
                 .severity_level(`OVL_FATAL),
-                .width(ERROR_WIDTH),
+                .width(M_ERROR_WIDTH),
                 .property_type(`OVL_ASSERT),
                 .msg("error signal cannot change value during bus hold")
             )
@@ -582,7 +470,7 @@ interface logic_avalon_st_if #(
 
             ovl_win_unchange #(
                 .severity_level(`OVL_FATAL),
-                .width(CHANNEL_WIDTH),
+                .width(M_CHANNEL_WIDTH),
                 .property_type(`OVL_ASSERT),
                 .msg("channel signal cannot change value during bus hold")
             )

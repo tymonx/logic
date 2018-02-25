@@ -78,21 +78,27 @@ interface logic_axi4_stream_if #(
     typedef logic [M_TID_WIDTH-1:0] tid_t;
     typedef logic tlast_t;
 
-`ifndef SYNTHESIS
-    `define INIT = '0
+`ifdef SYNTHESIS
+    logic tready;
+    logic tvalid;
+    tlast_t tlast;
+    tdata_t tdata;
+    tstrb_t tstrb;
+    tkeep_t tkeep;
+    tdest_t tdest;
+    tuser_t tuser;
+    tid_t tid;
 `else
-    `define INIT
+    logic tready = 'X;
+    logic tvalid = 'X;
+    tlast_t tlast = 'X;
+    tdata_t tdata = 'X;
+    tstrb_t tstrb = 'X;
+    tkeep_t tkeep = 'X;
+    tdest_t tdest = 'X;
+    tuser_t tuser = 'X;
+    tid_t tid = 'X;
 `endif
-
-    logic tready `INIT;
-    logic tvalid `INIT;
-    tlast_t tlast `INIT;
-    tdata_t tdata `INIT;
-    tstrb_t tstrb `INIT;
-    tkeep_t tkeep `INIT;
-    tdest_t tdest `INIT;
-    tuser_t tuser `INIT;
-    tid_t tid `INIT;
 
     function automatic logic [TOTAL_WIDTH-1:0] read();
         if (TDATA_WIDTH > 0) begin
@@ -226,44 +232,6 @@ interface logic_axi4_stream_if #(
         end
     endtask
 
-`ifndef SYNTHESIS
-    clocking cb_rx @(posedge aclk);
-        output tvalid;
-        output tuser;
-        output tdest;
-        output tid;
-        output tlast;
-        output tkeep;
-        output tstrb;
-        output tdata;
-        input tready;
-    endclocking
-
-    clocking cb_tx @(posedge aclk);
-        input tvalid;
-        input tuser;
-        input tdest;
-        input tid;
-        input tlast;
-        input tkeep;
-        input tstrb;
-        input tdata;
-        inout tready;
-    endclocking
-
-    clocking cb_monitor @(posedge aclk);
-        input tvalid;
-        input tuser;
-        input tdest;
-        input tid;
-        input tlast;
-        input tkeep;
-        input tstrb;
-        input tdata;
-        input tready;
-    endclocking
-`endif
-
 `ifndef LOGIC_MODPORT_DISABLED
     modport rx (
         input tvalid,
@@ -275,9 +243,6 @@ interface logic_axi4_stream_if #(
         input tstrb,
         input tdata,
         output tready,
-`ifndef SYNTHESIS
-        clocking cb = cb_rx,
-`endif
         import read
     );
 
@@ -291,9 +256,6 @@ interface logic_axi4_stream_if #(
         output tstrb,
         output tdata,
         input tready,
-`ifndef SYNTHESIS
-        clocking cb = cb_tx,
-`endif
         import write,
         import comb_write
     );
@@ -308,9 +270,6 @@ interface logic_axi4_stream_if #(
         input tstrb,
         input tdata,
         input tready,
-`ifndef SYNTHESIS
-        clocking cb = cb_monitor,
-`endif
         import read
     );
 `endif
@@ -328,6 +287,11 @@ interface logic_axi4_stream_if #(
         input tready;
     endclocking
 
+    modport cb_rx_modport (
+        input areset_n,
+        clocking cb_rx
+    );
+
     clocking cb_tx @(posedge aclk);
         input tvalid;
         input tuser;
@@ -339,6 +303,11 @@ interface logic_axi4_stream_if #(
         input tdata;
         inout tready;
     endclocking
+
+    modport cb_tx_modport (
+        input areset_n,
+        clocking cb_tx
+    );
 
     clocking cb_monitor @(posedge aclk);
         input tvalid;
@@ -352,68 +321,10 @@ interface logic_axi4_stream_if #(
         input tready;
     endclocking
 
-    task automatic cb_rx_clear();
-        cb_rx.tid <= '0;
-        cb_rx.tuser <= '0;
-        cb_rx.tdest <= '0;
-        cb_rx.tlast <= '0;
-        cb_rx.tkeep <= '0;
-        cb_rx.tstrb <= '0;
-        cb_rx.tdata <= '0;
-        cb_rx.tvalid <= '0;
-    endtask
-
-    task automatic cb_tx_clear();
-        cb_tx.tready <= '0;
-    endtask
-
-    task automatic cb_read(ref byte data[], input int id = 0, int dest = 0,
-            int idle_max = 0, int idle_min = 0);
-        int idle = 0;
-        byte q[$];
-
-        cb_tx.tready <= '1;
-
-        forever begin
-            if (!areset_n) begin
-                break;
-            end
-            else if ((1'b1 === cb_tx.tready) && (1'b1 === cb_tx.tvalid) &&
-                    (tid_t'(id) === cb_tx.tid) &&
-                    (tdest_t'(dest) === cb_tx.tdest)) begin
-                for (int i = 0; i < M_TDATA_BYTES; ++i) begin
-                    if ((1'b1 === cb_tx.tkeep[i]) &&
-                            (1'b1 === cb_tx.tstrb[i])) begin
-                        q.push_back(byte'(cb_tx.tdata[i]));
-                    end
-                end
-
-                if (1'b1 === cb_tx.tlast) begin
-                    cb_tx.tready <= '1;
-                    @(cb_tx);
-                    break;
-                end
-            end
-
-            if (0 == idle) begin
-                idle = $urandom_range(idle_max, idle_min);
-                cb_tx.tready <= '1;
-            end
-            else begin
-                --idle;
-                cb_tx.tready <= '0;
-            end
-
-            @(cb_tx);
-        end
-
-        cb_tx.tready <= '0;
-
-        data = new [q.size()];
-        foreach (q[i]) begin
-            data[i] = q[i];
-        end
-    endtask
+    modport cb_monitor_modport (
+        input areset_n,
+        clocking cb_monitor
+    );
 `endif
 
 `ifdef OVL_ASSERT_ON

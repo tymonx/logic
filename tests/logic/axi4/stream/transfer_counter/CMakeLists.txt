@@ -18,6 +18,8 @@ add_hdl_unit_test(logic_axi4_stream_transfer_counter_unit_test.sv
     NAME
         logic_axi4_stream_transfer_counter_normal_unit_test
     DEPENDS
+        logic_pkg
+        logic_unit_test_pkg
         logic_axi4_stream_if
         logic_axi4_stream_queue
         logic_axi4_stream_transfer_counter
@@ -29,6 +31,8 @@ add_hdl_unit_test(logic_axi4_stream_transfer_counter_unit_test.sv
     NAME
         logic_axi4_stream_transfer_counter_packets_unit_test
     DEPENDS
+        logic_pkg
+        logic_unit_test_pkg
         logic_axi4_stream_if
         logic_axi4_stream_queue
         logic_axi4_stream_transfer_counter

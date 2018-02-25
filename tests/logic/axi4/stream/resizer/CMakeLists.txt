@@ -18,6 +18,9 @@ add_hdl_unit_test(logic_axi4_stream_resizer_unit_test.sv
     NAME
         logic_axi4_stream_resizer_equal_unit_test
     DEPENDS
+        logic_pkg
+        logic_unit_test_pkg
+        logic_axi4_stream_if
         logic_axi4_stream_resizer
     PARAMETERS
         RX_TDATA_BYTES=4
@@ -28,6 +31,9 @@ add_hdl_unit_test(logic_axi4_stream_resizer_unit_test.sv
     NAME
         logic_axi4_stream_resizer_up_unit_test
     DEPENDS
+        logic_pkg
+        logic_unit_test_pkg
+        logic_axi4_stream_if
         logic_axi4_stream_resizer
     PARAMETERS
         RX_TDATA_BYTES=4
@@ -38,6 +44,9 @@ add_hdl_unit_test(logic_axi4_stream_resizer_unit_test.sv
     NAME
         logic_axi4_stream_resizer_down_unit_test
     DEPENDS
+        logic_pkg
+        logic_unit_test_pkg
+        logic_axi4_stream_if
         logic_axi4_stream_resizer
     PARAMETERS
         RX_TDATA_BYTES=12

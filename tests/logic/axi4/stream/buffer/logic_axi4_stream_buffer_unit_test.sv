@@ -17,6 +17,8 @@
 
 module logic_axi4_stream_buffer_unit_test;
     import svunit_pkg::svunit_testcase;
+    import logic_unit_test_pkg::logic_axi4_stream_driver_rx;
+    import logic_unit_test_pkg::logic_axi4_stream_driver_tx;
 
     string name = "logic_axi4_stream_buffer_unit_test";
     svunit_testcase svunit_ut;
@@ -32,9 +34,17 @@ module logic_axi4_stream_buffer_unit_test;
         .TDATA_BYTES(TDATA_BYTES)
     ) rx (.*);
 
+    logic_axi4_stream_driver_rx #(
+        .TDATA_BYTES(TDATA_BYTES)
+    ) rx_drv = new (rx);
+
     logic_axi4_stream_if #(
         .TDATA_BYTES(TDATA_BYTES)
     ) tx (.*);
+
+    logic_axi4_stream_driver_tx #(
+        .TDATA_BYTES(TDATA_BYTES)
+    ) tx_drv = new (tx);
 
     logic_axi4_stream_buffer #(
         .TDATA_BYTES(TDATA_BYTES)
@@ -50,11 +60,20 @@ module logic_axi4_stream_buffer_unit_test;
     task setup();
         svunit_ut.setup();
 
+        rx_drv.reset();
+        tx_drv.reset();
+
         areset_n = 0;
-        @(rx.cb_rx);
+        fork
+            rx_drv.aclk_posedge();
+            tx_drv.aclk_posedge();
+        join
 
         areset_n = 1;
-        @(rx.cb_rx);
+        fork
+            rx_drv.aclk_posedge();
+            tx_drv.aclk_posedge();
+        join
     endtask
 
     task teardown();
@@ -75,10 +94,10 @@ module logic_axi4_stream_buffer_unit_test;
 
     fork
     begin
-        rx.cb_write(data);
+        rx_drv.write(data);
     end
     begin
-        tx.cb_read(captured);
+        tx_drv.read(captured);
     end
     join
 
@@ -98,10 +117,34 @@ module logic_axi4_stream_buffer_unit_test;
 
     fork
     begin
-        rx.cb_write(data);
+        rx_drv.write(data);
     end
     begin
-        tx.cb_read(captured);
+        tx_drv.read(captured);
+    end
+    join
+
+    `FAIL_UNLESS_EQUAL(data.size(), captured.size())
+    foreach (data[i]) begin
+        `FAIL_UNLESS_EQUAL(data[i], captured[i])
+    end
+`SVTEST_END
+
+`SVTEST(slow_write)
+    byte data[] = new [7654];
+    byte captured[];
+
+    foreach (data[i]) begin
+        data[i] = $urandom;
+    end
+
+    fork
+    begin
+        rx_drv.set_idle(0, 3);
+        rx_drv.write(data);
+    end
+    begin
+        tx_drv.read(captured);
     end
     join
 
@@ -121,10 +164,11 @@ module logic_axi4_stream_buffer_unit_test;
 
     fork
     begin
-        rx.cb_write(data);
+        rx_drv.write(data);
     end
     begin
-        tx.cb_read(captured, 0, 0, 3, 0);
+        tx_drv.set_idle(0, 3);
+        tx_drv.read(captured);
     end
     join
 
@@ -132,6 +176,66 @@ module logic_axi4_stream_buffer_unit_test;
     foreach (data[i]) begin
         `FAIL_UNLESS_EQUAL(data[i], captured[i])
     end
+`SVTEST_END
+
+`SVTEST(mix_write_read)
+    byte data[] = new [7654];
+    byte captured[];
+
+    foreach (data[i]) begin
+        data[i] = $urandom;
+    end
+
+    fork
+    begin
+        rx_drv.set_idle(0, 3);
+        rx_drv.write(data);
+    end
+    begin
+        tx_drv.set_idle(0, 3);
+        tx_drv.read(captured);
+    end
+    join
+
+    `FAIL_UNLESS_EQUAL(data.size(), captured.size())
+    foreach (data[i]) begin
+        `FAIL_UNLESS_EQUAL(data[i], captured[i])
+    end
+`SVTEST_END
+
+`SVTEST(mix_write_read_packets)
+    byte data[16][];
+    byte captured[16][];
+
+    foreach (data[i]) begin
+        data[i] = new [$urandom_range(256, 1)];
+    end
+
+    foreach (data[i, j]) begin
+        data[i][j] = $urandom;
+    end
+
+    fork
+    begin
+        rx_drv.set_idle(0, 3);
+
+        foreach (data[i]) begin
+            rx_drv.write(data[i]);
+        end
+    end
+    begin
+        tx_drv.set_idle(0, 3);
+
+        foreach (captured[i]) begin
+            tx_drv.read(captured[i]);
+
+            `FAIL_UNLESS_EQUAL(data[i].size(), captured[i].size())
+            for (int j = 0; j < data[i].size(); ++j) begin
+                `FAIL_UNLESS_EQUAL(data[i][j], captured[i][j])
+            end
+        end
+    end
+    join
 `SVTEST_END
 
 `SVUNIT_TESTS_END

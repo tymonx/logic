@@ -59,52 +59,32 @@ void rx_driver::transfer(const rx_sequence_item& item) {
     std::uniform_int_distribution<std::size_t>
         random_idle{item.idle.min(), item.idle.max()};
 
-    std::size_t index = 0;
-    std::size_t count = 0;
-    std::size_t idle_count = random_idle(m_random_generator);
-    std::size_t size_count = item.data.size();
-    std::size_t timeout = item.timeout;
+    const std::size_t total_size = item.data.size();
     const std::size_t bus_size = m_vif->size();
+    bool is_running = (total_size > 0);
 
-    while (size_count != 0) {
-        if (!m_vif->get_areset_n()) {
-            size_count = 0;
-        }
-        else if (m_vif->get_tready()) {
+    std::size_t idle = random_idle(m_random_generator);
+    std::size_t timeout = item.timeout;
+    std::size_t transfer = 0;
+    std::size_t index = 0;
+
+    while (is_running && m_vif->get_areset_n()) {
+        if (m_vif->get_tready()) {
+            m_vif->set_tvalid(false);
+
             timeout = item.timeout;
 
-            if (idle_count != 0) {
-                --idle_count;
-                m_vif->set_tvalid(false);
-                m_vif->aclk_posedge();
+            if (index >= total_size) {
+                is_running = false;
             }
-            else {
-                idle_count = random_idle(m_random_generator);
-                m_vif->set_tvalid(true);
-
-                if (size_count <= bus_size) {
-                    m_vif->set_tlast(true);
-                }
-                else {
-                    m_vif->set_tlast(false);
-                }
-
-                m_vif->set_tid(item.id);
-                m_vif->set_tdest(item.destination);
-
-                if (item.user.empty()) {
-                    m_vif->set_tuser({});
-                }
-                else {
-                    m_vif->set_tuser(item.user[count % item.user.size()]);
-                }
+            else if (0 == idle) {
+                idle = random_idle(m_random_generator);
 
                 for (std::size_t i = 0; i < bus_size; ++i) {
-                    if (size_count != 0) {
+                    if (index < total_size) {
                         m_vif->set_tkeep(i, true);
                         m_vif->set_tstrb(i, true);
                         m_vif->set_tdata(i, item.data[index++]);
-                        --size_count;
                     }
                     else {
                         m_vif->set_tkeep(i, false);
@@ -113,26 +93,38 @@ void rx_driver::transfer(const rx_sequence_item& item) {
                     }
                 }
 
-                ++count;
+                if (0 == bus_size) {
+                    ++index;
+                }
 
-                do {
-                    m_vif->aclk_posedge();
-                } while ((size_count > 0) && !m_vif->get_tready());
-            }
-        }
-        else {
-            if (item.timeout > 0) {
-                if (timeout > 0) {
-                    --timeout;
+                if (transfer < item.user.size()) {
+                    m_vif->set_tuser(item.user[transfer]);
                 }
                 else {
-                    size_count = 0;
-                    UVM_ERROR(get_name(), "Timeout!");
+                    m_vif->set_tuser({});
                 }
-            }
 
-            m_vif->aclk_posedge();
+                ++transfer;
+
+                m_vif->set_tid(item.id);
+                m_vif->set_tdest(item.destination);
+                m_vif->set_tlast(index >= total_size);
+                m_vif->set_tvalid(true);
+            }
+            else {
+                --idle;
+            }
         }
+        else if (0 != item.timeout) {
+            if (0 != timeout) {
+                --timeout;
+            }
+            else {
+                is_running = false;
+                UVM_ERROR(get_name(), "Timeout!");
+            }
+        }
+        m_vif->aclk_posedge();
     }
 
     m_vif->set_tvalid(false);

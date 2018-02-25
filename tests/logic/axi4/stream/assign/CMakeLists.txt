@@ -16,5 +16,8 @@
 
 add_hdl_unit_test(logic_axi4_stream_assign_unit_test.sv
     DEPENDS
+        logic_pkg
+        logic_unit_test_pkg
+        logic_axi4_stream_if
         logic_axi4_stream_assign
 )

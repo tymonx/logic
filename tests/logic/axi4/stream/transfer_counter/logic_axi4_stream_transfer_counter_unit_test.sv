@@ -17,6 +17,8 @@
 
 module logic_axi4_stream_transfer_counter_unit_test;
     import svunit_pkg::svunit_testcase;
+    import logic_unit_test_pkg::logic_axi4_stream_driver_rx;
+    import logic_unit_test_pkg::logic_axi4_stream_driver_tx;
 
     string name = "logic_axi4_stream_transfer_counter_unit_test";
     svunit_testcase svunit_ut;
@@ -46,13 +48,25 @@ module logic_axi4_stream_transfer_counter_unit_test;
         .TDATA_BYTES(TDATA_BYTES)
     ) rx (.*);
 
+    logic_axi4_stream_driver_rx #(
+        .TDATA_BYTES(TDATA_BYTES)
+    ) rx_drv = new (rx);
+
     logic_axi4_stream_if #(
         .TDATA_BYTES(TDATA_BYTES)
     ) tx (.*);
 
+    logic_axi4_stream_driver_tx #(
+        .TDATA_BYTES(TDATA_BYTES)
+    ) tx_drv = new (tx);
+
     logic_axi4_stream_if #(
         .TDATA_BYTES(TDATA_BYTES)
     ) counter (.*);
+
+    logic_axi4_stream_driver_tx #(
+        .TDATA_BYTES(TDATA_BYTES)
+    ) counter_drv = new (counter);
 
     logic_axi4_stream_transfer_counter #(
         .PACKETS(PACKETS),
@@ -81,20 +95,31 @@ module logic_axi4_stream_transfer_counter_unit_test;
     task setup();
         svunit_ut.setup();
 
+        rx_drv.reset();
+        tx_drv.reset();
+        counter_drv.reset();
+
         areset_n = 0;
-        counter.cb_tx.tready <= '0;
-        @(rx.cb_rx);
+        fork
+            rx_drv.aclk_posedge();
+            tx_drv.aclk_posedge();
+            counter_drv.aclk_posedge();
+        join
 
         areset_n = 1;
-        counter.cb_tx.tready <= '1;
-        @(rx.cb_rx);
+        fork
+            rx_drv.aclk_posedge();
+            tx_drv.aclk_posedge();
+            counter_drv.aclk_posedge();
+        join
+
+        counter_drv.ready();
     endtask
 
     task teardown();
         svunit_ut.teardown();
 
         areset_n = 0;
-        counter.cb_tx.tready <= '0;
     endtask
 
 `SVUNIT_TESTS_BEGIN
@@ -108,18 +133,18 @@ module logic_axi4_stream_transfer_counter_unit_test;
         data[i] = $urandom;
     end
 
-    rx.cb_write(data);
+    rx_drv.write(data);
 
-    @(counter.cb_rx);
-    counter.cb_read(value);
-    counter.cb_tx.tready <= '1;
+    counter_drv.aclk_posedge();
+    counter_drv.read(value);
+    counter_drv.ready();
 
     `FAIL_UNLESS_EQUAL(tdata_t'({<<8{value}}), PACKETS ? 1 : COUNTER_MAX)
 
-    tx.cb_read(captured);
+    tx_drv.read(captured);
 
-    @(counter.cb_rx);
-    counter.cb_read(value);
+    counter_drv.aclk_posedge();
+    counter_drv.read(value);
     `FAIL_UNLESS_EQUAL(tdata_t'({<<8{value}}), 0)
 `SVTEST_END
 
@@ -132,18 +157,19 @@ module logic_axi4_stream_transfer_counter_unit_test;
         data[i] = $urandom;
     end
 
-    rx.cb_write(data, 0, 0, 3, 0);
+    rx_drv.set_idle(0, 3);
+    rx_drv.write(data);
 
-    @(counter.cb_rx);
-    counter.cb_read(value);
-    counter.cb_tx.tready <= '1;
+    counter_drv.aclk_posedge();
+    counter_drv.read(value);
+    counter_drv.ready();
 
     `FAIL_UNLESS_EQUAL(tdata_t'({<<8{value}}), PACKETS ? 1 : COUNTER_MAX)
 
-    tx.cb_read(captured);
+    tx_drv.read(captured);
 
-    @(counter.cb_rx);
-    counter.cb_read(value);
+    counter_drv.aclk_posedge();
+    counter_drv.read(value);
     `FAIL_UNLESS_EQUAL(tdata_t'({<<8{value}}), 0)
 `SVTEST_END
 
@@ -156,18 +182,19 @@ module logic_axi4_stream_transfer_counter_unit_test;
         data[i] = $urandom;
     end
 
-    rx.cb_write(data);
+    rx_drv.write(data);
 
-    @(counter.cb_rx);
-    counter.cb_read(value);
-    counter.cb_tx.tready <= '1;
+    counter_drv.aclk_posedge();
+    counter_drv.read(value);
+    counter_drv.ready();
 
     `FAIL_UNLESS_EQUAL(tdata_t'({<<8{value}}), PACKETS ? 1 : COUNTER_MAX)
 
-    tx.cb_read(captured, 0, 0, 3, 0);
+    tx_drv.set_idle(0, 3);
+    tx_drv.read(captured);
 
-    @(counter.cb_rx);
-    counter.cb_read(value);
+    counter_drv.aclk_posedge();
+    counter_drv.read(value);
     `FAIL_UNLESS_EQUAL(tdata_t'({<<8{value}}), 0)
 `SVTEST_END
 
@@ -180,18 +207,20 @@ module logic_axi4_stream_transfer_counter_unit_test;
         data[i] = $urandom;
     end
 
-    rx.cb_write(data, 0, 0, 3, 0);
+    rx_drv.set_idle(0, 3);
+    rx_drv.write(data);
 
-    @(counter.cb_rx);
-    counter.cb_read(value);
-    counter.cb_tx.tready <= '1;
+    counter_drv.aclk_posedge();
+    counter_drv.read(value);
+    counter_drv.ready();
 
     `FAIL_UNLESS_EQUAL(tdata_t'({<<8{value}}), PACKETS ? 1 : COUNTER_MAX)
 
-    tx.cb_read(captured, 0, 0, 3, 0);
+    tx_drv.set_idle(0, 3);
+    tx_drv.read(captured);
 
-    @(counter.cb_rx);
-    counter.cb_read(value);
+    counter_drv.aclk_posedge();
+    counter_drv.read(value);
     `FAIL_UNLESS_EQUAL(tdata_t'({<<8{value}}), 0)
 `SVTEST_END
 
@@ -201,29 +230,29 @@ module logic_axi4_stream_transfer_counter_unit_test;
     byte value[];
 
     data = create_data(13 * TDATA_BYTES);
-    rx.cb_write(data);
+    rx_drv.write(data);
 
-    @(counter.cb_rx);
-    counter.cb_read(value);
-    counter.cb_tx.tready <= '1;
+    counter_drv.aclk_posedge();
+    counter_drv.read(value);
+    counter_drv.ready();
 
     `FAIL_UNLESS_EQUAL(tdata_t'({<<8{value}}), PACKETS ? 1 : 13)
 
     data = create_data(7 * TDATA_BYTES);
-    rx.cb_write(data);
+    rx_drv.write(data);
 
-    @(counter.cb_rx);
-    counter.cb_read(value);
-    counter.cb_tx.tready <= '1;
+    counter_drv.aclk_posedge();
+    counter_drv.read(value);
+    counter_drv.ready();
 
     `FAIL_UNLESS_EQUAL(tdata_t'({<<8{value}}), PACKETS ? 2 : 20)
 
     data = create_data(26 * TDATA_BYTES);
-    rx.cb_write(data);
+    rx_drv.write(data);
 
-    @(counter.cb_rx);
-    counter.cb_read(value);
-    counter.cb_tx.tready <= '1;
+    counter_drv.aclk_posedge();
+    counter_drv.read(value);
+    counter_drv.ready();
 
     `FAIL_UNLESS_EQUAL(tdata_t'({<<8{value}}), PACKETS ? 3 : 46)
 `SVTEST_END

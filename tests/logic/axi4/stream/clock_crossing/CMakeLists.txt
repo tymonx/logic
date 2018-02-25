@@ -19,6 +19,8 @@ add_hdl_unit_test(logic_axi4_stream_clock_crossing_unit_test.sv
         logic_axi4_stream_clock_crossing_generic_unit_test
     DEPENDS
         logic_pkg
+        logic_unit_test_pkg
+        logic_axi4_stream_if
         logic_axi4_stream_clock_crossing
     PARAMETERS
         TARGET=logic_pkg::TARGET_GENERIC
@@ -29,6 +31,8 @@ add_hdl_unit_test(logic_axi4_stream_clock_crossing_unit_test.sv
         logic_axi4_stream_clock_crossing_intel_unit_test
     DEPENDS
         logic_pkg
+        logic_unit_test_pkg
+        logic_axi4_stream_if
         logic_axi4_stream_clock_crossing
     PARAMETERS
         TARGET=logic_pkg::TARGET_INTEL

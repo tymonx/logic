@@ -17,6 +17,8 @@
 
 module logic_axi4_stream_mux_unit_test;
     import svunit_pkg::svunit_testcase;
+    import logic_unit_test_pkg::logic_axi4_stream_driver_rx;
+    import logic_unit_test_pkg::logic_axi4_stream_driver_tx;
 
     string name = "logic_axi4_stream_mux_unit_test";
     svunit_testcase svunit_ut;
@@ -35,19 +37,26 @@ module logic_axi4_stream_mux_unit_test;
         .TID_WIDTH(TID_WIDTH)
     ) rx [INPUTS] (.*);
 
-    virtual logic_axi4_stream_if #(
+    logic_axi4_stream_driver_rx #(
         .TDATA_BYTES(TDATA_BYTES),
         .TID_WIDTH(TID_WIDTH)
-    ) rx_if [INPUTS];
+    ) rx_drv [INPUTS];
 
     logic_axi4_stream_if #(
         .TDATA_BYTES(TDATA_BYTES),
         .TID_WIDTH(TID_WIDTH)
     ) tx (.*);
 
+    logic_axi4_stream_driver_tx #(
+        .TDATA_BYTES(TDATA_BYTES),
+        .TID_WIDTH(TID_WIDTH),
+        .ACTIVE(0)
+    ) tx_drv[INPUTS];
+
     generate
         for (genvar k = 0; k < INPUTS; ++k) begin: map
-            initial rx_if[k] = rx[k];
+            initial rx_drv[k] = new (rx[k]);
+            initial tx_drv[k] = new (tx);
         end
     endgenerate
 
@@ -67,17 +76,34 @@ module logic_axi4_stream_mux_unit_test;
     task setup();
         svunit_ut.setup();
 
+        foreach (rx_drv[k]) begin
+            rx_drv[k].reset();
+        end
+
+        foreach (tx_drv[k]) begin
+            tx_drv[k].reset();
+        end
+
         areset_n = 0;
-        @(rx[0].cb_rx);
+        fork
+            rx_drv[0].aclk_posedge();
+            tx_drv[0].aclk_posedge();
+        join
+
+        tx.cb_tx.tready <= '1;
 
         areset_n = 1;
-        @(rx[0].cb_rx);
+        fork
+            rx_drv[0].aclk_posedge();
+            tx_drv[0].aclk_posedge();
+        join
     endtask
 
     task teardown();
         svunit_ut.teardown();
 
         areset_n = 0;
+        tx.cb_tx.tready <= '0;
     endtask
 
 `SVUNIT_TESTS_BEGIN
@@ -99,7 +125,10 @@ module logic_axi4_stream_mux_unit_test;
         foreach (data[i]) begin
             fork
                 automatic int index = i;
-                rx_if[index].cb_write(data[index], index);
+            begin
+                rx_drv[index].set_id(index);
+                rx_drv[index].write(data[index]);
+            end
             join_none
         end
         wait fork;
@@ -108,7 +137,10 @@ module logic_axi4_stream_mux_unit_test;
         foreach (captured[i]) begin
             fork
                 automatic int index = i;
-                tx.cb_read(captured[index], index);
+            begin
+                tx_drv[index].set_id(index);
+                tx_drv[index].read(captured[index]);
+            end
             join_none
         end
         wait fork;
@@ -141,7 +173,10 @@ module logic_axi4_stream_mux_unit_test;
         foreach (data[i]) begin
             fork
                 automatic int index = i;
-                rx_if[index].cb_write(data[index], index);
+            begin
+                rx_drv[index].set_id(index);
+                rx_drv[index].write(data[index]);
+            end
             join_none
         end
         wait fork;
@@ -150,7 +185,10 @@ module logic_axi4_stream_mux_unit_test;
         foreach (captured[i]) begin
             fork
                 automatic int index = i;
-                tx.cb_read(captured[index], index);
+            begin
+                tx_drv[index].set_id(index);
+                tx_drv[index].read(captured[index]);
+            end
             join_none
         end
         wait fork;

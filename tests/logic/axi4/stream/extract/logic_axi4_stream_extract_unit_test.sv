@@ -17,6 +17,8 @@
 
 module logic_axi4_stream_extract_unit_test;
     import svunit_pkg::svunit_testcase;
+    import logic_unit_test_pkg::logic_axi4_stream_driver_rx;
+    import logic_unit_test_pkg::logic_axi4_stream_driver_tx;
 
     string name = "logic_axi4_stream_extract_unit_test";
     svunit_testcase svunit_ut;
@@ -36,19 +38,24 @@ module logic_axi4_stream_extract_unit_test;
         .TID_WIDTH(TID_WIDTH)
     ) rx (.*);
 
+    logic_axi4_stream_driver_rx #(
+        .TDATA_BYTES(TDATA_BYTES),
+        .TID_WIDTH(TID_WIDTH)
+    ) rx_drv = new (rx);
+
     logic_axi4_stream_if #(
         .TDATA_BYTES(TDATA_BYTES),
         .TID_WIDTH(TID_WIDTH)
     ) tx[OUTPUTS] (.*);
 
-    virtual logic_axi4_stream_if #(
+    logic_axi4_stream_driver_tx #(
         .TDATA_BYTES(TDATA_BYTES),
         .TID_WIDTH(TID_WIDTH)
-    ) tx_if[OUTPUTS];
+    ) tx_drv[OUTPUTS];
 
     generate
         for (genvar k = 0; k < OUTPUTS; ++k) begin: map
-            initial tx_if[k] = tx[k];
+            initial tx_drv[k] = new (tx[k]);
         end
     endgenerate
 
@@ -69,11 +76,24 @@ module logic_axi4_stream_extract_unit_test;
     task setup();
         svunit_ut.setup();
 
+        rx_drv.reset();
+        foreach (tx_drv[k]) begin
+            tx_drv[k].reset();
+        end
+
         areset_n = 0;
-        @(rx.cb_rx);
+        fork
+            rx_drv.aclk_posedge();
+            tx_drv[0].aclk_posedge();
+            tx_drv[1].aclk_posedge();
+        join
 
         areset_n = 1;
-        @(rx.cb_rx);
+        fork
+            rx_drv.aclk_posedge();
+            tx_drv[0].aclk_posedge();
+            tx_drv[1].aclk_posedge();
+        join
     endtask
 
     task teardown();
@@ -104,20 +124,23 @@ module logic_axi4_stream_extract_unit_test;
     fork
     begin
         foreach (data[i]) begin
-            rx.cb_write(data[i], ids[i]);
+            rx_drv.set_id(ids[i]);
+            rx_drv.write(data[i]);
         end
     end
     begin
         foreach (ids[i]) begin
             if (ids[i] >= PACKETS) begin
-                tx_if[0].cb_read(captured[i], ids[i]);
+                tx_drv[0].set_id(ids[i]);
+                tx_drv[0].read(captured[i]);
             end
         end
     end
     begin
         foreach (ids[i]) begin
             if (ids[i] < PACKETS) begin
-                tx_if[1].cb_read(captured[i], ids[i]);
+                tx_drv[1].set_id(ids[i]);
+                tx_drv[1].read(captured[i]);
             end
         end
     end
@@ -152,20 +175,24 @@ module logic_axi4_stream_extract_unit_test;
     fork
     begin
         foreach (data[i]) begin
-            rx.cb_write(data[i], ids[i], 0, 3, 0);
+            rx_drv.set_idle(0, 3);
+            rx_drv.set_id(ids[i]);
+            rx_drv.write(data[i]);
         end
     end
     begin
         foreach (ids[i]) begin
             if (ids[i] >= PACKETS) begin
-                tx_if[0].cb_read(captured[i], ids[i]);
+                tx_drv[0].set_id(ids[i]);
+                tx_drv[0].read(captured[i]);
             end
         end
     end
     begin
         foreach (ids[i]) begin
             if (ids[i] < PACKETS) begin
-                tx_if[1].cb_read(captured[i], ids[i]);
+                tx_drv[1].set_id(ids[i]);
+                tx_drv[1].read(captured[i]);
             end
         end
     end
@@ -200,20 +227,24 @@ module logic_axi4_stream_extract_unit_test;
     fork
     begin
         foreach (data[i]) begin
-            rx.cb_write(data[i], ids[i]);
+            rx_drv.set_id(ids[i]);
+            rx_drv.write(data[i]);
         end
     end
     begin
         foreach (ids[i]) begin
             if (ids[i] >= PACKETS) begin
-                tx_if[0].cb_read(captured[i], ids[i], 0, 3, 0);
+                tx_drv[0].set_idle(0, 3);
+                tx_drv[0].set_id(ids[i]);
+                tx_drv[0].read(captured[i]);
             end
         end
     end
     begin
         foreach (ids[i]) begin
             if (ids[i] < PACKETS) begin
-                tx_if[1].cb_read(captured[i], ids[i]);
+                tx_drv[1].set_id(ids[i]);
+                tx_drv[1].read(captured[i]);
             end
         end
     end
@@ -248,20 +279,24 @@ module logic_axi4_stream_extract_unit_test;
     fork
     begin
         foreach (data[i]) begin
-            rx.cb_write(data[i], ids[i]);
+            rx_drv.set_id(ids[i]);
+            rx_drv.write(data[i]);
         end
     end
     begin
         foreach (ids[i]) begin
             if (ids[i] >= PACKETS) begin
-                tx_if[0].cb_read(captured[i], ids[i]);
+                tx_drv[0].set_id(ids[i]);
+                tx_drv[0].read(captured[i]);
             end
         end
     end
     begin
         foreach (ids[i]) begin
             if (ids[i] < PACKETS) begin
-                tx_if[1].cb_read(captured[i], ids[i], 0, 3, 0);
+                tx_drv[1].set_idle(0, 3);
+                tx_drv[1].set_id(ids[i]);
+                tx_drv[1].read(captured[i]);
             end
         end
     end
@@ -296,20 +331,25 @@ module logic_axi4_stream_extract_unit_test;
     fork
     begin
         foreach (data[i]) begin
-            rx.cb_write(data[i], ids[i]);
+            rx_drv.set_id(ids[i]);
+            rx_drv.write(data[i]);
         end
     end
     begin
         foreach (ids[i]) begin
             if (ids[i] >= PACKETS) begin
-                tx_if[0].cb_read(captured[i], ids[i], 0, 3, 0);
+                tx_drv[0].set_idle(0, 3);
+                tx_drv[0].set_id(ids[i]);
+                tx_drv[0].read(captured[i]);
             end
         end
     end
     begin
         foreach (ids[i]) begin
             if (ids[i] < PACKETS) begin
-                tx_if[1].cb_read(captured[i], ids[i], 0, 3, 0);
+                tx_drv[1].set_idle(0, 3);
+                tx_drv[1].set_id(ids[i]);
+                tx_drv[1].read(captured[i]);
             end
         end
     end
@@ -344,20 +384,26 @@ module logic_axi4_stream_extract_unit_test;
     fork
     begin
         foreach (data[i]) begin
-            rx.cb_write(data[i], ids[i], 0, 3, 0);
+            rx_drv.set_idle(0, 3);
+            rx_drv.set_id(ids[i]);
+            rx_drv.write(data[i]);
         end
     end
     begin
         foreach (ids[i]) begin
             if (ids[i] >= PACKETS) begin
-                tx_if[0].cb_read(captured[i], ids[i], 0, 3, 0);
+                tx_drv[0].set_idle(0, 3);
+                tx_drv[0].set_id(ids[i]);
+                tx_drv[0].read(captured[i]);
             end
         end
     end
     begin
         foreach (ids[i]) begin
             if (ids[i] < PACKETS) begin
-                tx_if[1].cb_read(captured[i], ids[i], 0, 3, 0);
+                tx_drv[1].set_idle(0, 3);
+                tx_drv[1].set_id(ids[i]);
+                tx_drv[1].read(captured[i]);
             end
         end
     end

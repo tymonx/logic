@@ -64,12 +64,19 @@ add_library(verilated STATIC
     ${VERILATOR_INCLUDE_DIR}/verilated_dpi.cpp
     ${VERILATOR_INCLUDE_DIR}/verilated_vcd_c.cpp
     ${VERILATOR_INCLUDE_DIR}/verilated_vcd_sc.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/verilator_callbacks.cpp
+)
+
+set_source_files_properties(
+    ${VERILATOR_INCLUDE_DIR}/verilated.cpp
+    PROPERTIES
+        COMPILE_DEFINITIONS "VL_USER_STOP;VL_USER_FINISH"
 )
 
 set_source_files_properties(
     ${VERILATOR_INCLUDE_DIR}/verilated_cov.cpp
     PROPERTIES
-    COMPILE_DEFINITIONS "VM_COVERAGE=1"
+        COMPILE_DEFINITIONS "VM_COVERAGE=1"
 )
 
 target_link_libraries(verilated PRIVATE systemc)

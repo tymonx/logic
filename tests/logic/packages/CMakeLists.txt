@@ -14,12 +14,13 @@
 
 # SVUnit unit test
 
-add_hdl_unit_test(logic_axi4_stream_driver_rx.sv
+add_hdl_source(logic_unit_test_pkg.sv
     DEPENDS
         logic_axi4_stream_if
-)
-
-add_hdl_unit_test(logic_axi4_stream_driver_tx.sv
-    DEPENDS
-        logic_axi4_stream_if
+    PACKAGE
+        TRUE
+    INCLUDES
+        .
+    LIBRARY
+        unit_test
 )

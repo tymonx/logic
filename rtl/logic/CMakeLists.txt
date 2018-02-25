@@ -21,6 +21,10 @@ if (STD_OVL_FOUND)
     set(HDL_INCLUDES ${HDL_INCLUDES}
         ${STD_OVL_DIR}
     )
+
+    set(HDL_DEFINES ${HDL_DEFINES}
+        OVL_ASSERT_ON
+    )
 endif()
 
 add_subdirectory(packages)

@@ -60,53 +60,46 @@ void tx_driver::run_phase(uvm::uvm_phase& /* phase */) {
 }
 
 void tx_driver::transfer(const tx_sequence_item& item) {
-    auto tready_tmp = m_vif->get_tready();
-
     std::uniform_int_distribution<std::size_t>
         random_idle{item.idle.min(), item.idle.max()};
 
-    std::size_t packets_count = 1;
-    std::size_t idle_count = random_idle(m_random_generator);
+    bool is_running = true;
+
+    std::size_t idle = random_idle(m_random_generator);
     std::size_t timeout = item.timeout;
 
-    while (packets_count != 0) {
-        if (!m_vif->get_areset_n()) {
-            packets_count = 0;
+    m_vif->set_tready(true);
+
+    while ((is_running || (0 != idle)) && m_vif->get_areset_n()) {
+        if (is_running && m_vif->get_tready() && m_vif->get_tvalid()
+                && (item.id == m_vif->get_tid())
+                && (item.destination == m_vif->get_tdest())) {
+            timeout = item.timeout;
+            is_running = !m_vif->get_tlast();
         }
-        else {
-            if (m_vif->get_tready() && m_vif->get_tvalid()) {
-                timeout = item.timeout;
 
-                if (m_vif->get_tlast()) {
-                    --packets_count;
-                }
-            }
-
-            if (packets_count != 0) {
-                if (idle_count != 0) {
-                    --idle_count;
-                    m_vif->set_tready(false);
-                }
-                else {
-                    idle_count = random_idle(m_random_generator);
-                    m_vif->set_tready(true);
-                }
+        if (is_running && (0 != item.timeout)) {
+            if (0 != timeout) {
+                --timeout;
             }
             else {
-                m_vif->set_tready(tready_tmp);
+                idle = 0;
+                is_running = false;
+                UVM_ERROR(get_name(), "Timeout!");
             }
-
-            if (item.timeout != 0) {
-                if (timeout != 0) {
-                    --timeout;
-                }
-                else {
-                    packets_count = 0;
-                    UVM_ERROR(get_name(), "Timeout!");
-                }
-            }
-
-            m_vif->aclk_posedge();
         }
+
+        if (0 == idle) {
+            idle = is_running ? random_idle(m_random_generator) : 0;
+            m_vif->set_tready(true);
+        }
+        else {
+            --idle;
+            m_vif->set_tready(false);
+        }
+
+        m_vif->aclk_posedge();
     }
+
+    m_vif->set_tready(false);
 }

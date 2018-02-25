@@ -75,8 +75,8 @@ module logic_axi4_stream_timer #(
         if (!areset_n) begin
             counter <= '0;
         end
-        else if (tx.tready) begin
-            counter <= (counter_reload || rx.tvalid) ? '0 : counter + 1'b1;
+        else if (tx.tready && tx.tvalid) begin
+            counter <= counter_reload ? '0 : counter + 1'b1;
         end
     end
 
@@ -94,7 +94,7 @@ module logic_axi4_stream_timer #(
             counter_reload <= '0;
         end
         else if (tx.tready) begin
-            counter_reload <= (counter == periodic) && !rx.tvalid;
+            counter_reload <= (counter == periodic);
         end
     end
 
@@ -102,7 +102,7 @@ module logic_axi4_stream_timer #(
         if (!areset_n) begin
             tx.tvalid <= '0;
         end
-        else begin
+        else if (tx.tready) begin
             tx.tvalid <= '1;
         end
     end
