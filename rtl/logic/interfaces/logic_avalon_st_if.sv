@@ -122,8 +122,7 @@ interface logic_avalon_st_if #(
         output channel,
         output error,
         output empty,
-        output data,
-        import write
+        output data
     );
 
     modport monitor (
