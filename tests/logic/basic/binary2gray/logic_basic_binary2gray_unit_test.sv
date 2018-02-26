@@ -13,8 +13,11 @@
  * limitations under the License.
  */
 
-`include "std_ovl_defines.h"
 `include "svunit_defines.svh"
+
+`ifdef OVL_ASSERT_ON
+`include "std_ovl_defines.h"
+`endif
 
 module logic_basic_binary2gray_unit_test;
     import svunit_pkg::svunit_testcase;
@@ -34,7 +37,6 @@ module logic_basic_binary2gray_unit_test;
 
     logic aclk = '0;
     logic areset_n = '0;
-    logic [`OVL_FIRE_WIDTH-1:0] assert_unknown_output_fire;
 
     logic [WIDTH-1:0] i = '0;
     logic [WIDTH-1:0] o;
@@ -73,6 +75,9 @@ module logic_basic_binary2gray_unit_test;
         areset_n = '0;
     endtask
 
+`ifdef OVL_ASSERT_ON
+    logic [`OVL_FIRE_WIDTH-1:0] assert_unknown_output_fire;
+
     ovl_never_unknown_async #(
         .severity_level(`OVL_FATAL),
         .width(WIDTH),
@@ -85,6 +90,7 @@ module logic_basic_binary2gray_unit_test;
         .test_expr(i),
         .fire(assert_unknown_output_fire)
     );
+`endif
 
 `SVUNIT_TESTS_BEGIN
 

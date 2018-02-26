@@ -14,10 +14,22 @@
 
 # Create SystemVerilog with SVUnit
 
+set(depends)
+set(defines)
+set(includes)
+
+if (STD_OVL_FOUND)
+    list(APPEND depends ovl_never_unknown_async)
+    list(APPEND defines OVL_ASSERT_ON)
+    list(APPEND includes "${STD_OVL_DIR}")
+endif()
+
 add_hdl_unit_test(logic_basic_binary2gray_unit_test.sv
     DEPENDS
-        ovl_never_unknown_async
+        ${depends}
         logic_basic_binary2gray
     INCLUDES
-        ${STD_OVL_DIR}
+        ${includes}
+    DEFINES
+        ${defines}
 )

@@ -12,11 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_hdl_source(logic_axi4_stream_if.sv
-    DEPENDS
+set(std_ovl_depends)
+
+if (STD_OVL_FOUND)
+    set(std_ovl_depends
         ovl_never_unknown
         ovl_win_unchange
         ovl_always
+    )
+endif()
+
+add_hdl_source(logic_axi4_stream_if.sv
+    DEPENDS
+        ${std_ovl_depends}
     MODELSIM_SUPPRESS
         2583
 )
@@ -26,10 +34,16 @@ add_hdl_source(logic_axi4_lite_if.sv
         logic_axi4_lite_pkg
 )
 
-add_hdl_source(logic_avalon_st_if.sv
-    DEPENDS
+if (STD_OVL_FOUND)
+    set(std_ovl_depends
         ovl_win_unchange
         ovl_always
+    )
+endif()
+
+add_hdl_source(logic_avalon_st_if.sv
+    DEPENDS
+        ${std_ovl_depends}
     MODELSIM_SUPPRESS
         2583
 )

@@ -79,4 +79,8 @@ module logic_axi4_stream_from_avalon_st #(
             tx.tdata <= tdata_t'(rx.data);
         end
     end
+
+`ifdef VERILATOR
+    logic _unused_ports = &{1'b0, rx.startofpacket, rx.error, 1'b0};
+`endif
 endmodule
