@@ -89,6 +89,7 @@ module logic_clock_domain_crossing_intel #(
     end
 
     /* verilator lint_off PINMISSING */
+    /* verilator lint_off DECLFILENAME */
 
     dcfifo #(
         .lpm_width(DATA_WIDTH),
@@ -115,6 +116,7 @@ module logic_clock_domain_crossing_intel #(
         .rdusedw(rdusedw)
     );
 
+    /* verilator lint_on DECLFILENAME */
     /* verilator lint_on PINMISSING */
 
     always_ff @(posedge tx_aclk or negedge areset_n) begin

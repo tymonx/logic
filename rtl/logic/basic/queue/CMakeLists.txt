@@ -12,6 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set(vendor_depends "")
+
+if (QUARTUS_FOUND)
+    list(APPEND vendor_depends altera_mf)
+endif()
+
+if (STD_OVL_FOUND)
+    list(APPEND vendor_depends ovl_no_transition)
+endif()
+
 add_hdl_source(logic_basic_queue.sv
     SOURCES
         logic_basic_queue_generic_capacity.sv
@@ -25,8 +35,7 @@ add_hdl_source(logic_basic_queue.sv
         logic_pkg
         logic_axi4_stream_if
         logic_reset_synchronizer
-        ovl_no_transition
-        altera_mf
+        ${vendor_depends}
     ANALYSIS
         TRUE
 )

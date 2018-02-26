@@ -12,13 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set(vendor_depends "")
+
+if (QUARTUS_FOUND)
+    list(APPEND vendor_depends altera_mf)
+endif()
+
 add_hdl_source(logic_basic_synchronizer.sv
     SOURCES
         logic_basic_synchronizer_generic.sv
         logic_basic_synchronizer_intel.sv
     DEPENDS
         logic_pkg
-        altera_mf
+        ${vendor_depends}
     ANALYSIS
         TRUE
 )

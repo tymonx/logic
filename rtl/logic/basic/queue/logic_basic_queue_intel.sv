@@ -66,6 +66,7 @@ module logic_basic_queue_intel #(
     end
 
     /* verilator lint_off PINMISSING */
+    /* verilator lint_off DECLFILENAME */
 
     scfifo #(
         .lpm_width($bits(write_data)),
@@ -92,6 +93,7 @@ module logic_basic_queue_intel #(
         .almost_full(almost_full)
     );
 
+    /* verilator lint_on DECLFILENAME */
     /* verilator lint_on PINMISSING */
 
     always_ff @(posedge aclk or negedge areset_n) begin

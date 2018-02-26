@@ -12,6 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set(vendor_depends "")
+
+if (QUARTUS_FOUND)
+    list(APPEND vendor_depends altera_mf)
+endif()
+
+if (STD_OVL_FOUND)
+    list(APPEND vendor_depends ovl_no_transition)
+endif()
+
 add_hdl_source(logic_clock_domain_crossing.sv
     SOURCES
         logic_clock_domain_crossing_intel.sv
@@ -28,8 +38,7 @@ add_hdl_source(logic_clock_domain_crossing.sv
         logic_basic_synchronizer
         logic_basic_gray2binary
         logic_basic_binary2gray
-        ovl_no_transition
-        altera_mf
+        ${vendor_depends}
     ANALYSIS
         TRUE
     QUARTUS_SDC_FILES

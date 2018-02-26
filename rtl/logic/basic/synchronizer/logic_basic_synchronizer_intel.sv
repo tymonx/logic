@@ -36,6 +36,7 @@ module logic_basic_synchronizer_intel #(
 
     generate
         for (k = 0; k < WIDTH; ++k) begin: width
+            /* verilator lint_off DECLFILENAME */
             altera_std_synchronizer #(
                 .depth(STAGES)
             )
@@ -45,6 +46,7 @@ module logic_basic_synchronizer_intel #(
                 .din(i[k]),
                 .dout(o[k])
             );
+            /* verilator lint_on DECLFILENAME */
         end
     endgenerate
 endmodule
