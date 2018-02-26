@@ -22,17 +22,24 @@
 #
 #   STD_OVL_DIR             - Open Verification Library directory
 
-if (STD_OVL_FOUND)
+if (COMMAND _find_accellera_std_ovl)
     return()
 endif()
 
-find_package(PackageHandleStandardArgs REQUIRED)
+function(_find_accellera_std_ovl)
+    find_package(PackageHandleStandardArgs REQUIRED)
 
-find_path(STD_OVL_DIR std_ovl_defines.h
-    HINTS $ENV{STD_OVL_DIR} $ENV{STD_OVL}
-    DOC "Path to the Open Verification Library directory"
-)
+    find_path(STD_OVL_DIR std_ovl_defines.h
+        HINTS $ENV{STD_OVL_DIR} $ENV{STD_OVL}
+        DOC "Path to the Open Verification Library directory"
+    )
 
-mark_as_advanced(STD_OVL_DIR)
+    mark_as_advanced(STD_OVL_DIR)
 
-find_package_handle_standard_args(STD_OVL REQUIRED_VARS STD_OVL_DIR)
+    find_package_handle_standard_args(STD_OVL REQUIRED_VARS STD_OVL_DIR)
+
+    set(STD_OVL_FOUND ${STD_OVL_FOUND} PARENT_SCOPE)
+    set(STD_OVL_DIR "${STD_OVL_DIR}" PARENT_SCOPE)
+endfunction()
+
+_find_accellera_std_ovl()

@@ -24,25 +24,33 @@
 #   SVUNIT_INCLUDE_DIR      - SVUnit include directory
 #   SVUNIT_FOUND            - true if SVUnit found
 
-if (SVUNIT_FOUND)
+if (_find_svunit)
     return()
 endif()
 
-find_package(PackageHandleStandardArgs REQUIRED)
+function(_find_svunit)
+    find_package(PackageHandleStandardArgs REQUIRED)
 
-find_path(SVUNIT_HDL_SOURCES_DIR svunit_base.sv
-    HINTS $ENV{SVUNIT_INSTALL}
-    PATH_SUFFIXES svunit_base
-    DOC "Path to the SVUnit include directory"
-)
+    find_path(SVUNIT_HDL_SOURCES_DIR svunit_base.sv
+        HINTS $ENV{SVUNIT_INSTALL}
+        PATH_SUFFIXES svunit_base
+        DOC "Path to the SVUnit include directory"
+    )
 
-if (SVUNIT_HDL_SOURCES_DIR)
-    set(SVUNIT_HDL_PACKAGE ${SVUNIT_HDL_SOURCES_DIR}/svunit_pkg.sv)
-    set(SVUNIT_INCLUDE_DIR ${SVUNIT_HDL_SOURCES_DIR})
-endif()
+    if (SVUNIT_HDL_SOURCES_DIR)
+        set(SVUNIT_HDL_PACKAGE ${SVUNIT_HDL_SOURCES_DIR}/svunit_pkg.sv)
+        set(SVUNIT_INCLUDE_DIR ${SVUNIT_HDL_SOURCES_DIR})
+    endif()
 
-mark_as_advanced(SVUNIT_HDL_PACKAGE)
-mark_as_advanced(SVUNIT_INCLUDE_DIR)
+    mark_as_advanced(SVUNIT_HDL_PACKAGE)
+    mark_as_advanced(SVUNIT_INCLUDE_DIR)
 
-find_package_handle_standard_args(SVUnit REQUIRED_VARS
-    SVUNIT_HDL_PACKAGE SVUNIT_INCLUDE_DIR)
+    find_package_handle_standard_args(SVUnit REQUIRED_VARS
+        SVUNIT_HDL_PACKAGE SVUNIT_INCLUDE_DIR)
+
+    set(SVUNIT_FOUND ${SVUNIT_FOUND} PARENT_SCOPE)
+    set(SVUNIT_INCLUDE_DIR "${SVUNIT_INCLUDE_DIR}" PARENT_SCOPE)
+    set(SVUNIT_HDL_PACKAGE "${SVUNIT_HDL_PACKAGE}" PARENT_SCOPE)
+endfunction()
+
+_find_svunit()

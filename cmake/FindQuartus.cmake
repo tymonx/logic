@@ -28,91 +28,104 @@
 #   QUARTUS_QSYS_GENERATE   - Quartus Qsys generate
 #   QUARTUS_FOUND           - true if Quartus found
 
-if (QUARTUS_FOUND)
+if (COMMAND _find_intel_quartus)
     return()
 endif()
 
-find_package(PackageHandleStandardArgs REQUIRED)
+function(_find_intel_quartus)
+    find_package(PackageHandleStandardArgs REQUIRED)
 
-set(QUARTUS_HINTS
-    $ENV{QUARTUS_ROOTDIR}
-    $ENV{QUARTUS_HOME}
-    $ENV{QUARTUS_ROOT}
-    $ENV{QUARTUS_DIR}
-    $ENV{QUARTUS}
-)
-
-find_program(QUARTUS_EXECUTABLE quartus
-    HINTS ${QUARTUS_HINTS}
-    PATH_SUFFIXES bin bin64
-    DOC "Path to the Quartus executable"
-)
-
-find_program(QUARTUS_MAP quartus_map
-    HINTS ${QUARTUS_HINTS}
-    PATH_SUFFIXES bin bin64
-    DOC "Path to the Quartus map executable"
-)
-
-find_program(QUARTUS_SYN quartus_syn
-    HINTS ${QUARTUS_HINTS}
-    PATH_SUFFIXES bin bin64
-    DOC "Path to the Quartus syn executable"
-)
-
-find_program(QUARTUS_SH quartus_sh
-    HINTS ${QUARTUS_HINTS}
-    PATH_SUFFIXES bin bin64
-    DOC "Path to the Quartus sh executable"
-)
-
-find_program(QUARTUS_QSYS_GENERATE qsys-generate
-    HINTS ${QUARTUS_HINTS}
-    PATH_SUFFIXES ../qsys/bin ../qsys/bin64 ../sopc_builder/bin
-    DOC "Path to the Quartus Qsys generate"
-)
-
-find_program(QUARTUS_QSYS_SCRIPT qsys-script
-    HINTS ${QUARTUS_HINTS}
-    PATH_SUFFIXES ../qsys/bin ../qsys/bin64 ../sopc_builder/bin
-    DOC "Path to the Quartus Qsys script"
-)
-
-if (QUARTUS_SH)
-    execute_process(COMMAND ${QUARTUS_SH}
-        --tcl_eval puts "$::quartus(version)"
-        OUTPUT_VARIABLE quartus_version
-        OUTPUT_STRIP_TRAILING_WHITESPACE
+    set(QUARTUS_HINTS
+        $ENV{QUARTUS_ROOTDIR}
+        $ENV{QUARTUS_HOME}
+        $ENV{QUARTUS_ROOT}
+        $ENV{QUARTUS_DIR}
+        $ENV{QUARTUS}
     )
 
-    if (quartus_version MATCHES Pro)
-        set(QUARTUS_EDITION Pro)
-    elseif (quartus_version MATCHES Lite)
-        set(QUARTUS_EDITION Lite)
-    else ()
-        set(QUARTUS_EDITION Standard)
+    find_program(QUARTUS_EXECUTABLE quartus
+        HINTS ${QUARTUS_HINTS}
+        PATH_SUFFIXES bin bin64
+        DOC "Path to the Quartus executable"
+    )
+
+    find_program(QUARTUS_MAP quartus_map
+        HINTS ${QUARTUS_HINTS}
+        PATH_SUFFIXES bin bin64
+        DOC "Path to the Quartus map executable"
+    )
+
+    find_program(QUARTUS_SYN quartus_syn
+        HINTS ${QUARTUS_HINTS}
+        PATH_SUFFIXES bin bin64
+        DOC "Path to the Quartus syn executable"
+    )
+
+    find_program(QUARTUS_SH quartus_sh
+        HINTS ${QUARTUS_HINTS}
+        PATH_SUFFIXES bin bin64
+        DOC "Path to the Quartus sh executable"
+    )
+
+    find_program(QUARTUS_QSYS_GENERATE qsys-generate
+        HINTS ${QUARTUS_HINTS}
+        PATH_SUFFIXES ../qsys/bin ../qsys/bin64 ../sopc_builder/bin
+        DOC "Path to the Quartus Qsys generate"
+    )
+
+    find_program(QUARTUS_QSYS_SCRIPT qsys-script
+        HINTS ${QUARTUS_HINTS}
+        PATH_SUFFIXES ../qsys/bin ../qsys/bin64 ../sopc_builder/bin
+        DOC "Path to the Quartus Qsys script"
+    )
+
+    if (QUARTUS_SH)
+        execute_process(COMMAND ${QUARTUS_SH}
+            --tcl_eval puts "$::quartus(version)"
+            OUTPUT_VARIABLE quartus_version
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+
+        if (quartus_version MATCHES Pro)
+            set(QUARTUS_EDITION Pro)
+        elseif (quartus_version MATCHES Lite)
+            set(QUARTUS_EDITION Lite)
+        else ()
+            set(QUARTUS_EDITION Standard)
+        endif()
+
+        string(REGEX REPLACE " " ";" quartus_version ${quartus_version})
+
+        list(GET quartus_version 1 QUARTUS_VERSION)
     endif()
 
-    string(REGEX REPLACE " " ";" quartus_version ${quartus_version})
+    get_filename_component(QUARTUS_DIR ${QUARTUS_EXECUTABLE} DIRECTORY)
+    get_filename_component(QUARTUS_DIR ${QUARTUS_DIR}/.. REALPATH)
 
-    list(GET quartus_version 1 QUARTUS_VERSION)
-endif()
+    mark_as_advanced(QUARTUS_EXECUTABLE)
+    mark_as_advanced(QUARTUS_SH)
+    mark_as_advanced(QUARTUS_MAP)
+    mark_as_advanced(QUARTUS_SYN)
+    mark_as_advanced(QUARTUS_QSYS_SCRIPT)
+    mark_as_advanced(QUARTUS_QSYS_GENERATE)
 
-get_filename_component(QUARTUS_DIR ${QUARTUS_EXECUTABLE} DIRECTORY)
-get_filename_component(QUARTUS_DIR ${QUARTUS_DIR}/.. REALPATH)
+    find_package_handle_standard_args(Quartus REQUIRED_VARS
+        QUARTUS_EXECUTABLE
+        QUARTUS_MAP
+        QUARTUS_SYN
+        QUARTUS_SH
+        QUARTUS_QSYS_SCRIPT
+        QUARTUS_QSYS_GENERATE
+    )
 
-mark_as_advanced(QUARTUS_EXECUTABLE)
-mark_as_advanced(QUARTUS_SH)
-mark_as_advanced(QUARTUS_MAP)
-mark_as_advanced(QUARTUS_SYN)
-mark_as_advanced(QUARTUS_QSYS_SCRIPT)
-mark_as_advanced(QUARTUS_QSYS_GENERATE)
+    set(QUARTUS_QSYS_GENERATE "${QUARTUS_QSYS_GENERATE}" PARENT_SCOPE)
+    set(QUARTUS_QSYS_SCRIPT "${QUARTUS_QSYS_SCRIPT}" PARENT_SCOPE)
+    set(QUARTUS_EXECUTABLE "${QUARTUS_EXECUTABLE}" PARENT_SCOPE)
+    set(QUARTUS_MAP "${QUARTUS_MAP}" PARENT_SCOPE)
+    set(QUARTUS_SYN "${QUARTUS_SYN}" PARENT_SCOPE)
+    set(QUARTUS_DIR "${QUARTUS_DIR}" PARENT_SCOPE)
+    set(QUARTUS_SH "${QUARTUS_SH}" PARENT_SCOPE)
+    set(QUARTUS_FOUND ${QUARTUS_FOUND} PARENT_SCOPE)
+endfunction()
 
-find_package_handle_standard_args(Quartus REQUIRED_VARS
-    QUARTUS_EXECUTABLE
-    QUARTUS_MAP
-    QUARTUS_SYN
-    QUARTUS_SH
-    QUARTUS_QSYS_SCRIPT
-    QUARTUS_QSYS_GENERATE
-)
+_find_intel_quartus()

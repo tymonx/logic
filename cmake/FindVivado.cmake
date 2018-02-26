@@ -22,26 +22,33 @@
 #
 #   VIVADO_EXECUTABLE   - Vivado executable
 
-if (VIVADO_FOUND)
+if (COMMAND _find_xilinx_vivado)
     return()
 endif()
 
-find_package(PackageHandleStandardArgs REQUIRED)
+function(_find_xilinx_vivado)
+    find_package(PackageHandleStandardArgs REQUIRED)
 
-set(VIVADO_HINTS
-    $ENV{VIVADO_ROOTDIR}
-    $ENV{VIVADO_HOME}
-    $ENV{VIVADO_ROOT}
-    $ENV{VIVADO_DIR}
-    $ENV{VIVADO}
-)
+    set(VIVADO_HINTS
+        $ENV{VIVADO_ROOTDIR}
+        $ENV{VIVADO_HOME}
+        $ENV{VIVADO_ROOT}
+        $ENV{VIVADO_DIR}
+        $ENV{VIVADO}
+    )
 
-find_program(VIVADO_EXECUTABLE vivado
-    HINTS ${VIVADO_HINTS}
-    PATH_SUFFIXES bin bin64
-    DOC "Path to the Vivado executable"
-)
+    find_program(VIVADO_EXECUTABLE vivado
+        HINTS ${VIVADO_HINTS}
+        PATH_SUFFIXES bin bin64
+        DOC "Path to the Vivado executable"
+    )
 
-mark_as_advanced(VIVADO_EXECUTABLE)
+    mark_as_advanced(VIVADO_EXECUTABLE)
 
-find_package_handle_standard_args(Vivado REQUIRED_VARS VIVADO_EXECUTABLE)
+    find_package_handle_standard_args(Vivado REQUIRED_VARS VIVADO_EXECUTABLE)
+
+    set(VIVADO_EXECUTABLE "${VIVADO_EXECUTABLE}" PARENT_SCOPE)
+    set(VIVADO_FOUND ${VIVADO_FOUND} PARENT_SCOPE)
+endfunction()
+
+_find_xilinx_vivado()

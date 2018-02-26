@@ -27,72 +27,83 @@
 #   MODELSIM_VSIM           - ModelSim vsim
 #   MODELSIM_FOUND          - true if ModelSim found
 
-if (MODELSIM_FOUND)
+if (COMMAND _find_mentor_graphics_modelsim)
     return()
 endif()
 
-find_package(PackageHandleStandardArgs REQUIRED)
+function(_find_mentor_graphics_modelsim)
+    find_package(PackageHandleStandardArgs REQUIRED)
 
-set(MODELSIM_HINTS
-    $ENV{MODELSIM_ROOTDIR}
-    $ENV{MODELSIM_HOME}
-    $ENV{MODELSIM_ROOT}
-    $ENV{MODELSIM_DIR}
-    $ENV{MODELSIM}
-    $ENV{MODELSIM_ROOT}
-    $ENV{QUARTUS_ROOTDIR}
-    $ENV{QUARTUS_HOME}
-    $ENV{QUARTUS_ROOT}
-    $ENV{QUARTUS_DIR}
-    $ENV{QUARTUS}
-)
+    set(MODELSIM_HINTS
+        $ENV{MODELSIM_ROOTDIR}
+        $ENV{MODELSIM_HOME}
+        $ENV{MODELSIM_ROOT}
+        $ENV{MODELSIM_DIR}
+        $ENV{MODELSIM}
+        $ENV{MODELSIM_ROOT}
+        $ENV{QUARTUS_ROOTDIR}
+        $ENV{QUARTUS_HOME}
+        $ENV{QUARTUS_ROOT}
+        $ENV{QUARTUS_DIR}
+        $ENV{QUARTUS}
+    )
 
-set(MODELSIM_PATH_SUFFIXES
-    bin
-    ../modelsim_ae/bin
-    ../modelsim_ase/bin
-)
+    set(MODELSIM_PATH_SUFFIXES
+        bin
+        ../modelsim_ae/bin
+        ../modelsim_ase/bin
+    )
 
-find_program(MODELSIM_VLIB vlib
-    HINTS ${MODELSIM_HINTS}
-    PATH_SUFFIXES bin ${MODELSIM_PATH_SUFFIXES}
-    DOC "Path to the vlib executable"
-)
+    find_program(MODELSIM_VLIB vlib
+        HINTS ${MODELSIM_HINTS}
+        PATH_SUFFIXES bin ${MODELSIM_PATH_SUFFIXES}
+        DOC "Path to the vlib executable"
+    )
 
-find_program(MODELSIM_VMAP vmap
-    HINTS ${MODELSIM_HINTS}
-    PATH_SUFFIXES bin ${MODELSIM_PATH_SUFFIXES}
-    DOC "Path to the vmap executable"
-)
+    find_program(MODELSIM_VMAP vmap
+        HINTS ${MODELSIM_HINTS}
+        PATH_SUFFIXES bin ${MODELSIM_PATH_SUFFIXES}
+        DOC "Path to the vmap executable"
+    )
 
-find_program(MODELSIM_VCOM vcom
-    HINTS ${MODELSIM_HINTS}
-    PATH_SUFFIXES bin ${MODELSIM_PATH_SUFFIXES}
-    DOC "Path to the vcom executable"
-)
+    find_program(MODELSIM_VCOM vcom
+        HINTS ${MODELSIM_HINTS}
+        PATH_SUFFIXES bin ${MODELSIM_PATH_SUFFIXES}
+        DOC "Path to the vcom executable"
+    )
 
-find_program(MODELSIM_VLOG vlog
-    HINTS ${MODELSIM_HINTS}
-    PATH_SUFFIXES bin ${MODELSIM_PATH_SUFFIXES}
-    DOC "Path to the vlog executable"
-)
+    find_program(MODELSIM_VLOG vlog
+        HINTS ${MODELSIM_HINTS}
+        PATH_SUFFIXES bin ${MODELSIM_PATH_SUFFIXES}
+        DOC "Path to the vlog executable"
+    )
 
-find_program(MODELSIM_VSIM vsim
-    HINTS ${MODELSIM_HINTS}
-    PATH_SUFFIXES bin ${MODELSIM_PATH_SUFFIXES}
-    DOC "Path to the vsim executable"
-)
+    find_program(MODELSIM_VSIM vsim
+        HINTS ${MODELSIM_HINTS}
+        PATH_SUFFIXES bin ${MODELSIM_PATH_SUFFIXES}
+        DOC "Path to the vsim executable"
+    )
 
-mark_as_advanced(MODELSIM_VLIB)
-mark_as_advanced(MODELSIM_VMAP)
-mark_as_advanced(MODELSIM_VCOM)
-mark_as_advanced(MODELSIM_VLOG)
-mark_as_advanced(MODELSIM_VSIM)
+    mark_as_advanced(MODELSIM_VLIB)
+    mark_as_advanced(MODELSIM_VMAP)
+    mark_as_advanced(MODELSIM_VCOM)
+    mark_as_advanced(MODELSIM_VLOG)
+    mark_as_advanced(MODELSIM_VSIM)
 
-find_package_handle_standard_args(ModelSim REQUIRED_VARS
-    MODELSIM_VSIM
-    MODELSIM_VMAP
-    MODELSIM_VCOM
-    MODELSIM_VLOG
-    MODELSIM_VLIB
-)
+    find_package_handle_standard_args(ModelSim REQUIRED_VARS
+        MODELSIM_VSIM
+        MODELSIM_VMAP
+        MODELSIM_VCOM
+        MODELSIM_VLOG
+        MODELSIM_VLIB
+    )
+
+    set(MODELSIM_VLIB "${MODELSIM_VLIB}" PARENT_SCOPE)
+    set(MODELSIM_VMAP "${MODELSIM_VMAP}" PARENT_SCOPE)
+    set(MODELSIM_VCOM "${MODELSIM_VCOM}" PARENT_SCOPE)
+    set(MODELSIM_VLOG "${MODELSIM_VLOG}" PARENT_SCOPE)
+    set(MODELSIM_VSIM "${MODELSIM_VSIM}" PARENT_SCOPE)
+    set(MODELSIM_FOUND ${MODELSIM_FOUND} PARENT_SCOPE)
+endfunction()
+
+_find_mentor_graphics_modelsim()
