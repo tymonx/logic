@@ -24,7 +24,7 @@
 #   SVUNIT_INCLUDE_DIR      - SVUnit include directory
 #   SVUNIT_FOUND            - true if SVUnit found
 
-if (_find_svunit)
+if (COMMAND _find_svunit)
     return()
 endif()
 

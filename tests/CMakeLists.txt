@@ -22,11 +22,6 @@ if (NOT GTEST_FOUND)
     return()
 endif()
 
-if (NOT SVUNIT_FOUND)
-    message(WARNING "Tests enabled but cannot find SVUnit")
-    return()
-endif()
-
 set(HDL_SYNTHESIZABLE FALSE)
 
 add_subdirectory(logic)

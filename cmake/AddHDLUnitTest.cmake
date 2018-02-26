@@ -22,6 +22,7 @@ if (NOT DEFINED _HDL_CMAKE_ROOT_DIR)
 endif()
 
 find_package(ModelSim)
+find_package(SVUnit)
 
 include(SetHDLPath)
 include(GetHDLDepends)
@@ -32,6 +33,10 @@ file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/logic/deps")
 file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/modelsim/unit_tests")
 
 function(add_hdl_unit_test hdl_file)
+    if (NOT SVUNIT_FOUND)
+        return()
+    endif()
+
     if (NOT hdl_file)
         message(FATAL_ERROR "HDL file not provided as first argument")
     endif()
