@@ -3,8 +3,6 @@ Logic
 
 [![Join the chat at https://gitter.im/tymonx/logic](https://badges.gitter.im/tymonx/logic.svg)](https://gitter.im/tymonx/logic?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-[![Join the chat at https://gitter.im/tymonx-logic/Lobby](https://badges.gitter.im/tymonx-logic/Lobby.svg)](https://gitter.im/tymonx-logic/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
 CMake, SystemVerilog and SystemC utilities for creating, building and testing
 RTL projects for FPGAs and ASICs.
 
