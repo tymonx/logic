@@ -26,7 +26,8 @@ reset_driver::reset_driver() :
 
 reset_driver::reset_driver(const uvm::uvm_component_name& name) :
     uvm::uvm_driver<reset_sequence_item>{name},
-    m_vif{nullptr}
+    m_vif{nullptr},
+    m_item{nullptr}
 { }
 
 reset_driver::~reset_driver() = default;
@@ -41,15 +42,20 @@ void reset_driver::build_phase(uvm::uvm_phase& phase) {
         UVM_FATAL(get_name(), "Virtual interface not defined!"
                 " Simulation aborted!");
     }
+
+    m_item = reset_sequence_item::type_id::create("reset_sequence_item", this);
+
+    if (m_item == nullptr) {
+        UVM_FATAL(get_name(), "Cannot create reset sequence item!");
+    }
 }
 
 void reset_driver::run_phase(uvm::uvm_phase& /* phase */) {
     UVM_INFO(get_name(), "Run phase", uvm::UVM_FULL);
-    reset_sequence_item item;
 
     while (true) {
-        seq_item_port->get_next_item(item);
-        transfer(item);
+        seq_item_port->get_next_item(*m_item);
+        transfer(*m_item);
         seq_item_port->item_done();
     }
 }

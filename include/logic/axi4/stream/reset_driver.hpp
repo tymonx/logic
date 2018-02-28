@@ -50,6 +50,7 @@ protected:
     void transfer(const reset_sequence_item& item);
 
     reset_if* m_vif;
+    reset_sequence_item* m_item;
 };
 
 } /* namespace stream */

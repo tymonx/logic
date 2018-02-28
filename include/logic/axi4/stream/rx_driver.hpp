@@ -52,8 +52,8 @@ protected:
 
     void transfer(const rx_sequence_item& item);
 
-    bus_if_base* m_vif{nullptr};
-
+    bus_if_base* m_vif;
+    rx_sequence_item* m_item;
     std::mt19937 m_random_generator;
 };
 

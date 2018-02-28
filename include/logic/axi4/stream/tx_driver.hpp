@@ -53,7 +53,7 @@ protected:
     void transfer(const tx_sequence_item& item);
 
     bus_if_base* m_vif;
-
+    tx_sequence_item* m_item;
     std::mt19937 m_random_generator;
 };
 
