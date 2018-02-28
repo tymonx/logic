@@ -15,11 +15,7 @@
 
 #include "logic/axi4/stream/test.hpp"
 
-#include "logic/axi4/stream/rx_sequencer.hpp"
 #include "logic/axi4/stream/scoreboard.hpp"
-#include "logic/axi4/stream/sequence.hpp"
-#include "logic/axi4/stream/sequencer.hpp"
-#include "logic/axi4/stream/testbench.hpp"
 
 using logic::axi4::stream::test;
 

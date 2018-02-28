@@ -16,32 +16,28 @@
 #ifndef LOGIC_AXI4_STREAM_SEQUENCE_HPP
 #define LOGIC_AXI4_STREAM_SEQUENCE_HPP
 
+#include "logic/axi4/stream/reset_sequence.hpp"
+#include "logic/axi4/stream/rx_sequence.hpp"
+#include "logic/axi4/stream/tx_sequence.hpp"
 #include "logic/range.hpp"
 
 #include <uvm>
-
-#include <cstddef>
-#include <utility>
 
 namespace logic {
 namespace axi4 {
 namespace stream {
 
-class rx_sequence;
-class tx_sequence;
 class rx_sequencer;
 class tx_sequencer;
-class reset_sequence;
 class reset_sequencer;
 
 class sequence : public uvm::uvm_sequence<> {
 public:
     UVM_OBJECT_UTILS(logic::axi4::stream::sequence)
 
-    range length;
-    range packets;
-    range rx_idle;
-    range tx_idle;
+    reset_sequence* reset;
+    rx_sequence* rx;
+    tx_sequence* tx;
 
     sequence();
 
@@ -62,10 +58,6 @@ protected:
     void body() override;
 
     void post_body() override;
-
-    rx_sequence* m_rx_sequence;
-    tx_sequence* m_tx_sequence;
-    reset_sequence* m_reset_sequence;
 
     rx_sequencer* m_rx_sequencer;
     tx_sequencer* m_tx_sequencer;

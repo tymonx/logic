@@ -22,7 +22,8 @@ reset_sequence::reset_sequence() :
 { }
 
 reset_sequence::reset_sequence(const std::string& name) :
-    uvm::uvm_sequence<reset_sequence_item>{name}
+    uvm::uvm_sequence<reset_sequence_item>{name},
+    items{}
 { }
 
 reset_sequence::~reset_sequence() = default;
@@ -36,8 +37,10 @@ void reset_sequence::pre_body() {
 void reset_sequence::body() {
     UVM_INFO(get_name(), "Starting reset sequence", uvm::UVM_FULL);
 
-    start_item(&req);
-    finish_item(&req);
+    for (auto& item : items) {
+        start_item(&item);
+        finish_item(&item);
+    }
 
     UVM_INFO(get_name(), "Finishing reset sequence", uvm::UVM_FULL);
 }

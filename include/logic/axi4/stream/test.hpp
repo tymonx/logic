@@ -16,6 +16,10 @@
 #ifndef LOGIC_AXI4_STREAM_TEST_HPP
 #define LOGIC_AXI4_STREAM_TEST_HPP
 
+#include "logic/axi4/stream/sequence.hpp"
+#include "logic/axi4/stream/sequencer.hpp"
+#include "logic/axi4/stream/testbench.hpp"
+
 #include <uvm>
 
 namespace logic{

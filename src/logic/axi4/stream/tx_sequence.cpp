@@ -22,7 +22,8 @@ tx_sequence::tx_sequence() :
 { }
 
 tx_sequence::tx_sequence(const std::string& name) :
-    uvm::uvm_sequence<tx_sequence_item>{name}
+    uvm::uvm_sequence<tx_sequence_item>{name},
+    items{}
 { }
 
 tx_sequence::~tx_sequence() = default;
@@ -36,8 +37,10 @@ void tx_sequence::pre_body() {
 void tx_sequence::body() {
     UVM_INFO(get_name(), "Starting sequence", uvm::UVM_FULL);
 
-    start_item(&req);
-    finish_item(&req);
+    for (auto& item : items) {
+        start_item(&item);
+        finish_item(&item);
+    }
 
     UVM_INFO(get_name(), "Finishing sequence", uvm::UVM_FULL);
 }

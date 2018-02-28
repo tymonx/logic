@@ -21,6 +21,7 @@
 #include <uvm>
 
 #include <cstddef>
+#include <vector>
 
 namespace logic {
 namespace axi4 {
@@ -29,6 +30,8 @@ namespace stream {
 class reset_sequence : public uvm::uvm_sequence<reset_sequence_item> {
 public:
     UVM_OBJECT_UTILS(logic::axi4::stream::reset_sequence)
+
+    std::vector<reset_sequence_item> items;
 
     reset_sequence();
 

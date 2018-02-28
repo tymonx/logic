@@ -13,10 +13,9 @@
  * limitations under the License.
  */
 
-#include "logic/axi4/stream/sequence.hpp"
-#include "logic/axi4/stream/sequencer.hpp"
 #include "logic/axi4/stream/test.hpp"
-#include "logic/axi4/stream/testbench.hpp"
+
+#include <random>
 
 namespace {
 
@@ -39,23 +38,45 @@ protected:
     void run_phase(uvm::uvm_phase& phase) override {
         phase.raise_objection(this);
 
-        m_sequence->length = {1, 256};
-        m_sequence->packets = {1, 8};
+        std::random_device random_device;
+        std::mt19937 random_generator(random_device());
 
-        m_sequence->rx_idle = {0, 0};
-        m_sequence->tx_idle = {0, 0};
+        std::uniform_int_distribution<std::size_t> random_packets{1, 8};
+        std::uniform_int_distribution<std::size_t> random_length{1, 256};
+        std::uniform_int_distribution<std::uint8_t> random_data{};
+
+        m_sequence->reset->items.resize(1);
+        m_sequence->reset->items[0].duration = 1;
+        m_sequence->reset->items[0].idle = 0;
+
+        auto randomize = [&] (const logic::range& rx = {},
+                const logic::range& tx = {}) {
+            m_sequence->rx->items.resize(random_packets(random_generator));
+            m_sequence->tx->items.resize(m_sequence->rx->items.size());
+
+            for (auto& item : m_sequence->rx->items) {
+                item.idle = rx;
+                item.data.resize(random_length(random_generator));
+                for (auto& data : item.data) {
+                    data = random_data(random_generator);
+                }
+            }
+
+            for (auto& item : m_sequence->tx->items) {
+                item.idle = tx;
+            }
+        };
+
+        randomize();
         m_sequence->start(m_testbench->sequencer);
 
-        m_sequence->rx_idle = {0, 3};
-        m_sequence->tx_idle = {0, 0};
+        randomize({0, 3});
         m_sequence->start(m_testbench->sequencer);
 
-        m_sequence->rx_idle = {0, 0};
-        m_sequence->tx_idle = {0, 3};
+        randomize({0, 0}, {0, 3});
         m_sequence->start(m_testbench->sequencer);
 
-        m_sequence->rx_idle = {0, 3};
-        m_sequence->tx_idle = {0, 3};
+        randomize({0, 3}, {0, 3});
         m_sequence->start(m_testbench->sequencer);
 
         phase.drop_objection(this);

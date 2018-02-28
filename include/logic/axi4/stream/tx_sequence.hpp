@@ -21,6 +21,7 @@
 #include <uvm>
 
 #include <cstddef>
+#include <vector>
 
 namespace logic {
 namespace axi4 {
@@ -29,6 +30,8 @@ namespace stream {
 class tx_sequence : public uvm::uvm_sequence<tx_sequence_item> {
 public:
     UVM_OBJECT_UTILS(logic::axi4::stream::tx_sequence)
+
+    std::vector<tx_sequence_item> items;
 
     tx_sequence();
 
