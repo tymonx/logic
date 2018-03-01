@@ -78,8 +78,18 @@ scoreboard::scoreboard(const uvm::uvm_component_name& name) :
     tx_analysis_export{"tx_analysis_export"},
     m_error{false},
     m_rx_fifo{"rx_fifo"},
-    m_tx_fifo{"tx_fifo"}
-{ }
+    m_tx_fifo{"tx_fifo"},
+    m_rx_packet{packet::type_id::create("rx_packet", this)},
+    m_tx_packet{packet::type_id::create("tx_packet", this)}
+{
+    if (m_rx_packet == nullptr) {
+        UVM_FATAL(get_name(), "Cannot create rx packet!");
+    }
+
+    if (m_tx_packet == nullptr) {
+        UVM_FATAL(get_name(), "Cannot create tx packet!");
+    }
+}
 
 bool scoreboard::passed() const noexcept {
     return !m_error;
@@ -102,31 +112,31 @@ void scoreboard::run_phase(uvm::uvm_phase& /* phase */) {
     UVM_INFO(get_name(), "Run phase", uvm::UVM_FULL);
 
     while (true) {
-        auto rx_packet = m_rx_fifo.get(nullptr);
-        auto tx_packet = m_tx_fifo.get(nullptr);
+        *m_rx_packet = m_rx_fifo.get(nullptr);
+        *m_tx_packet = m_tx_fifo.get(nullptr);
 
-        if (!rx_packet.compare(tx_packet)) {
+        if (!m_rx_packet->compare(*m_tx_packet)) {
             m_error = true;
 
             std::stringstream ss;
 
             ss << "Packets mismatch:" << std::endl;
 
-            ::print(ss, "rx", rx_packet);
+            ::print(ss, "rx", *m_rx_packet);
             ss << std::endl;
 
-            ::print(ss, "tx", tx_packet);
+            ::print(ss, "tx", *m_tx_packet);
             ss << std::endl;
 
-            const auto packet_length = std::min(rx_packet.tdata.size(),
-                    tx_packet.tdata.size());
+            const auto packet_length = std::min(m_rx_packet->tdata.size(),
+                    m_tx_packet->tdata.size());
 
             for (auto i = 0u; i < packet_length; ++i) {
-                if (rx_packet.tdata[i] != tx_packet.tdata[i]) {
+                if (m_rx_packet->tdata[i] != m_tx_packet->tdata[i]) {
                     ss << "  index: " << i << ", rx: {";
-                    ::print(ss, rx_packet, i);
+                    ::print(ss, *m_rx_packet, i);
                     ss << "}, tx: {";
-                    ::print(ss, tx_packet, i);
+                    ::print(ss, *m_tx_packet, i);
                     ss << "}" << std::endl;
                 }
             }

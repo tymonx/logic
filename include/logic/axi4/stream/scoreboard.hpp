@@ -59,6 +59,9 @@ protected:
     bool m_error;
     tlm::tlm_analysis_fifo<packet> m_rx_fifo;
     tlm::tlm_analysis_fifo<packet> m_tx_fifo;
+
+    packet* m_rx_packet;
+    packet* m_tx_packet;
 };
 
 } /* namespace stream */
