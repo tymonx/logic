@@ -88,8 +88,25 @@ void rx_driver::transfer(const rx_sequence_item& item) {
 
                 for (std::size_t i = 0; i < bus_size; ++i) {
                     if (index < total_size) {
-                        m_vif->set_tkeep(i, true);
-                        m_vif->set_tstrb(i, true);
+                        switch (item.data[index].type()) {
+                        case tdata_byte::DATA_BYTE:
+                            m_vif->set_tkeep(i, true);
+                            m_vif->set_tstrb(i, true);
+                            break;
+                        case tdata_byte::POSITION_BYTE:
+                            m_vif->set_tkeep(i, true);
+                            m_vif->set_tstrb(i, false);
+                            break;
+                        case tdata_byte::RESERVED:
+                            m_vif->set_tkeep(i, false);
+                            m_vif->set_tstrb(i, true);
+                            break;
+                        case tdata_byte::NULL_BYTE:
+                        default:
+                            m_vif->set_tkeep(i, false);
+                            m_vif->set_tstrb(i, false);
+                            break;
+                        }
                         m_vif->set_tdata(i, std::uint8_t(item.data[index++]));
                     }
                     else {
