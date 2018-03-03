@@ -15,57 +15,132 @@
 
 #include "logic/axi4/stream/scoreboard.hpp"
 
+#include <algorithm>
 #include <iomanip>
 #include <sstream>
-#include <algorithm>
 
 using logic::axi4::stream::scoreboard;
 
-static void print(std::stringstream& ss,
-        const logic::axi4::stream::packet& packet, std::size_t index) {
-    ss << packet.tdata[index].second << ", 0x";
+static std::string print_difference(const logic::axi4::stream::packet& rx,
+        const logic::axi4::stream::packet& tx) {
+    std::stringstream ss;
 
-    std::ios state{nullptr};
-    state.copyfmt(ss);
+    ss << std::endl;
 
-    ss << std::hex << std::setw(2) << std::setfill('0') <<
-        unsigned(packet.tdata[index].first);
+    ss << std::string(71, '-') << std::endl;
 
-    ss.copyfmt(state);
-}
+    ss << "            |             rx             " <<
+                      "|             tx             |" << std::endl;
 
-static void print(std::stringstream& ss, const char* prefix,
-        const logic::axi4::stream::packet& packet) {
+    ss << std::string(71, '-') << std::endl;
 
-    ss << "  " << prefix << ".timestamp.start: " <<
-        packet.tdata.front().second << std::endl;
+    ss << "time.start  | " << std::setw(26) << rx.tdata.front().second <<
+        " | " << std::setw(26) << tx.tdata.front().second << " |" << std::endl;
 
-    ss << "  " << prefix << ".timestamp.end: " <<
-        packet.tdata.back().second << std::endl;
+    ss << "time.end    | " << std::setw(26) << rx.tdata.back().second <<
+        " | " << std::setw(26) << tx.tdata.back().second << " |" << std::endl;
 
-    ss << "  " << prefix << ".transfers: " <<
-        packet.transfers << std::endl;
+    ss << "time.total  | " << std::setw(26) <<
+            (rx.tdata.back().second - rx.tdata.front().second) <<
+        " | " << std::setw(26) <<
+            (tx.tdata.back().second - tx.tdata.front().second) <<
+        " |" << std::endl;
 
-    ss << "  " << prefix << ".bus.width: " <<
-        8 * packet.bus_size << std::endl;
+    ss << "transfers   | " << std::setw(26) << rx.transfers <<
+        " | " << std::setw(26) << tx.transfers << " |" << std::endl;
 
-    ss << "  " << prefix << ".tid: " <<
-        std::uintmax_t(packet.tid) << std::endl;
+    ss << "bus.width   | " << std::setw(26) << 8 * rx.bus_size <<
+        " | " << std::setw(26) << 8 * tx.bus_size << " |"  << std::endl;
 
-    ss << "  " << prefix << ".tid.width: " <<
-        packet.tid.size() << std::endl;
+    ss << "tid         | " << std::setw(26) << std::uintmax_t(rx.tid) <<
+        " | " << std::setw(26) << std::uintmax_t(tx.tid) << " |"  << std::endl;
 
-    ss << "  " << prefix << ".tdest: " <<
-        std::uintmax_t(packet.tdest) << std::endl;
+    ss << "tid.width   | " << std::setw(26) << rx.tid.size() <<
+        " | " << std::setw(26) << tx.tid.size() << " |"  << std::endl;
 
-    ss << "  " << prefix << ".tdest.width: " <<
-        packet.tdest.size() << std::endl;
+    ss << "tdest       | " << std::setw(26) << std::uintmax_t(rx.tdest) <<
+        " | " << std::setw(26) << std::uintmax_t(tx.tdest) << " |"  <<
+        std::endl;
 
-    ss << "  " << prefix << ".tuser.width: " <<
-        packet.tuser.front().size() << std::endl;
+    ss << "tdest.width | " << std::setw(26) << rx.tdest.size() <<
+        " | " << std::setw(26) << tx.tdest.size() << " |"  << std::endl;
 
-    ss << "  " << prefix << ".tdata.length: " <<
-        packet.tdata.size() << std::endl;
+    auto bytes = [] (const logic::axi4::stream::packet& packet) {
+        return std::count_if(packet.tdata.cbegin(), packet.tdata.cend(),
+            [] (const logic::axi4::stream::packet::data_type& data) {
+                return data.first.is_data_byte();
+            }
+        );
+    };
+
+    ss << "tdata.bytes | " << std::setw(26) << bytes(rx) <<
+        " | " << std::setw(26) << bytes(tx) << " |"  << std::endl;
+
+    ss << "tdata.total | " << std::setw(26) << rx.tdata.size() <<
+        " | " << std::setw(26) << tx.tdata.size() << " |"  << std::endl;
+
+    ss << std::string(71, '-') << std::endl;
+
+    auto print_type = [] (const logic::axi4::stream::tdata_byte& data) {
+        std::string str;
+
+        switch (data.type()) {
+            case logic::axi4::stream::tdata_byte::DATA_BYTE:
+                str = "  Data  ";
+                break;
+            case logic::axi4::stream::tdata_byte::POSITION_BYTE:
+                str = "Position";
+                break;
+            case logic::axi4::stream::tdata_byte::NULL_BYTE:
+                str = "  Null  ";
+                break;
+            case logic::axi4::stream::tdata_byte::RESERVED:
+            default:
+                str = "Reserved";
+                break;
+        }
+
+        return str;
+    };
+
+    ss << "      index |   time   |   type   | data" <<
+                     " |   time   |   type   | data |" << std::endl;
+
+    ss << std::string(71, '-') << std::endl;
+
+    const std::size_t max_length = std::max(rx.tdata.size(), tx.tdata.size());
+
+    for (std::size_t i = 0; i < max_length; ++i) {
+        ss << std::setw(11) << std::setfill(' ') << std::dec << i;
+
+        if (i < rx.tdata.size()) {
+            ss <<
+                " | " << std::setw(8) << rx.tdata[i].second <<
+                " | " << print_type(rx.tdata[i].first) <<
+                " | 0x" << std::setw(2) << std::setfill('0') <<
+                    std::hex << unsigned(rx.tdata[i].first.data());
+        }
+        else {
+           ss << " | -------- | -------- | ----";
+        }
+
+        if (i < tx.tdata.size()) {
+            ss <<
+                " | " << std::setw(8) << std::setfill(' ') <<
+                    std::dec << tx.tdata[i].second <<
+                " | " << print_type(tx.tdata[i].first) <<
+                " | 0x" << std::setw(2) << std::setfill('0') <<
+                std::hex << unsigned(tx.tdata[i].first.data()) <<
+                " |" << std::endl;
+        }
+        else {
+           ss << " | -------- | -------- | ---- |" << std::endl;
+        }
+    }
+
+    ss << std::string(71, '-') << std::endl;
+
+    return ss.str();
 }
 
 scoreboard::scoreboard() :
@@ -117,31 +192,7 @@ void scoreboard::run_phase(uvm::uvm_phase& /* phase */) {
 
         if (!m_rx_packet->compare(*m_tx_packet)) {
             m_error = true;
-
-            std::stringstream ss;
-
-            ss << "Packets mismatch:" << std::endl;
-
-            ::print(ss, "rx", *m_rx_packet);
-            ss << std::endl;
-
-            ::print(ss, "tx", *m_tx_packet);
-            ss << std::endl;
-
-            const auto packet_length = std::min(m_rx_packet->tdata.size(),
-                    m_tx_packet->tdata.size());
-
-            for (auto i = 0u; i < packet_length; ++i) {
-                if (m_rx_packet->tdata[i].first != m_tx_packet->tdata[i].first) {
-                    ss << "  index: " << i << ", rx: {";
-                    ::print(ss, *m_rx_packet, i);
-                    ss << "}, tx: {";
-                    ::print(ss, *m_tx_packet, i);
-                    ss << "}" << std::endl;
-                }
-            }
-
-            UVM_ERROR(get_name(), ss.str());
+            UVM_ERROR(get_name(), print_difference(*m_rx_packet, *m_tx_packet));
         }
     }
 }
