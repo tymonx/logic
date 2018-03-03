@@ -97,11 +97,24 @@ void monitor::run_phase(uvm::uvm_phase& /* phase */) {
             packet.bus_size = bus_size;
 
             for (auto i = 0u; i < bus_size; ++i) {
+                tdata_byte::type_t tdata_byte_type;
+
                 if (m_vif->get_tkeep(i) && m_vif->get_tstrb(i)) {
-                    packet.tdata.emplace_back(std::make_pair(
-                            m_vif->get_tdata(i), timestamp
-                    ));
+                    tdata_byte_type = tdata_byte::DATA_BYTE;
                 }
+                else if (m_vif->get_tkeep(i) && !m_vif->get_tstrb(i)) {
+                    tdata_byte_type = tdata_byte::POSITION_BYTE;
+                }
+                else if (!m_vif->get_tkeep(i) && m_vif->get_tstrb(i)) {
+                    tdata_byte_type = tdata_byte::RESERVED;
+                }
+                else {
+                    tdata_byte_type = tdata_byte::NULL_BYTE;
+                }
+
+                packet.tdata.emplace_back(std::make_pair(
+                    tdata_byte{m_vif->get_tdata(i), tdata_byte_type}, timestamp
+                ));
             }
 
             ++packet.transfers;
