@@ -30,6 +30,7 @@ add_library(logic-axi4-stream OBJECT
     scoreboard.cpp
     sequence.cpp
     sequencer.cpp
+    tdata_byte.cpp
     test.cpp
     testbench.cpp
     tx_agent.cpp
