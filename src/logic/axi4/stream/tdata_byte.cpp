@@ -78,6 +78,14 @@ tdata_byte::operator type_t() const noexcept {
     return m_type;
 }
 
+tdata_byte::operator bool() const noexcept {
+    return (0 != m_data);
+}
+
+bool tdata_byte::operator!() const noexcept {
+    return (0 == m_data);
+}
+
 bool tdata_byte::is_data_byte() const noexcept {
     return (DATA_BYTE == m_type);
 }

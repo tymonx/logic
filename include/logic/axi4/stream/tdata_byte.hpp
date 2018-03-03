@@ -65,6 +65,10 @@ public:
 
     explicit operator type_t() const noexcept;
 
+    explicit operator bool() const noexcept;
+
+    bool operator!() const noexcept;
+
     bool is_data_byte() const noexcept;
 
     bool is_null_byte() const noexcept;
