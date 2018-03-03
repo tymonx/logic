@@ -103,11 +103,11 @@ bool tdata_byte::is_reserved() const noexcept {
 }
 
 bool tdata_byte::operator==(const tdata_byte& other) const noexcept {
-    return (m_data == other.m_data);
+    return (m_data == other.m_data) && (m_type == other.m_type);
 }
 
 bool tdata_byte::operator!=(const tdata_byte& other) const noexcept {
-    return (m_data != other.m_data);
+    return (m_data != other.m_data) || (m_type != other.m_type);
 }
 
 bool tdata_byte::operator<(const tdata_byte& other) const noexcept {

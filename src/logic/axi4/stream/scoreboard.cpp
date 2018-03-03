@@ -34,20 +34,20 @@ static std::string print_difference(const logic::axi4::stream::packet& rx,
 
     ss << std::string(71, '-') << std::endl;
 
-    ss << "time.start  | " << std::setw(26) << rx.tdata.front().second <<
-        " | " << std::setw(26) << tx.tdata.front().second << " |" << std::endl;
+    ss << "time.start  | " << std::setw(26) << rx.timestamps.front() <<
+        " | " << std::setw(26) << tx.timestamps.front() << " |" << std::endl;
 
-    ss << "time.end    | " << std::setw(26) << rx.tdata.back().second <<
-        " | " << std::setw(26) << tx.tdata.back().second << " |" << std::endl;
+    ss << "time.end    | " << std::setw(26) << rx.timestamps.back() <<
+        " | " << std::setw(26) << tx.timestamps.back() << " |" << std::endl;
 
     ss << "time.total  | " << std::setw(26) <<
-            (rx.tdata.back().second - rx.tdata.front().second) <<
+            (rx.timestamps.back() - rx.timestamps.front()) <<
         " | " << std::setw(26) <<
-            (tx.tdata.back().second - tx.tdata.front().second) <<
+            (tx.timestamps.back() - tx.timestamps.front()) <<
         " |" << std::endl;
 
-    ss << "transfers   | " << std::setw(26) << rx.transfers <<
-        " | " << std::setw(26) << tx.transfers << " |" << std::endl;
+    ss << "transfers   | " << std::setw(26) << rx.timestamps.size() <<
+        " | " << std::setw(26) << tx.timestamps.size() << " |" << std::endl;
 
     ss << "bus.width   | " << std::setw(26) << 8 * rx.bus_size <<
         " | " << std::setw(26) << 8 * tx.bus_size << " |"  << std::endl;
@@ -67,8 +67,8 @@ static std::string print_difference(const logic::axi4::stream::packet& rx,
 
     auto bytes = [] (const logic::axi4::stream::packet& packet) {
         return std::count_if(packet.tdata.cbegin(), packet.tdata.cend(),
-            [] (const logic::axi4::stream::packet::data_type& data) {
-                return data.first.is_data_byte();
+            [] (const logic::axi4::stream::tdata_byte& data) {
+                return data.is_data_byte();
             }
         );
     };
@@ -115,10 +115,10 @@ static std::string print_difference(const logic::axi4::stream::packet& rx,
 
         if (i < rx.tdata.size()) {
             ss <<
-                " | " << std::setw(8) << rx.tdata[i].second <<
-                " | " << print_type(rx.tdata[i].first) <<
+                " | " << std::setw(8) << rx.timestamps[i / rx.bus_size] <<
+                " | " << print_type(rx.tdata[i]) <<
                 " | 0x" << std::setw(2) << std::setfill('0') <<
-                    std::hex << unsigned(rx.tdata[i].first.data());
+                    std::hex << unsigned(rx.tdata[i]);
         }
         else {
            ss << " | -------- | -------- | ----";
@@ -127,10 +127,10 @@ static std::string print_difference(const logic::axi4::stream::packet& rx,
         if (i < tx.tdata.size()) {
             ss <<
                 " | " << std::setw(8) << std::setfill(' ') <<
-                    std::dec << tx.tdata[i].second <<
-                " | " << print_type(tx.tdata[i].first) <<
+                    std::dec << tx.timestamps[i / tx.bus_size] <<
+                " | " << print_type(tx.tdata[i]) <<
                 " | 0x" << std::setw(2) << std::setfill('0') <<
-                std::hex << unsigned(tx.tdata[i].first.data()) <<
+                std::hex << unsigned(tx.tdata[i]) <<
                 " |" << std::endl;
         }
         else {

@@ -79,20 +79,20 @@ void monitor::run_phase(uvm::uvm_phase& /* phase */) {
     UVM_INFO(get_name(), "Run phase", uvm::UVM_FULL);
 
     packets_type packets;
-    const auto bus_size = m_vif->size();
+    const auto bus_size = m_vif->size() ? m_vif->size() : 1;
 
     while (true) {
         if (!m_vif->get_areset_n()) {
             packets.clear();
         }
         else if (m_vif->get_tvalid() && m_vif->get_tready()) {
-            auto timestamp = sc_core::sc_time_stamp();
             auto packet_id = packet_id_type{
                 m_vif->get_tid(),
                 m_vif->get_tdest()
             };
             auto& packet = get_packet(packets, packet_id);
 
+            packet.timestamps.emplace_back(sc_core::sc_time_stamp());
             packet.tuser.emplace_back(m_vif->get_tuser());
             packet.bus_size = bus_size;
 
@@ -112,12 +112,8 @@ void monitor::run_phase(uvm::uvm_phase& /* phase */) {
                     tdata_byte_type = tdata_byte::NULL_BYTE;
                 }
 
-                packet.tdata.emplace_back(std::make_pair(
-                    tdata_byte{m_vif->get_tdata(i), tdata_byte_type}, timestamp
-                ));
+                packet.tdata.emplace_back(m_vif->get_tdata(i), tdata_byte_type);
             }
-
-            ++packet.transfers;
 
             if (m_vif->get_tlast()) {
                 analysis_port.write(packet);

@@ -15,7 +15,6 @@
 
 #include "logic/axi4/stream/packet.hpp"
 
-#include <algorithm>
 #include <iomanip>
 
 using logic::axi4::stream::packet;
@@ -30,8 +29,8 @@ packet::packet(const std::string& name) :
     tdest{},
     tuser{},
     tdata{},
-    bus_size{0},
-    transfers{0}
+    timestamps{},
+    bus_size{0}
 { }
 
 auto packet::clear() -> packet& {
@@ -49,7 +48,7 @@ std::string packet::convert2string() const {
 
     for (const auto& value : tdata) {
         ss << " " << std::hex << std::setfill('0') << std::setw(2) <<
-            unsigned(value.first);
+            unsigned(value);
     }
 
     return ss.str();
@@ -62,7 +61,7 @@ void packet::do_print(const uvm::uvm_printer& printer) const {
             "std::vector<std::uint8_t>");
 
     for (const auto& value : tdata) {
-        printer.print_field_int("", int(value.first), 8, uvm::UVM_HEX);
+        printer.print_field_int("", int(value), 8, uvm::UVM_HEX);
     }
 
     printer.print_array_footer();
@@ -70,13 +69,13 @@ void packet::do_print(const uvm::uvm_printer& printer) const {
 
 void packet::do_pack(uvm::uvm_packer& p) const {
     for (const auto& value : tdata) {
-        p << value.first;
+        p << value;
     }
 }
 
 void packet::do_unpack(uvm::uvm_packer& p) {
     for (auto& value : tdata) {
-        p >> value.first;
+        p >> value;
     }
 }
 
@@ -97,12 +96,7 @@ bool packet::do_compare(const uvm::uvm_object& rhs,
 
     if (other != nullptr) {
         status = (tid == other->tid) && (tdest == other->tdest) &&
-            (tuser == other->tuser) && (tdata.size() == other->tdata.size()) &&
-            std::equal(tdata.cbegin(), tdata.cend(), other->tdata.cbegin(),
-                [] (const data_type& val1, const data_type& val2) {
-                    return (val1.first == val2.first);
-                }
-            );
+            (tuser == other->tuser) && (tdata == other->tdata);
     }
     else {
         UVM_ERROR(get_name(), "Error in do_compare");
