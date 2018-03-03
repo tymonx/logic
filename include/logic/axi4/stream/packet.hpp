@@ -16,8 +16,8 @@
 #ifndef LOGIC_AXI4_STREAM_PACKET_HPP
 #define LOGIC_AXI4_STREAM_PACKET_HPP
 
-#include "logic/axi4/stream/tdata_byte.hpp"
 #include "logic/bitstream.hpp"
+#include "tdata_byte.hpp"
 
 #include <uvm>
 

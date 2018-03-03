@@ -16,9 +16,9 @@
 #ifndef LOGIC_AXI4_STREAM_RX_SEQUENCE_ITEM_HPP
 #define LOGIC_AXI4_STREAM_RX_SEQUENCE_ITEM_HPP
 
-#include "logic/axi4/stream/tdata_byte.hpp"
 #include "logic/bitstream.hpp"
 #include "logic/range.hpp"
+#include "tdata_byte.hpp"
 
 #include <uvm>
 
