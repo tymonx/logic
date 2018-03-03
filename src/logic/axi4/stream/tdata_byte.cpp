@@ -15,6 +15,8 @@
 
 #include "logic/axi4/stream/tdata_byte.hpp"
 
+#include <uvm>
+
 using logic::axi4::stream::tdata_byte;
 
 tdata_byte::tdata_byte() noexcept :
@@ -72,10 +74,6 @@ auto tdata_byte::type() const noexcept -> type_t {
     return m_type;
 }
 
-tdata_byte::operator std::uint8_t() const noexcept {
-    return m_data;
-}
-
 tdata_byte::operator type_t() const noexcept {
     return m_type;
 }
@@ -95,3 +93,44 @@ bool tdata_byte::is_position_byte() const noexcept {
 bool tdata_byte::is_reserved() const noexcept {
     return (RESERVED == m_type);
 }
+
+bool tdata_byte::operator==(const tdata_byte& other) const noexcept {
+    return (m_data == other.m_data);
+}
+
+bool tdata_byte::operator!=(const tdata_byte& other) const noexcept {
+    return (m_data != other.m_data);
+}
+
+bool tdata_byte::operator<(const tdata_byte& other) const noexcept {
+    return (m_data < other.m_data);
+}
+
+bool tdata_byte::operator<=(const tdata_byte& other) const noexcept {
+    return (m_data <= other.m_data);
+}
+
+bool tdata_byte::operator>(const tdata_byte& other) const noexcept {
+    return (m_data > other.m_data);
+}
+
+bool tdata_byte::operator>=(const tdata_byte& other) const noexcept {
+    return (m_data >= other.m_data);
+}
+
+namespace uvm {
+
+auto operator<<(uvm_packer& packer,
+        const logic::axi4::stream::tdata_byte& value) -> uvm_packer& {
+    return packer << value.data();
+}
+
+auto operator>>(uvm_packer& packer,
+        logic::axi4::stream::tdata_byte& value) -> uvm_packer& {
+    auto tmp = value.data();
+    packer >> tmp;
+    value = tmp;
+    return packer;
+}
+
+} /* namespace uvm */

@@ -17,6 +17,7 @@
 #define LOGIC_AXI4_STREAM_TDATA_BYTE_HPP
 
 #include <cstdint>
+#include <type_traits>
 #include <utility>
 
 namespace logic {
@@ -25,6 +26,11 @@ namespace stream {
 
 class tdata_byte {
 public:
+    template<typename T>
+    using enable_integral = typename std::enable_if<
+            std::is_integral<T>::value,
+        int>::type;
+
     enum type_t {
         DATA_BYTE,
         NULL_BYTE,
@@ -54,7 +60,8 @@ public:
 
     type_t type() const noexcept;
 
-    explicit operator std::uint8_t() const noexcept;
+    template<typename T, enable_integral<T> = 0>
+    explicit operator T() const noexcept;
 
     explicit operator type_t() const noexcept;
 
@@ -65,6 +72,18 @@ public:
     bool is_position_byte() const noexcept;
 
     bool is_reserved() const noexcept;
+
+    bool operator==(const tdata_byte& other) const noexcept;
+
+    bool operator!=(const tdata_byte& other) const noexcept;
+
+    bool operator<(const tdata_byte& other) const noexcept;
+
+    bool operator<=(const tdata_byte& other) const noexcept;
+
+    bool operator>(const tdata_byte& other) const noexcept;
+
+    bool operator>=(const tdata_byte& other) const noexcept;
 
     tdata_byte(tdata_byte&&) noexcept = default;
 
@@ -80,8 +99,25 @@ private:
     std::uint8_t m_data;
 };
 
+template<typename T, tdata_byte::enable_integral<T>>
+tdata_byte::operator T() const noexcept {
+    return T(data());
+}
+
 } /* namespace stream */
 } /* namespace axi4 */
 } /* namespace logic */
+
+namespace uvm {
+
+class uvm_packer;
+
+uvm_packer& operator<<(uvm_packer& packer,
+        const logic::axi4::stream::tdata_byte& value);
+
+uvm_packer& operator>>(uvm_packer& packer,
+        logic::axi4::stream::tdata_byte& value);
+
+} /* namespace uvm */
 
 #endif /* LOGIC_AXI4_STREAM_TDATA_BYTE_HPP */

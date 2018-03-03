@@ -90,7 +90,7 @@ void rx_driver::transfer(const rx_sequence_item& item) {
                     if (index < total_size) {
                         m_vif->set_tkeep(i, true);
                         m_vif->set_tstrb(i, true);
-                        m_vif->set_tdata(i, item.data[index++]);
+                        m_vif->set_tdata(i, std::uint8_t(item.data[index++]));
                     }
                     else {
                         m_vif->set_tkeep(i, false);

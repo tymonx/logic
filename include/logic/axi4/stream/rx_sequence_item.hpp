@@ -16,8 +16,9 @@
 #ifndef LOGIC_AXI4_STREAM_RX_SEQUENCE_ITEM_HPP
 #define LOGIC_AXI4_STREAM_RX_SEQUENCE_ITEM_HPP
 
-#include "logic/range.hpp"
+#include "logic/axi4/stream/tdata_byte.hpp"
 #include "logic/bitstream.hpp"
+#include "logic/range.hpp"
 
 #include <uvm>
 
@@ -36,7 +37,7 @@ public:
     bitstream id;
     bitstream destination;
     std::vector<bitstream> user;
-    std::vector<std::uint8_t> data;
+    std::vector<tdata_byte> data;
     range idle;
     std::size_t timeout;
 

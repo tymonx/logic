@@ -16,6 +16,7 @@
 #ifndef LOGIC_AXI4_STREAM_PACKET_HPP
 #define LOGIC_AXI4_STREAM_PACKET_HPP
 
+#include "logic/axi4/stream/tdata_byte.hpp"
 #include "logic/bitstream.hpp"
 
 #include <uvm>
@@ -34,7 +35,7 @@ public:
     bitstream tid;
     bitstream tdest;
     std::vector<bitstream> tuser;
-    std::vector<std::uint8_t> tdata;
+    std::vector<tdata_byte> tdata;
     std::vector<sc_core::sc_time> tdata_timestamp;
     std::vector<sc_core::sc_time> transfer_timestamp;
     std::size_t bus_size;
