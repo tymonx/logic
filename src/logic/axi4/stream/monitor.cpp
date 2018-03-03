@@ -94,15 +94,17 @@ void monitor::run_phase(uvm::uvm_phase& /* phase */) {
             auto& packet = get_packet(packets, packet_id);
 
             packet.tuser.emplace_back(m_vif->get_tuser());
-            packet.transfer_timestamp.emplace_back(timestamp);
             packet.bus_size = bus_size;
 
             for (auto i = 0u; i < bus_size; ++i) {
                 if (m_vif->get_tkeep(i) && m_vif->get_tstrb(i)) {
-                    packet.tdata.emplace_back(m_vif->get_tdata(i));
-                    packet.tdata_timestamp.emplace_back(timestamp);
+                    packet.tdata.emplace_back(std::make_pair(
+                            m_vif->get_tdata(i), timestamp
+                    ));
                 }
             }
+
+            ++packet.transfers;
 
             if (m_vif->get_tlast()) {
                 analysis_port.write(packet);

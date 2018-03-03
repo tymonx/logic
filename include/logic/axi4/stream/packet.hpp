@@ -22,6 +22,7 @@
 #include <uvm>
 
 #include <cstdint>
+#include <utility>
 #include <vector>
 
 namespace logic {
@@ -32,13 +33,14 @@ class packet : public uvm::uvm_object {
 public:
     UVM_OBJECT_UTILS(logic::axi4::stream::packet)
 
+    using data_type = std::pair<tdata_byte, sc_core::sc_time>;
+
     bitstream tid;
     bitstream tdest;
     std::vector<bitstream> tuser;
-    std::vector<tdata_byte> tdata;
-    std::vector<sc_core::sc_time> tdata_timestamp;
-    std::vector<sc_core::sc_time> transfer_timestamp;
+    std::vector<data_type> tdata;
     std::size_t bus_size;
+    std::size_t transfers;
 
     packet();
 

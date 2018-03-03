@@ -23,13 +23,13 @@ using logic::axi4::stream::scoreboard;
 
 static void print(std::stringstream& ss,
         const logic::axi4::stream::packet& packet, std::size_t index) {
-    ss << packet.tdata_timestamp[index] << ", 0x";
+    ss << packet.tdata[index].second << ", 0x";
 
     std::ios state{nullptr};
     state.copyfmt(ss);
 
     ss << std::hex << std::setw(2) << std::setfill('0') <<
-        unsigned(packet.tdata[index]);
+        unsigned(packet.tdata[index].first);
 
     ss.copyfmt(state);
 }
@@ -38,13 +38,13 @@ static void print(std::stringstream& ss, const char* prefix,
         const logic::axi4::stream::packet& packet) {
 
     ss << "  " << prefix << ".timestamp.start: " <<
-        packet.transfer_timestamp.front() << std::endl;
+        packet.tdata.front().second << std::endl;
 
     ss << "  " << prefix << ".timestamp.end: " <<
-        packet.transfer_timestamp.back() << std::endl;
+        packet.tdata.back().second << std::endl;
 
     ss << "  " << prefix << ".transfers: " <<
-        packet.transfer_timestamp.size() << std::endl;
+        packet.transfers << std::endl;
 
     ss << "  " << prefix << ".bus.width: " <<
         8 * packet.bus_size << std::endl;
@@ -132,7 +132,7 @@ void scoreboard::run_phase(uvm::uvm_phase& /* phase */) {
                     m_tx_packet->tdata.size());
 
             for (auto i = 0u; i < packet_length; ++i) {
-                if (m_rx_packet->tdata[i] != m_tx_packet->tdata[i]) {
+                if (m_rx_packet->tdata[i].first != m_tx_packet->tdata[i].first) {
                     ss << "  index: " << i << ", rx: {";
                     ::print(ss, *m_rx_packet, i);
                     ss << "}, tx: {";
