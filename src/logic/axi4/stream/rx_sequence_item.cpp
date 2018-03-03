@@ -27,24 +27,24 @@ rx_sequence_item::rx_sequence_item() :
 
 rx_sequence_item::rx_sequence_item(const std::string& name) :
     uvm::uvm_sequence_item{name},
-    id{},
-    destination{},
-    user{},
-    data{},
+    tid{},
+    tdest{},
+    tuser{},
+    tdata{},
     idle{},
     timeout{TIMEOUT}
 {
-    id.resize(1);
-    destination.resize(1);
-    user.resize(1);
-    user[0].resize(1);
+    tid.resize(1);
+    tdest.resize(1);
+    tuser.resize(1);
+    tuser[0].resize(1);
 }
 
 auto rx_sequence_item::convert2string() const -> std::string {
     std::ostringstream ss;
     ss << " data:";
 
-    for (const auto& value : data) {
+    for (const auto& value : tdata) {
         ss << " " << std::hex << std::setfill('0') << std::setw(2) <<
             unsigned(value);
     }
@@ -55,10 +55,10 @@ auto rx_sequence_item::convert2string() const -> std::string {
 rx_sequence_item::~rx_sequence_item() = default;
 
 void rx_sequence_item::do_print(const uvm::uvm_printer& printer) const {
-    printer.print_array_header("data", int(data.size()),
+    printer.print_array_header("data", int(tdata.size()),
             "std::vector<std::uint8_t>");
 
-    for (const auto& value : data) {
+    for (const auto& value : tdata) {
         printer.print_field_int("", int(value), 8, uvm::UVM_HEX);
     }
 
@@ -66,11 +66,11 @@ void rx_sequence_item::do_print(const uvm::uvm_printer& printer) const {
 }
 
 void rx_sequence_item::do_pack(uvm::uvm_packer& p) const {
-    p << data;
+    p << tdata;
 }
 
 void rx_sequence_item::do_unpack(uvm::uvm_packer& p) {
-    p >> data;
+    p >> tdata;
 }
 
 void rx_sequence_item::do_copy(const uvm::uvm_object& rhs) {
@@ -89,7 +89,7 @@ bool rx_sequence_item::do_compare(const uvm::uvm_object& rhs,
     auto status = false;
 
     if (other != nullptr) {
-        status = (data == other->data);
+        status = (tdata == other->tdata);
     }
     else {
         UVM_ERROR(get_name(), "Error in do_compare");

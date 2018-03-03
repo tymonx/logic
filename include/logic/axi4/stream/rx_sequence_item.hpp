@@ -34,10 +34,10 @@ class rx_sequence_item : public uvm::uvm_sequence_item {
 public:
     UVM_OBJECT_UTILS(logic::axi4::stream::rx_sequence_item)
 
-    bitstream id;
-    bitstream destination;
-    std::vector<bitstream> user;
-    std::vector<tdata_byte> data;
+    bitstream tid;
+    bitstream tdest;
+    std::vector<bitstream> tuser;
+    std::vector<tdata_byte> tdata;
     range idle;
     std::size_t timeout;
 

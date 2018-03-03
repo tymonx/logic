@@ -78,8 +78,8 @@ void tx_driver::transfer(const tx_sequence_item& item) {
 
     while ((is_running || (0 != idle)) && m_vif->get_areset_n()) {
         if (is_running && m_vif->get_tready() && m_vif->get_tvalid()
-                && (item.id == m_vif->get_tid())
-                && (item.destination == m_vif->get_tdest())) {
+                && (item.tid == m_vif->get_tid())
+                && (item.tdest == m_vif->get_tdest())) {
             timeout = item.timeout;
             is_running = !m_vif->get_tlast();
         }

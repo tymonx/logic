@@ -25,8 +25,8 @@ tx_sequence_item::tx_sequence_item() :
 
 tx_sequence_item::tx_sequence_item(const std::string& name) :
     uvm::uvm_sequence_item{name},
-    id{},
-    destination{},
+    tid{},
+    tdest{},
     timeout{TIMEOUT},
     idle{}
 { }

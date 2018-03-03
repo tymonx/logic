@@ -65,7 +65,7 @@ void rx_driver::transfer(const rx_sequence_item& item) {
     std::uniform_int_distribution<std::size_t>
         random_idle{item.idle.min(), item.idle.max()};
 
-    const std::size_t total_size = item.data.size();
+    const std::size_t total_size = item.tdata.size();
     const std::size_t bus_size = m_vif->size();
     bool is_running = (total_size > 0);
 
@@ -88,7 +88,7 @@ void rx_driver::transfer(const rx_sequence_item& item) {
 
                 for (std::size_t i = 0; i < bus_size; ++i) {
                     if (index < total_size) {
-                        switch (item.data[index].type()) {
+                        switch (item.tdata[index].type()) {
                         case tdata_byte::DATA_BYTE:
                             m_vif->set_tkeep(i, true);
                             m_vif->set_tstrb(i, true);
@@ -107,7 +107,7 @@ void rx_driver::transfer(const rx_sequence_item& item) {
                             m_vif->set_tstrb(i, false);
                             break;
                         }
-                        m_vif->set_tdata(i, std::uint8_t(item.data[index++]));
+                        m_vif->set_tdata(i, std::uint8_t(item.tdata[index++]));
                     }
                     else {
                         m_vif->set_tkeep(i, false);
@@ -120,8 +120,8 @@ void rx_driver::transfer(const rx_sequence_item& item) {
                     ++index;
                 }
 
-                if (transfer < item.user.size()) {
-                    m_vif->set_tuser(item.user[transfer]);
+                if (transfer < item.tuser.size()) {
+                    m_vif->set_tuser(item.tuser[transfer]);
                 }
                 else {
                     m_vif->set_tuser({});
@@ -129,8 +129,8 @@ void rx_driver::transfer(const rx_sequence_item& item) {
 
                 ++transfer;
 
-                m_vif->set_tid(item.id);
-                m_vif->set_tdest(item.destination);
+                m_vif->set_tid(item.tid);
+                m_vif->set_tdest(item.tdest);
                 m_vif->set_tlast(index >= total_size);
                 m_vif->set_tvalid(true);
             }

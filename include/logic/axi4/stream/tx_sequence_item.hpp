@@ -32,8 +32,8 @@ class tx_sequence_item : public uvm::uvm_sequence_item {
 public:
     UVM_OBJECT_UTILS(logic::axi4::stream::tx_sequence_item)
 
-    bitstream id;
-    bitstream destination;
+    bitstream tid;
+    bitstream tdest;
     std::size_t timeout;
     range idle;
 

@@ -56,8 +56,8 @@ protected:
 
             for (auto& item : m_sequence->rx->items) {
                 item.idle = rx;
-                item.data.resize(random_length(random_generator));
-                for (auto& data : item.data) {
+                item.tdata.resize(random_length(random_generator));
+                for (auto& data : item.tdata) {
                     data = random_data(random_generator);
                 }
             }
