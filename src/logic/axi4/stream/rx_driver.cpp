@@ -74,6 +74,24 @@ void rx_driver::transfer(const rx_sequence_item& item) {
     std::size_t transfer = 0;
     std::size_t index = 0;
 
+    if (!is_running) {
+        while (0 != idle) {
+            if (m_vif->get_tready()) {
+                --idle;
+            }
+            else if (0 != item.timeout) {
+                if (0 != timeout) {
+                    --timeout;
+                }
+                else {
+                    idle = 0;
+                    UVM_ERROR(get_name(), "Timeout!");
+                }
+            }
+            m_vif->aclk_posedge();
+        }
+    }
+
     while (is_running && m_vif->get_areset_n()) {
         if (m_vif->get_tready()) {
             m_vif->set_tvalid(false);
