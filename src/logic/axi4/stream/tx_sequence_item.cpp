@@ -14,8 +14,48 @@
  */
 
 #include "logic/axi4/stream/tx_sequence_item.hpp"
+#include "logic/printer/json.hpp"
 
 using logic::axi4::stream::tx_sequence_item;
+
+namespace {
+namespace field {
+
+class idle : public uvm::uvm_object {
+public:
+    explicit idle(const logic::range& value) :
+        m_range{value}
+    { }
+protected:
+    void do_print(const uvm::uvm_printer& printer) const override {
+        printer.print_field_int("min", m_range.min(), -1, uvm::UVM_DEC);
+        printer.print_field_int("max", m_range.max(), -1, uvm::UVM_DEC);
+    }
+
+    logic::range m_range{};
+};
+
+class width_value : public uvm::uvm_object {
+public:
+    explicit width_value(const logic::bitstream& bits) :
+        m_width{bits.size()}
+    {
+        for (std::size_t i = 0; i < m_width; ++i) {
+            m_value[int(i)] = bool(bits[i]);
+        }
+    }
+protected:
+    void do_print(const uvm::uvm_printer& printer) const override {
+        printer.print_field_int("width", m_width, -1, uvm::UVM_DEC);
+        printer.print_field("value", m_value, int(m_width), uvm::UVM_HEX);
+    }
+
+    std::size_t m_width{};
+    uvm::uvm_bitstream_t m_value{};
+};
+
+} /* namespace field */
+} /* namespace */
 
 static constexpr std::size_t TIMEOUT{10000};
 
@@ -31,14 +71,20 @@ tx_sequence_item::tx_sequence_item(const std::string& name) :
     idle{}
 { }
 
-std::string tx_sequence_item::convert2string() const {
-    std::ostringstream ss;
-    return ss.str();
-}
-
 tx_sequence_item::~tx_sequence_item() = default;
 
-void tx_sequence_item::do_print(const uvm::uvm_printer&) const { }
+std::string tx_sequence_item::convert2string() const {
+    logic::printer::json json_printer;
+    do_print(json_printer);
+    return json_printer.emit();
+}
+
+void tx_sequence_item::do_print(const uvm::uvm_printer& printer) const {
+    printer.print_field_int("timeout", timeout, -1, uvm::UVM_DEC);
+    printer.print_object("idle", field::idle{idle});
+    printer.print_object("tid", field::width_value{tid});
+    printer.print_object("tdest", field::width_value{tdest});
+}
 
 void tx_sequence_item::do_pack(uvm::uvm_packer&) const { }
 
@@ -60,7 +106,8 @@ bool tx_sequence_item::do_compare(const uvm::uvm_object& rhs,
     auto status = false;
 
     if (other != nullptr) {
-        status = true;
+        status = (tid == other->tid) &&
+            (tdest == other->tdest);
     }
     else {
         UVM_ERROR(get_name(), "Error in do_compare");
