@@ -93,7 +93,10 @@ void tx_sequence_item::do_unpack(uvm::uvm_packer&) { }
 void tx_sequence_item::do_copy(const uvm::uvm_object& rhs) {
     auto other = dynamic_cast<const tx_sequence_item*>(&rhs);
     if (other != nullptr) {
-        *this = *other;
+        this->idle = other->idle;
+        this->timeout = other->timeout;
+        this->tid = other->tid;
+        this->tdest = other->tdest;
     }
     else {
         UVM_ERROR(get_name(), "Error in do_copy");

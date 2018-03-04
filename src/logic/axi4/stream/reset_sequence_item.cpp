@@ -55,7 +55,8 @@ void reset_sequence_item::do_unpack(uvm::uvm_packer& p) {
 void reset_sequence_item::do_copy(const uvm::uvm_object& rhs) {
     auto other = dynamic_cast<const reset_sequence_item*>(&rhs);
     if (other != nullptr) {
-        *this = *other;
+        this->idle = other->idle;
+        this->duration = other->duration;
     }
     else {
         UVM_ERROR(get_name(), "Error in do_copy");

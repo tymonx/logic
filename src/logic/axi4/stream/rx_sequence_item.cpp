@@ -179,7 +179,12 @@ void rx_sequence_item::do_unpack(uvm::uvm_packer& p) {
 void rx_sequence_item::do_copy(const uvm::uvm_object& rhs) {
     auto other = dynamic_cast<const rx_sequence_item*>(&rhs);
     if (other != nullptr) {
-        *this = *other;
+        this->idle = other->idle;
+        this->timeout = other->timeout;
+        this->tid = other->tid;
+        this->tdest = other->tdest;
+        this->tuser = other->tuser;
+        this->tdata = other->tdata;
     }
     else {
         UVM_ERROR(get_name(), "Error in do_copy");
