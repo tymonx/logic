@@ -36,12 +36,11 @@ Benefits
   * Easy to integrate with other projects as git submodule
   * Custom UVM printers: JSON
 
-Introduction
-------------
+Documentation
+-------------
 
-  * [Commands](https://github.com/tymonx/logic/wiki/Commands) -
-    available CMake commands for creating project, adding HDL source files and
-    vendor IP core files, compiling and creating unit tests
+  * [Wiki](https://github.com/tymonx/logic/wiki) - Main documentation
+  * [Environment setup for Linux](doc/environment-setup-linux.md)
 
 Examples
 --------
@@ -76,10 +75,6 @@ These 3rd party tools and libraries are optional:
   * [Natural Docs](http://www.naturaldocs.org/) - code documentation generator
   * [GTKWave](http://gtkwave.sourceforge.net/) - waveform viewer
   * [WaveDrom](http://wavedrom.com/) - digital timing diagram
-
-Environment setup guides:
-
-  * [Environment setup for Linux](doc/environment-setup-linux.md)
 
 Workspace
 ---------
