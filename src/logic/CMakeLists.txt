@@ -14,6 +14,7 @@
 
 add_subdirectory(axi4)
 add_subdirectory(gtest)
+add_subdirectory(printer)
 
 if (VERILATOR_FOUND)
     include_directories(SYSTEM ${VERILATOR_INCLUDE_DIR})
@@ -45,6 +46,7 @@ add_library(logic-core OBJECT
 
 add_library(logic STATIC
     $<TARGET_OBJECTS:logic-core>
+    $<TARGET_OBJECTS:logic-core-printer>
     $<TARGET_OBJECTS:logic-axi4-stream>
 )
 

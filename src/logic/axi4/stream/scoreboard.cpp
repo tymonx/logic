@@ -14,134 +14,9 @@
  */
 
 #include "logic/axi4/stream/scoreboard.hpp"
-
-#include <algorithm>
-#include <iomanip>
-#include <sstream>
+#include "logic/printer/json.hpp"
 
 using logic::axi4::stream::scoreboard;
-
-static std::string print_difference(const logic::axi4::stream::packet& rx,
-        const logic::axi4::stream::packet& tx) {
-    std::stringstream ss;
-
-    ss << std::endl;
-
-    ss << std::string(71, '-') << std::endl;
-
-    ss << "            |             rx             " <<
-                      "|             tx             |" << std::endl;
-
-    ss << std::string(71, '-') << std::endl;
-
-    ss << "time.start  | " << std::setw(26) << rx.timestamps.front() <<
-        " | " << std::setw(26) << tx.timestamps.front() << " |" << std::endl;
-
-    ss << "time.end    | " << std::setw(26) << rx.timestamps.back() <<
-        " | " << std::setw(26) << tx.timestamps.back() << " |" << std::endl;
-
-    ss << "time.total  | " << std::setw(26) <<
-            (rx.timestamps.back() - rx.timestamps.front()) <<
-        " | " << std::setw(26) <<
-            (tx.timestamps.back() - tx.timestamps.front()) <<
-        " |" << std::endl;
-
-    ss << "transfers   | " << std::setw(26) << rx.timestamps.size() <<
-        " | " << std::setw(26) << tx.timestamps.size() << " |" << std::endl;
-
-    ss << "bus.width   | " << std::setw(26) << 8 * rx.bus_size <<
-        " | " << std::setw(26) << 8 * tx.bus_size << " |"  << std::endl;
-
-    ss << "tid         | " << std::setw(26) << std::uintmax_t(rx.tid) <<
-        " | " << std::setw(26) << std::uintmax_t(tx.tid) << " |"  << std::endl;
-
-    ss << "tid.width   | " << std::setw(26) << rx.tid.size() <<
-        " | " << std::setw(26) << tx.tid.size() << " |"  << std::endl;
-
-    ss << "tdest       | " << std::setw(26) << std::uintmax_t(rx.tdest) <<
-        " | " << std::setw(26) << std::uintmax_t(tx.tdest) << " |"  <<
-        std::endl;
-
-    ss << "tdest.width | " << std::setw(26) << rx.tdest.size() <<
-        " | " << std::setw(26) << tx.tdest.size() << " |"  << std::endl;
-
-    auto bytes = [] (const logic::axi4::stream::packet& packet) {
-        return std::count_if(packet.tdata.cbegin(), packet.tdata.cend(),
-            [] (const logic::axi4::stream::tdata_byte& data) {
-                return data.is_data_byte();
-            }
-        );
-    };
-
-    ss << "tdata.bytes | " << std::setw(26) << bytes(rx) <<
-        " | " << std::setw(26) << bytes(tx) << " |"  << std::endl;
-
-    ss << "tdata.total | " << std::setw(26) << rx.tdata.size() <<
-        " | " << std::setw(26) << tx.tdata.size() << " |"  << std::endl;
-
-    ss << std::string(71, '-') << std::endl;
-
-    auto print_type = [] (const logic::axi4::stream::tdata_byte& data) {
-        std::string str;
-
-        switch (data.type()) {
-            case logic::axi4::stream::tdata_byte::DATA_BYTE:
-                str = "  Data  ";
-                break;
-            case logic::axi4::stream::tdata_byte::POSITION_BYTE:
-                str = "Position";
-                break;
-            case logic::axi4::stream::tdata_byte::NULL_BYTE:
-                str = "  Null  ";
-                break;
-            case logic::axi4::stream::tdata_byte::RESERVED:
-            default:
-                str = "Reserved";
-                break;
-        }
-
-        return str;
-    };
-
-    ss << "      index |   time   |   type   | data" <<
-                     " |   time   |   type   | data |" << std::endl;
-
-    ss << std::string(71, '-') << std::endl;
-
-    const std::size_t max_length = std::max(rx.tdata.size(), tx.tdata.size());
-
-    for (std::size_t i = 0; i < max_length; ++i) {
-        ss << std::setw(11) << std::setfill(' ') << std::dec << i;
-
-        if (i < rx.tdata.size()) {
-            ss <<
-                " | " << std::setw(8) << rx.timestamps[i / rx.bus_size] <<
-                " | " << print_type(rx.tdata[i]) <<
-                " | 0x" << std::setw(2) << std::setfill('0') <<
-                    std::hex << unsigned(rx.tdata[i]);
-        }
-        else {
-           ss << " | -------- | -------- | ----";
-        }
-
-        if (i < tx.tdata.size()) {
-            ss <<
-                " | " << std::setw(8) << std::setfill(' ') <<
-                    std::dec << tx.timestamps[i / tx.bus_size] <<
-                " | " << print_type(tx.tdata[i]) <<
-                " | 0x" << std::setw(2) << std::setfill('0') <<
-                std::hex << unsigned(tx.tdata[i]) <<
-                " |" << std::endl;
-        }
-        else {
-           ss << " | -------- | -------- | ---- |" << std::endl;
-        }
-    }
-
-    ss << std::string(71, '-') << std::endl;
-
-    return ss.str();
-}
 
 scoreboard::scoreboard() :
     scoreboard{"scoreboard"}
@@ -190,9 +65,15 @@ void scoreboard::run_phase(uvm::uvm_phase& /* phase */) {
         *m_rx_packet = m_rx_fifo.get(nullptr);
         *m_tx_packet = m_tx_fifo.get(nullptr);
 
+        m_rx_packet->set_name("rx");
+        m_tx_packet->set_name("tx");
+
         if (!m_rx_packet->compare(*m_tx_packet)) {
             m_error = true;
-            UVM_ERROR(get_name(), print_difference(*m_rx_packet, *m_tx_packet));
+
+            logic::printer::json json_printer;
+            m_rx_packet->print(&json_printer);
+            m_tx_packet->print(&json_printer);
         }
     }
 }
