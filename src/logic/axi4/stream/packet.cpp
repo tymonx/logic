@@ -110,16 +110,6 @@ packet::packet(const std::string& name) :
 
 packet::~packet() = default;
 
-auto packet::clear() -> packet& {
-    tid.clear();
-    tdest.clear();
-    tuser.clear();
-    tdata.clear();
-    timestamps.clear();
-    bus_size = 0;
-    return *this;
-}
-
 std::string packet::convert2string() const {
     logic::printer::json json_printer;
     do_print(json_printer);

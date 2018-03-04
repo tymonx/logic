@@ -51,8 +51,6 @@ public:
 
     packet& operator=(const packet&) = default;
 
-    packet& clear();
-
     std::string convert2string() const override;
 
     ~packet() override;
