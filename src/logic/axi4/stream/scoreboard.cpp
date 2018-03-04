@@ -29,8 +29,8 @@ scoreboard::scoreboard(const uvm::uvm_component_name& name) :
     m_error{false},
     m_rx_fifo{"rx_fifo"},
     m_tx_fifo{"tx_fifo"},
-    m_rx_packet{packet::type_id::create("rx_packet", this)},
-    m_tx_packet{packet::type_id::create("tx_packet", this)}
+    m_rx_packet{packet::type_id::create("rx", this)},
+    m_tx_packet{packet::type_id::create("tx", this)}
 {
     if (m_rx_packet == nullptr) {
         UVM_FATAL(get_name(), "Cannot create rx packet!");
@@ -62,11 +62,8 @@ void scoreboard::run_phase(uvm::uvm_phase& /* phase */) {
     UVM_INFO(get_name(), "Run phase", uvm::UVM_FULL);
 
     while (true) {
-        *m_rx_packet = m_rx_fifo.get(nullptr);
-        *m_tx_packet = m_tx_fifo.get(nullptr);
-
-        m_rx_packet->set_name("rx");
-        m_tx_packet->set_name("tx");
+        m_rx_packet->copy(m_rx_fifo.get(nullptr));
+        m_tx_packet->copy(m_tx_fifo.get(nullptr));
 
         if (!m_rx_packet->compare(*m_tx_packet)) {
             m_error = true;
