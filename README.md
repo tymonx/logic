@@ -34,6 +34,7 @@ Benefits
     parallel execution, tests selection
   * Run the same unit tests with different parameters
   * Easy to integrate with other projects as git submodule
+  * Custom UVM printers: JSON
 
 Introduction
 ------------
