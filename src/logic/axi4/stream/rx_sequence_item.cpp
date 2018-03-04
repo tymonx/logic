@@ -14,8 +14,112 @@
  */
 
 #include "logic/axi4/stream/rx_sequence_item.hpp"
+#include "logic/printer/json.hpp"
 
-#include <iomanip>
+namespace {
+namespace field {
+
+class tdata : public uvm::uvm_object {
+public:
+    explicit tdata(const logic::axi4::stream::tdata_byte& tdata_byte) :
+        m_data{tdata_byte.data()}
+    {
+        switch (tdata_byte.type()) {
+        case logic::axi4::stream::tdata_byte::DATA_BYTE:
+            m_type = "data";
+            break;
+        case logic::axi4::stream::tdata_byte::POSITION_BYTE:
+            m_type = "position";
+            break;
+        case logic::axi4::stream::tdata_byte::RESERVED:
+            m_type = "reserved";
+            break;
+        case logic::axi4::stream::tdata_byte::NULL_BYTE:
+        default:
+            m_type = "null";
+            break;
+        }
+    }
+protected:
+    void do_print(const uvm::uvm_printer& printer) const override {
+        printer.print_string("type", m_type);
+        printer.print_field_int("value", m_data, 8, uvm::UVM_HEX);
+    }
+
+    std::string m_type{};
+    std::uint8_t m_data{};
+};
+
+class tuser : public uvm::uvm_object {
+public:
+    explicit tuser(const std::vector<logic::bitstream>& tuser) :
+        m_width{tuser.empty() ? 0u : tuser[0].size()},
+        m_values(tuser.size())
+    {
+        for (std::size_t i = 0u; i < tuser.size(); ++i) {
+            for (std::size_t j = 0u; j < m_width; ++j) {
+                m_values[i][int(j)] = bool(tuser[i][j]);
+            }
+        }
+    }
+protected:
+    void do_print(const uvm::uvm_printer& printer) const override {
+        printer.print_field_int("width", m_width, -1, uvm::UVM_DEC);
+
+        if (m_values.size() == 1) {
+            printer.print_field("value", m_values[0], int(m_width),
+                    uvm::UVM_HEX);
+        }
+        else {
+            printer.print_array_header("value", int(m_values.size()));
+
+            for (const auto& value : m_values) {
+                printer.print_field("value", value, int(m_width), uvm::UVM_HEX);
+            }
+
+            printer.print_array_footer();
+        }
+    }
+
+    std::size_t m_width;
+    std::vector<uvm::uvm_bitstream_t> m_values;
+};
+
+class idle : public uvm::uvm_object {
+public:
+    explicit idle(const logic::range& value) :
+        m_range{value}
+    { }
+protected:
+    void do_print(const uvm::uvm_printer& printer) const override {
+        printer.print_field_int("min", m_range.min(), -1, uvm::UVM_DEC);
+        printer.print_field_int("max", m_range.max(), -1, uvm::UVM_DEC);
+    }
+
+    logic::range m_range{};
+};
+
+class width_value : public uvm::uvm_object {
+public:
+    explicit width_value(const logic::bitstream& bits) :
+        m_width{bits.size()}
+    {
+        for (std::size_t i = 0; i < m_width; ++i) {
+            m_value[int(i)] = bool(bits[i]);
+        }
+    }
+protected:
+    void do_print(const uvm::uvm_printer& printer) const override {
+        printer.print_field_int("width", m_width, -1, uvm::UVM_DEC);
+        printer.print_field("value", m_value, int(m_width), uvm::UVM_HEX);
+    }
+
+    std::size_t m_width{};
+    uvm::uvm_bitstream_t m_value{};
+};
+
+} /* namespace field */
+} /* namespace */
 
 static constexpr std::size_t TIMEOUT{10000};
 
@@ -40,26 +144,25 @@ rx_sequence_item::rx_sequence_item(const std::string& name) :
     tuser[0].resize(1);
 }
 
-auto rx_sequence_item::convert2string() const -> std::string {
-    std::ostringstream ss;
-    ss << " data:";
-
-    for (const auto& value : tdata) {
-        ss << " " << std::hex << std::setfill('0') << std::setw(2) <<
-            unsigned(value);
-    }
-
-    return ss.str();
-}
-
 rx_sequence_item::~rx_sequence_item() = default;
 
-void rx_sequence_item::do_print(const uvm::uvm_printer& printer) const {
-    printer.print_array_header("data", int(tdata.size()),
-            "std::vector<std::uint8_t>");
+auto rx_sequence_item::convert2string() const -> std::string {
+    logic::printer::json json_printer;
+    do_print(json_printer);
+    return json_printer.emit();
+}
 
-    for (const auto& value : tdata) {
-        printer.print_field_int("", int(value), 8, uvm::UVM_HEX);
+void rx_sequence_item::do_print(const uvm::uvm_printer& printer) const {
+    printer.print_field_int("timeout", timeout, -1, uvm::UVM_DEC);
+    printer.print_object("idle", field::idle{idle});
+    printer.print_object("tid", field::width_value{tid});
+    printer.print_object("tdest", field::width_value{tdest});
+    printer.print_object("tuser", field::tuser{tuser});
+
+    printer.print_array_header("tdata", int(tdata.size()));
+
+    for (const auto& item : tdata) {
+        printer.print_object("item", field::tdata{item});
     }
 
     printer.print_array_footer();
@@ -89,7 +192,10 @@ bool rx_sequence_item::do_compare(const uvm::uvm_object& rhs,
     auto status = false;
 
     if (other != nullptr) {
-        status = (tdata == other->tdata);
+        status = (tid == other->tid) &&
+            (tdest == other->tdest) &&
+            (tuser == other->tuser) &&
+            (tdata == other->tdata);
     }
     else {
         UVM_ERROR(get_name(), "Error in do_compare");
