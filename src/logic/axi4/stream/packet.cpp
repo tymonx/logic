@@ -22,41 +22,68 @@ namespace {
 namespace field {
 
 struct transaction : public uvm::uvm_object {
-    std::size_t tdata_bytes{};
-    std::size_t tuser_width{};
-    sc_core::sc_time timestamp{};
-    uvm::uvm_bitstream_t tuser{};
-    uvm::uvm_bitstream_t tkeep{};
-    uvm::uvm_bitstream_t tstrb{};
-    uvm::uvm_bitstream_t tdata{};
+    using tdata_byte_iterator =
+        std::vector<logic::axi4::stream::tdata_byte>::const_iterator;
+
+    transaction(const sc_core::sc_time& timestamp,
+            const logic::bitstream& tuser,
+            tdata_byte_iterator tdata_byte_begin,
+            tdata_byte_iterator tdata_byte_end,
+            std::size_t tdata_bytes) :
+        m_timestamp{timestamp},
+        m_tuser_width{tuser.size()},
+        m_tdata_bytes{tdata_bytes}
+    {
+        int index = 0;
+
+        for (std::size_t i = 0u; i < tuser.size(); ++i) {
+            m_tuser[int(i)] = bool(tuser[i]);
+        }
+
+        while ((tdata_byte_begin < tdata_byte_end) && (0 != tdata_bytes--)) {
+            switch (tdata_byte_begin->type()) {
+            case logic::axi4::stream::tdata_byte::DATA_BYTE:
+                m_tkeep[index] = true;
+                m_tstrb[index] = true;
+                break;
+            case logic::axi4::stream::tdata_byte::RESERVED:
+                m_tkeep[index] = false;
+                m_tstrb[index] = true;
+                break;
+            case logic::axi4::stream::tdata_byte::POSITION_BYTE:
+                m_tkeep[index] = true;
+                m_tstrb[index] = false;
+                break;
+            case logic::axi4::stream::tdata_byte::NULL_BYTE:
+            default:
+                m_tkeep[index] = false;
+                m_tstrb[index] = false;
+                break;
+            }
+
+            m_tdata(8 * (index + 1) - 1, 8 * index) = tdata_byte_begin->data();
+
+            ++tdata_byte_begin;
+            ++index;
+        }
+    }
 protected:
     void do_print(const uvm::uvm_printer& printer) const override {
-        printer.print_time("time", timestamp);
-        printer.print_field("tuser", tuser, int(tuser_width), uvm::UVM_HEX);
-        printer.print_field("tkeep", tkeep, int(tdata_bytes), uvm::UVM_HEX);
-        printer.print_field("tstrb", tstrb, int(tdata_bytes), uvm::UVM_HEX);
-        printer.print_field("tdata", tdata, int(8 * tdata_bytes), uvm::UVM_HEX);
-    }
-};
-
-struct time : public uvm::uvm_object {
-    explicit time(const std::vector<sc_core::sc_time>& timestamps) :
-        m_total{timestamps.back() - timestamps.front()},
-        m_begin{timestamps.front()},
-        m_end{timestamps.back()}
-    { }
-protected:
-    void do_print(const uvm::uvm_printer& printer) const override {
-        printer.print_time("total", m_total);
-        printer.print_time("begin", m_begin);
-        printer.print_time("end", m_end);
+        printer.print_time("time", m_timestamp);
+        printer.print_field("tuser", m_tuser, int(m_tuser_width), uvm::UVM_HEX);
+        printer.print_field("tkeep", m_tkeep, int(m_tdata_bytes), uvm::UVM_HEX);
+        printer.print_field("tstrb", m_tstrb, int(m_tdata_bytes), uvm::UVM_HEX);
+        printer.print_field("tdata", m_tdata, int(8 * m_tdata_bytes), uvm::UVM_HEX);
     }
 
-    sc_core::sc_time m_total{};
-    sc_core::sc_time m_begin{};
-    sc_core::sc_time m_end{};
+    sc_core::sc_time m_timestamp{};
+    uvm::uvm_bitstream_t m_tuser{};
+    std::size_t m_tuser_width{};
+    uvm::uvm_bitstream_t m_tkeep{};
+    uvm::uvm_bitstream_t m_tstrb{};
+    uvm::uvm_bitstream_t m_tdata{};
+    std::size_t m_tdata_bytes;
 };
-
 
 struct width : public uvm::uvm_object {
     explicit width(std::size_t value) :
@@ -105,7 +132,7 @@ packet::packet(const std::string& name) :
     tuser{},
     tdata{},
     timestamps{},
-    bus_size{0}
+    bus_size{}
 { }
 
 packet::~packet() = default;
@@ -117,58 +144,34 @@ std::string packet::convert2string() const {
 }
 
 void packet::do_print(const uvm::uvm_printer& printer) const {
-    const std::size_t tuser_width = tuser.empty() ? 0 : tuser[0].size();
+    const std::size_t tuser_width = tuser.empty() ? 0u : tuser[0].size();
 
-    printer.print_object("time", field::time{timestamps});
     printer.print_object("tid", field::width_value{tid});
     printer.print_object("tdest", field::width_value{tdest});
     printer.print_object("tuser", field::width{tuser_width});
     printer.print_object("tkeep", field::width{bus_size});
     printer.print_object("tstrb", field::width{bus_size});
-    printer.print_object("tdata", field::width{8 * bus_size});
+    printer.print_object("tdata", field::width{8u * bus_size});
 
     printer.print_array_header("transaction", int(timestamps.size()));
 
-    for (std::size_t i = 0u; i < tdata.size(); i += bus_size) {
-        field::transaction transaction;
-        transaction.tuser_width = tuser_width;
-        transaction.tdata_bytes = bus_size;
-        transaction.timestamp = timestamps[i / bus_size];
+    auto it_tdata = tdata.cbegin();
+    auto it_timestamp = timestamps.cbegin();
+    auto it_tuser = tuser.cbegin();
 
-        for (std::size_t j = 0; j < tuser.size(); ++j) {
-            transaction.tuser[int(j)] = bool(tuser[j]);
-        }
+    while (it_timestamp < timestamps.cend()) {
+        printer.print_object("item", field::transaction{
+            *it_timestamp++,
+            *it_tuser++,
+            it_tdata,
+            tdata.cend(),
+            bus_size
+        });
 
-        const std::size_t length = std::min(bus_size, tdata.size() - i);
-
-        for (std::size_t j = 0u; j < length; ++j) {
-            switch (tdata[i + j].type()) {
-            case tdata_byte::DATA_BYTE:
-                transaction.tkeep[int(j)] = true;
-                transaction.tstrb[int(j)] = true;
-                break;
-            case tdata_byte::RESERVED:
-                transaction.tkeep[int(j)] = false;
-                transaction.tstrb[int(j)] = true;
-                break;
-            case tdata_byte::POSITION_BYTE:
-                transaction.tkeep[int(j)] = true;
-                transaction.tstrb[int(j)] = false;
-                break;
-            case tdata_byte::NULL_BYTE:
-            default:
-                transaction.tkeep[int(j)] = false;
-                transaction.tstrb[int(j)] = false;
-                break;
-            }
-
-            transaction.tdata(8 * (int(j) + 1) - 1, 8 * int(j)) = tdata[i + j].data();
-        }
-
-        printer.print_object("tdata", transaction);
+        it_tdata += decltype(it_tdata)::difference_type(bus_size);
     }
 
-    printer.print_array_footer(int(tdata.size()));
+    printer.print_array_footer();
 }
 
 void packet::do_pack(uvm::uvm_packer& p) const {
