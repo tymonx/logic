@@ -14,6 +14,7 @@
  */
 
 #include "logic/axi4/stream/reset_sequence_item.hpp"
+#include "logic/printer/json.hpp"
 
 using logic::axi4::stream::reset_sequence_item;
 
@@ -23,39 +24,38 @@ reset_sequence_item::reset_sequence_item() :
 
 reset_sequence_item::reset_sequence_item(const std::string& name) :
     uvm::uvm_sequence_item{name},
-    duration{1},
-    idle{0}
+    duration{},
+    idle{}
 { }
 
 std::string reset_sequence_item::convert2string() const {
-    std::ostringstream ss;
-    ss << "duration: " << duration <<
-        ", idle: " << idle;
-    return ss.str();
+    logic::printer::json json_printer;
+    do_print(json_printer);
+    return json_printer.emit();
 }
 
 reset_sequence_item::~reset_sequence_item() = default;
 
 void reset_sequence_item::do_print(const uvm::uvm_printer& printer) const {
-    printer.print_field_int("duration",
-            duration, 8 * sizeof(std::size_t));
+    printer.print_field_int("duration", duration, 8 * sizeof(std::size_t),
+            uvm::UVM_DEC);
 
-    printer.print_field_int("idle",
-            idle, 8 * sizeof(std::size_t));
+    printer.print_field_int("idle", idle, 8 * sizeof(std::size_t),
+            uvm::UVM_DEC);
 }
 
 void reset_sequence_item::do_pack(uvm::uvm_packer& p) const {
-    p << duration;
+    p << duration << idle;
 }
 
 void reset_sequence_item::do_unpack(uvm::uvm_packer& p) {
-    p >> duration;
+    p >> duration >> idle;
 }
 
 void reset_sequence_item::do_copy(const uvm::uvm_object& rhs) {
     auto other = dynamic_cast<const reset_sequence_item*>(&rhs);
     if (other != nullptr) {
-        *this = *other;;
+        *this = *other;
     }
     else {
         UVM_ERROR(get_name(), "Error in do_copy");
