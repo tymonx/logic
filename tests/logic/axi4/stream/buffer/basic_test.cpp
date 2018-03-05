@@ -49,8 +49,8 @@ protected:
         m_sequence->reset->items[0].duration = 1;
         m_sequence->reset->items[0].idle = 0;
 
-        auto randomize = [&] (const logic::range& rx = {},
-                const logic::range& tx = {}) {
+        auto randomize = [&] (const logic::range& rx,
+                const logic::range& tx) {
             m_sequence->rx->items.resize(random_packets(random_generator));
             m_sequence->tx->items.resize(m_sequence->rx->items.size());
 
@@ -67,10 +67,10 @@ protected:
             }
         };
 
-        randomize();
+        randomize({0, 0}, {0, 0});
         m_sequence->start(m_testbench->sequencer);
 
-        randomize({0, 3});
+        randomize({0, 3}, {0, 0});
         m_sequence->start(m_testbench->sequencer);
 
         randomize({0, 0}, {0, 3});

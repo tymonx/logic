@@ -159,12 +159,17 @@ public:
         tuser.write(value);
     }
 
-    ~bus_if() override = default;
+    ~bus_if() override;
 private:
     tdata_type m_tdata{};
     tkeep_type m_tkeep{};
     tstrb_type m_tstrb{};
 };
+
+template<std::size_t M_TDATA_BYTES, std::size_t M_TID_WIDTH,
+    std::size_t M_TDEST_WIDTH, std::size_t M_TUSER_WIDTH>
+bus_if<M_TDATA_BYTES, M_TID_WIDTH, M_TDEST_WIDTH, M_TUSER_WIDTH>::~bus_if()
+    = default;
 
 } /* namespace stream */
 } /* namespace axi4 */
