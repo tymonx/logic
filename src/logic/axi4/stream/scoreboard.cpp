@@ -62,11 +62,14 @@ void scoreboard::run_phase(uvm::uvm_phase& /* phase */) {
     UVM_INFO(get_name(), "Run phase", uvm::UVM_FULL);
 
     while (true) {
-        m_rx_packet->copy(m_rx_fifo.get(nullptr));
-        m_tx_packet->copy(m_tx_fifo.get(nullptr));
+        *m_rx_packet = m_rx_fifo.get(nullptr);
+        *m_tx_packet = m_tx_fifo.get(nullptr);
 
         if (!m_rx_packet->compare(*m_tx_packet)) {
             m_error = true;
+
+            m_rx_packet->set_name("rx");
+            m_tx_packet->set_name("tx");
 
             logic::printer::json json_printer;
             m_rx_packet->print(&json_printer);
