@@ -93,8 +93,6 @@ void rx_driver::idle_transfer(const rx_sequence_item& item) {
         }
         m_vif->aclk_posedge();
     }
-
-    m_vif->set_tvalid(false);
 }
 
 void rx_driver::data_transfer(const rx_sequence_item& item) {
