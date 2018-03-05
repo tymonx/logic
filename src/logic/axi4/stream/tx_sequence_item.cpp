@@ -26,6 +26,8 @@ public:
     explicit idle(const logic::range& value) :
         m_range{value}
     { }
+
+    ~idle() override;
 protected:
     void do_print(const uvm::uvm_printer& printer) const override {
         printer.print_field_int("min", m_range.min(), -1, uvm::UVM_DEC);
@@ -34,6 +36,8 @@ protected:
 
     logic::range m_range{};
 };
+
+idle::~idle() = default;
 
 class width_value : public uvm::uvm_object {
 public:
@@ -44,6 +48,8 @@ public:
             m_value[int(i)] = bool(bits[i]);
         }
     }
+
+    ~width_value() override;
 protected:
     void do_print(const uvm::uvm_printer& printer) const override {
         printer.print_field_int("width", m_width, -1, uvm::UVM_DEC);
@@ -53,6 +59,8 @@ protected:
     std::size_t m_width{};
     uvm::uvm_bitstream_t m_value{};
 };
+
+width_value::~width_value() = default;
 
 } /* namespace field */
 } /* namespace */

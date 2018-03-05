@@ -61,12 +61,15 @@ struct transaction : public uvm::uvm_object {
                 break;
             }
 
-            m_tdata(8 * (index + 1) - 1, 8 * index) = tdata_byte_begin->data();
+            m_tdata(8 * (index + 1) - 1, 8 * index) =
+                unsigned(tdata_byte_begin->data());
 
             ++tdata_byte_begin;
             ++index;
         }
     }
+
+    ~transaction() override;
 protected:
     void do_print(const uvm::uvm_printer& printer) const override {
         printer.print_time("time", m_timestamp);
@@ -85,6 +88,8 @@ protected:
     std::size_t m_tdata_bytes;
 };
 
+transaction::~transaction() = default;
+
 struct width : public uvm::uvm_object {
     explicit width(std::size_t value) :
         m_width{value}
@@ -93,6 +98,8 @@ struct width : public uvm::uvm_object {
     explicit width(const logic::bitstream& bits) :
         m_width{bits.size()}
     { }
+
+    ~width() override;
 protected:
     void do_print(const uvm::uvm_printer& printer) const override {
         printer.print_field_int("width", m_width, -1, uvm::UVM_DEC);
@@ -100,6 +107,8 @@ protected:
 
     std::size_t m_width{};
 };
+
+width::~width() = default;
 
 struct width_value : public width {
     explicit width_value(const logic::bitstream& bits) :
@@ -109,6 +118,8 @@ struct width_value : public width {
             m_value[int(i)] = bool(bits[i]);
         }
     }
+
+    ~width_value() override;
 protected:
     void do_print(const uvm::uvm_printer& printer) const override {
         width::do_print(printer);
@@ -117,6 +128,8 @@ protected:
 
     uvm::uvm_bitstream_t m_value{};
 };
+
+width_value::~width_value() = default;
 
 } /* namespace field */
 } /* namespace */

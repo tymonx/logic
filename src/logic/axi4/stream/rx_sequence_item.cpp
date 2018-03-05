@@ -40,28 +40,34 @@ public:
             break;
         }
     }
+
+    ~tdata() override;
 protected:
     void do_print(const uvm::uvm_printer& printer) const override {
         printer.print_string("type", m_type);
-        printer.print_field_int("value", m_data, 8, uvm::UVM_HEX);
+        printer.print_field_int("value", unsigned(m_data), 8, uvm::UVM_HEX);
     }
 
     std::string m_type{};
     std::uint8_t m_data{};
 };
 
+tdata::~tdata() = default;
+
 class tuser : public uvm::uvm_object {
 public:
-    explicit tuser(const std::vector<logic::bitstream>& tuser) :
-        m_width{tuser.empty() ? 0u : tuser[0].size()},
-        m_values(tuser.size())
+    explicit tuser(const std::vector<logic::bitstream>& tuser_vector) :
+        m_width{tuser_vector.empty() ? 0u : tuser_vector[0].size()},
+        m_values(tuser_vector.size())
     {
-        for (std::size_t i = 0u; i < tuser.size(); ++i) {
+        for (std::size_t i = 0u; i < tuser_vector.size(); ++i) {
             for (std::size_t j = 0u; j < m_width; ++j) {
-                m_values[i][int(j)] = bool(tuser[i][j]);
+                m_values[i][int(j)] = bool(tuser_vector[i][j]);
             }
         }
     }
+
+    ~tuser() override;
 protected:
     void do_print(const uvm::uvm_printer& printer) const override {
         printer.print_field_int("width", m_width, -1, uvm::UVM_DEC);
@@ -85,11 +91,15 @@ protected:
     std::vector<uvm::uvm_bitstream_t> m_values;
 };
 
+tuser::~tuser() = default;
+
 class idle : public uvm::uvm_object {
 public:
     explicit idle(const logic::range& value) :
         m_range{value}
     { }
+
+    ~idle() override;
 protected:
     void do_print(const uvm::uvm_printer& printer) const override {
         printer.print_field_int("min", m_range.min(), -1, uvm::UVM_DEC);
@@ -98,6 +108,8 @@ protected:
 
     logic::range m_range{};
 };
+
+idle::~idle() = default;
 
 class width_value : public uvm::uvm_object {
 public:
@@ -108,6 +120,8 @@ public:
             m_value[int(i)] = bool(bits[i]);
         }
     }
+
+    ~width_value() override;
 protected:
     void do_print(const uvm::uvm_printer& printer) const override {
         printer.print_field_int("width", m_width, -1, uvm::UVM_DEC);
@@ -117,6 +131,8 @@ protected:
     std::size_t m_width{};
     uvm::uvm_bitstream_t m_value{};
 };
+
+width_value::~width_value() = default;
 
 } /* namespace field */
 } /* namespace */
