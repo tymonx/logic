@@ -50,7 +50,9 @@ protected:
 
     [[noreturn]] void run_phase(uvm::uvm_phase& phase) override;
 
-    void transfer(const rx_sequence_item& item);
+    void data_transfer(const rx_sequence_item& item);
+
+    void idle_transfer(const rx_sequence_item& item);
 
     bus_if_base* m_vif;
     rx_sequence_item* m_item;

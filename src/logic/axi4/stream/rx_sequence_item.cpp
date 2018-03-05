@@ -147,6 +147,7 @@ rx_sequence_item::rx_sequence_item() :
 
 rx_sequence_item::rx_sequence_item(const std::string& name) :
     uvm::uvm_sequence_item{name},
+    type{DATA},
     tid{},
     tdest{},
     tuser{},

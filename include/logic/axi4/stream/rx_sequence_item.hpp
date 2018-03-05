@@ -34,6 +34,12 @@ class rx_sequence_item : public uvm::uvm_sequence_item {
 public:
     UVM_OBJECT_UTILS(logic::axi4::stream::rx_sequence_item)
 
+    enum type_t {
+        DATA,
+        IDLE
+    };
+
+    type_t type;
     bitstream tid;
     bitstream tdest;
     std::vector<bitstream> tuser;

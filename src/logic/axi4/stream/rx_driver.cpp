@@ -56,12 +56,48 @@ void rx_driver::run_phase(uvm::uvm_phase& /* phase */) {
 
     while (true) {
         seq_item_port->get_next_item(*m_item);
-        transfer(*m_item);
+
+        switch (m_item->type) {
+        case rx_sequence_item::IDLE:
+            idle_transfer(*m_item);
+            break;
+        case rx_sequence_item::DATA:
+        default:
+            data_transfer(*m_item);
+            break;
+        }
+
         seq_item_port->item_done();
     }
 }
 
-void rx_driver::transfer(const rx_sequence_item& item) {
+void rx_driver::idle_transfer(const rx_sequence_item& item) {
+    std::uniform_int_distribution<std::size_t>
+        random_idle{item.idle.min(), item.idle.max()};
+
+    std::size_t idle = random_idle(m_random_generator);
+    std::size_t timeout = item.timeout;
+
+    while (0 != idle) {
+        if (m_vif->get_tready()) {
+            --idle;
+        }
+        else if (0 != item.timeout) {
+            if (0 != timeout) {
+                --timeout;
+            }
+            else {
+                idle = 0;
+                UVM_ERROR(get_name(), "Timeout!");
+            }
+        }
+        m_vif->aclk_posedge();
+    }
+
+    m_vif->set_tvalid(false);
+}
+
+void rx_driver::data_transfer(const rx_sequence_item& item) {
     std::uniform_int_distribution<std::size_t>
         random_idle{item.idle.min(), item.idle.max()};
 
@@ -73,24 +109,6 @@ void rx_driver::transfer(const rx_sequence_item& item) {
     std::size_t timeout = item.timeout;
     std::size_t transfer = 0;
     std::size_t index = 0;
-
-    if (!is_running) {
-        while (0 != idle) {
-            if (m_vif->get_tready()) {
-                --idle;
-            }
-            else if (0 != item.timeout) {
-                if (0 != timeout) {
-                    --timeout;
-                }
-                else {
-                    idle = 0;
-                    UVM_ERROR(get_name(), "Timeout!");
-                }
-            }
-            m_vif->aclk_posedge();
-        }
-    }
 
     while (is_running && m_vif->get_areset_n()) {
         if (m_vif->get_tready()) {
