@@ -172,13 +172,13 @@ function install_verilator {
 function install_gtest {
     if [ ! -f "$INSTALL/gtest/$GTEST_VERSION/include/gtest/gtest.h" ]; then
         echo "Creating Google Test directories..."
+        mkdir -p /tmp/src/gtest
         mkdir -p $INSTALL/gtest/$GTEST_VERSION
-        mkdir -p /tmp/src/gtest/$GTEST_VERSION
-        mkdir -p /tmp/src/gtest/$GTEST_VERSION/build
 
         echo "Downloading Google Test sources..."
-        cd /tmp/src/gtest/$GTEST_VERSION
-        git clone https://github.com/google/googletest.git build
+        cd /tmp/src/gtest
+        git clone https://github.com/google/googletest.git $GTEST_VERSION
+        mkdir -p /tmp/src/gtest/$GTEST_VERSION/build
 
         echo "Checkout Google Test stable version..."
         cd /tmp/src/gtest/$GTEST_VERSION/build
