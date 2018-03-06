@@ -179,7 +179,10 @@ function install_gtest {
         echo "Downloading Google Test sources..."
         cd /tmp/src/gtest/$GTEST_VERSION
         git clone https://github.com/google/googletest.git build
-        git checkout 703b4a8
+
+        echo "Checkout Google Test stable version..."
+        cd /tmp/src/gtest/$GTEST_VERSION/build
+        git checkout -b dev $GTEST_VERSION
 
         echo "Configuring Google Test sources..."
         cd /tmp/src/gtest/$GTEST_VERSION/build
@@ -232,9 +235,6 @@ VERILATOR_TAR=verilator-$VERILATOR_VERSION.tgz
 
 install_verilator
 
-GTEST_ROOT=$HOME/archive/gtest
-GTEST_VERSION=master
-GTEST_URL=https://github.com/google/googletest/archive
-GTEST_TAR=$GTEST_VERSION.zip
+GTEST_VERSION=703b4a8
 
 install_gtest
