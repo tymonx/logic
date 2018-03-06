@@ -1,0 +1,89 @@
+# Copyright 2018 Tymoteusz Blazejczyk
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+dist: precise
+sudo: false
+language: cpp
+os: linux
+
+install:
+ - gem install coveralls-lcov
+
+addons:
+  apt:
+    sources:
+     - george-edison55-precise-backports
+     - ubuntu-toolchain-r-test
+    packages:
+     - cmake cmake-data
+
+script:
+    - mkdir build && cd build
+    - cmake -DCMAKE_CXX_COMPILER=$CXX_COMPILER ..
+    - cmake --build . --target all -- -j`nproc`
+    - ctest
+
+matrix:
+  include:
+    - env: CXX_COMPILER=g++-6
+      addons:
+        apt:
+          packages:
+           - g++-6
+
+    - env: CXX_COMPILER=g++-5
+      addons:
+        apt:
+          packages:
+           - g++-5
+
+    - env: CXX_COMPILER=clang++-3.9
+      addons:
+        apt:
+          sources:
+           - llvm-toolchain-precise-3.9
+          packages:
+           - clang-3.9
+
+    - env: CXX_COMPILER=clang++-3.8
+      addons:
+        apt:
+          sources:
+           - llvm-toolchain-precise-3.8
+          packages:
+           - clang-3.8
+
+    - env: CXX_COMPILER=clang++-3.7
+      addons:
+        apt:
+          sources:
+           - llvm-toolchain-precise-3.7
+          packages:
+           - clang-3.7
+
+    - env: CXX_COMPILER=clang++-3.6
+      addons:
+        apt:
+          sources:
+           - llvm-toolchain-precise-3.6
+          packages:
+           - clang-3.6
+
+    - env: CXX_COMPILER=clang++-3.5
+      addons:
+        apt:
+          sources:
+           - llvm-toolchain-precise-3.5
+          packages:
+           - clang-3.5
