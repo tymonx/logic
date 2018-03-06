@@ -1,6 +1,7 @@
 Logic
 =====
 
+[![Build Status](https://travis-ci.org/tymonx/logic.svg?branch=master)](https://travis-ci.org/tymonx/logic)
 [![Join the chat at https://gitter.im/tymonx/logic](https://badges.gitter.im/tymonx/logic.svg)](https://gitter.im/tymonx/logic?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 CMake, SystemVerilog and SystemC utilities for creating, building and testing
