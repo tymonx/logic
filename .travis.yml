@@ -19,11 +19,8 @@ os: linux
 
 cache:
   directories:
-   - $HOME/systemc
-   - $HOME/uvm-systemc
-   - $HOME/scv
-   - $HOME/verilator
-   - $HOME/gtest
+   - $HOME/archive
+   - $HOME/tools
 
 env: C_COMPILER='gcc-7 -std=gnu11' CXX_COMPILER='g++-7 -std=gnu++11'
 
