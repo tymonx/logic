@@ -17,8 +17,15 @@ sudo: false
 language: cpp
 os: linux
 
-install:
- - gem install coveralls-lcov
+cache:
+  directories:
+   - $HOME/systemc
+   - $HOME/uvm-systemc
+   - $HOME/scv
+   - $HOME/verilator
+   - $HOME/gtest
+
+env: CC='gcc-7 -std=gnu11' CXX='g++-7 -std=gnu++11'
 
 addons:
   apt:
@@ -29,15 +36,18 @@ addons:
     - cmake cmake-data
     - gcc-7 g++-7
 
+before_script:
+    - ./.travis/setup.sh
+
 script:
-    - mkdir build && cd build
-    - cmake -DCMAKE_CXX_COMPILER=$CXX_COMPILER ..
+    - mkdir -p build && cd build
+    - cmake ..
     - cmake --build . --target all -- -j`nproc`
     - ctest
 
 matrix:
   include:
-  - env: CXX_COMPILER=g++-6
+  - env: CC='gcc-6 -std=gnu11' CXX='g++-6 -std=gnu++11'
     addons:
       apt:
         sources:
@@ -47,7 +57,7 @@ matrix:
         - cmake cmake-data
         - g++-6
 
-  - env: CXX_COMPILER=g++-5
+  - env: CC='gcc-5 -std=gnu11' CXX='g++-5 -std=gnu++11'
     addons:
       apt:
         sources:
@@ -57,7 +67,7 @@ matrix:
         - cmake cmake-data
         - g++-5
 
-  - env: CXX_COMPILER=clang++-3.9
+  - env: CC='clang-3.9 -std=gnu11' CXX='clang++-3.9 -std=gnu++11'
     addons:
       apt:
         sources:
@@ -68,7 +78,7 @@ matrix:
         - cmake cmake-data
         - clang-3.9
 
-  - env: CXX_COMPILER=clang++-3.8
+  - env: CC='clang-3.8 -std=gnu11' CXX='clang++-3.8 -std=gnu++11'
     addons:
       apt:
         sources:
@@ -79,7 +89,7 @@ matrix:
         - cmake cmake-data
         - clang-3.8
 
-  - env: CXX_COMPILER=clang++-3.7
+  - env: CC='clang-3.7 -std=gnu11' CXX='clang++-3.7 -std=gnu++11'
     addons:
       apt:
         sources:
@@ -90,7 +100,7 @@ matrix:
         - cmake cmake-data
         - clang-3.7
 
-  - env: CXX_COMPILER=clang++-3.6
+  - env: CC='clang-3.6 -std=gnu11' CXX='clang++-3.6 -std=gnu++11'
     addons:
       apt:
         sources:
@@ -101,7 +111,7 @@ matrix:
         - cmake cmake-data
         - clang-3.6
 
-  - env: CXX_COMPILER=clang++-3.5
+  - env: CC='clang-3.5 -std=gnu11' CXX='clang++-3.5 -std=gnu++11'
     addons:
       apt:
         sources:
