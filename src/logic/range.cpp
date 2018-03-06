@@ -42,6 +42,11 @@ auto range::max() const noexcept -> size_type {
     return m_max;
 }
 
+auto range::operator=(size_type value) noexcept -> range& {
+    m_min = m_max = value;
+    return *this;
+}
+
 range::operator bool() const noexcept {
     return (m_min != 0) || (m_max != 0);
 }

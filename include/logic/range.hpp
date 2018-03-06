@@ -17,6 +17,7 @@
 #define LOGIC_RANGE_HPP
 
 #include <cstddef>
+#include <type_traits>
 
 #include <uvm>
 
@@ -24,6 +25,10 @@ namespace logic {
 
 class range {
 public:
+    template<typename T>
+    using enable_integral = typename std::enable_if<
+            std::is_integral<T>::value, int>::type;
+
     using size_type = std::size_t;
 
     range() noexcept;
@@ -36,6 +41,11 @@ public:
 
     size_type max() const noexcept;
 
+    template<typename T, enable_integral<T> = 0>
+    range& operator=(T value) noexcept;
+
+    range& operator=(size_type value) noexcept;
+
     explicit operator bool() const noexcept;
 
     bool operator!() const noexcept;
@@ -47,6 +57,11 @@ private:
     size_type m_min;
     size_type m_max;
 };
+
+template<typename T, range::enable_integral<T>> auto
+range::operator=(T value) noexcept -> range& {
+    return operator=(size_type(value));
+}
 
 } /* namespace logic */
 
