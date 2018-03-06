@@ -67,8 +67,12 @@ function install_uvm_systemc {
     mkdir -p /tmp/src/uvm-systemc/$UVM_SYSTEMC_VERSION/build
 
     echo "Unpacking UVM-SystemC archive file..."
-    tar -xvf $UVM_SYSTEMC_ROOT/$UVM_SYSTEMC_TAR \
+    tar -xf $UVM_SYSTEMC_ROOT/$UVM_SYSTEMC_TAR \
         -C /tmp/src/uvm-systemc/$UVM_SYSTEMC_VERSION --strip-components 1
+
+    echo "Creating UVM-SystemC configure file..."
+    cd /tmp/src/uvm-systemc/$UVM_SYSTEMC_VERSION
+    ./config/bootstrap
 
     echo "Configuring UVM-SystemC sources..."
     cd /tmp/src/uvm-systemc/$UVM_SYSTEMC_VERSION/build

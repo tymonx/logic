@@ -193,6 +193,10 @@ Change current location to UVM-SystemC source directory:
 
     cd uvm-systemc-1.0-beta1
 
+Create configure:
+
+    ./config/bootstrap
+
 Create build directory:
 
     mkdir build
