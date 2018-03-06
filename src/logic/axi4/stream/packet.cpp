@@ -187,27 +187,10 @@ void packet::do_print(const uvm::uvm_printer& printer) const {
     printer.print_array_footer();
 }
 
-void packet::do_pack(uvm::uvm_packer& p) const {
-    for (const auto& value : tdata) {
-        p << value;
-    }
-}
-
-void packet::do_unpack(uvm::uvm_packer& p) {
-    for (auto& value : tdata) {
-        p >> value;
-    }
-}
-
 void packet::do_copy(const uvm::uvm_object& rhs) {
     auto other = dynamic_cast<const packet*>(&rhs);
     if (other != nullptr) {
-        this->tid = other->tid;
-        this->tdest = other->tdest;
-        this->tuser = other->tuser;
-        this->tdata = other->tdata;
-        this->timestamps = other->timestamps;
-        this->bus_size = other->bus_size;
+        *this = *other;
     }
     else {
         UVM_ERROR(get_name(), "Error in do_copy");
