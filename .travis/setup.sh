@@ -19,6 +19,7 @@ set -u
 function install_systemc {
     if [ ! -f "$SYSTEMC_ARCHIVE_DIR/$SYSTEMC_TAR" ]; then
         echo "Downloading $SYSTEMC_URL/$SYSTEMC_TAR..."
+        mkdir -p $SYSTEMC_ARCHIVE_DIR
         wget $SYSTEMC_URL/$SYSTEMC_TAR -O $SYSTEMC_ARCHIVE_DIR/$SYSTEMC_TAR
     else
         echo "SystemC $SYSTEMC_URL/$SYSTEMC_TAR already downloaded"
@@ -59,6 +60,7 @@ function install_systemc {
 
 function install_uvm_systemc {
     if [ ! -f "$UVM_SYSTEMC_ARCHIVE_DIR/$UVM_SYSTEMC_TAR" ]; then
+        mkdir -p $UVM_SYSTEMC_ARCHIVE_DIR
         echo "Downloading $UVM_SYSTEMC_URL/$UVM_SYSTEMC_TAR..."
         wget $UVM_SYSTEMC_URL/$UVM_SYSTEMC_TAR \
             -O $UVM_SYSTEMC_ARCHIVE_DIR/$UVM_SYSTEMC_TAR
@@ -81,7 +83,8 @@ function install_uvm_systemc {
 
         echo "Configuring UVM-SystemC sources..."
         cd /tmp/src/uvm-systemc/$UVM_SYSTEMC_VERSION/build
-        ../configure --enable-shared --with-systemc=$INSTALL/systemc/$SYSTEMC_VERSION \
+        ../configure --enable-shared \
+            --with-systemc=$INSTALL/systemc/$SYSTEMC_VERSION \
             --prefix=$INSTALL/systemc/$SYSTEMC_VERSION
 
         echo "Building UVM-SystemC library..."
@@ -97,6 +100,7 @@ function install_uvm_systemc {
 function install_scv {
     if [ ! -f "$SCV_ARCHIVE_DIR/$SCV_TAR" ]; then
         echo "Downloading $SCV_URL/$SCV_TAR..."
+        mkdir -p $SCV_ARCHIVE_DIR
         wget $SCV_URL/$SCV_TAR -O $SCV_ARCHIVE_DIR/$SCV_TAR
     else
         echo "SCV $SCV_URL/$SCV_TAR already downloaded"
@@ -113,7 +117,8 @@ function install_scv {
 
         echo "Configuring SCV sources..."
         cd /tmp/src/scv/$SCV_VERSION/build
-        ../configure --enable-shared --with-systemc=$INSTALL/systemc/$SYSTEMC_VERSION \
+        ../configure --enable-shared \
+            --with-systemc=$INSTALL/systemc/$SYSTEMC_VERSION \
             --prefix=$INSTALL/systemc/$SYSTEMC_VERSION
 
         echo "Building SCV library..."
@@ -129,6 +134,7 @@ function install_scv {
 function install_verilator {
     if [ ! -f "$VERILATOR_ARCHIVE_DIR/$VERILATOR_TAR" ]; then
         echo "Downloading $VERILATOR_URL/$VERILATOR_TAR..."
+        mkdir -p $VERILATOR_ARCHIVE_DIR
         wget $VERILATOR_URL/$VERILATOR_TAR \
             -O $VERILATOR_ARCHIVE_DIR/$VERILATOR_TAR
     else
