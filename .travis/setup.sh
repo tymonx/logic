@@ -238,3 +238,5 @@ install_verilator
 GTEST_VERSION=703b4a8
 
 install_gtest
+
+set +u
