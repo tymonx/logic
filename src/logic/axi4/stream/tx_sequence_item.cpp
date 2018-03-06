@@ -94,17 +94,10 @@ void tx_sequence_item::do_print(const uvm::uvm_printer& printer) const {
     printer.print_object("tdest", field::width_value{tdest});
 }
 
-void tx_sequence_item::do_pack(uvm::uvm_packer&) const { }
-
-void tx_sequence_item::do_unpack(uvm::uvm_packer&) { }
-
 void tx_sequence_item::do_copy(const uvm::uvm_object& rhs) {
     auto other = dynamic_cast<const tx_sequence_item*>(&rhs);
     if (other != nullptr) {
-        this->idle = other->idle;
-        this->timeout = other->timeout;
-        this->tid = other->tid;
-        this->tdest = other->tdest;
+        *this = *other;
     }
     else {
         UVM_ERROR(get_name(), "Error in do_copy");
@@ -117,7 +110,10 @@ bool tx_sequence_item::do_compare(const uvm::uvm_object& rhs,
     auto status = false;
 
     if (other != nullptr) {
-        status = (tid == other->tid) &&
+        status =
+            (idle == other->idle) &&
+            (timeout == other->timeout) &&
+            (tid == other->tid) &&
             (tdest == other->tdest);
     }
     else {
