@@ -170,6 +170,16 @@ auto rx_sequence_item::convert2string() const -> std::string {
 }
 
 void rx_sequence_item::do_print(const uvm::uvm_printer& printer) const {
+    switch (type) {
+    case DATA:
+        printer.print_string("type", "data");
+        break;
+    case IDLE:
+    default:
+        printer.print_string("type", "idle");
+        break;
+    }
+
     printer.print_field_int("timeout", timeout, -1, uvm::UVM_DEC);
     printer.print_object("idle", field::idle{idle});
     printer.print_object("tid", field::width_value{tid});
@@ -185,23 +195,10 @@ void rx_sequence_item::do_print(const uvm::uvm_printer& printer) const {
     printer.print_array_footer();
 }
 
-void rx_sequence_item::do_pack(uvm::uvm_packer& p) const {
-    p << tdata;
-}
-
-void rx_sequence_item::do_unpack(uvm::uvm_packer& p) {
-    p >> tdata;
-}
-
 void rx_sequence_item::do_copy(const uvm::uvm_object& rhs) {
     auto other = dynamic_cast<const rx_sequence_item*>(&rhs);
     if (other != nullptr) {
-        this->idle = other->idle;
-        this->timeout = other->timeout;
-        this->tid = other->tid;
-        this->tdest = other->tdest;
-        this->tuser = other->tuser;
-        this->tdata = other->tdata;
+        *this = *other;
     }
     else {
         UVM_ERROR(get_name(), "Error in do_copy");
@@ -214,7 +211,11 @@ bool rx_sequence_item::do_compare(const uvm::uvm_object& rhs,
     auto status = false;
 
     if (other != nullptr) {
-        status = (tid == other->tid) &&
+        status =
+            (type == other->type) &&
+            (idle == other->idle) &&
+            (timeout == other->timeout) &&
+            (tid == other->tid) &&
             (tdest == other->tdest) &&
             (tuser == other->tuser) &&
             (tdata == other->tdata);

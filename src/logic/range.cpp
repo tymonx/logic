@@ -42,6 +42,22 @@ auto range::max() const noexcept -> size_type {
     return m_max;
 }
 
+range::operator bool() const noexcept {
+    return (m_min != 0) || (m_max != 0);
+}
+
+bool range::operator!() const noexcept {
+    return (m_min == 0) && (m_max == 0);
+}
+
+bool range::operator==(const range& other) const noexcept {
+    return (m_min == other.m_min) && (m_max == other.m_max);
+}
+
+bool range::operator!=(const range& other) const noexcept {
+    return (m_min != other.m_min) || (m_max != other.m_max);
+}
+
 template<> void
 uvm::uvm_config_db<logic::range>::set(uvm_component* cntxt,
         const std::string& instname, const std::string& fieldname,

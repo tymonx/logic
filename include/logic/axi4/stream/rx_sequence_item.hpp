@@ -65,10 +65,6 @@ public:
 protected:
     void do_print(const uvm::uvm_printer& printer) const override;
 
-    void do_pack(uvm::uvm_packer& p) const override;
-
-    void do_unpack(uvm::uvm_packer& p) override;
-
     void do_copy(const uvm::uvm_object& rhs) override;
 
     bool do_compare(const uvm::uvm_object& rhs,

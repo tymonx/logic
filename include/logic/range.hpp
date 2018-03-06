@@ -35,6 +35,14 @@ public:
     size_type min() const noexcept;
 
     size_type max() const noexcept;
+
+    explicit operator bool() const noexcept;
+
+    bool operator!() const noexcept;
+
+    bool operator==(const range& other) const noexcept;
+
+    bool operator!=(const range& other) const noexcept;
 private:
     size_type m_min;
     size_type m_max;
