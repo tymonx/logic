@@ -44,19 +44,10 @@ void reset_sequence_item::do_print(const uvm::uvm_printer& printer) const {
             uvm::UVM_DEC);
 }
 
-void reset_sequence_item::do_pack(uvm::uvm_packer& p) const {
-    p << duration << idle;
-}
-
-void reset_sequence_item::do_unpack(uvm::uvm_packer& p) {
-    p >> duration >> idle;
-}
-
 void reset_sequence_item::do_copy(const uvm::uvm_object& rhs) {
     auto other = dynamic_cast<const reset_sequence_item*>(&rhs);
     if (other != nullptr) {
-        this->idle = other->idle;
-        this->duration = other->duration;
+        *this = *other;
     }
     else {
         UVM_ERROR(get_name(), "Error in do_copy");
