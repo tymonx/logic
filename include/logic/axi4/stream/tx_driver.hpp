@@ -36,7 +36,7 @@ public:
 
     tx_driver();
 
-    explicit tx_driver(const uvm::uvm_component_name& name);
+    explicit tx_driver(const uvm::uvm_component_name& component_name);
 
     tx_driver(tx_driver&&) = delete;
 

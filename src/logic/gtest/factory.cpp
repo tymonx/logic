@@ -38,11 +38,12 @@ void factory::destroy() {
     m_objects.clear();
 }
 
-void factory::add_object(const std::string& name, const constructor& create) {
+void factory::add_object(const std::string& name,
+        const constructor& create_object) {
     auto it = m_constructors.find(name);
 
     if (it == m_constructors.cend()) {
-        m_constructors[name] = create;
+        m_constructors[name] = create_object;
     }
     else {
         throw std::runtime_error("logic::gtest::factory::add(): "

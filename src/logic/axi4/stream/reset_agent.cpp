@@ -24,8 +24,8 @@ reset_agent::reset_agent() :
     reset_agent{"reset_agent"}
 { }
 
-reset_agent::reset_agent(const uvm::uvm_component_name& name) :
-    uvm::uvm_agent{name},
+reset_agent::reset_agent(const uvm::uvm_component_name& component_name) :
+    uvm::uvm_agent{component_name},
     sequencer{nullptr},
     m_driver{nullptr}
 {

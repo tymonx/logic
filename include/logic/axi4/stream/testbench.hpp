@@ -36,7 +36,7 @@ public:
 
     testbench();
 
-    explicit testbench(const uvm::uvm_component_name& name);
+    explicit testbench(const uvm::uvm_component_name& component_name);
 
     bool passed() const noexcept;
 

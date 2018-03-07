@@ -23,8 +23,8 @@ test::test() :
     test{"test"}
 { }
 
-test::test(const uvm::uvm_component_name& name) :
-    uvm::uvm_test{name},
+test::test(const uvm::uvm_component_name& component_name) :
+    uvm::uvm_test{component_name},
     m_sequence{nullptr},
     m_testbench{nullptr},
     m_test_passed{false}

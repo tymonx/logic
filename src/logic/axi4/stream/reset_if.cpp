@@ -21,8 +21,8 @@ reset_if::reset_if() :
     reset_if{""}
 { }
 
-reset_if::reset_if(const sc_core::sc_module_name& name) :
-    sc_core::sc_module{name},
+reset_if::reset_if(const sc_core::sc_module_name& module_name) :
+    sc_core::sc_module{module_name},
     aclk{"aclk"},
     areset_n{"areset_n"}
 { }

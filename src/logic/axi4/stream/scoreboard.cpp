@@ -22,8 +22,8 @@ scoreboard::scoreboard() :
     scoreboard{"scoreboard"}
 { }
 
-scoreboard::scoreboard(const uvm::uvm_component_name& name) :
-    uvm::uvm_scoreboard{name},
+scoreboard::scoreboard(const uvm::uvm_component_name& component_name) :
+    uvm::uvm_scoreboard{component_name},
     rx_analysis_export{"rx_analysis_export"},
     tx_analysis_export{"tx_analysis_export"},
     m_error{false},

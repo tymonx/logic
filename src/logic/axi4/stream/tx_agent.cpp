@@ -25,8 +25,8 @@ tx_agent::tx_agent() :
     tx_agent{"tx_agent"}
 { }
 
-tx_agent::tx_agent(const uvm::uvm_component_name& name) :
-    uvm::uvm_agent{name},
+tx_agent::tx_agent(const uvm::uvm_component_name& component_name) :
+    uvm::uvm_agent{component_name},
     analysis_port{"analysis_port"},
     sequencer{nullptr},
     m_monitor{nullptr},

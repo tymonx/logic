@@ -36,7 +36,7 @@ public:
 
     sequencer();
 
-    explicit sequencer(const uvm::uvm_component_name& name);
+    explicit sequencer(const uvm::uvm_component_name& component_name);
 
     sequencer(sequencer&&) = delete;
 

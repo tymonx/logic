@@ -33,7 +33,7 @@ public:
 
     rx_agent();
 
-    explicit rx_agent(const uvm::uvm_component_name& name);
+    explicit rx_agent(const uvm::uvm_component_name& component_name);
 
     rx_agent(rx_agent&&) = delete;
 

@@ -30,7 +30,7 @@ public:
 
     tx_sequencer();
 
-    explicit tx_sequencer(const uvm::uvm_component_name& name);
+    explicit tx_sequencer(const uvm::uvm_component_name& component_name);
 
     ~tx_sequencer() override;
 };

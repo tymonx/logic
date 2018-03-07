@@ -25,8 +25,8 @@ tx_driver::tx_driver() :
     tx_driver{"tx_driver"}
 { }
 
-tx_driver::tx_driver(const uvm::uvm_component_name& name) :
-    uvm::uvm_driver<tx_sequence_item>(name),
+tx_driver::tx_driver(const uvm::uvm_component_name& component_name) :
+    uvm::uvm_driver<tx_sequence_item>{component_name},
     m_vif{nullptr},
     m_item{nullptr},
     m_random_generator{}

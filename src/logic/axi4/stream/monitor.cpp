@@ -49,8 +49,8 @@ monitor::monitor() :
     monitor{"monitor"}
 { }
 
-monitor::monitor(const uvm::uvm_component_name& name) :
-    uvm::uvm_monitor{name},
+monitor::monitor(const uvm::uvm_component_name& component_name) :
+    uvm::uvm_monitor{component_name},
     analysis_port{"analysis_port"},
     m_vif{nullptr},
     m_checks_enable{false},

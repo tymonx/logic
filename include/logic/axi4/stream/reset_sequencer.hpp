@@ -30,7 +30,7 @@ public:
 
     reset_sequencer();
 
-    explicit reset_sequencer(const uvm::uvm_component_name& name);
+    explicit reset_sequencer(const uvm::uvm_component_name& component_name);
 
     reset_sequencer(reset_sequencer&&) = delete;
 

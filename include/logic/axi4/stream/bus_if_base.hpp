@@ -35,7 +35,7 @@ public:
     sc_core::sc_signal<bool> tready;
     sc_core::sc_signal<bool> tlast;
 
-    explicit bus_if_base(const sc_core::sc_module_name& name);
+    explicit bus_if_base(const sc_core::sc_module_name& module_name);
 
     void aclk_posedge();
 

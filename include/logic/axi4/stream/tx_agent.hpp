@@ -33,7 +33,7 @@ public:
 
     tx_agent();
 
-    explicit tx_agent(const uvm::uvm_component_name& name);
+    explicit tx_agent(const uvm::uvm_component_name& component_name);
 
     tx_agent(tx_agent&&) = delete;
 

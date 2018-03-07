@@ -17,8 +17,8 @@
 
 using logic::axi4::stream::bus_if_base;
 
-bus_if_base::bus_if_base(const sc_core::sc_module_name& name) :
-    sc_core::sc_module{name},
+bus_if_base::bus_if_base(const sc_core::sc_module_name& module_name) :
+    sc_core::sc_module{module_name},
     aclk{"aclk"},
     areset_n{"areset_n"},
     tvalid{"tvalid"},

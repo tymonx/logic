@@ -35,7 +35,7 @@ public:
 
     test();
 
-    explicit test(const uvm::uvm_component_name& name);
+    explicit test(const uvm::uvm_component_name& component_name);
 
     test(test&&) = delete;
 

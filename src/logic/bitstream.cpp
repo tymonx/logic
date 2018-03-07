@@ -32,8 +32,8 @@ static void copy_n(const void* src, size_type n, void* dst) noexcept {
             static_cast<std::uint8_t*>(dst));
 }
 
-static void fill_n(void* dst, size_type n, std::uint8_t value) noexcept {
-    std::fill_n(static_cast<std::uint8_t*>(dst), n, value);
+static void fill_n(void* dst, size_type n, std::uint8_t val) noexcept {
+    std::fill_n(static_cast<std::uint8_t*>(dst), n, val);
 }
 
 bitstream::bitstream() noexcept :
@@ -95,13 +95,13 @@ auto bitstream::size() const noexcept -> size_type {
     return m_size;
 }
 
-auto bitstream::resize(size_type value) -> bitstream& {
-    if (m_size != value) {
-        auto bits = new std::uint8_t[::size(value)] {};
-        ::copy_n(m_bits, ::size(std::min(m_size, value)), bits);
+auto bitstream::resize(size_type val) -> bitstream& {
+    if (m_size != val) {
+        auto bits = new std::uint8_t[::size(val)] {};
+        ::copy_n(m_bits, ::size(std::min(m_size, val)), bits);
         delete [] static_cast<std::uint8_t*>(m_bits);
         m_bits = bits;
-        m_size = value;
+        m_size = val;
     }
     return *this;
 }
@@ -312,8 +312,8 @@ auto bitstream::operator==(const bitstream& other) const noexcept -> bool {
         auto total_bytes = ::size(std::max(m_size, other.m_size));
 
         result = std::all_of(it + bytes, it + total_bytes,
-            [] (const std::uint8_t& value) {
-                return (0 == value);
+            [] (const std::uint8_t& val) {
+                return (0 == val);
             }
         );
     }

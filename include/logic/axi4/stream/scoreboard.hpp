@@ -33,7 +33,7 @@ public:
 
     scoreboard();
 
-    explicit scoreboard(const uvm::uvm_component_name& name);
+    explicit scoreboard(const uvm::uvm_component_name& component_name);
 
     bool passed() const noexcept;
 

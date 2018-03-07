@@ -31,7 +31,7 @@ public:
 
     monitor();
 
-    explicit monitor(const uvm::uvm_component_name& name);
+    explicit monitor(const uvm::uvm_component_name& component_name);
 
     monitor(monitor&&) = delete;
 

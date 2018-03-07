@@ -23,8 +23,8 @@
 using logic::axi4::stream::rx_driver;
 using logic::axi4::stream::rx_sequence_item;
 
-rx_driver::rx_driver(const uvm::uvm_component_name& name) :
-    uvm::uvm_driver<rx_sequence_item>{name},
+rx_driver::rx_driver(const uvm::uvm_component_name& component_name) :
+    uvm::uvm_driver<rx_sequence_item>{component_name},
     m_vif{nullptr},
     m_item{nullptr},
     m_random_generator{}

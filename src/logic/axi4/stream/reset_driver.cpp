@@ -24,8 +24,8 @@ reset_driver::reset_driver() :
     reset_driver{"reset_driver"}
 { }
 
-reset_driver::reset_driver(const uvm::uvm_component_name& name) :
-    uvm::uvm_driver<reset_sequence_item>{name},
+reset_driver::reset_driver(const uvm::uvm_component_name& component_name) :
+    uvm::uvm_driver<reset_sequence_item>{component_name},
     m_vif{nullptr},
     m_item{nullptr}
 { }

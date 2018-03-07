@@ -36,7 +36,7 @@ public:
 
     rx_driver();
 
-    explicit rx_driver(const uvm::uvm_component_name& name);
+    explicit rx_driver(const uvm::uvm_component_name& component_name);
 
     rx_driver(rx_driver&&) = delete;
 

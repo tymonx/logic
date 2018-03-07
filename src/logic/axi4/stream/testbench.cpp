@@ -28,8 +28,8 @@ testbench::testbench() :
     testbench{"testbench"}
 { }
 
-testbench::testbench(const uvm::uvm_component_name& name) :
-    uvm::uvm_env{name},
+testbench::testbench(const uvm::uvm_component_name& component_name) :
+    uvm::uvm_env{component_name},
     sequencer{nullptr},
     m_rx_agent{nullptr},
     m_tx_agent{nullptr},

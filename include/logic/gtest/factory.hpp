@@ -59,7 +59,7 @@ private:
 
     factory();
 
-    void add_object(const std::string& name, const constructor& create);
+    void add_object(const std::string& name, const constructor& create_object);
 
     void* get_object(const std::string& name);
 

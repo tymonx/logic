@@ -30,7 +30,7 @@ public:
 
     rx_sequencer();
 
-    explicit rx_sequencer(const uvm::uvm_component_name& name);
+    explicit rx_sequencer(const uvm::uvm_component_name& component_name);
 
     rx_sequencer(rx_sequencer&&) = delete;
 

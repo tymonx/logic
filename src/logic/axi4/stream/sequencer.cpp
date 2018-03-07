@@ -21,8 +21,8 @@ sequencer::sequencer() :
     sequencer("sequencer")
 { }
 
-sequencer::sequencer(const uvm::uvm_component_name& name) :
-    uvm::uvm_sequencer<>(name),
+sequencer::sequencer(const uvm::uvm_component_name& component_name) :
+    uvm::uvm_sequencer<>(component_name),
     rx_sequencer{nullptr},
     tx_sequencer{nullptr},
     reset_sequencer{nullptr}

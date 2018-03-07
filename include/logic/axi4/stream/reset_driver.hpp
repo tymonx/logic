@@ -33,7 +33,7 @@ public:
 
     reset_driver();
 
-    explicit reset_driver(const uvm::uvm_component_name& name);
+    explicit reset_driver(const uvm::uvm_component_name& component_name);
 
     reset_driver(reset_driver&&) = delete;
 

@@ -47,8 +47,8 @@ public:
     sc_core::sc_signal<tdest_type> tdest{"tdest"};
     sc_core::sc_signal<tuser_type> tuser{"tuser"};
 
-    explicit bus_if(const sc_core::sc_module_name& name) :
-        bus_if_base{name}
+    explicit bus_if(const sc_core::sc_module_name& module_name) :
+        bus_if_base{module_name}
     { }
 
     bus_if(bus_if&&) = delete;
@@ -76,11 +76,11 @@ public:
     }
 
     std::uint8_t get_tdata(std::size_t offset) const override {
-        return utils::get_uint8<8 * M_TDATA_BYTES>(tdata.read(), 8 * offset);
+        return utils::get_uint8<8u * M_TDATA_BYTES>(tdata.read(), 8u * offset);
     }
 
     void set_tdata(std::size_t offset, std::uint8_t value) override {
-        utils::set<8 * M_TDATA_BYTES>(m_tdata, 8 * offset, value);
+        utils::set<8u * M_TDATA_BYTES>(m_tdata, 8u * offset, value);
         tdata.write(m_tdata);
     }
 
@@ -104,18 +104,18 @@ public:
 
     bitstream get_tid() const override {
         bitstream bits(M_TID_WIDTH);
-        for (std::size_t i = 0; i < M_TID_WIDTH; ++i) {
+        for (std::size_t i = 0u; i < M_TID_WIDTH; ++i) {
             bits[i] = utils::get_bool<M_TID_WIDTH>(tid.read(), i);
         }
         return bits;
     }
 
     void set_tid(const bitstream& bits) override {
-        auto size = (bits.size() < M_TID_WIDTH)
+        const auto bits_size = (bits.size() < M_TID_WIDTH)
             ? bits.size() : M_TID_WIDTH;
 
         tid_type value{};
-        for (std::size_t i = 0; i < size; ++i) {
+        for (std::size_t i = 0u; i < bits_size; ++i) {
             utils::set<M_TID_WIDTH>(value, i, bool(bits[i]));
         }
         tid.write(value);
@@ -123,18 +123,18 @@ public:
 
     bitstream get_tdest() const override {
         bitstream bits(M_TDEST_WIDTH);
-        for (std::size_t i = 0; i < M_TDEST_WIDTH; ++i) {
+        for (std::size_t i = 0u; i < M_TDEST_WIDTH; ++i) {
             bits[i] = utils::get_bool<M_TDEST_WIDTH>(tdest.read(), i);
         }
         return bits;
     }
 
     void set_tdest(const bitstream& bits) override {
-        auto size = (bits.size() < M_TDEST_WIDTH)
+        const auto bits_size = (bits.size() < M_TDEST_WIDTH)
             ? bits.size() : M_TDEST_WIDTH;
 
         tdest_type value{};
-        for (std::size_t i = 0; i < size; ++i) {
+        for (std::size_t i = 0u; i < bits_size; ++i) {
             utils::set<M_TDEST_WIDTH>(value, i, bool(bits[i]));
         }
         tdest.write(value);
@@ -142,18 +142,18 @@ public:
 
     bitstream get_tuser() const override {
         bitstream bits(M_TUSER_WIDTH);
-        for (std::size_t i = 0; i < M_TUSER_WIDTH; ++i) {
+        for (std::size_t i = 0u; i < M_TUSER_WIDTH; ++i) {
             bits[i] = utils::get_bool<M_TUSER_WIDTH>(tuser.read(), i);
         }
         return bits;
     }
 
     void set_tuser(const bitstream& bits) override {
-        auto size = (bits.size() < M_TUSER_WIDTH)
+        const auto bits_size = (bits.size() < M_TUSER_WIDTH)
             ? bits.size() : M_TUSER_WIDTH;
 
         tuser_type value{};
-        for (std::size_t i = 0; i < size; ++i) {
+        for (std::size_t i = 0u; i < bits_size; ++i) {
             utils::set<M_TUSER_WIDTH>(value, i, bool(bits[i]));
         }
         tuser.write(value);

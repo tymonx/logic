@@ -29,7 +29,7 @@ public:
 
     reset_if();
 
-    explicit reset_if(const sc_core::sc_module_name& name);
+    explicit reset_if(const sc_core::sc_module_name& module_name);
 
     void trace(sc_core::sc_trace_file* trace_file) const override;
 
