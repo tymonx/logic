@@ -46,6 +46,16 @@ script:
 
 matrix:
   include:
+  - env: C_COMPILER='gcc-7 -std=gnu11' CXX_COMPILER='g++-7 -std=gnu++11'
+    addons:
+      apt:
+        sources:
+        - george-edison55-precise-backports
+        - ubuntu-toolchain-r-test
+        packages:
+        - cmake cmake-data
+        - g++-7
+
   - env: C_COMPILER='gcc-6 -std=gnu11' CXX_COMPILER='g++-6 -std=gnu++11'
     addons:
       apt:
@@ -65,6 +75,38 @@ matrix:
         packages:
         - cmake cmake-data
         - g++-5
+
+  - env: C_COMPILER='gcc-4.9 -std=gnu11' CXX_COMPILER='g++-4.9 -std=gnu++11'
+    addons:
+      apt:
+        sources:
+        - george-edison55-precise-backports
+        - ubuntu-toolchain-r-test
+        packages:
+        - cmake cmake-data
+        - g++-4.9
+
+  - env: C_COMPILER='clang-5.0 -std=gnu11' CXX_COMPILER='clang++-5.0 -std=gnu++11'
+    addons:
+      apt:
+        sources:
+        - george-edison55-precise-backports
+        - ubuntu-toolchain-r-test
+        - llvm-toolchain-precise-5.0
+        packages:
+        - cmake cmake-data
+        - clang-5.0
+
+  - env: C_COMPILER='clang-4.0 -std=gnu11' CXX_COMPILER='clang++-4.0 -std=gnu++11'
+    addons:
+      apt:
+        sources:
+        - george-edison55-precise-backports
+        - ubuntu-toolchain-r-test
+        - llvm-toolchain-precise-4.0
+        packages:
+        - cmake cmake-data
+        - clang-4.0
 
   - env: C_COMPILER='clang-3.9 -std=gnu11' CXX_COMPILER='clang++-3.9 -std=gnu++11'
     addons:
