@@ -166,7 +166,7 @@ function install_verilator {
         echo "Verilator already installed"
     fi
 
-    export VERILATOR_ROOT=$INSTALL/verilator/$VERILATOR_VERSION
+    export PATH=$INSTALL/verilator/$VERILATOR_VERSION/bin:$PATH
 }
 
 function install_gtest {
@@ -201,42 +201,46 @@ function install_gtest {
     export GTEST_ROOT=$INSTALL/gtest/$GTEST_VERSION
 }
 
-echo "Preparing tools..."
+function install_tools {
+    echo "Preparing tools..."
 
-sudo apt-get update -qq
+    sudo apt-get update -qq
 
-INSTALL=$HOME/tools
+    INSTALL=$HOME/tools
 
-SYSTEMC_ARCHIVE_DIR=$HOME/archive/systemc
-SYSTEMC_VERSION=2.3.2
-SYSTEMC_URL=http://accellera.org/images/downloads/standards/systemc
-SYSTEMC_TAR=systemc-$SYSTEMC_VERSION.tar.gz
+    SYSTEMC_ARCHIVE_DIR=$HOME/archive/systemc
+    SYSTEMC_VERSION=2.3.2
+    SYSTEMC_URL=http://accellera.org/images/downloads/standards/systemc
+    SYSTEMC_TAR=systemc-$SYSTEMC_VERSION.tar.gz
 
-install_systemc
+    install_systemc
 
-UVM_SYSTEMC_ARCHIVE_DIR=$HOME/archive/uvm-systemc
-UVM_SYSTEMC_VERSION=1.0-beta1
-UVM_SYSTEMC_URL=http://accellera.org/images/downloads/standards/systemc
-UVM_SYSTEMC_TAR=uvm-systemc-$UVM_SYSTEMC_VERSION.tar.gz
+    UVM_SYSTEMC_ARCHIVE_DIR=$HOME/archive/uvm-systemc
+    UVM_SYSTEMC_VERSION=1.0-beta1
+    UVM_SYSTEMC_URL=http://accellera.org/images/downloads/standards/systemc
+    UVM_SYSTEMC_TAR=uvm-systemc-$UVM_SYSTEMC_VERSION.tar.gz
 
-install_uvm_systemc
+    install_uvm_systemc
 
-SCV_ARCHIVE_DIR=$HOME/archive/scv
-SCV_VERSION=2.0.1
-SCV_URL=http://accellera.org/images/downloads/standards/systemc
-SCV_TAR=scv-$SCV_VERSION.tar.gz
+    SCV_ARCHIVE_DIR=$HOME/archive/scv
+    SCV_VERSION=2.0.1
+    SCV_URL=http://accellera.org/images/downloads/standards/systemc
+    SCV_TAR=scv-$SCV_VERSION.tar.gz
 
-install_scv
+    install_scv
 
-VERILATOR_ARCHIVE_DIR=$HOME/archive/verilator
-VERILATOR_VERSION=3.920
-VERILATOR_URL=https://www.veripool.org/ftp
-VERILATOR_TAR=verilator-$VERILATOR_VERSION.tgz
+    VERILATOR_ARCHIVE_DIR=$HOME/archive/verilator
+    VERILATOR_VERSION=3.920
+    VERILATOR_URL=https://www.veripool.org/ftp
+    VERILATOR_TAR=verilator-$VERILATOR_VERSION.tgz
 
-install_verilator
+    install_verilator
 
-GTEST_VERSION=703b4a8
+    GTEST_VERSION=703b4a8
 
-install_gtest
+    install_gtest
+}
+
+install_tools
 
 set +u
