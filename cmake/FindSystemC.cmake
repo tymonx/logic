@@ -142,6 +142,8 @@ function(_find_systemc)
             ${CMAKE_CURRENT_LIST_DIR}/sc_main.cpp
         )
 
+        logic_target_compile_options(systemc-main)
+
         target_include_directories(systemc-main SYSTEM
             PRIVATE ${SYSTEMC_INCLUDE_DIR})
 

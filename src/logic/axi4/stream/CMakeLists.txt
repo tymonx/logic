@@ -39,3 +39,15 @@ add_library(logic-axi4-stream OBJECT
     tx_sequence_item.cpp
     tx_sequencer.cpp
 )
+
+set(compile_options "")
+
+if (CMAKE_CXX_COMPILER_ID MATCHES Clang)
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.9)
+        list(APPEND compile_options
+            -Wno-undefined-func-template
+        )
+    endif()
+endif()
+
+logic_target_compile_options(logic-axi4-stream ${compile_options})

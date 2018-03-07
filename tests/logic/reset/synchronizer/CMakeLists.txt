@@ -34,12 +34,14 @@ add_executable(logic_reset_synchronizer_test
     logic_reset_synchronizer_test.cpp
 )
 
+logic_target_compile_options(logic_reset_synchronizer_test)
+
 target_include_directories(logic_reset_synchronizer_test
     SYSTEM PRIVATE
         ${module_includes}
 )
 
-target_link_libraries(logic_reset_synchronizer_test
+logic_target_link_libraries(logic_reset_synchronizer_test
     ${module_libraries}
     logic-gtest-main
 )

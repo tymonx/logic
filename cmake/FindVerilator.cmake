@@ -94,7 +94,7 @@ function(_find_verilator)
     )
 
     if (CMAKE_CXX_COMPILER_ID MATCHES GNU)
-        target_compile_options(verilated PRIVATE
+        logic_target_compile_options(verilated PRIVATE
             -Wno-attributes
             -Wno-cast-qual
             -Wno-cast-equal
@@ -122,7 +122,7 @@ function(_find_verilator)
             -Wno-zero-as-null-pointer-constant
         )
     elseif (CMAKE_CXX_COMPILER_ID MATCHES Clang)
-        target_compile_options(verilated PRIVATE -Wno-everything)
+        logic_target_compile_options(verilated PRIVATE -Wno-everything)
     endif()
 
     set(VERILATOR_FOUND ${VERILATOR_FOUND} PARENT_SCOPE)

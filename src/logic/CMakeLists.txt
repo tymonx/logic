@@ -44,6 +44,8 @@ add_library(logic-core OBJECT
     command_line_argument.cpp
 )
 
+logic_target_compile_options(logic-core)
+
 add_library(logic STATIC
     $<TARGET_OBJECTS:logic-core>
     $<TARGET_OBJECTS:logic-core-printer>

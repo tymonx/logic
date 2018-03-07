@@ -15,3 +15,5 @@
 add_library(logic-core-printer OBJECT
     json.cpp
 )
+
+logic_target_compile_options(logic-core-printer)

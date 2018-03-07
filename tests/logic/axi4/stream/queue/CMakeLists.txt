@@ -74,7 +74,7 @@ add_executable(logic_axi4_stream_queue_test
     basic_test.cpp
 )
 
-target_compile_options(logic_axi4_stream_queue_test
+logic_target_compile_options(logic_axi4_stream_queue_test
     PRIVATE
         $<$<CXX_COMPILER_ID:Clang>:-Wno-unused-member-function>
 )
@@ -84,7 +84,7 @@ target_include_directories(logic_axi4_stream_queue_test
         ${module_includes}
 )
 
-target_link_libraries(logic_axi4_stream_queue_test
+logic_target_link_libraries(logic_axi4_stream_queue_test
     ${module_libraries}
     logic
 )

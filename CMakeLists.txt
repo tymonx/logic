@@ -23,21 +23,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
-if (NOT DEFINED LOGIC_TESTS)
-    option(LOGIC_TESTS "Enable/disable tests" ON)
-endif()
-
-if (NOT DEFINED LOGIC_RTL)
-    option(LOGIC_RTL "Enable/disable RTL build" ON)
-endif()
-
-if (NOT DEFINED LOGIC_EXAMPLES)
-    option(LOGIC_EXAMPLES "Enable/disable examples" OFF)
-endif()
-
-if (NOT DEFINED LOGIC_WARNINGS_INTO_ERRORS)
-    option(LOGIC_WARNINGS_INTO_ERRORS "Enable/disable warnings as errors" OFF)
-endif()
+option(LOGIC_TESTS "Enable/disable tests" ON)
+option(LOGIC_RTL "Enable/disable RTL build" ON)
+option(LOGIC_WARNINGS_INTO_ERRORS "Enable/disable warnings as errors" OFF)
 
 include(AddLogic)
 
