@@ -44,7 +44,6 @@ set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS}
     -Wno-covered-switch-default
     -Wno-c++98-compat
     -Wno-c++98-compat-pedantic
-    -Wno-undefined-func-template
 )
 
 if (WARNINGS_INTO_ERRORS)

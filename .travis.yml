@@ -162,11 +162,3 @@ matrix:
         packages:
         - cmake cmake-data
         - clang-3.5
-
-  - env: C_COMPILER=clang CXX_COMPILER=clang++
-    addons:
-      apt:
-        sources:
-        - george-edison55-precise-backports
-        packages:
-        - cmake cmake-data

@@ -39,6 +39,9 @@ Benefits
   * Run the same unit tests with different parameters
   * Easy to integrate with other projects as git submodule
   * Custom UVM printers: JSON
+  * Modern HDL testing library written in C++11 using UVM-SystemC
+  * Support for Clang 3.5 and later
+  * Support for GCC 4.9 and later
 
 Documentation
 -------------
