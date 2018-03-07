@@ -82,7 +82,7 @@ matrix:
         sources:
         - george-edison55-precise-backports
         - ubuntu-toolchain-r-test
-        - llvm-toolchain-precise-5.0
+        - llvm-toolchain-trusty-5.0
         packages:
         - cmake cmake-data
         - clang-5.0
@@ -93,7 +93,7 @@ matrix:
         sources:
         - george-edison55-precise-backports
         - ubuntu-toolchain-r-test
-        - llvm-toolchain-precise-4.0
+        - llvm-toolchain-trusty-4.0
         packages:
         - cmake cmake-data
         - clang-4.0
@@ -104,7 +104,7 @@ matrix:
         sources:
         - george-edison55-precise-backports
         - ubuntu-toolchain-r-test
-        - llvm-toolchain-precise-3.9
+        - llvm-toolchain-trusty-3.9
         packages:
         - cmake cmake-data
         - clang-3.9
