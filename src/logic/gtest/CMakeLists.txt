@@ -40,10 +40,17 @@ target_link_libraries(logic-gtest-main
 )
 
 if (CMAKE_CXX_COMPILER_ID MATCHES Clang)
-    target_compile_options(logic-gtest-main PUBLIC
-        -Wno-zero-as-null-pointer-constant
+    set(compile_options
         -Wno-global-constructors
         -Wno-over-aligned
         -Wno-weak-vtables
     )
+
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0)
+        list(APPEND compile_options
+            -Wno-zero-as-null-pointer-constant
+        )
+    endif()
+
+    target_compile_options(logic-gtest-main PUBLIC ${compile_options})
 endif()

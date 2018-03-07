@@ -52,3 +52,15 @@ add_library(logic STATIC
 
 target_link_libraries(logic PRIVATE
     verilated scv uvm-systemc systemc)
+
+if (CMAKE_CXX_COMPILER_ID MATCHES Clang)
+    set(compile_options "")
+
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.9)
+        list(APPEND compile_options
+            -Wno-undefined-func-template
+        )
+    endif()
+
+    target_compile_options(logic PUBLIC ${compile_options})
+endif()
