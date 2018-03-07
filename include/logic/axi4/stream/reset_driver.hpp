@@ -16,6 +16,8 @@
 #ifndef LOGIC_AXI4_STREAM_RESET_DRIVER_HPP
 #define LOGIC_AXI4_STREAM_RESET_DRIVER_HPP
 
+#include "logic/axi4/stream/reset_sequence_item.hpp"
+
 #include <uvm>
 
 namespace logic {

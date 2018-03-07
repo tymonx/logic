@@ -16,6 +16,8 @@
 #ifndef LOGIC_AXI4_STREAM_TX_DRIVER_HPP
 #define LOGIC_AXI4_STREAM_TX_DRIVER_HPP
 
+#include "logic/axi4/stream/tx_sequence_item.hpp"
+
 #include <uvm>
 
 #include <cstddef>
