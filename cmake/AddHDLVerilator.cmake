@@ -33,9 +33,11 @@ if (VERILATOR_FOUND)
     file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/verilator/coverage")
 
     add_custom_target(verilator-coverage
-        ${VERILATOR_COVERAGE_EXECUTABLE}
+        COMMAND
+            ${VERILATOR_COVERAGE_EXECUTABLE}
             --annotate-all
             --annotate "${CMAKE_BINARY_DIR}/verilator/coverage"
+            "${CMAKE_BINARY_DIR}/verilator/coverage/run/*/coverage.dat"
             "${CMAKE_BINARY_DIR}/verilator/unit_tests/*/*.dat"
     )
 
@@ -45,6 +47,10 @@ if (VERILATOR_FOUND)
 
     if (NOT TARGET verilator-analysis-all)
         add_custom_target(verilator-analysis-all)
+    endif()
+
+    if (NOT TARGET verilator-coverage-all)
+        add_custom_target(verilator-coverage-all ALL)
     endif()
 endif()
 
@@ -90,6 +96,12 @@ function(add_hdl_verilator hdl_name)
 
     if (NOT verilator_analysis AND NOT verilator_compile)
         return()
+    endif()
+
+    if (verilator_analysis OR verilator_compile)
+        set(verilator_coverage TRUE)
+    else()
+        set(verilator_coverage FALSE)
     endif()
 
     if (NOT DEFINED ARG_TARGET)
@@ -189,6 +201,57 @@ function(add_hdl_verilator hdl_name)
             add_dependencies(${ARG_TARGET}
                 verilator-analysis-${verilator_target})
         endif()
+    endif()
+
+    if (verilator_coverage AND
+            NOT TARGET verilator-coverage-${verilator_target})
+        set(working_directory
+            "${CMAKE_BINARY_DIR}/verilator/coverage/run/${verilator_target}")
+
+        file(MAKE_DIRECTORY "${working_directory}")
+
+        configure_file("${_HDL_CMAKE_ROOT_DIR}/verilator_coverage.cpp.in"
+            "${working_directory}/${verilator_target}_main.cpp")
+
+        set(coverage_flags "")
+        list(APPEND coverage_flags --cc)
+        list(APPEND coverage_flags --coverage)
+        list(APPEND coverage_flags --prefix ${verilator_target})
+        list(APPEND coverage_flags --exe)
+        list(APPEND coverage_flags -o ${verilator_target})
+        list(APPEND coverage_flags -Mdir .)
+
+        add_custom_command(
+            OUTPUT
+                "${working_directory}/coverage.dat"
+            COMMAND
+                ${VERILATOR_EXECUTABLE}
+            ARGS
+                ${coverage_flags}
+                ${verilator_flags}
+                ${verilator_target}_main.cpp
+            COMMAND
+                make
+            ARGS
+                -f ${verilator_target}.mk
+            COMMAND
+                ./${verilator_target}
+            DEPENDS
+                ${verilator_sources}
+                ${verilator_includes}
+                ${verilator_configuration_file}
+                "${working_directory}/${verilator_target}_main.cpp"
+            WORKING_DIRECTORY
+                "${working_directory}"
+            COMMENT
+                "Initializing SystemC ${verilator_target} coverage"
+        )
+
+        add_custom_target(verilator-coverage-${verilator_target}
+            DEPENDS "${working_directory}/coverage.dat")
+
+        add_dependencies(verilator-coverage-all
+            verilator-coverage-${verilator_target})
     endif()
 
     if (verilator_compile AND NOT TARGET verilator-compile-${verilator_target})
