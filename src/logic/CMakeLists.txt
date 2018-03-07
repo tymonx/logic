@@ -47,7 +47,13 @@ target_include_directories(logic-core SYSTEM PRIVATE
 
 logic_target_compile_options(logic-core)
 
-add_library(logic STATIC
+if (WIN32)
+    set(library_policy STATIC)
+else()
+    set(library_policy SHARED)
+endif()
+
+add_library(logic ${library_policy}
     $<TARGET_OBJECTS:logic-core>
     $<TARGET_OBJECTS:logic-core-printer>
     $<TARGET_OBJECTS:logic-axi4-stream>

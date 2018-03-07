@@ -22,7 +22,13 @@ if (CMAKE_CXX_COMPILER_ID MATCHES Clang)
     )
 endif()
 
-add_library(logic-gtest-main STATIC
+if (WIN32)
+    set(library_policy STATIC)
+else()
+    set(library_policy SHARED)
+endif()
+
+add_library(logic-gtest-main ${library_policy}
     factory.cpp
     main.cpp
 )

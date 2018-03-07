@@ -59,7 +59,13 @@ function(_find_verilator)
     find_package_handle_standard_args(Verilator REQUIRED_VARS
         VERILATOR_EXECUTABLE VERILATOR_COVERAGE_EXECUTABLE VERILATOR_INCLUDE_DIR)
 
-    add_library(verilated STATIC
+    if (WIN32)
+        set(library_policy STATIC)
+    else()
+        set(library_policy SHARED)
+    endif()
+
+    add_library(verilated ${library_policy}
         ${VERILATOR_INCLUDE_DIR}/verilated.cpp
         ${VERILATOR_INCLUDE_DIR}/verilated_cov.cpp
         ${VERILATOR_INCLUDE_DIR}/verilated_dpi.cpp

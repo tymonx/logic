@@ -138,7 +138,13 @@ function(_find_systemc)
     endforeach()
 
     if (SYSTEMC_FOUND)
-        add_library(systemc-main STATIC
+        if (WIN32)
+            set(library_policy STATIC)
+        else()
+            set(library_policy SHARED)
+        endif()
+
+        add_library(systemc-main ${library_policy}
             ${CMAKE_CURRENT_LIST_DIR}/sc_main.cpp
         )
 
