@@ -198,6 +198,25 @@ function install_gtest {
     export GTEST_ROOT=$INSTALL/gtest/$GTEST_VERSION
 }
 
+function install_std_ovl {
+    if [ ! -f "$STD_OVL_ARCHIVE_DIR/$STD_OVL_TAR" ]; then
+        echo "Downloading $STD_OVL_URL/$STD_OVL_TAR..."
+        mkdir -p $STD_OVL_ARCHIVE_DIR
+        wget $STD_OVL_URL/$STD_OVL_TAR -O $STD_OVL_ARCHIVE_DIR/$STD_OVL_TAR
+    else
+        echo "OVL $STD_OVL_URL/$STD_OVL_TAR already downloaded"
+    fi
+
+    echo "Creating OVL directories..."
+    mkdir -p /tmp/src/std_ovl/$STD_OVL_VERSION
+
+    echo "Unpacking OVL archive file..."
+    tar -xzf $STD_OVL_ARCHIVE_DIR/$STD_OVL_TAR \
+        -C /tmp/src/std_ovl/$STD_OVL_VERSION --strip-components 1
+
+    export STD_OVL_DIR=/tmp/src/std_ovl/$STD_OVL_VERSION
+}
+
 function install_tools {
     echo "Preparing tools..."
 
@@ -235,6 +254,13 @@ function install_tools {
     GTEST_VERSION=703b4a8
 
     install_gtest
+
+    STD_OVL_ARCHIVE_DIR=$HOME/archive/std_ovl
+    STD_OVL_VERSION=v2p8.1_Apr2014
+    STD_OVL_URL=http://accellera.org/images/downloads/standards/ovl
+    STD_OVL_TAR=std_ovl_$STD_OVL_VERSION.tgz
+
+    install_std_ovl
 
     cd $WORKDIR
 }
