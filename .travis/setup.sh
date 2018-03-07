@@ -201,6 +201,7 @@ function install_gtest {
 function install_tools {
     echo "Preparing tools..."
 
+    WORKDIR=$(pwd)
     INSTALL=$HOME/tools
 
     SYSTEMC_ARCHIVE_DIR=$HOME/archive/systemc
@@ -234,6 +235,8 @@ function install_tools {
     GTEST_VERSION=703b4a8
 
     install_gtest
+
+    cd $WORKDIR
 }
 
 install_tools
