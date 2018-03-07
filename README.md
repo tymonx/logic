@@ -2,6 +2,7 @@ Logic
 =====
 
 [![Language](https://img.shields.io/badge/language-C++-blue.svg?style=flat)](https://isocpp.org/)
+[![Standard](https://img.shields.io/badge/c%2B%2B-11/14/17-blue.svg?style=flat)](https://en.wikipedia.org/wiki/C%2B%2B#Standardization)
 [![Language](https://img.shields.io/badge/language-SystemVerilog-blue.svg?style=flat)](http://accellera.org/downloads/ieee)
 [![License Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg?style=flat)](https://choosealicense.com/licenses/apache-2.0/)
 [![Build Status](https://travis-ci.org/tymonx/logic.svg?branch=master)](https://travis-ci.org/tymonx/logic)
