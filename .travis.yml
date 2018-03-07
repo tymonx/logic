@@ -34,8 +34,8 @@ addons:
     - gcc-7 g++-7
 
 before_script:
-    - export CC='$C_COMPILER -std=gnu11'
-    - export CXX='$CXX_COMPILER -std=gnu++11'
+    - export CC="$C_COMPILER -std=gnu11"
+    - export CXX="$CXX_COMPILER -std=gnu++11"
     - source ./.travis/setup.sh
 
 script:
