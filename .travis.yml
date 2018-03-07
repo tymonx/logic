@@ -46,6 +46,16 @@ script:
 
 matrix:
   include:
+  - env: C_COMPILER='gcc-7 -std=gnu11' CXX_COMPILER='g++-7 -std=gnu++11'
+    addons:
+      apt:
+        sources:
+        - george-edison55-precise-backports
+        - ubuntu-toolchain-r-test
+        packages:
+        - cmake cmake-data
+        - g++-7
+
   - env: C_COMPILER='gcc-6 -std=gnu11' CXX_COMPILER='g++-6 -std=gnu++11'
     addons:
       apt:
