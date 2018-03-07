@@ -86,6 +86,14 @@ matrix:
         - cmake cmake-data
         - g++-4.9
 
+  - env: C_COMPILER=gcc CXX_COMPILER=g++
+    addons:
+      apt:
+        sources:
+        - george-edison55-precise-backports
+        packages:
+        - cmake cmake-data
+
   - env: C_COMPILER=clang-5.0 CXX_COMPILER=clang++-5.0
     addons:
       apt:
