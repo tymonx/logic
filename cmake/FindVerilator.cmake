@@ -68,6 +68,12 @@ function(_find_verilator)
         ${CMAKE_CURRENT_LIST_DIR}/verilator_callbacks.cpp
     )
 
+    set_target_properties(verilated PROPERTIES
+        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+    )
+
     set_source_files_properties(
         ${VERILATOR_INCLUDE_DIR}/verilated.cpp
         PROPERTIES

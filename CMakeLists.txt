@@ -15,13 +15,7 @@
 cmake_minimum_required(VERSION 3.1)
 project(Logic C CXX)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
-    ${CMAKE_CURRENT_LIST_DIR}/cmake
-)
-
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 option(LOGIC_TESTS "Enable/disable tests" ON)
 option(LOGIC_RTL "Enable/disable RTL build" ON)
@@ -30,9 +24,6 @@ option(LOGIC_WARNINGS_INTO_ERRORS "Enable/disable warnings as errors" OFF)
 include(AddLogic)
 
 set(LOGIC_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
-
-include_directories(include)
-include_directories(SYSTEM ${SYSTEMC_INCLUDE_DIRS})
 
 add_subdirectory(src)
 

@@ -16,14 +16,6 @@ add_subdirectory(axi4)
 add_subdirectory(gtest)
 add_subdirectory(printer)
 
-if (VERILATOR_FOUND)
-    include_directories(SYSTEM ${VERILATOR_INCLUDE_DIR})
-
-    set(LOGIC_CORE_SOURCES ${LOGIC_CORE_SOURCES}
-        trace_verilated.cpp
-    )
-endif()
-
 if (CMAKE_CXX_COMPILER_ID MATCHES Clang)
     set_source_files_properties(command_line.cpp
         PROPERTIES COMPILE_FLAGS -Wno-global-constructors
@@ -31,7 +23,6 @@ if (CMAKE_CXX_COMPILER_ID MATCHES Clang)
 endif()
 
 add_library(logic-core OBJECT
-    ${LOGIC_CORE_SOURCES}
     range.cpp
     trace_base.cpp
     trace_systemc.cpp
@@ -42,6 +33,16 @@ add_library(logic-core OBJECT
     bitstream_const_reference.cpp
     command_line.cpp
     command_line_argument.cpp
+    $<$<BOOL:VERILATOR_FOUND>:trace_verilated.cpp>
+)
+
+target_include_directories(logic-core PRIVATE
+    ${LOGIC_INCLUDE_DIR}
+)
+
+target_include_directories(logic-core SYSTEM PRIVATE
+    ${SYSTEMC_INCLUDE_DIRS}
+    ${VERILATOR_INCLUDE_DIR}
 )
 
 logic_target_compile_options(logic-core)
@@ -52,8 +53,20 @@ add_library(logic STATIC
     $<TARGET_OBJECTS:logic-axi4-stream>
 )
 
+set_target_properties(logic PROPERTIES
+    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+)
+
 target_link_libraries(logic PRIVATE
     verilated scv uvm-systemc systemc)
+
+target_include_directories(logic SYSTEM PUBLIC
+    ${LOGIC_INCLUDE_DIR}
+    ${SYSTEMC_INCLUDE_DIRS}
+    ${VERILATOR_INCLUDE_DIR}
+)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES Clang)
     set(compile_options "")

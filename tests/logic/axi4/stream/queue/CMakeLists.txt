@@ -74,6 +74,11 @@ add_executable(logic_axi4_stream_queue_test
     basic_test.cpp
 )
 
+set_target_properties(logic_axi4_stream_queue_test
+    PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${module_working_directory}"
+)
+
 logic_target_compile_options(logic_axi4_stream_queue_test
     PRIVATE
         $<$<CXX_COMPILER_ID:Clang>:-Wno-unused-member-function>

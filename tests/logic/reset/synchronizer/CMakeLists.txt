@@ -34,6 +34,11 @@ add_executable(logic_reset_synchronizer_test
     logic_reset_synchronizer_test.cpp
 )
 
+set_target_properties(logic_reset_synchronizer_test
+    PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${module_working_directory}"
+)
+
 logic_target_compile_options(logic_reset_synchronizer_test)
 
 target_include_directories(logic_reset_synchronizer_test

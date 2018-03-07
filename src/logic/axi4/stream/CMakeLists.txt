@@ -40,6 +40,14 @@ add_library(logic-axi4-stream OBJECT
     tx_sequencer.cpp
 )
 
+target_include_directories(logic-axi4-stream PRIVATE
+    ${LOGIC_INCLUDE_DIR}
+)
+
+target_include_directories(logic-axi4-stream SYSTEM PRIVATE
+    ${SYSTEMC_INCLUDE_DIRS}
+)
+
 set(compile_options "")
 
 if (CMAKE_CXX_COMPILER_ID MATCHES Clang)

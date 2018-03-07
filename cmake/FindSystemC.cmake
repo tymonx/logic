@@ -142,6 +142,12 @@ function(_find_systemc)
             ${CMAKE_CURRENT_LIST_DIR}/sc_main.cpp
         )
 
+        set_target_properties(systemc-main PROPERTIES
+            ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+            LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+        )
+
         logic_target_compile_options(systemc-main)
 
         target_include_directories(systemc-main SYSTEM

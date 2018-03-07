@@ -16,4 +16,12 @@ add_library(logic-core-printer OBJECT
     json.cpp
 )
 
+target_include_directories(logic-core-printer PRIVATE
+    ${LOGIC_INCLUDE_DIR}
+)
+
+target_include_directories(logic-core-printer SYSTEM PRIVATE
+    ${SYSTEMC_INCLUDE_DIRS}
+)
+
 logic_target_compile_options(logic-core-printer)

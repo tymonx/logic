@@ -27,6 +27,16 @@ add_library(logic-gtest-main STATIC
     main.cpp
 )
 
+set_target_properties(logic-gtest-main PROPERTIES
+    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+)
+
+target_include_directories(logic-gtest-main PRIVATE
+    ${LOGIC_INCLUDE_DIR}
+)
+
 target_include_directories(logic-gtest-main
     SYSTEM PUBLIC
         ${LOGIC_INCLUDE_DIR}
