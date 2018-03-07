@@ -66,7 +66,9 @@ json_emitter::json_emitter(const std::vector<uvm::uvm_printer_row_info>& rows) :
 
 auto json_emitter::emit() -> std::string {
     m_row = m_row_begin;
-    m_output = std::stringstream{};
+
+    m_output.str({});
+    m_output.clear();
 
     print(OBJECT);
 
