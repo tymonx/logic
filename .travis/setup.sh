@@ -150,9 +150,6 @@ function install_verilator {
         tar -xzf $VERILATOR_ARCHIVE_DIR/$VERILATOR_TAR \
             -C /tmp/src/verilator/$VERILATOR_VERSION --strip-components 1
 
-        echo "Installing Verilator dependencies..."
-        sudo apt-get install git make autoconf g++ flex bison -y
-
         echo "Configuring Verilator sources..."
         cd /tmp/src/verilator/$VERILATOR_VERSION
         ./configure --prefix=$INSTALL/verilator/$VERILATOR_VERSION
@@ -203,8 +200,6 @@ function install_gtest {
 
 function install_tools {
     echo "Preparing tools..."
-
-    sudo apt-get update -qq
 
     INSTALL=$HOME/tools
 
