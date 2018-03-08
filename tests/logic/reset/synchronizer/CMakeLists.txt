@@ -21,41 +21,31 @@ add_hdl_unit_test(logic_reset_synchronizer_unit_test.sv
 
 # Create SystemC with GTest
 
-add_hdl_systemc(logic_reset_synchronizer
-    OUTPUT_INCLUDES
-        module_includes
-    OUTPUT_LIBRARIES
-        module_libraries
-    OUTPUT_WORKING_DIRECTORY
-        module_working_directory
-)
+set(hdl_name logic_reset_synchronizer)
 
-add_executable(logic_reset_synchronizer_test
+add_hdl_systemc(${hdl_name})
+
+add_executable(${hdl_name}_test
     logic_reset_synchronizer_test.cpp
 )
 
-set_target_properties(logic_reset_synchronizer_test
-    PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY "${module_working_directory}"
+set_target_properties(${hdl_name}_test PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY
+        "${CMAKE_BINARY_DIR}/systemc/unit_tests/${hdl_name}"
 )
 
-logic_target_compile_options(logic_reset_synchronizer_test)
+logic_target_compile_options(${hdl_name}_test)
 
-target_include_directories(logic_reset_synchronizer_test
-    SYSTEM PRIVATE
-        ${module_includes}
-)
-
-logic_target_link_libraries(logic_reset_synchronizer_test
-    ${module_libraries}
+logic_target_link_libraries(${hdl_name}_test
+    systemc-module-${hdl_name}
     logic-gtest-main
 )
 
 add_test(
     NAME
-        logic_reset_synchronizer_test
+        ${hdl_name}_test
     COMMAND
-        logic_reset_synchronizer_test
+        ${hdl_name}_test
     WORKING_DIRECTORY
-        "${module_working_directory}"
+        "${CMAKE_BINARY_DIR}/systemc/unit_tests/${hdl_name}"
 )

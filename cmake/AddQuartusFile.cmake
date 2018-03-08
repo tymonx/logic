@@ -16,179 +16,55 @@ if (COMMAND add_quartus_file)
     return()
 endif()
 
-if (NOT DEFINED _HDL_CMAKE_ROOT_DIR)
-    set(_HDL_CMAKE_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}" CACHE INTERNAL
-        "HDL CMake root directory" FORCE)
-endif()
+include(AddHDLSource)
 
-find_package(Quartus)
-find_package(ModelSim)
+if (QUARTUS_FOUND)
+    set(hdl_modules "")
+    set(hdl_sources "")
 
-include(SetHDLPath)
+    file(GLOB sources "${QUARTUS_DIR}/eda/sim_lib/*.v")
+    list(APPEND hdl_sources ${sources})
 
-file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/logic/deps")
+    file(GLOB sources "${QUARTUS_DIR}/eda/sim_lib/*.sv")
+    list(APPEND hdl_sources ${sources})
 
-if (NOT TARGET modelsim-compile-all)
-    add_custom_target(modelsim-compile-all ALL)
+    file(GLOB sources "${QUARTUS_DIR}/eda/sim_lib/mentor/*.v")
+    list(APPEND hdl_sources ${sources})
+
+    file(GLOB sources "${QUARTUS_DIR}/eda/sim_lib/mentor/*.sv")
+    list(APPEND hdl_sources ${sources})
+
+    foreach (hdl_source ${hdl_sources})
+        if (hdl_source MATCHES _for_vhdl)
+            continue()
+        endif()
+
+        get_filename_component(hdl_module "${hdl_source}" NAME_WE)
+        list(APPEND hdl_modules ${hdl_module})
+    endforeach()
 endif()
 
 function(add_quartus_file file)
-    set(file_type "")
-
-    if (NOT file)
-        message(FATAL_ERROR "Quartus file is not defined")
-    endif()
-
-    get_filename_component(file "${file}" REALPATH)
-    get_filename_component(name "${file}" NAME_WE)
-
-    if (NOT EXISTS "${file}")
-        message(FATAL_ERROR "Quartus file doesn't exist: ${file}")
-    endif()
-
-    if (file MATCHES "\\.ip$")
-        set(file_type ip)
-    elseif (file MATCHES "\\.qsys$")
-        set(file_type qsys)
-    elseif (file MATCHES "\\.tcl$")
-        set(file_type tcl)
-    else()
-        message(FATAL_ERROR "Quartus file must be IP, Qsys or Tcl file")
-    endif()
-
-    set(spd_file "${CMAKE_CURRENT_BINARY_DIR}/${name}/${name}.spd")
-    set(qsys_file "${CMAKE_CURRENT_BINARY_DIR}/${name}.${file_type}")
-
-    if (NOT file MATCHES "${qsys_file}")
-        add_custom_command(
-            OUTPUT
-                "${qsys_file}"
-            COMMAND
-                ${CMAKE_COMMAND}
-            ARGS
-                -E copy "${file}" "${name}.${file_type}"
-            DEPENDS
-                "${file}"
-            WORKING_DIRECTORY
-                "${CMAKE_CURRENT_BINARY_DIR}"
-        )
-    endif()
-
-    set(entries
-        TYPE Qsys
-        NAME "${name}"
-        SOURCE "${file}"
-        LIBRARY "${name}"
-        SOURCES ""
-        DEPENDS ""
-        DEFINES ""
-        INCLUDES ""
-        COMPILE Quartus ModelSim
-        ANALYSIS Quartus ModelSim
-        SYNTHESIZABLE TRUE
-        QUARTUS_SPD_FILES "${spd_file}"
-    )
-
-    if (NOT DEFINED _HDL_${name})
-        set(hdl_list ${_HDL_LIST})
-        list(APPEND hdl_list ${name})
-        set(_HDL_LIST "${hdl_list}" CACHE INTERNAL "" FORCE)
-    endif()
-
-    set(_HDL_${name} "${entries}" CACHE INTERNAL "" FORCE)
-
-    if (NOT MODELSIM_FOUND)
-        return()
-    endif()
-
-    if (file_type MATCHES tcl)
-        set(tcl_file "${qsys_file}")
-        set_hdl_path(input_file "${qsys_file}")
-        set(qsys_file "${CMAKE_CURRENT_BINARY_DIR}/${name}.ip")
-
-        add_custom_command(
-            OUTPUT
-                "${qsys_file}"
-            COMMAND
-                ${QUARTUS_QSYS_SCRIPT}
-            ARGS
-                --script=${input_file}
-            DEPENDS
-                "${tcl_file}"
-            WORKING_DIRECTORY
-                "${CMAKE_CURRENT_BINARY_DIR}"
-        )
-
-        set(file_type ip)
-    endif()
-
-    set_hdl_path(input_file "${qsys_file}")
-    set(modelsim_libraries_dir "${CMAKE_BINARY_DIR}/modelsim/libraries")
-    set(modelsim_file "${CMAKE_BINARY_DIR}/logic/deps/modelsim.${name}.${name}")
-
-    if (NOT EXISTS "${modelsim_libraries_dir}/${name}")
-        set_hdl_path(library_dir
-            "${CMAKE_BINARY_DIR}/modelsim/libraries/${name}")
-
-        execute_process(COMMAND ${MODELSIM_VLIB} ${name}
-            WORKING_DIRECTORY "${modelsim_libraries_dir}" OUTPUT_QUIET)
-
-        execute_process(COMMAND ${MODELSIM_VMAP} ${name} "${library_dir}"
-            WORKING_DIRECTORY "${modelsim_libraries_dir}" OUTPUT_QUIET)
-    endif()
-
-    add_custom_command(
-        OUTPUT
-            "${spd_file}"
-        COMMAND
-            ${QUARTUS_QSYS_GENERATE}
-        ARGS
-            "${input_file}"
-            --upgrade-ip-cores
-        COMMAND
-            ${QUARTUS_QSYS_GENERATE}
-        ARGS
-            "${input_file}"
-            --simulation=VERILOG
+    add_hdl_source(${file}
+        TYPE
+            Qsys
+        MODELSIM_LINT
+            FALSE
+        MODELSIM_PEDANTICERRORS
+            FALSE
+        MODELSIM_WARNING_AS_ERROR
+            FALSE
+        VERILATOR_ALL_WARNINGS
+            FALSE
+        VERILATOR_LINT_WARNINGS
+            FALSE
+        VERILATOR_STYLE_WARNINGS
+            FALSE
+        VERILATOR_FATAL_WARNINGS
+            FALSE
         DEPENDS
-            "${qsys_file}"
-        WORKING_DIRECTORY
-            "${CMAKE_CURRENT_BINARY_DIR}"
+            ${hdl_modules}
     )
-
-    add_custom_command(
-        OUTPUT
-            "${modelsim_file}"
-        COMMAND
-            ${CMAKE_COMMAND}
-        ARGS
-            -DWORK=${name}
-            -DSPD_FILE="${spd_file}"
-            -DMODELSIM_VCOM="${MODELSIM_VCOM}"
-            -DMODELSIM_VLOG="${MODELSIM_VLOG}"
-            -DWORKING_DIRECTORY="${CMAKE_BINARY_DIR}/modelsim/libraries"
-            -P "${_HDL_CMAKE_ROOT_DIR}/AddQuartusFileSPD.cmake"
-        COMMAND
-            ${CMAKE_COMMAND}
-        ARGS
-            -E touch "${modelsim_file}"
-        DEPENDS
-            "${spd_file}"
-        WORKING_DIRECTORY
-            "${CMAKE_BINARY_DIR}/modelsim"
-    )
-
-    add_custom_target(modelsim-compile-${name}-${name}
-        DEPENDS "${modelsim_file}"
-    )
-
-    if (NOT TARGET modelsim-compile-${name})
-        add_custom_target(modelsim-compile-${name})
-        add_dependencies(modelsim-compile-all modelsim-compile-${name})
-    endif()
-
-    add_dependencies(modelsim-compile-${name}
-        modelsim-compile-${name}-${name})
 endfunction()
 
 function(add_quartus_files)

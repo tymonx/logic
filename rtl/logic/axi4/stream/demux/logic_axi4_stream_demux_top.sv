@@ -17,7 +17,7 @@
 
 module logic_axi4_stream_demux_top #(
     int GROUP = 8,
-    int OUTPUTS = 16,
+    int OUTPUTS = 4,
     int TDATA_BYTES = 4,
     int TDEST_WIDTH = 1,
     int TUSER_WIDTH = 1,

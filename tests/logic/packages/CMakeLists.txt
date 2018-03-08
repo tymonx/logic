@@ -21,6 +21,4 @@ add_hdl_source(logic_unit_test_pkg.sv
         TRUE
     INCLUDES
         .
-    LIBRARY
-        unit_test
 )

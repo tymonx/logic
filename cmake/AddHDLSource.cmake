@@ -16,26 +16,63 @@ if (COMMAND add_hdl_source)
     return()
 endif()
 
+include(AddHDLQsys)
 include(AddHDLVivado)
 include(AddHDLQuartus)
 include(AddHDLModelSim)
 include(AddHDLVerilator)
 
 function(add_hdl_source hdl_file)
-    if (NOT hdl_file)
-        message(FATAL_ERROR "HDL file not provided as first argument")
-    endif()
+    set(one_value_arguments
+        NAME
+        TYPE
+        SOURCE
+        TARGET
+        PACKAGE
+        SYNTHESIZABLE
+        MODELSIM_LINT
+        MODELSIM_PEDANTICERRORS
+        MODELSIM_WARNING_AS_ERROR
+        VERILATOR_ALL_WARNINGS
+        VERILATOR_LINT_WARNINGS
+        VERILATOR_STYLE_WARNINGS
+        VERILATOR_FATAL_WARNINGS
+        OUTPUT_LIBRARIES
+        OUTPUT_INCLUDES
+        OUTPUT_WORKING_DIRECTORY
+    )
 
-    get_filename_component(hdl_file "${hdl_file}" REALPATH)
+    set(multi_value_arguments
+        COMPILE
+        COMPILE_EXCLUDE
+        DEFINES
+        DEPENDS
+        INCLUDES
+        ANALYSIS
+        SOURCES
+        LIBRARIES
+        PARAMETERS
+        FILES
+        MIF_FILES
+        INPUT_FILES
+        MODELSIM_FLAGS
+        MODELSIM_SOURCES
+        MODELSIM_DEPENDS
+        MODELSIM_SUPPRESS
+        MODELSIM_VLOG_FILES
+        MODELSIM_VCOM_FILES
+        VERILATOR_FILES
+        VERILATOR_CONFIGURATIONS
+        QUARTUS_IP_FILES
+        QUARTUS_SDC_FILES
+        QUARTUS_SPD_FILES
+        QUARTUS_QSYS_FILES
+        QUARTUS_QSYS_INPUTS
+        QUARTUS_QSYS_TCL_FILES
+    )
 
-    if (NOT EXISTS "${hdl_file}")
-        message(FATAL_ERROR "HDL file doesn't exist: ${hdl_file}")
-    endif()
-
-    get_filename_component(hdl_name "${hdl_file}" NAME_WE)
-
-    cmake_parse_arguments(ARG "" "${_HDL_ONE_VALUE_ARGUMENTS}"
-        "${_HDL_MULTI_VALUE_ARGUMENTS}" ${ARGN})
+    cmake_parse_arguments(ARG "" "${one_value_arguments}"
+        "${multi_value_arguments}" ${ARGN})
 
     macro(set_default_value name value)
         if (NOT DEFINED ARG_${name})
@@ -55,14 +92,21 @@ function(add_hdl_source hdl_file)
         set(ARG_${name} ${paths})
     endmacro()
 
+    if (NOT hdl_file)
+        message(FATAL_ERROR "HDL file not provided as first argument")
+    endif()
+
+    get_filename_component(hdl_file "${hdl_file}" REALPATH)
+
+    if (NOT EXISTS "${hdl_file}")
+        message(FATAL_ERROR "HDL file doesn't exist: ${hdl_file}")
+    endif()
+
+    get_filename_component(hdl_name "${hdl_file}" NAME_WE)
+
     set_default_value(NAME ${hdl_name})
     set_default_value(SOURCE ${hdl_file})
-    set_default_value(SOURCES "")
-    set_default_value(DEPENDS "")
-    set_default_value(DEFINES "")
-    set_default_value(INCLUDES "")
-    set_default_value(LIBRARIES "")
-    set_default_value(LIBRARY work)
+    set_default_value(SOURCES "${ARG_UNPARSED_ARGUMENTS}")
     set_default_value(PACKAGE FALSE)
     set_default_value(COMPILE ModelSim Quartus)
     set_default_value(ANALYSIS FALSE)
@@ -70,12 +114,10 @@ function(add_hdl_source hdl_file)
     set_default_value(MODELSIM_LINT TRUE)
     set_default_value(MODELSIM_PEDANTICERRORS TRUE)
     set_default_value(MODELSIM_WARNING_AS_ERROR TRUE)
-    set_default_value(MODELSIM_SUPPRESS "")
-    set_default_value(VERILATOR_CONFIGURATIONS "")
-
-    if (HDL_LIBRARY)
-        set(ARG_LIBRARY ${HDL_LIBRARY})
-    endif()
+    set_default_value(VERILATOR_ALL_WARNINGS TRUE)
+    set_default_value(VERILATOR_LINT_WARNINGS TRUE)
+    set_default_value(VERILATOR_STYLE_WARNINGS TRUE)
+    set_default_value(VERILATOR_FATAL_WARNINGS TRUE)
 
     if (DEFINED HDL_SYNTHESIZABLE)
         set(ARG_SYNTHESIZABLE ${HDL_SYNTHESIZABLE})
@@ -100,12 +142,16 @@ function(add_hdl_source hdl_file)
     set_realpath(SOURCES)
     set_realpath(INCLUDES)
     set_realpath(MIF_FILES)
-    set_realpath(TEXT_FILES)
     set_realpath(INPUT_FILES)
     set_realpath(QUARTUS_IP_FILES)
     set_realpath(QUARTUS_SDC_FILES)
     set_realpath(QUARTUS_QSYS_FILES)
+    set_realpath(QUARTUS_QSYS_INPUTS)
     set_realpath(QUARTUS_QSYS_TCL_FILES)
+    set_realpath(VERILATOR_FILES)
+    set_realpath(MODELSIM_SOURCES)
+    set_realpath(MODELSIM_VCOM_FILES)
+    set_realpath(MODELSIM_VLOG_FILES)
 
     foreach (quartus_file ${ARG_QUARTUS_IP_FILES} ${ARG_QUARTUS_QSYS_TCL_FILES}
             ${ARG_QUARTUS_QSYS_FILES})
@@ -116,7 +162,7 @@ function(add_hdl_source hdl_file)
     endforeach()
 
     if (NOT ARG_TYPE)
-        if (ARG_SOURCE MATCHES .sv)
+        if (ARG_SOURCE MATCHES "\.sv$")
             set(ARG_TYPE SystemVerilog)
         elseif (ARG_SOURCE MATCHES "\.vhd$")
             set(ARG_TYPE VHDL)
@@ -133,26 +179,44 @@ function(add_hdl_source hdl_file)
         endif()
     endif()
 
-    if (NOT DEFINED _HDL_${ARG_NAME})
-        set(hdl_list ${_HDL_LIST})
-        list(APPEND hdl_list ${ARG_NAME})
-        set(_HDL_LIST "${hdl_list}" CACHE INTERNAL "" FORCE)
+    if (TARGET ${ARG_NAME})
+        message(FATAL_ERROR "Target name ${ARG_NAME} already exists!")
     endif()
 
-    set(hdl_entry "")
+    add_custom_target(${ARG_NAME}
+        DEPENDS
+            ${ARG_FILES}
+            ${ARG_SOURCE}
+            ${ARG_SOURCES}
+            ${ARG_INCLUDES}
+            ${ARG_MIF_FILES}
+            ${ARG_INPUT_FILES}
+            ${ARG_QUARTUS_IP_FILES}
+            ${ARG_QUARTUS_SDC_FILES}
+            ${ARG_QUARTUS_SPD_FILES}
+            ${ARG_QUARTUS_QSYS_FILES}
+            ${ARG_QUARTUS_QSYS_INPUTS}
+            ${ARG_QUARTUS_QSYS_TCL_FILES}
+            ${ARG_VERILATOR_FILES}
+            ${ARG_MODELSIM_VCOM_FILES}
+            ${ARG_MODELSIM_VLOG_FILES}
+        COMMENT
+            "Generating artifacts for ${ARG_NAME} target"
+    )
 
-    foreach (argument ${_HDL_ONE_VALUE_ARGUMENTS})
-        list(APPEND hdl_entry "${argument}" "${ARG_${argument}}")
+    foreach (argument ${one_value_arguments} ${multi_value_arguments})
+        set_target_properties(${ARG_NAME} PROPERTIES
+            HDL_${argument} "${ARG_${argument}}"
+        )
     endforeach()
 
-    foreach (argument ${_HDL_MULTI_VALUE_ARGUMENTS})
-        list(APPEND hdl_entry "${argument}" "${ARG_${argument}}")
-    endforeach()
+    if (ARG_DEPENDS)
+        add_dependencies(${ARG_NAME} ${ARG_DEPENDS})
+    endif()
 
-    set(_HDL_${ARG_NAME} "${hdl_entry}" CACHE INTERNAL "" FORCE)
-
-    add_hdl_modelsim(${ARG_NAME})
-    add_hdl_verilator(${ARG_NAME})
-    add_hdl_quartus(${ARG_NAME})
-    add_hdl_vivado(${ARG_NAME})
+    add_hdl_qsys()
+    add_hdl_modelsim()
+    add_hdl_verilator()
+    add_hdl_quartus()
+    add_hdl_vivado()
 endfunction()

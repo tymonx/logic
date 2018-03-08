@@ -18,7 +18,6 @@
  * Logic package.
  */
 package logic_pkg;
-
     /* Enum: system_t
      *
      * System select.

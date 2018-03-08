@@ -112,6 +112,9 @@ module logic_basic_queue_intel #(
                     fsm_state <= FSM_IDLE;
                 end
             end
+            default: begin
+                fsm_state <= FSM_IDLE;
+            end
             endcase
         end
     end

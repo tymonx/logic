@@ -52,6 +52,7 @@ interface logic_axi4_lite_if #(
     typedef logic_axi4_lite_pkg::access_t awprot_t;
     typedef logic_axi4_lite_pkg::access_t arprot_t;
 
+`ifdef SYNTHESIS
     /* Write address channel */
     logic awvalid;
     logic awready;
@@ -80,6 +81,36 @@ interface logic_axi4_lite_if #(
     logic rready;
     rdata_t rdata;
     rresp_t rresp;
+`else
+    /* Write address channel */
+    logic awvalid = 'X;
+    logic awready = 'X;
+    awaddr_t awaddr = 'X;
+    awprot_t awprot = logic_axi4_lite_pkg::access_t'('X);
+
+    /* Write data channel */
+    logic wvalid = 'X;
+    logic wready = 'X;
+    wdata_t wdata = 'X;
+    wstrb_t wstrb = 'X;
+
+    /* Write response channel */
+    logic bvalid = 'X;
+    logic bready = 'X;
+    bresp_t bresp = logic_axi4_lite_pkg::response_t'('X);
+
+    /* Read address channel */
+    logic arvalid = 'X;
+    logic arready = 'X;
+    araddr_t araddr = 'X;
+    arprot_t arprot = logic_axi4_lite_pkg::access_t'('X);
+
+    /* Read data channel */
+    logic rvalid = 'X;
+    logic rready = 'X;
+    rdata_t rdata = 'X;
+    rresp_t rresp = logic_axi4_lite_pkg::response_t'('X);
+`endif
 
 `ifndef LOGIC_MODPORT_DISABLED
     modport slave (

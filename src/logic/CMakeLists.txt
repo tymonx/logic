@@ -65,10 +65,10 @@ set_target_properties(logic PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
 )
 
-target_link_libraries(logic PRIVATE
+target_link_libraries(logic PUBLIC
     verilated scv uvm-systemc systemc)
 
-target_include_directories(logic SYSTEM PUBLIC
+target_include_directories(logic SYSTEM INTERFACE
     ${LOGIC_INCLUDE_DIR}
     ${SYSTEMC_INCLUDE_DIRS}
     ${VERILATOR_INCLUDE_DIR}

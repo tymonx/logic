@@ -60,6 +60,12 @@ module logic_axi4_stream_timer #(
     typedef logic [COUNTER_WIDTH-1:0] counter_t;
     typedef logic [TDATA_BYTES-1:0][7:0] data_t;
 
+    enum logic [0:0] {
+        FSM_IDLE,
+        FSM_RELOAD
+    } fsm_state;
+
+    logic counter_event;
     logic counter_reload;
 
     counter_t counter;
@@ -70,6 +76,32 @@ module logic_axi4_stream_timer #(
 
     always_comb periodic_load = counter_t'(rx.tdata) -
         PERIODIC_OFFSET[COUNTER_WIDTH-1:0];
+
+    always_comb counter_reload = counter_event || rx.tvalid ||
+        (FSM_RELOAD == fsm_state);
+
+    always_ff @(posedge aclk or negedge areset_n) begin
+        if (!areset_n) begin
+            fsm_state <= FSM_IDLE;
+        end
+        else begin
+            case (fsm_state)
+            FSM_IDLE: begin
+                if (rx.tvalid && tx.tvalid && !tx.tready) begin
+                    fsm_state <= FSM_RELOAD;
+                end
+            end
+            FSM_RELOAD: begin
+                if (tx.tvalid && tx.tready) begin
+                    fsm_state <= FSM_IDLE;
+                end
+            end
+            default: begin
+                fsm_state <= FSM_IDLE;
+            end
+            endcase
+        end
+    end
 
     always_ff @(posedge aclk or negedge areset_n) begin
         if (!areset_n) begin
@@ -91,10 +123,11 @@ module logic_axi4_stream_timer #(
 
     always_ff @(posedge aclk or negedge areset_n) begin
         if (!areset_n) begin
-            counter_reload <= '0;
+            counter_event <= '0;
         end
         else if (tx.tready) begin
-            counter_reload <= (counter == periodic);
+            counter_event <= (counter == periodic) && !rx.tvalid &&
+                (FSM_RELOAD != fsm_state);
         end
     end
 
@@ -107,7 +140,7 @@ module logic_axi4_stream_timer #(
         end
     end
 
-    always_comb tx.tlast = counter_reload;
+    always_comb tx.tlast = counter_event;
     always_comb tx.tdata = data_t'(counter);
     always_comb tx.tstrb = '1;
     always_comb tx.tkeep = '1;

@@ -14,30 +14,25 @@
 
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_CURRENT_LIST_DIR}")
 
-include(SetHDLPath)
-
 set(SPD_FILE "" CACHE STRING "SPD file")
+set(QUARTUS_DIR "" CACHE STRING "Quartus path")
 
 if (NOT EXISTS "${SPD_FILE}")
     message(FATAL_ERROR "SPD file doesn't exist: ${SPD_FILE}")
 endif()
 
-if (NOT DEFINED WORK)
-    set(WORK work)
-endif()
-
-if (NOT DEFINED WORKING_DIRECTORY)
-    set(WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
-endif()
-
+get_filename_component(name "${SPD_FILE}" NAME_WE)
 get_filename_component(dir "${SPD_FILE}" DIRECTORY)
 
 file(READ "${SPD_FILE}" content)
 string(REGEX REPLACE "[\n ]+" ";" content_split "${content}")
 
-set(hex_files "")
-set(modelsim_vhdl_sources "")
-set(modelsim_verilog_sources "")
+set(vhdl_files "")
+set(input_files "")
+set(verilog_files "")
+
+set(modelsim_vcom "")
+set(modelsim_vlog "")
 
 set(type "")
 set(path "")
@@ -69,19 +64,21 @@ foreach (item ${content_split})
         endif()
 
         if (type MATCHES VHDL)
+            list(APPEND vhdl_files "${path}")
+
             if (NOT simulator OR simulator MATCHES modelsim OR
                     simulator MATCHES mentor)
-                set_hdl_path(path "${path}")
-                list(APPEND modelsim_vhdl_sources "${path}")
+                list(APPEND modelsim_vcom "${path}")
             endif()
         elseif (type MATCHES VERILOG)
+            list(APPEND verilog_files "${path}")
+
             if (NOT simulator OR simulator MATCHES modelsim OR
                     simulator MATCHES mentor)
-                set_hdl_path(path "${path}")
-                list(APPEND modelsim_verilog_sources "${path}")
+                list(APPEND modelsim_vlog "${path}")
             endif()
         elseif (type MATCHES HEX)
-            list(APPEND hex_files "${path}")
+            list(APPEND input_files "${path}")
         endif()
 
         set(type "")
@@ -90,32 +87,43 @@ foreach (item ${content_split})
     endif()
 endforeach()
 
-if (DEFINED MODELSIM_VLOG AND modelsim_verilog_sources)
+file(WRITE "${dir}/.inputs" "")
+
+foreach (input_file ${input_files})
+    file(APPEND "${dir}/.inputs"  "${input_file}\n")
+endforeach()
+
+file(WRITE "${dir}/.verilog" "")
+
+foreach (verilog_file ${verilog_files})
+    file(APPEND "${dir}/.verilog"  "${verilog_file}\n")
+endforeach()
+
+set(modelsim_libraries_dir "${CMAKE_BINARY_DIR}/modelsim/libraries")
+
+if (NOT EXISTS "${modelsim_libraries_dir}/${name}/")
     execute_process(
         COMMAND
-            ${MODELSIM_VLOG}
-            -sv
-            -work ${WORK}
-            ${modelsim_verilog_sources}
+            vlib ${name}
         WORKING_DIRECTORY
-            "${WORKING_DIRECTORY}"
+            "${modelsim_libraries_dir}"
     )
 endif()
 
-if (DEFINED MODELSIM_VCOM AND modelsim_vhdl_sources)
+if (modelsim_vlog)
     execute_process(
         COMMAND
-            ${MODELSIM_VCOM}
-            -2008
-            -work ${WORK}
-            ${modelsim_vhdl_sources}
+            vlog -work ${name} -sv ${modelsim_vlog}
         WORKING_DIRECTORY
-            "${WORKING_DIRECTORY}"
+            "${modelsim_libraries_dir}"
     )
 endif()
 
-if (DEFINED MODELSIM_HEX_OUTPUT)
-    foreach (hex_file ${hex_files})
-        configure_file("${hex_file}" "${MODELSIM_HEX_OUTPUT}" COPYONLY)
-    endforeach()
+if (modelsim_vcom)
+    execute_process(
+        COMMAND
+            vcom -work ${name} -2008 ${modelsim_vcom}
+        WORKING_DIRECTORY
+            "${modelsim_libraries_dir}"
+    )
 endif()

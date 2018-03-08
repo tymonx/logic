@@ -27,6 +27,7 @@
  *  USE_TLAST    - Enable or disable tlast signal.
  *  USE_TKEEP    - Enable or disable tkeep signal.
  *  USE_TSTRB    - Enable or disable tstrb signal.
+ *  FIRST_SYMBOL_IN_HIGH_ORDER_BITS - 1 is big-endian, 0 is little-endian.
  *
  * Ports:
  *  aclk        - Clock.
@@ -42,15 +43,35 @@ module logic_axi4_stream_to_avalon_st #(
     int USE_TLAST = 1,
     int USE_TKEEP = 1,
     int USE_TSTRB = 1,
-    int EMPTY_WIDTH = (TDATA_BYTES >= 2) ? $clog2(TDATA_BYTES) : 1
+    int EMPTY_WIDTH = (TDATA_BYTES >= 2) ? $clog2(TDATA_BYTES) : 1,
+    int FIRST_SYMBOL_IN_HIGH_ORDER_BITS = 1
 ) (
     input aclk,
     input areset_n,
     `LOGIC_MODPORT(logic_axi4_stream_if, rx) rx,
     `LOGIC_MODPORT(logic_avalon_st_if, tx) tx
 );
+    localparam int M_TDATA_BYTES = (TDATA_BYTES > 0) ? TDATA_BYTES : 1;
+
+    typedef logic [M_TDATA_BYTES-1:0][7:0] tdata_t;
+
+    genvar k;
+
     logic startofpacket;
     logic [EMPTY_WIDTH-1:0] empty;
+
+    tdata_t endiannes;
+
+    generate
+        if (FIRST_SYMBOL_IN_HIGH_ORDER_BITS > 0) begin: big_endian
+            for (k = 0; k < M_TDATA_BYTES; ++k) begin: swap
+                always_comb endiannes[M_TDATA_BYTES - 1 - k] = rx.tdata[k];
+            end
+        end
+        else begin: little_endian
+            always_comb endiannes = tdata_t'(rx.tdata);
+        end
+    endgenerate
 
     always_comb rx.tready = tx.ready;
     always_comb tx.error = '0;
@@ -94,7 +115,7 @@ module logic_axi4_stream_to_avalon_st #(
             tx.endofpacket <= rx.tlast;
             tx.channel <= rx.tid;
             tx.empty <= empty;
-            tx.data <= rx.tdata;
+            tx.data <= endiannes;
         end
     end
 endmodule

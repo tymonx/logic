@@ -87,16 +87,18 @@ function(_find_intel_quartus)
         )
 
         if (quartus_version MATCHES Pro)
-            set(QUARTUS_EDITION Pro)
+            set(QUARTUS_EDITION Pro PARENT_SCOPE)
         elseif (quartus_version MATCHES Lite)
-            set(QUARTUS_EDITION Lite)
+            set(QUARTUS_EDITION Lite PARENT_SCOPE)
         else ()
-            set(QUARTUS_EDITION Standard)
+            set(QUARTUS_EDITION Standard PARENT_SCOPE)
         endif()
 
         string(REGEX REPLACE " " ";" quartus_version ${quartus_version})
 
         list(GET quartus_version 1 QUARTUS_VERSION)
+
+        set(QUARTUS_VERSION ${QUARTUS_VERSION} PARENT_SCOPE)
     endif()
 
     get_filename_component(QUARTUS_DIR ${QUARTUS_EXECUTABLE} DIRECTORY)

@@ -24,6 +24,7 @@ module logic_axi4_stream_from_avalon_st_unit_test;
     svunit_testcase svunit_ut;
 
     parameter TDATA_BYTES = 4;
+    parameter FIRST_SYMBOL_IN_HIGH_ORDER_BITS = 0;
 
     logic aclk = 0;
     logic areset_n = 0;
@@ -51,7 +52,8 @@ module logic_axi4_stream_from_avalon_st_unit_test;
     ) tx_drv = new (tx);
 
     logic_axi4_stream_from_avalon_st #(
-        .TDATA_BYTES(TDATA_BYTES)
+        .TDATA_BYTES(TDATA_BYTES),
+        .FIRST_SYMBOL_IN_HIGH_ORDER_BITS(FIRST_SYMBOL_IN_HIGH_ORDER_BITS)
     )
     dut (
         .*

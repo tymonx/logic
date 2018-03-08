@@ -108,6 +108,7 @@ module logic_axi4_stream_timer_unit_test;
     byte captured[];
 
     tx_drv.read(captured);
+    tx_drv.ready();
 
     `FAIL_UNLESS_EQUAL(captured.size(), TDATA_BYTES * PERIODIC_DEFAULT)
 
@@ -118,8 +119,10 @@ module logic_axi4_stream_timer_unit_test;
     {<<8{data}} = reload;
 
     fork
+    begin
         rx_drv.write(data);
         tx_drv.read(captured);
+    end
     join
 
     `FAIL_UNLESS_EQUAL(captured.size(), TDATA_BYTES * reload)
@@ -136,6 +139,7 @@ module logic_axi4_stream_timer_unit_test;
     byte captured[];
 
     tx_drv.read(captured);
+    tx_drv.ready();
 
     `FAIL_UNLESS_EQUAL(captured.size(), TDATA_BYTES * PERIODIC_DEFAULT)
 
@@ -146,8 +150,10 @@ module logic_axi4_stream_timer_unit_test;
     {<<8{data}} = reload;
 
     fork
+    begin
         rx_drv.write(data);
         tx_drv.read(captured);
+    end
     join
 
     `FAIL_UNLESS_EQUAL(captured.size(), TDATA_BYTES * reload)

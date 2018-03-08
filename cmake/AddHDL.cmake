@@ -12,62 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-if (COMMAND add_hdl_source)
-    return()
-endif()
-
-if (NOT DEFINED _HDL_CMAKE_ROOT_DIR)
-    set(_HDL_CMAKE_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}" CACHE INTERNAL
-        "HDL CMake root directory" FORCE)
-endif()
-
-foreach (hdl_entry ${_HDL_LIST})
-    unset(_HDL_${hdl_entry} CACHE)
-endforeach()
-
-set(_HDL_LIST "" CACHE INTERNAL "" FORCE)
-
-set(_HDL_ONE_VALUE_ARGUMENTS
-    NAME
-    TYPE
-    SOURCE
-    TARGET
-    LIBRARY
-    PACKAGE
-    SYNTHESIZABLE
-    MODELSIM_LINT
-    MODELSIM_PEDANTICERRORS
-    MODELSIM_WARNING_AS_ERROR
-    OUTPUT_LIBRARIES
-    OUTPUT_INCLUDES
-    OUTPUT_WORKING_DIRECTORY
-)
-
-set(_HDL_MULTI_VALUE_ARGUMENTS
-    COMPILE
-    COMPILE_EXCLUDE
-    DEFINES
-    DEPENDS
-    INCLUDES
-    ANALYSIS
-    SOURCES
-    LIBRARIES
-    PARAMETERS
-    MIF_FILES
-    TEXT_FILES
-    INPUT_FILES
-    MODELSIM_FLAGS
-    MODELSIM_DEPENDS
-    MODELSIM_SUPPRESS
-    VERILATOR_CONFIGURATIONS
-    QUARTUS_IP_FILES
-    QUARTUS_SDC_FILES
-    QUARTUS_SPD_FILES
-    QUARTUS_QSYS_FILES
-    QUARTUS_QSYS_TCL_FILES
-)
-
-include(GetHDLProperty)
 include(GetHDLDepends)
 include(AddHDLSource)
 include(AddHDLModelSim)

@@ -27,7 +27,7 @@ endif()
 add_hdl_unit_test(logic_basic_gray2binary_unit_test.sv
     DEPENDS
         ${depends}
-        logic_basic_binary2gray
+        logic_basic_gray2binary
     INCLUDES
         ${includes}
     DEFINES

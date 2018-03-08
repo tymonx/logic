@@ -13,21 +13,23 @@
  * limitations under the License.
  */
 
-#include "@verilator_target@.h"
+#include "@ARG_TARGET@.h"
 
 #include "verilated.h"
 #include "verilated_cov.h"
+
+#include <cstdlib>
 
 double sc_time_stamp() {
     return 0;
 }
 
 int main() {
-    @verilator_target@ top{};
+    @ARG_TARGET@ top;
     top.eval();
     top.final();
 
-    VerilatedCov::write("coverage.dat");
+    VerilatedCov::write("@ARG_TARGET@.coverage");
 
-    return 0;
+    return EXIT_SUCCESS;
 }

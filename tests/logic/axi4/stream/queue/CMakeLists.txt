@@ -46,52 +46,44 @@ endif()
 
 # UVM-SystemC unit test
 
-set(MODULE_PARAMETERS
+set(PARAMETERS
     TDATA_BYTES=4
     TUSER_WIDTH=1
     TDEST_WIDTH=1
     TID_WIDTH=1
 )
 
-add_hdl_systemc(logic_axi4_stream_queue_top
+set(hdl_name logic_axi4_stream_queue_top)
+
+add_hdl_systemc(${hdl_name}
     PARAMETERS
-        ${MODULE_PARAMETERS}
-    OUTPUT_INCLUDES
-        module_includes
-    OUTPUT_LIBRARIES
-        module_libraries
-    OUTPUT_WORKING_DIRECTORY
-        module_working_directory
+        ${PARAMETERS}
 )
 
 set_source_files_properties(main.cpp PROPERTIES
-    COMPILE_DEFINITIONS "${MODULE_PARAMETERS}"
+    COMPILE_DEFINITIONS
+        "${PARAMETERS}"
 )
 
-add_executable(logic_axi4_stream_queue_test
+add_executable(${hdl_name}_test
     main.cpp
     long_test.cpp
     basic_test.cpp
 )
 
-set_target_properties(logic_axi4_stream_queue_test
-    PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY "${module_working_directory}"
+set_target_properties(${hdl_name}_test PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY
+        "${CMAKE_BINARY_DIR}/systemc/unit_tests/${hdl_name}"
 )
 
-logic_target_compile_options(logic_axi4_stream_queue_test
+logic_target_compile_options(${hdl_name}_test
     PRIVATE
         $<$<CXX_COMPILER_ID:Clang>:-Wno-unused-member-function>
 )
 
-target_include_directories(logic_axi4_stream_queue_test
-    SYSTEM PRIVATE
-        ${module_includes}
-)
-
-logic_target_link_libraries(logic_axi4_stream_queue_test
-    ${module_libraries}
+logic_target_link_libraries(${hdl_name}_test
     logic
+    systemc-module-${hdl_name}
 )
 
 set(TESTS
@@ -100,16 +92,14 @@ set(TESTS
 )
 
 foreach (test ${TESTS})
-    set(module_test logic_axi4_stream_queue_${test})
-
     add_test(
         NAME
-            ${module_test}
+            ${hdl_name}_${test}
         COMMAND
-            logic_axi4_stream_queue_test
+            ${hdl_name}_test
             +UVM_TESTNAME=${test}
-            +uvm_set_config_string=*,trace_filename,${module_test}
+            +uvm_set_config_string=*,trace_filename,${hdl_name}_${test}
         WORKING_DIRECTORY
-            "${module_working_directory}"
+            "${CMAKE_BINARY_DIR}/systemc/unit_tests/${hdl_name}"
     )
 endforeach()

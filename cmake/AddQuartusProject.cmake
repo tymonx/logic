@@ -18,7 +18,6 @@ endif()
 
 find_package(Quartus)
 
-include(SetHDLPath)
 include(CMakeParseArguments)
 
 file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/logic/deps")
@@ -138,16 +137,16 @@ function(add_quartus_project target_name)
     get_hdl_depends(${ARG_TOP_LEVEL_ENTITY} hdl_depends)
 
     foreach (hdl_name ${ARG_DEPENDS} ${hdl_depends} ${ARG_TOP_LEVEL_ENTITY})
-        get_hdl_property(hdl_synthesizable ${hdl_name} SYNTHESIZABLE)
+        get_target_property(hdl_synthesizable ${hdl_name} HDL_SYNTHESIZABLE)
 
         if (hdl_synthesizable)
-            get_hdl_property(hdl_type ${hdl_name} TYPE)
+            get_target_property(hdl_type ${hdl_name} HDL_TYPE)
 
-            get_hdl_property(sdc_files ${hdl_name} QUARTUS_SDC_FILES)
+            get_target_property(sdc_files ${hdl_name} HDL_QUARTUS_SDC_FILES)
             list(APPEND ARG_SDC_FILES ${sdc_files})
 
             if (hdl_type MATCHES Qsys)
-                get_hdl_property(hdl_source ${hdl_name} SOURCE)
+                get_target_property(hdl_source ${hdl_name} HDL_SOURCE)
 
                 if (hdl_source MATCHES "\\.tcl$")
                     list(APPEND ARG_QSYS_TCL_FILES "${hdl_source}")
@@ -157,19 +156,19 @@ function(add_quartus_project target_name)
                     list(APPEND ARG_QSYS_FILES "${hdl_source}")
                 endif()
             elseif (hdl_type MATCHES Verilog OR hdl_type MATCHES VHDL)
-                get_hdl_property(hdl_sources ${hdl_name} SOURCES)
+                get_target_property(hdl_sources ${hdl_name} HDL_SOURCES)
                 list(APPEND ARG_SOURCES ${hdl_sources})
 
-                get_hdl_property(hdl_source ${hdl_name} SOURCE)
+                get_target_property(hdl_source ${hdl_name} HDL_SOURCE)
                 list(APPEND ARG_SOURCES "${hdl_source}")
 
-                get_hdl_property(hdl_defines ${hdl_name} DEFINES)
+                get_target_property(hdl_defines ${hdl_name} HDL_DEFINES)
                 list(APPEND ARG_DEFINES ${hdl_defines})
 
-                get_hdl_property(hdl_includes ${hdl_name} INCLUDES)
+                get_target_property(hdl_includes ${hdl_name} HDL_INCLUDES)
                 list(APPEND ARG_INCLUDES ${hdl_includes})
 
-                get_hdl_property(mif_files ${hdl_name} MIF_FILES)
+                get_target_property(mif_files ${hdl_name} HDL_MIF_FILES)
                 list(APPEND ARG_MIF_FILES ${mif_files})
             endif()
         endif()
@@ -178,7 +177,6 @@ function(add_quartus_project target_name)
     set(ip_search_paths "")
 
     foreach(ip_path ${ARG_IP_SEARCH_PATHS})
-        set_hdl_path(ip_path "${ip_path}")
         list(APPEND ip_search_paths "${ip_path}")
     endforeach()
 
@@ -232,7 +230,6 @@ function(add_quartus_project target_name)
         get_filename_component(dir "${qsys_tcl_file}" DIRECTORY)
 
         set(ip_file "${dir}/${name}.ip")
-        set_hdl_path(input_file "${qsys_tcl_file}")
 
         add_custom_command(
             OUTPUT
@@ -240,7 +237,7 @@ function(add_quartus_project target_name)
             COMMAND
                 ${QUARTUS_QSYS_SCRIPT}
             ARGS
-                --script="${input_file}"
+                --script="${qsys_file}"
                 $<$<STREQUAL:QUARTUS_EDITION,Pro>:${quartus_pro}>
             DEPENDS
                 "${qsys_tcl_file}"
@@ -261,7 +258,6 @@ function(add_quartus_project target_name)
 
         set(output_file
             "${CMAKE_BINARY_DIR}/logic/deps/quartus.${target_name}.${name}")
-        set_hdl_path(input_file "${ip_file}")
 
         add_custom_command(
             OUTPUT
@@ -269,7 +265,7 @@ function(add_quartus_project target_name)
             COMMAND
                 ${QUARTUS_QSYS_GENERATE}
             ARGS
-                "${input_file}"
+                "${ip_file}"
                 --family=\""${ARG_FAMILY}"\"
                 --part=\""${ARG_DEVICE}"\"
                 --upgrade-ip-cores
@@ -278,7 +274,7 @@ function(add_quartus_project target_name)
             COMMAND
                 ${QUARTUS_QSYS_GENERATE}
             ARGS
-                "${input_file}"
+                "${ip_file}"
                 --family=\""${ARG_FAMILY}"\"
                 --part=\""${ARG_DEVICE}"\"
                 --synthesis=VERILOG
@@ -298,7 +294,7 @@ function(add_quartus_project target_name)
 
         list(APPEND quartus_depends "${output_file}")
         list(APPEND quartus_assignments
-            "set_global_assignment -name IP_FILE ${input_file}")
+            "set_global_assignment -name IP_FILE ${ip_file}")
     endforeach()
 
     foreach (qsys_file ${qsys_files})
@@ -307,7 +303,6 @@ function(add_quartus_project target_name)
 
         set(output_file
             "${CMAKE_BINARY_DIR}/logic/deps/quartus.${target_name}.${name}")
-        set_hdl_path(input_file "${qsys_file}")
 
         add_custom_command(
             OUTPUT
@@ -315,7 +310,7 @@ function(add_quartus_project target_name)
             COMMAND
                 ${QUARTUS_QSYS_GENERATE}
             ARGS
-                "${input_file}"
+                "${qsys_file}"
                 --family=\""${ARG_FAMILY}"\"
                 --part=\""${ARG_DEVICE}"\"
                 --upgrade-ip-cores
@@ -324,7 +319,7 @@ function(add_quartus_project target_name)
             COMMAND
                 ${QUARTUS_QSYS_GENERATE}
             ARGS
-                "${input_file}"
+                "${qsys_file}"
                 --family=\""${ARG_FAMILY}"\"
                 --part=\""${ARG_DEVICE}"\"
                 --synthesis=VERILOG
@@ -345,7 +340,7 @@ function(add_quartus_project target_name)
 
         list(APPEND quartus_depends "${output_file}")
         list(APPEND quartus_assignments
-            "set_global_assignment -name QSYS_FILE ${input_file}")
+            "set_global_assignment -name QSYS_FILE ${qsys_file}")
     endforeach()
 
     if (ARG_SDC_FILES)
@@ -355,9 +350,6 @@ function(add_quartus_project target_name)
     foreach (mif_file ${ARG_MIF_FILES})
         get_filename_component(mif_file "${mif_file}" REALPATH)
         list(APPEND quartus_depends "${mif_file}")
-
-        set_hdl_path(mif_file "${mif_file}")
-
         list(APPEND quartus_assignments
             "set_global_assignment -name MIF_FILE ${mif_file}")
     endforeach()
@@ -365,9 +357,6 @@ function(add_quartus_project target_name)
     foreach (sdc_file ${ARG_SDC_FILES})
         get_filename_component(sdc_file "${sdc_file}" REALPATH)
         list(APPEND quartus_depends "${sdc_file}")
-
-        set_hdl_path(sdc_file "${sdc_file}")
-
         list(APPEND quartus_assignments
             "set_global_assignment -name SDC_FILE ${sdc_file}")
     endforeach()
@@ -375,9 +364,6 @@ function(add_quartus_project target_name)
     foreach (tcl_file ${ARG_SOURCE_TCL_SCRIPT_FILES})
         get_filename_component(tcl_file "${tcl_file}" REALPATH)
         list(APPEND quartus_depends "${tcl_file}")
-
-        set_hdl_path(tcl_file "${tcl_file}")
-
         list(APPEND quartus_assignments
             "set_global_assignment -name SOURCE_TCL_SCRIPT_FILE ${tcl_file}")
     endforeach()
@@ -398,9 +384,6 @@ function(add_quartus_project target_name)
     foreach (quartus_include ${ARG_INCLUDES})
         get_filename_component(quartus_include "${quartus_include}" REALPATH)
         list(APPEND quartus_depends "${quartus_include}")
-
-        set_hdl_path(quartus_include "${quartus_include}")
-
         list(APPEND quartus_assignments
             "set_global_assignment -name SEARCH_PATH ${quartus_include}")
     endforeach()
@@ -417,9 +400,6 @@ function(add_quartus_project target_name)
         endif()
 
         list(APPEND quartus_depends "${quartus_source}")
-
-        set_hdl_path(quartus_source "${quartus_source}")
-
         list(APPEND quartus_assignments
             "set_global_assignment -name ${quartus_type_file} ${quartus_source}")
     endforeach()

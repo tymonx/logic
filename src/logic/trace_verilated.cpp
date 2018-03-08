@@ -34,7 +34,7 @@ trace_verilated::~trace_verilated() {
         m_trace_file->close();
         Verilated::traceEverOn(false);
         delete m_trace_file;
-        VerilatedCov::write((m_filename + ".dat").c_str());
+        VerilatedCov::write((m_filename + ".coverage").c_str());
 }
 
 auto trace_verilated::get(

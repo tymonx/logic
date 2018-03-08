@@ -19,11 +19,10 @@ endif()
 function(get_hdl_depends hdl_target hdl_depends_var)
     set(hdl_depends "")
 
-    cmake_parse_arguments(ARG "" "${_HDL_ONE_VALUE_ARGUMENTS}"
-        "${_HDL_MULTI_VALUE_ARGUMENTS}" ${_HDL_${hdl_target}})
+    get_target_property(target_depends ${hdl_target} HDL_DEPENDS)
 
-    foreach (name ${ARG_DEPENDS})
-        if (NOT DEFINED _HDL_${name})
+    foreach (name ${target_depends})
+        if (NOT TARGET ${name})
             message(FATAL_ERROR "HDL target doesn't exist: ${name}")
         endif()
 

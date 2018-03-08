@@ -16,8 +16,6 @@ if (COMMAND add_vivado_project)
     return()
 endif()
 
-include(SetHDLPath)
-
 find_package(Vivado)
 
 if (VIVADO_FOUND)
@@ -74,19 +72,19 @@ function(add_vivado_project target_name)
     get_hdl_depends(${ARG_TOP_LEVEL_ENTITY} hdl_depends)
 
     foreach (hdl_name ${hdl_depends} ${ARG_TOP_LEVEL_ENTITY})
-        get_hdl_property(hdl_synthesizable ${hdl_name} SYNTHESIZABLE)
+        get_target_property(hdl_synthesizable ${hdl_name} HDL_SYNTHESIZABLE)
 
         if (hdl_synthesizable)
-            get_hdl_property(hdl_sources ${hdl_name} SOURCES)
+            get_target_property(hdl_sources ${hdl_name} HDL_SOURCES)
             list(APPEND ARG_SOURCES "${hdl_sources}")
 
-            get_hdl_property(hdl_source ${hdl_name} SOURCE)
+            get_target_property(hdl_source ${hdl_name} HDL_SOURCE)
             list(APPEND ARG_SOURCES "${hdl_source}")
 
-            get_hdl_property(hdl_defines ${hdl_name} DEFINES)
+            get_target_property(hdl_defines ${hdl_name} HDL_DEFINES)
             list(APPEND ARG_DEFINES "${hdl_defines}")
 
-            get_hdl_property(hdl_includes ${hdl_name} INCLUDES)
+            get_target_property(hdl_includes ${hdl_name} HDL_INCLUDES)
             list(APPEND ARG_INCLUDES "${hdl_includes}")
         endif()
     endforeach()
@@ -109,8 +107,6 @@ function(add_vivado_project target_name)
 
     foreach (vivado_include ${ARG_INCLUDES})
         get_filename_component(vivado_include "${vivado_include}" REALPATH)
-        set_hdl_path(vivado_include "${vivado_include}")
-
         list(APPEND vivado_includes_list "lappend includes ${vivado_include}")
     endforeach()
 
@@ -125,7 +121,6 @@ function(add_vivado_project target_name)
             set(vivado_type_file VERILOG_FILE)
         endif()
 
-        set_hdl_path(vivado_source "${vivado_source}")
         list(APPEND vivado_sources_list "lappend sources ${vivado_source}")
     endforeach()
 

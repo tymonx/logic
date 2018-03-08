@@ -22,23 +22,23 @@ if (NOT DEFINED _HDL_CMAKE_ROOT_DIR)
 endif()
 
 include(GetHDLDepends)
-include(GetHDLProperty)
 
 find_package(SystemC REQUIRED COMPONENTS SCV UVM)
 find_package(Verilator)
 
 if (VERILATOR_FOUND)
-    file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/verilator/configurations")
     file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/verilator/unit_tests")
-    file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/verilator/coverage")
+    file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/verilator/coverage/run")
 
     add_custom_target(verilator-coverage
         COMMAND
             ${VERILATOR_COVERAGE_EXECUTABLE}
             --annotate-all
             --annotate "${CMAKE_BINARY_DIR}/verilator/coverage"
-            "${CMAKE_BINARY_DIR}/verilator/coverage/run/*/coverage.dat"
-            "${CMAKE_BINARY_DIR}/verilator/unit_tests/*/*.dat"
+            "${CMAKE_BINARY_DIR}/verilator/coverage/run/*/*.coverage"
+            "${CMAKE_BINARY_DIR}/systemc/unit_tests/*/*.coverage"
+        COMMENT
+            "Verilator coverage"
     )
 
     if (NOT TARGET verilator-compile-all)
@@ -54,13 +54,10 @@ if (VERILATOR_FOUND)
     endif()
 endif()
 
-function(add_hdl_verilator hdl_name)
+function(add_hdl_verilator)
     if (NOT VERILATOR_FOUND)
         return()
     endif()
-
-    cmake_parse_arguments(ARG "" "${_HDL_ONE_VALUE_ARGUMENTS}"
-        "${_HDL_MULTI_VALUE_ARGUMENTS}" ${_HDL_${hdl_name}} ${ARGN})
 
     if (NOT DEFINED ARG_SYNTHESIZABLE OR NOT ARG_SYNTHESIZABLE)
         return()
@@ -108,38 +105,54 @@ function(add_hdl_verilator hdl_name)
         set(ARG_TARGET ${ARG_NAME})
     endif()
 
-    set(verilator_target ${ARG_TARGET})
+    set(verilator_files "")
     set(verilator_sources "")
     set(verilator_defines "")
+    set(verilator_depends "")
     set(verilator_includes "")
     set(verilator_parameters "")
     set(verilator_configurations "")
-    set(verilator_output_directory
-        "${CMAKE_BINARY_DIR}/verilator/libraries/${verilator_target}")
+
+    set(verilator_library_dir
+        "${CMAKE_BINARY_DIR}/verilator/libraries/${ARG_TARGET}")
+
+    set(verilator_coverage_dir
+        "${CMAKE_BINARY_DIR}/verilator/coverage/run/${ARG_TARGET}")
+
+    set(systemc_unit_test_dir
+        "${CMAKE_BINARY_DIR}/systemc/unit_tests/${ARG_TARGET}")
 
     list(APPEND verilator_defines ${ARG_DEFINES})
     list(APPEND verilator_parameters ${ARG_PARAMETERS})
 
-    get_hdl_depends(${ARG_NAME} hdl_depends)
+    get_hdl_depends(${ARG_NAME} depends)
 
-    foreach (name ${hdl_depends} ${ARG_NAME})
-        get_hdl_property(hdl_type "${name}" TYPE)
+    foreach (name ${depends} ${ARG_NAME})
+        get_target_property(hdl_source ${name} HDL_SOURCE)
+        get_target_property(hdl_sources ${name} HDL_SOURCES)
 
-        if (hdl_type MATCHES Verilog)
-            get_hdl_property(hdl_sources "${name}" SOURCES)
-            list(APPEND verilator_sources ${hdl_sources})
+        foreach (hdl_source ${hdl_sources} ${hdl_source})
+            if (hdl_source MATCHES "\.s?v$")
+                list(APPEND verilator_sources ${hdl_source})
+            endif()
+        endforeach()
 
-            get_hdl_property(hdl_source "${name}" SOURCE)
-            list(APPEND verilator_sources ${hdl_source})
+        get_target_property(hdl_defines ${name} HDL_DEFINES)
+        list(APPEND verilator_defines ${hdl_defines})
 
-            get_hdl_property(hdl_defines "${name}" DEFINES)
-            list(APPEND verilator_defines ${hdl_defines})
+        get_target_property(hdl_includes ${name} HDL_INCLUDES)
+        list(APPEND verilator_includes ${hdl_includes})
 
-            get_hdl_property(hdl_includes "${name}" INCLUDES)
-            list(APPEND verilator_includes ${hdl_includes})
+        get_target_property(hdl_files ${name} HDL_VERILATOR_FILES)
+        list(APPEND verilator_files ${hdl_files})
 
-            get_hdl_property(hdl_configs "${name}" VERILATOR_CONFIGURATIONS)
-            list(APPEND verilator_configurations ${hdl_configs})
+        get_target_property(hdl_configs ${name}
+            HDL_VERILATOR_CONFIGURATIONS)
+        list(APPEND verilator_configurations ${hdl_configs})
+
+        get_target_property(hdl_type ${name} HDL_TYPE)
+        if (hdl_type MATCHES Qsys)
+            list(APPEND verilator_depends qsys-compile-${name})
         endif()
     endforeach()
 
@@ -149,7 +162,7 @@ function(add_hdl_verilator hdl_name)
     list(REMOVE_DUPLICATES verilator_configurations)
 
     set(verilator_configuration_file
-        "${CMAKE_BINARY_DIR}/verilator/configurations/${ARG_TARGET}.vlt")
+        "${verilator_library_dir}/${ARG_TARGET}.vlt")
 
     set(verilator_config "")
     foreach (config ${verilator_configurations})
@@ -163,6 +176,26 @@ function(add_hdl_verilator hdl_name)
 
     list(APPEND verilator_flags --top-module ${ARG_NAME})
 
+    if (ARG_VERILATOR_ALL_WARNINGS)
+        list(APPEND verilator_flags -Wall)
+    endif()
+
+    if (ARG_VERILATOR_LINT_WARNINGS)
+        list(APPEND verilator_flags -Wwarn-lint)
+    else()
+        list(APPEND verilator_flags -Wno-lint)
+    endif()
+
+    if (ARG_VERILATOR_STYLE_WARNINGS)
+        list(APPEND verilator_flags -Wwarn-style)
+    else()
+        list(APPEND verilator_flags -Wno-style)
+    endif()
+
+    if (NOT ARG_VERILATOR_FATAL_WARNINGS)
+        list(APPEND verilator_flags -Wno-fatal)
+    endif()
+
     foreach (verilator_parameter ${verilator_parameters})
         list(APPEND verilator_flags -G${verilator_parameter})
     endforeach()
@@ -175,16 +208,18 @@ function(add_hdl_verilator hdl_name)
         list(APPEND verilator_flags -I${verilator_include})
     endforeach()
 
+    foreach (verilator_file ${verilator_files})
+        list(APPEND verilator_flags -f ${verilator_file})
+    endforeach()
+
     list(APPEND verilator_flags ${verilator_configuration_file})
     list(APPEND verilator_flags ${verilator_sources})
 
-    if (verilator_analysis AND
-            NOT TARGET verilator-analysis-${verilator_target})
+    if (verilator_analysis AND NOT TARGET verilator-analysis-${ARG_TARGET})
         set(analysis_flags "")
-        list(APPEND analysis_flags -Wall)
         list(APPEND analysis_flags --lint-only)
 
-        add_custom_target(verilator-analysis-${verilator_target}
+        add_custom_target(verilator-analysis-${ARG_TARGET}
                 ${VERILATOR_EXECUTABLE}
                 ${analysis_flags}
                 ${verilator_flags}
@@ -192,159 +227,142 @@ function(add_hdl_verilator hdl_name)
                 ${verilator_sources}
                 ${verilator_includes}
                 ${verilator_configuration_file}
+            COMMENT
+                "Verilator analysising ${ARG_TARGET}"
         )
 
         add_dependencies(verilator-analysis-all
-            verilator-analysis-${verilator_target})
-
-        if (TARGET ${ARG_TARGET})
-            add_dependencies(${ARG_TARGET}
-                verilator-analysis-${verilator_target})
-        endif()
+            verilator-analysis-${ARG_TARGET})
     endif()
 
-    if (verilator_coverage AND
-            NOT TARGET verilator-coverage-${verilator_target})
-        set(working_directory
-            "${CMAKE_BINARY_DIR}/verilator/coverage/run/${verilator_target}")
-
-        file(MAKE_DIRECTORY "${working_directory}")
+    if (verilator_coverage AND NOT TARGET verilator-coverage-${ARG_TARGET})
+        file(MAKE_DIRECTORY "${verilator_coverage_dir}")
+        file(MAKE_DIRECTORY "${systemc_unit_test_dir}")
+        set(verilator_main "${verilator_coverage_dir}/${ARG_TARGET}_main.cpp")
+        set(verilator_coverage_run "${verilator_coverage_dir}/${ARG_TARGET}")
 
         configure_file("${_HDL_CMAKE_ROOT_DIR}/verilator_coverage.cpp.in"
-            "${working_directory}/${verilator_target}_main.cpp")
+            "${verilator_main}")
 
         set(coverage_flags "")
         list(APPEND coverage_flags --cc)
         list(APPEND coverage_flags --coverage)
-        list(APPEND coverage_flags --prefix ${verilator_target})
+        list(APPEND coverage_flags --prefix ${ARG_TARGET})
         list(APPEND coverage_flags --exe)
-        list(APPEND coverage_flags -o ${verilator_target})
+        list(APPEND coverage_flags -o ${ARG_TARGET})
         list(APPEND coverage_flags -Mdir .)
 
         add_custom_command(
             OUTPUT
-                "${working_directory}/coverage.dat"
+                "${verilator_coverage_run}"
             COMMAND
                 ${VERILATOR_EXECUTABLE}
             ARGS
                 ${coverage_flags}
                 ${verilator_flags}
-                ${verilator_target}_main.cpp
+                ${verilator_main}
             COMMAND
                 make
             ARGS
-                -f ${verilator_target}.mk
+                -f ${ARG_TARGET}.mk
             COMMAND
-                ./${verilator_target}
+                ./${ARG_TARGET}
             DEPENDS
                 ${verilator_sources}
                 ${verilator_includes}
                 ${verilator_configuration_file}
-                "${working_directory}/${verilator_target}_main.cpp"
-            WORKING_DIRECTORY
-                "${working_directory}"
+                ${verilator_main}
             COMMENT
-                "Initializing SystemC ${verilator_target} coverage"
+                "Verilator coveraging ${ARG_TARGET}"
+            WORKING_DIRECTORY
+                "${verilator_coverage_dir}"
         )
 
-        add_custom_target(verilator-coverage-${verilator_target}
-            DEPENDS "${working_directory}/coverage.dat")
+        add_custom_target(verilator-coverage-${ARG_TARGET} DEPENDS
+            "${verilator_coverage_run}")
+
+        add_dependencies(${ARG_NAME} verilator-coverage-${ARG_TARGET})
 
         add_dependencies(verilator-coverage-all
-            verilator-coverage-${verilator_target})
+            verilator-coverage-${ARG_TARGET})
     endif()
 
-    if (verilator_compile AND NOT TARGET verilator-compile-${verilator_target})
-        file(MAKE_DIRECTORY "${verilator_output_directory}")
-        file(MAKE_DIRECTORY
-            "${CMAKE_BINARY_DIR}/verilator/unit_tests/${verilator_target}")
+    if (verilator_compile AND NOT TARGET verilator-compile-${ARG_TARGET})
+        file(MAKE_DIRECTORY "${verilator_library_dir}")
 
         set(compile_flags "")
-
         list(APPEND compile_flags --sc)
-        list(APPEND compile_flags -O2)
-        list(APPEND compile_flags -Wall)
         list(APPEND compile_flags --trace)
         list(APPEND compile_flags --coverage)
-        list(APPEND compile_flags --prefix ${verilator_target})
+        list(APPEND compile_flags --prefix ${ARG_TARGET})
+        list(APPEND compile_flags -O2)
         list(APPEND compile_flags -Mdir .)
 
         if (CMAKE_CXX_COMPILER_ID MATCHES GNU OR
                 CMAKE_CXX_COMPILER_ID MATCHES Clang)
-            set(flags
-                -std=c++11
-                -O2
-                -fdata-sections
-                -ffunction-sections
-            )
-
+            set(flags -std=c++11 -O2 -fdata-sections -ffunction-sections)
             list(APPEND compile_flags -CFLAGS '${flags}')
         endif()
 
-        set(verilator_library ${verilator_target}__ALL.a)
+        set(verilator_library
+            "${verilator_library_dir}/${ARG_TARGET}__ALL.a")
 
         add_custom_command(
             OUTPUT
-                ${verilator_output_directory}/${verilator_library}
+                "${verilator_library}"
             COMMAND
                 ${VERILATOR_EXECUTABLE}
             ARGS
                 ${compile_flags}
                 ${verilator_flags}
+                "${verilator_main}"
             COMMAND
                 make
             ARGS
-                -f ${verilator_target}.mk
+                -f ${ARG_TARGET}.mk
             DEPENDS
-                ${verilator_depends}
                 ${verilator_sources}
                 ${verilator_includes}
                 ${verilaotr_configuration_file}
             WORKING_DIRECTORY
-                ${verilator_output_directory}
+                ${verilator_library_dir}
             COMMENT
-                "Creating SystemC ${verilator_target} module"
+                "Verilator compiling ${ARG_TARGET}"
         )
 
-        add_custom_target(verilator-compile-${verilator_target}
-            DEPENDS ${verilator_output_directory}/${verilator_library})
+        add_custom_target(verilator-compile-${ARG_TARGET} DEPENDS
+            "${verilator_library}")
+
+        if (verilator_depends)
+            add_dependencies(verilator-compile-${ARG_TARGET} DEPENDS
+                ${verilator_depends})
+        endif()
+
+        add_dependencies(${ARG_NAME} verilator-compile-${ARG_TARGET})
 
         add_dependencies(verilator-compile-all
-            verilator-compile-${verilator_target})
+            verilator-compile-${ARG_TARGET})
 
-        add_library(verilated_${verilator_target} STATIC IMPORTED)
+        add_library(systemc-module-${ARG_TARGET} STATIC IMPORTED)
 
-        add_dependencies(verilated_${verilator_target}
-            verilator-compile-${verilator_target})
+        add_dependencies(systemc-module-${ARG_TARGET}
+            verilator-compile-${ARG_TARGET})
 
-        set_target_properties(verilated_${verilator_target} PROPERTIES
-            IMPORTED_LOCATION
-                ${verilator_output_directory}/${verilator_library}
+        set(systemc_module_includes
+            "${verilator_library_dir}"
+            "${SYSTEMC_INCLUDE_DIRS}"
+            "${VERILATOR_INCLUDE_DIR}"
         )
 
-        if (ARG_OUTPUT_LIBRARIES)
-            set(${ARG_OUTPUT_LIBRARIES}
-                verilated_${verilator_target}
-                verilated
-                ${SYSTEMC_LIBRARIES}
-                PARENT_SCOPE
-            )
-        endif()
+        set(systemc_module_libraries
+            systemc
+            verilated
+        )
 
-        if (ARG_OUTPUT_INCLUDES)
-            set(${ARG_OUTPUT_INCLUDES}
-                ${VERILATOR_INCLUDE_DIR}
-                ${SYSTEMC_INCLUDE_DIRS}
-                ${verilator_output_directory}
-                PARENT_SCOPE
-            )
-        endif()
-
-        if (ARG_OUTPUT_WORKING_DIRECTORY)
-            set(${ARG_OUTPUT_WORKING_DIRECTORY}
-                "${CMAKE_BINARY_DIR}/verilator/unit_tests/${verilator_target}"
-                PARENT_SCOPE
-            )
-        endif()
+        set_target_properties(systemc-module-${ARG_TARGET} PROPERTIES
+            IMPORTED_LOCATION "${verilator_library}"
+            INTERFACE_LINK_LIBRARIES "${systemc_module_libraries}"
+            INTERFACE_INCLUDE_DIRECTORIES "${systemc_module_includes}"
+            INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${systemc_module_includes}")
     endif()
 endfunction()

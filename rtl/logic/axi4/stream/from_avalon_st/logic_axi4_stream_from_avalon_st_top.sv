@@ -24,7 +24,8 @@ module logic_axi4_stream_from_avalon_st_top #(
     int USE_TSTRB = 1,
     int USE_TLAST = 1,
     int ERROR_WIDTH = 1,
-    int EMPTY_WIDTH = (TDATA_BYTES >= 2) ? $clog2(TDATA_BYTES) : 1
+    int EMPTY_WIDTH = (TDATA_BYTES >= 2) ? $clog2(TDATA_BYTES) : 1,
+    int FIRST_SYMBOL_IN_HIGH_ORDER_BITS = 1
 ) (
     input aclk,
     input areset_n,
@@ -76,7 +77,8 @@ module logic_axi4_stream_from_avalon_st_top #(
         .TID_WIDTH(TID_WIDTH),
         .USE_TKEEP(USE_TKEEP),
         .USE_TSTRB(USE_TSTRB),
-        .USE_TLAST(USE_TLAST)
+        .USE_TLAST(USE_TLAST),
+        .FIRST_SYMBOL_IN_HIGH_ORDER_BITS(FIRST_SYMBOL_IN_HIGH_ORDER_BITS)
     ) unit (.*);
 
     `LOGIC_AXI4_STREAM_IF_TX_ASSIGN(tx, tx);

@@ -16,6 +16,8 @@ add_hdl_source(logic_axi4_stream_from_avalon_st.sv
     DEPENDS
         logic_avalon_st_if
         logic_axi4_stream_if
+    MODELSIM_SUPPRESS
+        2583
 )
 
 add_hdl_source(logic_axi4_stream_from_avalon_st_top.sv

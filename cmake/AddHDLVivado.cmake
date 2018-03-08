@@ -17,16 +17,14 @@ if (COMMAND add_hdl_vivado)
 endif()
 
 include(AddVivadoProject)
-include(GetHDLProperty)
 
-function(add_hdl_vivado hdl_target)
-    set(VIVADO_DEFINES ${VIVADO_DEFINES}
-        SYNTHESIS
-    )
-
-    get_hdl_property(analysis ${hdl_target} ANALYSIS)
+function(add_hdl_vivado)
+    get_target_property(analysis ${ARG_NAME} HDL_ANALYSIS)
 
     if (analysis MATCHES ALL OR analysis MATCHES Vivado)
-        add_vivado_project(${hdl_target})
+        add_vivado_project(${ARG_NAME}
+            DEFINES
+                SYNTHESIS
+        )
     endif()
 endfunction()

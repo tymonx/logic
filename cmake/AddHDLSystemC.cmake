@@ -16,11 +16,33 @@ if (COMMAND add_hdl_systemc)
     return()
 endif()
 
-macro(add_hdl_systemc target_name)
-    add_hdl_verilator(${target_name}
-        COMPILE Verilator
-        ANALYSIS Verilator
-        SYNTHESIZABLE TRUE
-        ${ARGN}
+function(add_hdl_systemc target_name)
+    set(one_value_arguments
+        NAME
+        TARGET
     )
-endmacro()
+
+    set(multi_value_arguments
+        DEFINES
+        INCLUDES
+        PARAMETERS
+        VERILATOR_CONFIGURATIONS
+    )
+
+    cmake_parse_arguments(ARG "" "${one_value_arguments}"
+        "${multi_value_arguments}" ${ARGN})
+
+    set(ARG_COMPILE Verilator)
+    set(ARG_ANALYSIS Verilator)
+    set(ARG_SYNTHESIZABLE TRUE)
+
+    if (NOT ARG_NAME)
+        set(ARG_NAME ${target_name})
+    endif()
+
+    if (NOT ARG_TARGET)
+        set(ARG_TARGET ${target_name})
+    endif()
+
+    add_hdl_verilator()
+endfunction()
