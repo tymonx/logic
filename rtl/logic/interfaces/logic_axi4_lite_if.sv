@@ -223,6 +223,11 @@ interface logic_axi4_lite_if #(
         input rresp;
     endclocking
 
+    modport cb_slave_modport (
+        input areset_n,
+        clocking cb_slave
+    );
+
     clocking cb_master @(posedge aclk);
         /* Write address channel */
         input awvalid;
@@ -250,6 +255,11 @@ interface logic_axi4_lite_if #(
         output rresp;
     endclocking
 
+    modport cb_master_modport (
+        input areset_n,
+        clocking cb_master
+    );
+
     clocking cb_monitor @(posedge aclk);
         /* Write address channel */
         input awvalid;
@@ -276,6 +286,11 @@ interface logic_axi4_lite_if #(
         input rdata;
         input rresp;
     endclocking
+
+    modport cb_monitor_modport (
+        input areset_n,
+        clocking cb_monitor
+    );
 `endif
 
 `ifdef VERILATOR

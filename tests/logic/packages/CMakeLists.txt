@@ -16,6 +16,8 @@
 
 add_hdl_source(logic_unit_test_pkg.sv
     DEPENDS
+        logic_axi4_lite_pkg
+        logic_axi4_lite_if
         logic_axi4_stream_if
     PACKAGE
         TRUE
