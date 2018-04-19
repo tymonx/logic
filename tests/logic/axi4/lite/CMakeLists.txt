@@ -12,5 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(lite)
-add_subdirectory(stream)
+add_subdirectory(buffer)

@@ -103,12 +103,4 @@
     always_comb rhs``.rresp = lhs``_rresp; \
     always_comb lhs``_rready = rhs``.rready
 
-`ifndef LOGIC_AXI4_LITE_DATA_BYTES
-    `define LOGIC_AXI4_LITE_DATA_BYTES 4
-`endif
-
-`ifndef LOGIC_AXI4_LITE_ADDRESS_WIDTH
-    `define LOGIC_AXI4_LITE_ADDRESS_WIDTH 1
-`endif
-
 `endif /* LOGIC_AXI4_LITE_SVH */

@@ -12,5 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(lite)
-add_subdirectory(stream)
+# SVUnit unit test
+
+add_hdl_unit_test(logic_axi4_lite_buffer_unit_test.sv
+    DEPENDS
+        logic_pkg
+        logic_unit_test_pkg
+        logic_axi4_lite_pkg
+        logic_axi4_lite_if
+        logic_axi4_lite_buffer
+)

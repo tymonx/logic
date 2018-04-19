@@ -23,4 +23,5 @@ package logic_unit_test_pkg;
 `include "logic_axi4_stream_driver_rx.svh"
 `include "logic_axi4_stream_driver_tx.svh"
 `include "logic_axi4_lite_driver_slave.svh"
+`include "logic_axi4_lite_driver_master.svh"
 endpackage
