@@ -34,90 +34,15 @@ module logic_axi4_lite_write_aligned_main #(
     `LOGIC_MODPORT(logic_axi4_lite_if, slave) slave,
     `LOGIC_MODPORT(logic_axi4_lite_if, master) master
 );
-    enum logic [1:0] {
-        FSM_IDLE,
-        FSM_WAIT_FOR_DATA,
-        FSM_WAIT_FOR_ADDRESS
-    } fsm_state;
+    always_comb slave.wready = !slave.wvalid ||
+        (slave.awvalid && master.awready && master.wready);
 
-    logic data_ready;
-    logic address_ready;
-
-    always_comb data_ready = slave.wvalid && master.wready;
-    always_comb address_ready = slave.awvalid && master.awready;
+    always_comb slave.awready = !slave.awvalid ||
+        (slave.wvalid && master.awready && master.wready);
 
     always_comb slave.arready = master.arready;
     always_comb master.bready = slave.bready;
     always_comb master.rready = slave.rready;
-
-    always_ff @(posedge aclk or negedge areset_n) begin
-        if (!areset_n) begin
-            fsm_state <= FSM_IDLE;
-        end
-        else begin
-            unique case (fsm_state)
-            FSM_IDLE: begin
-                if (address_ready && !data_ready) begin
-                    fsm_state <= FSM_WAIT_FOR_DATA;
-                end
-                else if (!address_ready && data_ready) begin
-                    fsm_state <= FSM_WAIT_FOR_ADDRESS;
-                end
-            end
-            FSM_WAIT_FOR_DATA: begin
-                if (address_ready && data_ready) begin
-                    fsm_state <= FSM_IDLE;
-                end
-            end
-            FSM_WAIT_FOR_ADDRESS: begin
-                if (address_ready && data_ready) begin
-                    fsm_state <= FSM_IDLE;
-                end
-            end
-            default: begin
-                fsm_state <= FSM_IDLE;
-            end
-            endcase
-        end
-    end
-
-    always_comb begin
-        unique case (fsm_state)
-        FSM_IDLE: begin
-            if (address_ready && !data_ready) begin
-                slave.awready = 1'b0;
-            end
-            else begin
-                slave.awready = master.awready;
-            end
-        end
-        FSM_WAIT_FOR_DATA: begin
-            slave.awready = 1'b0;
-        end
-        default: begin
-            slave.awready = master.awready;
-        end
-        endcase
-    end
-
-    always_comb begin
-        unique case (fsm_state)
-        FSM_IDLE: begin
-            if (!address_ready && data_ready) begin
-                slave.wready = 1'b0;
-            end
-            else begin
-                slave.wready = master.wready;
-            end
-        end
-        FSM_WAIT_FOR_ADDRESS: begin
-            slave.wready = 1'b0;
-        end
-        default: begin
-            slave.wready = master.wready;
-        end
-        endcase
-    end
 
     always_ff @(posedge aclk or negedge areset_n) begin
         if (!areset_n) begin

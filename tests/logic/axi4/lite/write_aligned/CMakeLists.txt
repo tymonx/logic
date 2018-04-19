@@ -12,6 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(buffer)
-add_subdirectory(clock_crossing)
-add_subdirectory(write_aligned)
+# SVUnit unit test
+
+add_hdl_unit_test(logic_axi4_lite_write_aligned_unit_test.sv
+    DEPENDS
+        logic_pkg
+        logic_unit_test_pkg
+        logic_axi4_lite_pkg
+        logic_axi4_lite_if
+        logic_axi4_lite_write_aligned
+)
