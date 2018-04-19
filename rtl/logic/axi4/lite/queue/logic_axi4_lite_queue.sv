@@ -15,22 +15,24 @@
 
 `include "logic.svh"
 
-/* Module: logic_axi4_lite_buffer
+/* Module: logic_axi4_lite_queue
  *
  * Improve timings between modules by adding register to ready signal path from
  * tx to rx ports and it keeps zero latency bus transcation on both sides.
  *
  * Parameters:
+ *  CAPACITY                - Number of single data transactions that can be
+ *                            store in internal queue memory (FIFO capacity).
  *  DATA_BYTES              - Number of bytes for wdata and rdata signals.
  *  ADDRESS_WIDTH           - Number of bits for awaddr and araddr signals.
- *  WRITE_ADDRESS_CHANNEL   - Enable or disable buffer for write address
+ *  WRITE_ADDRESS_CAPACITY  - Enable or disable queue for write address
  *                            channel.
- *  WRITE_DATA_CHANNEL      - Enable or disable buffer for write data channel.
- *  WRITE_RESPONSE_CHANNEL  - Enable or disable buffer for write response
+ *  WRITE_DATA_CAPACITY     - Enable or disable queue for write data channel.
+ *  WRITE_RESPONSE_CAPACITY - Enable or disable queue for write response
  *                            channel.
- *  READ_ADDRESS_CHANNEL    - Enable or disable buffer for read address channel.
- *  READ_DATA_CHANNEL       - Enable or disable buffer for read data channel.
- *  MASTER                  - Enable or disable buffer for master port.
+ *  READ_ADDRESS_CAPACITY   - Enable or disable queue for read address channel.
+ *  READ_DATA_CAPACITY      - Enable or disable queue for read data channel.
+ *  MASTER                  - Enable or disable queue for master port.
  *
  * Ports:
  *  aclk        - Clock.
@@ -38,14 +40,15 @@
  *  slave       - AXI4-Lite slave interface.
  *  master      - AXI4-Lite master interface.
  */
-module logic_axi4_lite_buffer #(
+module logic_axi4_lite_queue #(
+    int CAPACITY = 256,
     int DATA_BYTES = 4,
     int ADDRESS_WIDTH = 1,
-    int WRITE_ADDRESS_CHANNEL = 1,
-    int WRITE_DATA_CHANNEL = 1,
-    int WRITE_RESPONSE_CHANNEL = 0,
-    int READ_ADDRESS_CHANNEL = 1,
-    int READ_DATA_CHANNEL = 0
+    int WRITE_ADDRESS_CAPACITY = CAPACITY,
+    int WRITE_DATA_CAPACITY = CAPACITY,
+    int WRITE_RESPONSE_CAPACITY = CAPACITY,
+    int READ_ADDRESS_CAPACITY = CAPACITY,
+    int READ_DATA_CAPACITY = CAPACITY
 ) (
     input aclk,
     input areset_n,
@@ -128,8 +131,8 @@ module logic_axi4_lite_buffer #(
     `LOGIC_AXI4_LITE_IF_MASTER_ASSIGN(slave, slave);
 
     generate
-        if (WRITE_ADDRESS_CHANNEL > 0) begin: write_address_channel_enabled
-            logic_basic_buffer #(
+        if (WRITE_ADDRESS_CAPACITY > 0) begin: write_address_channel_enabled
+            logic_basic_queue #(
                 .WIDTH(PROT_WIDTH + ADDRESS_WIDTH)
             )
             write_address_channel (
@@ -151,8 +154,8 @@ module logic_axi4_lite_buffer #(
             always_comb slave_awready = master_awready;
         end
 
-        if (WRITE_DATA_CHANNEL > 0) begin: write_data_channel_enabled
-            logic_basic_buffer #(
+        if (WRITE_DATA_CAPACITY > 0) begin: write_data_channel_enabled
+            logic_basic_queue #(
                 .WIDTH(STRB_WIDTH + DATA_WIDTH)
             )
             write_data_channel (
@@ -174,8 +177,8 @@ module logic_axi4_lite_buffer #(
             always_comb slave_wready = master_wready;
         end
 
-        if (WRITE_RESPONSE_CHANNEL > 0) begin: write_response_channel_enabled
-            logic_basic_buffer #(
+        if (WRITE_RESPONSE_CAPACITY > 0) begin: write_response_channel_enabled
+            logic_basic_queue #(
                 .WIDTH(RESP_WIDTH)
             )
             write_response_channel (
@@ -196,8 +199,8 @@ module logic_axi4_lite_buffer #(
             always_comb master_bready = slave_bready;
         end
 
-        if (READ_ADDRESS_CHANNEL > 0) begin: read_address_channel_enabled
-            logic_basic_buffer #(
+        if (READ_ADDRESS_CAPACITY > 0) begin: read_address_channel_enabled
+            logic_basic_queue #(
                 .WIDTH(PROT_WIDTH + ADDRESS_WIDTH)
             )
             read_address_channel (
@@ -220,8 +223,8 @@ module logic_axi4_lite_buffer #(
             always_comb slave_arready = master_arready;
         end
 
-        if (READ_DATA_CHANNEL > 0) begin: read_data_channel_enabled
-            logic_basic_buffer #(
+        if (READ_DATA_CAPACITY > 0) begin: read_data_channel_enabled
+            logic_basic_queue #(
                 .WIDTH(RESP_WIDTH + DATA_WIDTH)
             )
             read_data_channel (

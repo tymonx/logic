@@ -53,12 +53,14 @@ interface logic_axi4_stream_if #(
     localparam int TOTAL_WIDTH = TUSER_WIDTH + TDEST_WIDTH + TID_WIDTH +
         TLAST_WIDTH + TKEEP_WIDTH + TSTRB_WIDTH + TDATA_WIDTH;
 
+    localparam int M_TDATA_BITS = (TDATA_BYTES > 0) ? 8 : 1;
+
     localparam int M_TDATA_BYTES = (TDATA_BYTES > 0) ? TDATA_BYTES : 1;
     localparam int M_TDEST_WIDTH = (TDEST_WIDTH > 0) ? TDEST_WIDTH : 1;
     localparam int M_TUSER_WIDTH = (TUSER_WIDTH > 0) ? TUSER_WIDTH : 1;
     localparam int M_TID_WIDTH = (TID_WIDTH > 0) ? TID_WIDTH : 1;
 
-    localparam int M_TDATA_WIDTH = M_TDATA_BYTES * 8;
+    localparam int M_TDATA_WIDTH = M_TDATA_BYTES * M_TDATA_BITS;
     localparam int M_TSTRB_WIDTH = M_TDATA_BYTES;
     localparam int M_TKEEP_WIDTH = M_TDATA_BYTES;
 
@@ -70,7 +72,7 @@ interface logic_axi4_stream_if #(
     localparam int M_TUSER_OFFSET = M_TDEST_OFFSET + TDEST_WIDTH;
     localparam int M_TID_OFFSET = M_TUSER_OFFSET + TUSER_WIDTH;
 
-    typedef logic [M_TDATA_BYTES-1:0][7:0] tdata_t;
+    typedef logic [M_TDATA_BYTES-1:0][M_TDATA_BITS-1:0] tdata_t;
     typedef logic [M_TSTRB_WIDTH-1:0] tstrb_t;
     typedef logic [M_TKEEP_WIDTH-1:0] tkeep_t;
     typedef logic [M_TDEST_WIDTH-1:0] tdest_t;

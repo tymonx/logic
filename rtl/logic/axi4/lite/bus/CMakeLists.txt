@@ -12,18 +12,36 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_hdl_source(logic_axi4_lite_buffer.sv
+add_hdl_source(logic_axi4_lite_bus_pkg.sv
+    PACKAGE
+        TRUE
+)
+
+add_hdl_source(logic_axi4_lite_bus.sv
+    SOURCES
+        logic_axi4_lite_bus_multi_slave.sv
+        logic_axi4_lite_bus_multi_slave_decoder.sv
+        logic_axi4_lite_bus_multi_slave_mux.sv
+        logic_axi4_lite_bus_main.sv
     DEPENDS
+        logic_axi4_stream_if
+        logic_axi4_stream_queue
         logic_axi4_lite_if
-        logic_basic_buffer
+        logic_axi4_lite_queue
+        logic_axi4_lite_buffer
+        logic_axi4_lite_bus_pkg
+        logic_reset_synchronizer
     MODELSIM_SUPPRESS
         2583
 )
 
-add_hdl_source(logic_axi4_lite_buffer_top.sv
+add_hdl_source(logic_axi4_lite_bus_top.sv
     DEPENDS
         logic_axi4_lite_if
-        logic_axi4_lite_buffer
+        logic_axi4_lite_bus_pkg
+        logic_axi4_lite_bus
     ANALYSIS
         TRUE
+    MODELSIM_SUPPRESS
+        2583
 )

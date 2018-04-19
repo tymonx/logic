@@ -12,10 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(buffer)
-add_subdirectory(queue)
-add_subdirectory(write_aligned)
-add_subdirectory(to_avalon_mm)
-add_subdirectory(from_avalon_mm)
-add_subdirectory(clock_crossing)
-add_subdirectory(bus)
+add_hdl_source(logic_axi4_lite_queue.sv
+    DEPENDS
+        logic_axi4_lite_if
+        logic_basic_queue
+    MODELSIM_SUPPRESS
+        2583
+)
+
+add_hdl_source(logic_axi4_lite_queue_top.sv
+    DEPENDS
+        logic_axi4_lite_if
+        logic_axi4_lite_queue
+    ANALYSIS
+        TRUE
+)
