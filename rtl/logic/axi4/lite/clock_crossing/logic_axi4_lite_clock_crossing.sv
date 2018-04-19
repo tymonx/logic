@@ -52,11 +52,75 @@ module logic_axi4_lite_clock_crossing #(
     localparam PROT_WIDTH = $bits(logic_axi4_lite_pkg::access_t);
     localparam RESP_WIDTH = $bits(logic_axi4_lite_pkg::response_t);
 
-    logic rx_aclk;
-    logic tx_aclk;
+    typedef logic [ADDRESS_WIDTH-1:0] araddr_t;
+    typedef logic [ADDRESS_WIDTH-1:0] awaddr_t;
+    typedef logic [DATA_BYTES-1:0][7:0] wdata_t;
+    typedef logic [DATA_BYTES-1:0][7:0] rdata_t;
+    typedef logic [DATA_BYTES-1:0] wstrb_t;
+    typedef logic_axi4_lite_pkg::response_t rresp_t;
+    typedef logic_axi4_lite_pkg::response_t bresp_t;
+    typedef logic_axi4_lite_pkg::access_t awprot_t;
+    typedef logic_axi4_lite_pkg::access_t arprot_t;
 
-    always_comb rx_aclk = slave_aclk;
-    always_comb tx_aclk = master_aclk;
+    /* Write address channel */
+    logic slave_awvalid;
+    logic slave_awready;
+    awaddr_t slave_awaddr;
+    awprot_t slave_awprot;
+
+    /* Write data channel */
+    logic slave_wvalid;
+    logic slave_wready;
+    wdata_t slave_wdata;
+    wstrb_t slave_wstrb;
+
+    /* Write response channel */
+    logic slave_bvalid;
+    logic slave_bready;
+    bresp_t slave_bresp;
+
+    /* Read address channel */
+    logic slave_arvalid;
+    logic slave_arready;
+    araddr_t slave_araddr;
+    arprot_t slave_arprot;
+
+    /* Read data channel */
+    logic slave_rvalid;
+    logic slave_rready;
+    rdata_t slave_rdata;
+    rresp_t slave_rresp;
+
+    /* Write address channel */
+    logic master_awvalid;
+    logic master_awready;
+    awaddr_t master_awaddr;
+    awprot_t master_awprot;
+
+    /* Write data channel */
+    logic master_wvalid;
+    logic master_wready;
+    wdata_t master_wdata;
+    wstrb_t master_wstrb;
+
+    /* Write response channel */
+    logic master_bvalid;
+    logic master_bready;
+    bresp_t master_bresp;
+
+    /* Read address channel */
+    logic master_arvalid;
+    logic master_arready;
+    araddr_t master_araddr;
+    arprot_t master_arprot;
+
+    /* Read data channel */
+    logic master_rvalid;
+    logic master_rready;
+    rdata_t master_rdata;
+    rresp_t master_rresp;
+
+    `LOGIC_AXI4_LITE_IF_MASTER_ASSIGN(slave, slave);
 
     logic_clock_domain_crossing #(
         .WIDTH(PROT_WIDTH + ADDRESS_WIDTH),
@@ -66,13 +130,15 @@ module logic_axi4_lite_clock_crossing #(
     )
     write_address_channel (
         /* Slave */
-        .rx_tvalid(slave.awvalid),
-        .rx_tready(slave.awready),
-        .rx_tdata({slave.awprot, slave.awaddr}),
+        .rx_aclk(slave_aclk),
+        .rx_tvalid(slave_awvalid),
+        .rx_tready(slave_awready),
+        .rx_tdata({slave_awprot, slave_awaddr}),
         /* Master */
-        .tx_tvalid(master.awvalid),
-        .tx_tready(master.awready),
-        .tx_tdata({master.awprot, master.awaddr}),
+        .tx_aclk(master_aclk),
+        .tx_tvalid(master_awvalid),
+        .tx_tready(master_awready),
+        .tx_tdata({master_awprot, master_awaddr}),
         .*
     );
 
@@ -84,13 +150,15 @@ module logic_axi4_lite_clock_crossing #(
     )
     write_data_channel (
         /* Slave */
-        .rx_tvalid(slave.wvalid),
-        .rx_tready(slave.wready),
-        .rx_tdata({slave.wstrb, slave.wdata}),
+        .rx_aclk(slave_aclk),
+        .rx_tvalid(slave_wvalid),
+        .rx_tready(slave_wready),
+        .rx_tdata({slave_wstrb, slave_wdata}),
         /* Master */
-        .tx_tvalid(master.wvalid),
-        .tx_tready(master.wready),
-        .tx_tdata({master.wstrb, master.wdata}),
+        .tx_aclk(master_aclk),
+        .tx_tvalid(master_wvalid),
+        .tx_tready(master_wready),
+        .tx_tdata({master_wstrb, master_wdata}),
         .*
     );
 
@@ -102,13 +170,15 @@ module logic_axi4_lite_clock_crossing #(
     )
     write_response_channel (
         /* Slave */
-        .rx_tvalid(master.bvalid),
-        .rx_tready(master.bready),
-        .rx_tdata(master.bresp),
+        .rx_aclk(master_aclk),
+        .rx_tvalid(master_bvalid),
+        .rx_tready(master_bready),
+        .rx_tdata(master_bresp),
         /* Master */
-        .tx_tvalid(slave.bvalid),
-        .tx_tready(slave.bready),
-        .tx_tdata({slave.bresp}),
+        .tx_aclk(slave_aclk),
+        .tx_tvalid(slave_bvalid),
+        .tx_tready(slave_bready),
+        .tx_tdata({slave_bresp}),
         .*
     );
 
@@ -120,13 +190,15 @@ module logic_axi4_lite_clock_crossing #(
     )
     read_address_channel (
         /* Slave */
-        .rx_tvalid(slave.arvalid),
-        .rx_tready(slave.arready),
-        .rx_tdata({slave.arprot, slave.araddr}),
+        .rx_aclk(slave_aclk),
+        .rx_tvalid(slave_arvalid),
+        .rx_tready(slave_arready),
+        .rx_tdata({slave_arprot, slave_araddr}),
         /* Master */
-        .tx_tvalid(master.arvalid),
-        .tx_tready(master.arready),
-        .tx_tdata({master.arprot, master.araddr}),
+        .tx_aclk(master_aclk),
+        .tx_tvalid(master_arvalid),
+        .tx_tready(master_arready),
+        .tx_tdata({master_arprot, master_araddr}),
         .*
     );
 
@@ -138,13 +210,17 @@ module logic_axi4_lite_clock_crossing #(
     )
     read_data_channel (
         /* Slave */
-        .rx_tvalid(master.rvalid),
-        .rx_tready(master.rready),
-        .rx_tdata({master.rresp, master.rdata}),
+        .rx_aclk(master_aclk),
+        .rx_tvalid(master_rvalid),
+        .rx_tready(master_rready),
+        .rx_tdata({master_rresp, master_rdata}),
         /* Master */
-        .tx_tvalid(slave.rvalid),
-        .tx_tready(slave.rready),
-        .tx_tdata({slave.rresp, slave.rdata}),
+        .tx_aclk(slave_aclk),
+        .tx_tvalid(slave_rvalid),
+        .tx_tready(slave_rready),
+        .tx_tdata({slave_rresp, slave_rdata}),
         .*
     );
+
+    `LOGIC_AXI4_LITE_IF_SLAVE_ASSIGN(master, master);
 endmodule

@@ -13,3 +13,4 @@
 # limitations under the License.
 
 add_subdirectory(buffer)
+add_subdirectory(clock_crossing)
