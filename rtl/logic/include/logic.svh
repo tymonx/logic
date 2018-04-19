@@ -34,6 +34,8 @@
 `include "logic_modport.svh"
 
 `ifdef OVL_ASSERT_ON
+`define OVL_VERILOG
+`define OVL_SVA_INTERFACE
 `include "std_ovl_defines.h"
 `endif
 

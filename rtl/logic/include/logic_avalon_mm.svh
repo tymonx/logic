@@ -76,12 +76,4 @@
     always_comb rhs``.readdatavalid = lhs``_readdatavalid; \
     always_comb rhs``.writeresponsevalid = lhs``_writeresponsevalid
 
-`ifndef LOGIC_AVALON_MM_DATA_BYTES
-    `define LOGIC_AVALON_MM_DATA_BYTES 4
-`endif
-
-`ifndef LOGIC_AVALON_MM_ADDRESS_WIDTH
-    `define LOGIC_AVALON_MM_ADDRESS_WIDTH 1
-`endif
-
 `endif /* LOGIC_AVALON_MM_SVH */
