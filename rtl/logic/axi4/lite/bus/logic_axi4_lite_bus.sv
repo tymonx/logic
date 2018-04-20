@@ -29,17 +29,36 @@
  *  aclk        - Clock.
  *  areset_n    - Asynchronous active-low reset.
  *  slave       - AXI4-Lite slave interface.
- *  master      - AXI$-Lite master interface.
+ *  master      - AXI4-Lite master interface.
  */
 module logic_axi4_lite_bus #(
     int SLAVES = 1,
     int MASTERS = 1,
     int DATA_BYTES = 4,
-    int ADDRESS_WIDTH = 1
+    int ADDRESS_WIDTH = 1,
+    logic_axi4_lite_bus_pkg::slave_t MAP[SLAVES]
 ) (
     input aclk,
     input areset_n,
     `LOGIC_MODPORT(logic_axi4_lite_if, slave) slave[MASTERS],
     `LOGIC_MODPORT(logic_axi4_lite_if, master) master[SLAVES]
 );
+    logic areset_n_synced;
+
+    logic_reset_synchronizer
+    reset_synchronized (
+        .*
+    );
+
+    logic_axi4_lite_bus_main #(
+        .SLAVES(SLAVES),
+        .MASTERS(MASTERS),
+        .MAP(MAP),
+        .DATA_BYTES(DATA_BYTES),
+        .ADDRESS_WIDTH(ADDRESS_WIDTH)
+    )
+    main (
+        .areset_n(areset_n_synced),
+        .*
+    );
 endmodule

@@ -36,40 +36,12 @@ module logic_axi4_lite_bus_main #(
     int MASTERS = 1,
     int DATA_BYTES = 4,
     int ADDRESS_WIDTH = 1,
-    logic_axi4_lite_bus_pkg::range_t MAP[SLAVES],
-    int SLAVES_WIDTH = (SLAVES >= 2) ? $clog2(SLAVES) : 1
+    logic_axi4_lite_bus_pkg::slave_t MAP[SLAVES]
 ) (
     input aclk,
     input areset_n,
     `LOGIC_MODPORT(logic_axi4_lite_if, slave) slave[MASTERS],
     `LOGIC_MODPORT(logic_axi4_lite_if, master) master[SLAVES]
 );
-    initial begin: design_rule_checks
-        `LOGIC_DRC_EQUAL(MASTERS, 1)
-        `LOGIC_DRC_POWER_OF_2(DATA_BYTES)
-        `LOGIC_DRC_RANGE(DATA_BYTES, 4, 8)
-    end
 
-    genvar k;
-
-    logic [SLAVES_WIDTH-1:0] slave_id_write[MASTERS];
-    logic [SLAVES_WIDTH-1:0] slave_id_read[MASTERS];
-
-    generate
-        for (k = 0; k < MASTERS; ++k) begin: slave_id
-            always_comb begin
-                slave_id_write[k] = '0;
-
-                for (int i = 0; i < SLAVES; ++i) begin
-                    if (MAP[k].low[ADDRESS_WIDTH-1:0] ) begin
-                        slave_id_write[k] = i[SLAVES_WIDTH-1:0];
-                    end
-                end
-            end
-
-            always_comb begin
-
-            end
-        end
-    endgenerate
 endmodule

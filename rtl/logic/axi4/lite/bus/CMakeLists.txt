@@ -15,7 +15,9 @@
 add_hdl_source(logic_axi4_lite_bus.sv
     DEPENDS
         logic_axi4_lite_if
+        logic_axi4_stream_if
         logic_basic_bus
+        logic_basic_bus_main
 )
 
 add_hdl_source(logic_axi4_lite_bus_top.sv

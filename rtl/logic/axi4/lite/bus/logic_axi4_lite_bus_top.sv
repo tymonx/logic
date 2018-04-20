@@ -15,77 +15,99 @@
 
 `include "logic.svh"
 
-module logic_axi4_lite_buffer_top #(
+module logic_axi4_lite_bus_top #(
+    int SLAVES = 1,
+    int MASTERS = 1,
     int DATA_BYTES = 4,
-    int ADDRESS_WIDTH = 1
+    int ADDRESS_WIDTH = 1,
+    logic_axi4_lite_bus_pkg::slave_t MAP[SLAVES]
 ) (
     input aclk,
     input areset_n,
     /* Slave - write address channel */
-    input slave_awvalid,
-    input [ADDRESS_WIDTH-1:0] slave_awaddr,
-    input logic_axi4_lite_pkg::access_t slave_awprot,
-    output logic slave_awready,
+    input [MASTERS-1:0] slave_awvalid,
+    input [MASTERS-1:0][ADDRESS_WIDTH-1:0] slave_awaddr,
+    input logic_axi4_lite_pkg::access_t [MASTERS-1:0] slave_awprot,
+    output logic [MASTERS-1:0] slave_awready,
     /* Slave - write data channel */
-    input slave_wvalid,
-    input [DATA_BYTES-1:0][7:0] slave_wdata,
-    input [DATA_BYTES-1:0] slave_wstrb,
-    output logic slave_wready,
+    input [MASTERS-1:0] slave_wvalid,
+    input [MASTERS-1:0][DATA_BYTES-1:0][7:0] slave_wdata,
+    input [MASTERS-1:0][DATA_BYTES-1:0] slave_wstrb,
+    output logic [MASTERS-1:0] slave_wready,
     /* Slave - write response channel */
-    input slave_bready,
-    output logic slave_bvalid,
-    output logic_axi4_lite_pkg::response_t slave_bresp,
+    input [MASTERS-1:0] slave_bready,
+    output logic [MASTERS-1:0] slave_bvalid,
+    output logic_axi4_lite_pkg::response_t [MASTERS-1:0] slave_bresp,
     /* Slave - read address channel */
-    input slave_arvalid,
-    input [ADDRESS_WIDTH-1:0] slave_araddr,
-    input logic_axi4_lite_pkg::access_t slave_arprot,
-    output logic slave_arready,
+    input [MASTERS-1:0] slave_arvalid,
+    input [MASTERS-1:0][ADDRESS_WIDTH-1:0] slave_araddr,
+    input logic_axi4_lite_pkg::access_t [MASTERS-1:0] slave_arprot,
+    output logic [MASTERS-1:0] slave_arready,
     /* Slave - read data channel */
-    input slave_rready,
-    output logic slave_rvalid,
-    output logic [DATA_BYTES-1:0][7:0] slave_rdata,
-    output logic_axi4_lite_pkg::response_t slave_rresp,
+    input [MASTERS-1:0] slave_rready,
+    output logic [MASTERS-1:0] slave_rvalid,
+    output logic [MASTERS-1:0][DATA_BYTES-1:0][7:0] slave_rdata,
+    output logic_axi4_lite_pkg::response_t [MASTERS-1:0] slave_rresp,
     /* Master - write address channel */
-    output logic master_awvalid,
-    output logic [ADDRESS_WIDTH-1:0] master_awaddr,
+    output logic [SLAVES-1:0] master_awvalid,
+    output logic [SLAVES-1:0][ADDRESS_WIDTH-1:0] master_awaddr,
     output logic_axi4_lite_pkg::access_t master_awprot,
-    input master_awready,
+    input [SLAVES-1:0] master_awready,
     /* Master - write data channel */
-    output logic master_wvalid,
-    output logic [DATA_BYTES-1:0][7:0] master_wdata,
-    output logic [DATA_BYTES-1:0] master_wstrb,
-    input master_wready,
+    output logic [SLAVES-1:0] master_wvalid,
+    output logic [SLAVES-1:0][DATA_BYTES-1:0][7:0] master_wdata,
+    output logic [SLAVES-1:0][DATA_BYTES-1:0] master_wstrb,
+    input [SLAVES-1:0] master_wready,
     /* Master - write response channel */
-    input master_bvalid,
-    input logic_axi4_lite_pkg::response_t master_bresp,
-    output logic master_bready,
+    input [SLAVES-1:0] master_bvalid,
+    input logic_axi4_lite_pkg::response_t [SLAVES-1:0] master_bresp,
+    output logic [SLAVES-1:0] master_bready,
     /* Master - read address channel */
-    output logic master_arvalid,
-    output logic [ADDRESS_WIDTH-1:0] master_araddr,
-    output logic_axi4_lite_pkg::access_t master_arprot,
-    input master_arready,
+    output logic [SLAVES-1:0] master_arvalid,
+    output logic [SLAVES-1:0][ADDRESS_WIDTH-1:0] master_araddr,
+    output logic_axi4_lite_pkg::access_t [SLAVES-1:0] master_arprot,
+    input [SLAVES-1:0] master_arready,
     /* Master - read data channel */
-    output logic master_rready,
-    input master_rvalid,
-    input [DATA_BYTES-1:0][7:0] master_rdata,
-    input logic_axi4_lite_pkg::response_t master_rresp
+    output logic [SLAVES-1:0] master_rready,
+    input [SLAVES-1:0] master_rvalid,
+    input [SLAVES-1:0][DATA_BYTES-1:0][7:0] master_rdata,
+    input logic_axi4_lite_pkg::response_t [SLAVES-1:0] master_rresp
 );
-    logic_axi4_lite_if #(
-        .DATA_BYTES(DATA_BYTES),
-        .ADDRESS_WIDTH(ADDRESS_WIDTH)
-    ) slave (.*);
+    genvar k;
 
     logic_axi4_lite_if #(
         .DATA_BYTES(DATA_BYTES),
         .ADDRESS_WIDTH(ADDRESS_WIDTH)
-    ) master (.*);
+    ) slave [MASTERS] (
+        .aclk(aclk),
+        .areset_n(areset_n),
+        .*
+    );
 
-    `LOGIC_AXI4_LITE_IF_SLAVE_ASSIGN(slave, slave);
+    logic_axi4_lite_if #(
+        .DATA_BYTES(DATA_BYTES),
+        .ADDRESS_WIDTH(ADDRESS_WIDTH)
+    ) master [SLAVES] (
+        .aclk(aclk),
+        .areset_n(areset_n),
+        .*
+    );
 
-    logic_axi4_lite_buffer #(
+    generate
+        for (k = 0; k < MASTERS; ++k) begin: masters
+            `LOGIC_AXI4_LITE_IF_SLAVE_ASSIGN_ARRAY(slave[k], slave, k);
+        end
+
+        for (k = 0; k < SLAVES; ++k) begin: masters
+            `LOGIC_AXI4_LITE_IF_MASTER_ASSIGN_ARRAY(master, k, master[k]);
+        end
+    endgenerate
+
+    logic_axi4_lite_bus #(
+        .SLAVES(SLAVES),
+        .MASTERS(MASTERS),
+        .MAP(MAP),
         .DATA_BYTES(DATA_BYTES),
         .ADDRESS_WIDTH(ADDRESS_WIDTH)
     ) unit (.*);
-
-    `LOGIC_AXI4_LITE_IF_MASTER_ASSIGN(master, master);
 endmodule
