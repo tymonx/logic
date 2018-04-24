@@ -16,6 +16,8 @@ add_hdl_source(logic_axi4_lite_buffer.sv
     DEPENDS
         logic_axi4_lite_if
         logic_basic_buffer
+    MODELSIM_SUPPRESS
+        2583
 )
 
 add_hdl_source(logic_axi4_lite_buffer_top.sv

@@ -36,7 +36,7 @@ module logic_axi4_lite_bus #(
     int MASTERS = 1,
     int DATA_BYTES = 4,
     int ADDRESS_WIDTH = 1,
-    logic_axi4_lite_bus_pkg::slave_t MAP[SLAVES]
+    logic_axi4_lite_bus_pkg::slave_t [SLAVES-1:0] MAP
 ) (
     input aclk,
     input areset_n,

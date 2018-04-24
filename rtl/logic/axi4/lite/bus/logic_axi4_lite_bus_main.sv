@@ -36,12 +36,22 @@ module logic_axi4_lite_bus_main #(
     int MASTERS = 1,
     int DATA_BYTES = 4,
     int ADDRESS_WIDTH = 1,
-    logic_axi4_lite_bus_pkg::slave_t MAP[SLAVES]
+    logic_axi4_lite_bus_pkg::slave_t [SLAVES-1:0] MAP
 ) (
     input aclk,
     input areset_n,
     `LOGIC_MODPORT(logic_axi4_lite_if, slave) slave[MASTERS],
     `LOGIC_MODPORT(logic_axi4_lite_if, master) master[SLAVES]
 );
-
+    logic_axi4_lite_bus_multi_slave #(
+        .SLAVES(SLAVES),
+        .DATA_BYTES(DATA_BYTES),
+        .ADDRESS_WIDTH(ADDRESS_WIDTH),
+        .MAP(MAP)
+    )
+    multi_slave (
+        .slave(slave[0]),
+        .master(master),
+        .*
+    );
 endmodule

@@ -14,7 +14,7 @@
  */
 
 package logic_axi4_lite_bus_pkg;
-    typedef struct {
+    typedef struct packed {
         bit [63:0] address_high;
         bit [63:0] address_low;
     } slave_t;

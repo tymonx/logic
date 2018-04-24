@@ -20,7 +20,9 @@ module logic_axi4_lite_bus_top #(
     int MASTERS = 1,
     int DATA_BYTES = 4,
     int ADDRESS_WIDTH = 1,
-    logic_axi4_lite_bus_pkg::slave_t MAP[SLAVES]
+    logic_axi4_lite_bus_pkg::slave_t [SLAVES-1:0] MAP = {
+        {64'h1000, 64'h0000}
+    }
 ) (
     input aclk,
     input areset_n,
@@ -51,7 +53,7 @@ module logic_axi4_lite_bus_top #(
     /* Master - write address channel */
     output logic [SLAVES-1:0] master_awvalid,
     output logic [SLAVES-1:0][ADDRESS_WIDTH-1:0] master_awaddr,
-    output logic_axi4_lite_pkg::access_t master_awprot,
+    output logic_axi4_lite_pkg::access_t [SLAVES-1:0] master_awprot,
     input [SLAVES-1:0] master_awready,
     /* Master - write data channel */
     output logic [SLAVES-1:0] master_wvalid,
@@ -80,8 +82,7 @@ module logic_axi4_lite_bus_top #(
         .ADDRESS_WIDTH(ADDRESS_WIDTH)
     ) slave [MASTERS] (
         .aclk(aclk),
-        .areset_n(areset_n),
-        .*
+        .areset_n(areset_n)
     );
 
     logic_axi4_lite_if #(
@@ -89,12 +90,11 @@ module logic_axi4_lite_bus_top #(
         .ADDRESS_WIDTH(ADDRESS_WIDTH)
     ) master [SLAVES] (
         .aclk(aclk),
-        .areset_n(areset_n),
-        .*
+        .areset_n(areset_n)
     );
 
     generate
-        for (k = 0; k < MASTERS; ++k) begin: masters
+        for (k = 0; k < MASTERS; ++k) begin: slaves
             `LOGIC_AXI4_LITE_IF_SLAVE_ASSIGN_ARRAY(slave[k], slave, k);
         end
 

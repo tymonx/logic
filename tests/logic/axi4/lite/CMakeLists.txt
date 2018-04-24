@@ -15,3 +15,4 @@
 add_subdirectory(buffer)
 add_subdirectory(clock_crossing)
 add_subdirectory(write_aligned)
+add_subdirectory(bus)
