@@ -98,7 +98,7 @@ module logic_axi4_lite_bus_multi_slave_mux #(
         !write_response_channel.tvalid || (slave.bready && bvalid);
 
     always_comb read_address_channel.tready =
-        !write_address_channel.tvalid || (slave.arvalid && arready);
+        !read_address_channel.tvalid || (slave.arvalid && arready);
 
     always_comb read_data_channel.tready =
         !read_data_channel.tvalid || (slave.rready && rvalid);
