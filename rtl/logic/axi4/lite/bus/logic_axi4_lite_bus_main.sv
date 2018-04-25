@@ -43,6 +43,14 @@ module logic_axi4_lite_bus_main #(
     `LOGIC_MODPORT(logic_axi4_lite_if, slave) slave[MASTERS],
     `LOGIC_MODPORT(logic_axi4_lite_if, master) master[SLAVES]
 );
+    initial begin: design_rule_checks
+        `LOGIC_DRC_EQUAL(MASTERS, 1)
+        `LOGIC_DRC_EQUAL_OR_GREATER_THAN(SLAVES, 1)
+        `LOGIC_DRC_EQUAL_OR_GREATER_THAN(ADDRESS_WIDTH, 1)
+        `LOGIC_DRC_POWER_OF_2(DATA_BYTES)
+        `LOGIC_DRC_RANGE(DATA_BYTES, 4, 8)
+    end
+
     logic_axi4_lite_bus_multi_slave #(
         .SLAVES(SLAVES),
         .DATA_BYTES(DATA_BYTES),

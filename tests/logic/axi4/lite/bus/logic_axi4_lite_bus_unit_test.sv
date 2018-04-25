@@ -27,7 +27,7 @@ module logic_axi4_lite_bus_unit_test;
 
     parameter MASTERS = 1;
     parameter SLAVES = 1;
-    parameter ADDRESS_WIDTH = 10;
+    parameter ADDRESS_WIDTH = 32;
 
     localparam logic_axi4_lite_bus_pkg::slave_t [SLAVES-1:0] MAP = {
         {64'h2000, 64'h1000}
@@ -116,7 +116,7 @@ module logic_axi4_lite_bus_unit_test;
 
     foreach (requests[i]) begin
         requests[i].data = $urandom;
-        requests[i].address = $urandom;
+        requests[i].address = 'h1200;
         requests[i].byte_enable = $urandom;
         requests[i].access = random_access();
         requests[i].response = random_response();
@@ -163,7 +163,7 @@ module logic_axi4_lite_bus_unit_test;
 
     foreach (requests[i]) begin
         requests[i].data = $urandom;
-        requests[i].address = $urandom;
+        requests[i].address = 'h1200;
         requests[i].access = random_access();
         requests[i].response = random_response();
     end

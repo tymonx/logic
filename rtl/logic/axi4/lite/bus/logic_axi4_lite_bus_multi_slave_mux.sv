@@ -46,67 +46,77 @@ module logic_axi4_lite_bus_multi_slave_mux #(
     `LOGIC_MODPORT(logic_axi4_lite_if, slave) slave,
     `LOGIC_MODPORT(logic_axi4_lite_if, master) master[SLAVES]
 );
+    import logic_axi4_lite_pkg::RESPONSE_DECERR;
+    import logic_axi4_lite_pkg::response_t;
+
     localparam SLAVES_MUX = 2**SLAVES_WIDTH;
 
     genvar k;
 
-    logic [SLAVES-1:0] wready;
-    logic [SLAVES-1:0] awready;
-    logic [SLAVES-1:0] arready;
+    logic [SLAVES-1:0] mux_wready;
+    logic [SLAVES-1:0] mux_awready;
+    logic [SLAVES-1:0] mux_arready;
+    logic [SLAVES-1:0] mux_rvalid;
+    logic [SLAVES-1:0] mux_bvalid;
 
-    logic [SLAVES_MUX-1:0] rvalid;
+    logic wready;
+    logic awready;
+    logic arready;
+    logic rvalid;
+    logic bvalid;
+
     logic [DATA_BYTES-1:0][7:0] rdata[0:SLAVES_MUX-1];
-    logic_axi4_lite_pkg::response_t rresp[0:SLAVES_MUX-1];
+    response_t rresp[0:SLAVES_MUX-1];
+    response_t bresp[0:SLAVES_MUX-1];
 
-    logic [SLAVES_MUX-1:0] bvalid;
-    logic_axi4_lite_pkg::response_t bresp[0:SLAVES_MUX-1];
+    always_comb wready = write_data_channel.tvalid &&
+        (write_data_channel.tuser[0] ? |mux_wready : 1'b1);
 
-    always_comb slave.wready = !slave.wvalid || (
-        write_data_channel.tvalid && (
-        write_data_channel.tuser[0] ? |wready : 1'b1));
+    always_comb awready = write_address_channel.tvalid &&
+        (write_address_channel.tuser[0] ? |mux_awready : 1'b1);
 
-    always_comb slave.awready = !slave.awvalid || (
-        write_address_channel.tvalid && (
-        write_address_channel.tuser[0] ? |awready : 1'b1));
+    always_comb arready = read_address_channel.tvalid &&
+        (read_address_channel.tuser[0] ? |mux_arready : 1'b1);
 
-    always_comb slave.arready = !slave.arvalid || (
-        read_address_channel.tvalid && (
-        read_address_channel.tuser[0] ? |arready : 1'b1));
+    always_comb bvalid = write_response_channel.tvalid &&
+        (write_response_channel.tuser[0] ? |mux_bvalid : 1'b1);
 
-    always_comb write_address_channel.tready = !write_address_channel.tvalid ||
-        (slave.awvalid && (write_address_channel.tuser[0] ? |awready : 1'b1));
+    always_comb rvalid = read_data_channel.tvalid &&
+        (read_data_channel.tuser[0] ? |mux_rvalid : 1'b1);
 
-    always_comb write_data_channel.tready = !write_data_channel.tvalid ||
-        (slave.wvalid && (write_data_channel.tuser[0] ? |wready : 1'b1));
+    always_comb slave.wready = !slave.wvalid || wready;
+    always_comb slave.awready = !slave.awvalid || awready;
+    always_comb slave.arready = !slave.arvalid || arready;
 
-    always_comb write_response_channel.tready = !write_response_channel.tvalid
-        || (slave.bready && (write_response_channel.tuser[0] ?
-        bvalid[write_response_channel.tid] : 1'b1));
+    always_comb write_address_channel.tready =
+        !write_address_channel.tvalid || (slave.awvalid && awready);
 
-    always_comb read_address_channel.tready = !read_address_channel.tvalid ||
-        (slave.arvalid && (read_address_channel.tuser[0] ? |arready : 1'b1));
+    always_comb write_data_channel.tready =
+        !write_data_channel.tvalid || (slave.wvalid && wready);
 
-    always_comb read_data_channel.tready = !read_data_channel.tvalid
-        || (slave.rready && (read_data_channel.tuser[0] ?
-        rvalid[read_data_channel.tid] : 1'b1));
+    always_comb write_response_channel.tready =
+        !write_response_channel.tvalid || (slave.bready && bvalid);
+
+    always_comb read_address_channel.tready =
+        !write_address_channel.tvalid || (slave.arvalid && arready);
+
+    always_comb read_data_channel.tready =
+        !read_data_channel.tvalid || (slave.rready && rvalid);
 
     always_ff @(posedge aclk or negedge areset_n) begin
         if (!areset_n) begin
             slave.bvalid <= '0;
         end
         else if (slave.bready) begin
-            slave.bvalid <= write_response_channel.tvalid && (
-                write_response_channel.tuser[0] ?
-                bvalid[write_response_channel.tid] : 1'b1
-            );
+            slave.bvalid <= bvalid;
         end
     end
 
     always_ff @(posedge aclk) begin
         if (slave.bready) begin
-            slave.bresp <= write_response_channel.tuser[0] ?
-                bresp[write_response_channel.tid] :
-                logic_axi4_lite_pkg::RESPONSE_DECERR;
+            slave.bresp <= (write_response_channel.tvalid &&
+                write_response_channel.tuser[0]) ?
+                bresp[write_response_channel.tid] : RESPONSE_DECERR;
         end
     end
 
@@ -115,39 +125,66 @@ module logic_axi4_lite_bus_multi_slave_mux #(
             slave.rvalid <= '0;
         end
         else if (slave.rready) begin
-            slave.rvalid <= read_data_channel.tvalid && (
-                read_data_channel.tuser[0] ?
-                rvalid[read_data_channel.tid] : 1'b1
-            );
+            slave.rvalid <= rvalid;
         end
     end
 
     always_ff @(posedge aclk) begin
         if (slave.rready) begin
-            slave.rresp <= write_response_channel.tuser[0] ?
-                rresp[read_data_channel.tid] :
-                logic_axi4_lite_pkg::RESPONSE_DECERR;
+            slave.rresp <= (read_data_channel.tvalid &&
+                read_data_channel.tuser[0]) ?
+                rresp[read_data_channel.tid] : RESPONSE_DECERR;
         end
     end
 
     always_ff @(posedge aclk) begin
         if (slave.rready) begin
-            slave.rdata <= write_response_channel.tuser[0] ?
+            slave.rdata <= (read_data_channel.tvalid &&
+                read_data_channel.tuser[0]) ?
                 rdata[read_data_channel.tid] : {DATA_BYTES{8'b0}};
         end
     end
 
     generate
         for (k = 0; k < SLAVES; ++k) begin: slaves
-            always_comb wready[k] = master[k].wready &&
+            always_comb mux_wready[k] = master[k].wready &&
                 (write_data_channel.tid == k[SLAVES_WIDTH-1:0]);
+
+            always_comb mux_awready[k] = master[k].awready &&
+                (write_address_channel.tid == k[SLAVES_WIDTH-1:0]);
+
+            always_comb mux_bvalid[k] = master[k].bvalid &&
+                (write_response_channel.tid == k[SLAVES_WIDTH-1:0]);
+
+            always_comb mux_arready[k] = master[k].arready &&
+                (read_address_channel.tid == k[SLAVES_WIDTH-1:0]);
+
+            always_comb mux_rvalid[k] = master[k].rvalid &&
+                (read_data_channel.tid == k[SLAVES_WIDTH-1:0]);
+
+            always_comb bresp[k] = master[k].bresp;
+            always_comb rresp[k] = master[k].rresp;
+            always_comb rdata[k] = master[k].rdata;
+
+            always_comb master[k].bready = !master[k].bvalid || (slave.bready &&
+                write_response_channel.tvalid &&
+                write_response_channel.tuser[0] && (
+                write_response_channel.tid == k[SLAVES_WIDTH-1:0]));
+
+            always_comb master[k].rready = !master[k].rvalid || (slave.rready &&
+                read_data_channel.tvalid &&
+                read_data_channel.tuser[0] && (
+                read_data_channel.tid == k[SLAVES_WIDTH-1:0]));
 
             always_ff @(posedge aclk or negedge areset_n) begin
                 if (!areset_n) begin
                     master[k].wvalid <= '0;
                 end
                 else if (master[k].wready) begin
-                    master[k].wvalid <= slave.wvalid && wready[k];
+                    master[k].wvalid <= slave.wvalid &&
+                        write_data_channel.tvalid &&
+                        write_data_channel.tuser[0] && (
+                        write_data_channel.tid == k[SLAVES_WIDTH-1:0]);
                 end
             end
 
@@ -158,15 +195,15 @@ module logic_axi4_lite_bus_multi_slave_mux #(
                 end
             end
 
-            always_comb awready[k] = master[k].awready &&
-                (write_address_channel.tid == k[SLAVES_WIDTH-1:0]);
-
             always_ff @(posedge aclk or negedge areset_n) begin
                 if (!areset_n) begin
                     master[k].awvalid <= '0;
                 end
                 else if (master[k].awready) begin
-                    master[k].awvalid <= slave.awvalid && awready[k];
+                    master[k].awvalid <= slave.awvalid &&
+                        write_address_channel.tvalid &&
+                        write_address_channel.tuser[0] && (
+                        write_address_channel.tid == k[SLAVES_WIDTH-1:0]);
                 end
             end
 
@@ -177,15 +214,15 @@ module logic_axi4_lite_bus_multi_slave_mux #(
                 end
             end
 
-            always_comb arready[k] = master[k].arready &&
-                (read_address_channel.tid == k[SLAVES_WIDTH-1:0]);
-
             always_ff @(posedge aclk or negedge areset_n) begin
                 if (!areset_n) begin
                     master[k].arvalid <= '0;
                 end
                 else if (master[k].arready) begin
-                    master[k].arvalid <= slave.arvalid && arready[k];
+                    master[k].arvalid <= slave.arvalid &&
+                        read_address_channel.tvalid &&
+                        read_address_channel.tuser[0] && (
+                        read_address_channel.tid == k[SLAVES_WIDTH-1:0]);
                 end
             end
 
@@ -195,30 +232,12 @@ module logic_axi4_lite_bus_multi_slave_mux #(
                     master[k].arprot <= slave.arprot;
                 end
             end
-
-            always_comb bvalid[k] = master[k].bvalid;
-            always_comb bresp[k] = master[k].bresp;
-            always_comb master[k].bready = !master[k].bvalid ||
-                (slave.bready && write_response_channel.tvalid &&
-                write_response_channel.tuser[0] &&
-                (write_response_channel.tid == k[SLAVES_WIDTH-1:0]));
-
-            always_comb rvalid[k] = master[k].rvalid;
-            always_comb rresp[k] = master[k].rresp;
-            always_comb rdata[k] = master[k].rdata;
-            always_comb master[k].rready = !master[k].rvalid ||
-                (slave.rready && read_data_channel.tvalid &&
-                read_data_channel.tuser[0] &&
-                (read_data_channel.tid == k[SLAVES_WIDTH-1:0]));
         end
 
         for (k = SLAVES; k < SLAVES_MUX; ++k) begin: assign_unknown
-            always_comb bvalid[k] = 'X;
-            always_comb bresp[k] = logic_axi4_lite_pkg::response_t'('X);
-
-            always_comb rvalid[k] = 'X;
-            always_comb rresp[k] = logic_axi4_lite_pkg::response_t'('X);
             always_comb rdata[k] = 'X;
+            always_comb rresp[k] = response_t'('X);
+            always_comb bresp[k] = response_t'('X);
         end
     endgenerate
 endmodule

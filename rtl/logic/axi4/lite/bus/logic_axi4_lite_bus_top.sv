@@ -16,12 +16,12 @@
 `include "logic.svh"
 
 module logic_axi4_lite_bus_top #(
-    int SLAVES = 1,
+    int SLAVES = 2,
     int MASTERS = 1,
     int DATA_BYTES = 4,
-    int ADDRESS_WIDTH = 1,
+    int ADDRESS_WIDTH = 10,
     logic_axi4_lite_bus_pkg::slave_t [SLAVES-1:0] MAP = {
-        {64'h1000, 64'h0000}
+        {SLAVES{64'h1000, 64'h0000}}
     }
 ) (
     input aclk,

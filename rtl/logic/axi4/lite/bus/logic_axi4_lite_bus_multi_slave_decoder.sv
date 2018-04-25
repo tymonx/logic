@@ -177,7 +177,8 @@ module logic_axi4_lite_bus_multi_slave_decoder #(
             write_address_channel.tvalid <= 1'b0;
         end
         else if (write_address_channel.tready) begin
-            write_address_channel.tvalid <= slave.awvalid && slave.awready;
+            write_address_channel.tvalid <= slave.awvalid && master.awready &&
+                write_data_channel.tready && write_response_channel.tready;
         end
     end
 
@@ -199,7 +200,8 @@ module logic_axi4_lite_bus_multi_slave_decoder #(
             write_data_channel.tvalid <= 1'b0;
         end
         else if (write_data_channel.tready) begin
-            write_data_channel.tvalid <= slave.awvalid && slave.awready;
+            write_data_channel.tvalid <= slave.awvalid && master.awready &&
+                write_address_channel.tready && write_response_channel.tready;
         end
     end
 
@@ -221,7 +223,8 @@ module logic_axi4_lite_bus_multi_slave_decoder #(
             write_response_channel.tvalid <= 1'b0;
         end
         else if (write_response_channel.tready) begin
-            write_response_channel.tvalid <= slave.awvalid && slave.awready;
+            write_response_channel.tvalid <= slave.awvalid && master.awready &&
+                write_address_channel.tready && write_data_channel.tready;
         end
     end
 
@@ -243,7 +246,8 @@ module logic_axi4_lite_bus_multi_slave_decoder #(
             read_address_channel.tvalid <= 1'b0;
         end
         else if (read_address_channel.tready) begin
-            read_address_channel.tvalid <= slave.arvalid && slave.arready;
+            read_address_channel.tvalid <= slave.arvalid && master.arready &&
+                read_data_channel.tready;
         end
     end
 
@@ -265,7 +269,8 @@ module logic_axi4_lite_bus_multi_slave_decoder #(
             read_data_channel.tvalid <= 1'b0;
         end
         else if (read_data_channel.tready) begin
-            read_data_channel.tvalid <= slave.arvalid && slave.arready;
+            read_data_channel.tvalid <= slave.arvalid && master.arready &&
+                read_address_channel.tready;
         end
     end
 
