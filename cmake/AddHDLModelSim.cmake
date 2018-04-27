@@ -25,6 +25,7 @@ endif()
 
 if (MODELSIM_FOUND)
     file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/modelsim/libraries")
+    file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/modelsim/libraries/.placeholders")
 
     if (NOT EXISTS "${CMAKE_BINARY_DIR}/modelsim/libraries/work/_info")
         execute_process(
