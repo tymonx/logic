@@ -237,7 +237,7 @@ function(add_quartus_project target_name)
             COMMAND
                 ${QUARTUS_QSYS_SCRIPT}
             ARGS
-                --script="${qsys_file}"
+                --script="${qsys_tcl_file}"
                 $<$<STREQUAL:QUARTUS_EDITION,Pro>:${quartus_pro}>
             DEPENDS
                 "${qsys_tcl_file}"
