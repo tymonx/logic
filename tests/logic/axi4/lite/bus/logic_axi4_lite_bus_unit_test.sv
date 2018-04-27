@@ -15,17 +15,23 @@
 
 `include "svunit_defines.svh"
 
-module logic_axi4_lite_write_aligned_unit_test;
+module logic_axi4_lite_bus_unit_test;
     import svunit_pkg::svunit_testcase;
     import logic_unit_test_pkg::logic_axi4_lite_driver_slave;
     import logic_unit_test_pkg::logic_axi4_lite_driver_master;
     import logic_axi4_lite_pkg::access_t;
     import logic_axi4_lite_pkg::response_t;
 
-    string name = "logic_axi4_lite_write_aligned_unit_test";
+    string name = "logic_axi4_lite_bus_unit_test";
     svunit_testcase svunit_ut;
 
-    parameter ADDRESS_WIDTH = 10;
+    parameter MASTERS = 1;
+    parameter SLAVES = 1;
+    parameter ADDRESS_WIDTH = 32;
+
+    localparam logic_axi4_lite_bus_pkg::slave_t [SLAVES-1:0] MAP = {
+        {64'h2000, 64'h1000}
+    };
 
     typedef struct {
         bit [ADDRESS_WIDTH-1:0] address;
@@ -50,22 +56,25 @@ module logic_axi4_lite_write_aligned_unit_test;
 
     logic_axi4_lite_if #(
         .ADDRESS_WIDTH(ADDRESS_WIDTH)
-    ) slave (.*);
+    ) slave [MASTERS] (.*);
 
     logic_axi4_lite_driver_slave #(
         .ADDRESS_WIDTH(ADDRESS_WIDTH)
-    ) slave_drv = new (slave);
+    ) slave_drv = new (slave[0]);
 
     logic_axi4_lite_if #(
         .ADDRESS_WIDTH(ADDRESS_WIDTH)
-    ) master (.*);
+    ) master [SLAVES] (.*);
 
     logic_axi4_lite_driver_master #(
         .ADDRESS_WIDTH(ADDRESS_WIDTH)
-    ) master_drv = new (master);
+    ) master_drv = new (master[0]);
 
-    logic_axi4_lite_write_aligned #(
-        .ADDRESS_WIDTH(ADDRESS_WIDTH)
+    logic_axi4_lite_bus #(
+        .SLAVES(SLAVES),
+        .MASTERS(MASTERS),
+        .ADDRESS_WIDTH(ADDRESS_WIDTH),
+        .MAP(MAP)
     )
     dut (
         .*
@@ -107,7 +116,7 @@ module logic_axi4_lite_write_aligned_unit_test;
 
     foreach (requests[i]) begin
         requests[i].data = $urandom;
-        requests[i].address = $urandom;
+        requests[i].address = 'h1200;
         requests[i].byte_enable = $urandom;
         requests[i].access = random_access();
         requests[i].response = random_response();
@@ -116,16 +125,8 @@ module logic_axi4_lite_write_aligned_unit_test;
     fork
     begin
         foreach (requests[i]) begin
-            slave_drv.aclk_posedge($urandom_range(0, 3));
-            slave_drv.write_request_data(requests[i].data,
-                requests[i].byte_enable);
-        end
-    end
-    begin
-        foreach (requests[i]) begin
-            slave_drv.aclk_posedge($urandom_range(0, 3));
-            slave_drv.write_request_address(requests[i].address,
-                requests[i].access);
+            slave_drv.write_request(requests[i].address, requests[i].data,
+                requests[i].byte_enable, requests[i].access);
         end
     end
     begin
@@ -159,7 +160,7 @@ module logic_axi4_lite_write_aligned_unit_test;
 
     foreach (requests[i]) begin
         requests[i].data = $urandom;
-        requests[i].address = $urandom;
+        requests[i].address = 'h1200;
         requests[i].access = random_access();
         requests[i].response = random_response();
     end

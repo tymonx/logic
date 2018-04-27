@@ -103,4 +103,64 @@
     always_comb rhs``.rresp = lhs``_rresp; \
     always_comb lhs``_rready = rhs``.rready
 
+/* Define: LOGIC_AXI4_LITE_IF_SLAVE_ASSIGN_ARRAY
+ *
+ * Assign standalone signals to signals in SystemVerilog interface.
+ *
+ * Parameters:
+ *  lhs       - SystemVerilog interface.
+ *  rhs       - Standalone SystemVerilog signals.
+ *  index     - Array index for rhs.
+ */
+`define LOGIC_AXI4_LITE_IF_SLAVE_ASSIGN_ARRAY(lhs, rhs, index) \
+    always_comb lhs``.awvalid = rhs``_awvalid[index]; \
+    always_comb lhs``.awaddr = rhs``_awaddr[index]; \
+    always_comb lhs``.awprot = rhs``_awprot[index]; \
+    always_comb rhs``_awready[index] = lhs``.awready; \
+    always_comb lhs``.wvalid = rhs``_wvalid[index]; \
+    always_comb lhs``.wdata = rhs``_wdata[index]; \
+    always_comb lhs``.wstrb = rhs``_wstrb[index]; \
+    always_comb rhs``_wready[index] = lhs``.wready; \
+    always_comb rhs``_bvalid[index] = lhs``.bvalid; \
+    always_comb rhs``_bresp[index] = lhs``.bresp; \
+    always_comb lhs``.bready = rhs``_bready[index]; \
+    always_comb lhs``.arvalid = rhs``_arvalid[index]; \
+    always_comb lhs``.araddr = rhs``_araddr[index]; \
+    always_comb lhs``.arprot = rhs``_arprot[index]; \
+    always_comb rhs``_arready[index] = lhs``.arready; \
+    always_comb rhs``_rvalid[index] = lhs``.rvalid; \
+    always_comb rhs``_rdata[index] = lhs``.rdata; \
+    always_comb rhs``_rresp[index] = lhs``.rresp; \
+    always_comb lhs``.rready = rhs``_rready[index]
+
+/* Define: LOGIC_AXI4_LITE_IF_MASTER_ASSIGN_ARRAY
+ *
+ * Assign signals in SystemVerilog interface to standalone signals.
+ *
+ * Parameters:
+ *  lhs       - Standalone SystemVerilog signals.
+ *  rhs       - SystemVerilog interface.
+ *  index     - Array index for lhs.
+ */
+`define LOGIC_AXI4_LITE_IF_MASTER_ASSIGN_ARRAY(lhs, index, rhs) \
+    always_comb lhs``_awvalid[index] = rhs``.awvalid; \
+    always_comb lhs``_awaddr[index] = rhs``.awaddr; \
+    always_comb lhs``_awprot[index] = rhs``.awprot; \
+    always_comb rhs``.awready = lhs``_awready[index]; \
+    always_comb lhs``_wvalid[index] = rhs``.wvalid; \
+    always_comb lhs``_wdata[index] = rhs``.wdata; \
+    always_comb lhs``_wstrb[index] = rhs``.wstrb; \
+    always_comb rhs``.wready = lhs``_wready[index]; \
+    always_comb rhs``.bvalid = lhs``_bvalid[index]; \
+    always_comb rhs``.bresp = lhs``_bresp[index]; \
+    always_comb lhs``_bready[index] = rhs``.bready; \
+    always_comb lhs``_arvalid[index] = rhs``.arvalid; \
+    always_comb lhs``_araddr[index] = rhs``.araddr; \
+    always_comb lhs``_arprot[index] = rhs``.arprot; \
+    always_comb rhs``.arready = lhs``_arready[index]; \
+    always_comb rhs``.rvalid = lhs``_rvalid[index]; \
+    always_comb rhs``.rdata = lhs``_rdata[index]; \
+    always_comb rhs``.rresp = lhs``_rresp[index]; \
+    always_comb lhs``_rready[index] = rhs``.rready
+
 `endif /* LOGIC_AXI4_LITE_SVH */

@@ -149,10 +149,7 @@ module logic_axi4_lite_clock_crossing_unit_test;
             `FAIL_UNLESS_EQUAL(captured.access, requests[i].access);
             `FAIL_UNLESS_EQUAL(captured.address, requests[i].address)
             `FAIL_UNLESS_EQUAL(captured.data, requests[i].data)
-        end
-    end
-    begin
-        foreach (requests[i]) begin
+
             master_drv.write_response(requests[i].response);
         end
     end
@@ -192,10 +189,7 @@ module logic_axi4_lite_clock_crossing_unit_test;
 
             `FAIL_UNLESS_EQUAL(captured.access, requests[i].access);
             `FAIL_UNLESS_EQUAL(captured.address, requests[i].address)
-        end
-    end
-    begin
-        foreach (requests[i]) begin
+
             master_drv.read_response(requests[i].data, requests[i].response);
         end
     end
