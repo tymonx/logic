@@ -12,9 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#add_subdirectory(synchronizer)
-#add_subdirectory(binary2gray)
-#add_subdirectory(gray2binary)
-add_subdirectory(buffer)
-#add_subdirectory(delay)
-#add_subdirectory(queue)
+if (NOT EXISTS "${OUTPUT_DIRECTORY}/${NAME}/_info")
+    if (NOT EXISTS "${OUTPUT_DIRECTORY}")
+        file(MAKE_DIRECTORY "${OUTPUT_DIRECTORY}")
+    endif()
+
+    if (EXISTS "${OUTPUT_DIRECTORY}/${NAME}/")
+        execute_process(
+            COMMAND
+                "${CMAKE_COMMAND}" -E remove_directory "${NAME}"
+            WORKING_DIRECTORY
+                "${OUTPUT_DIRECTORY}"
+        )
+    endif()
+
+    execute_process(
+        COMMAND
+            "${MODELSIM_VLIB}" ${NAME}
+        WORKING_DIRECTORY
+            "${OUTPUT_DIRECTORY}"
+    )
+endif()

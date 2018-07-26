@@ -22,14 +22,14 @@ if (STD_OVL_FOUND)
     )
 endif()
 
-add_hdl_source(logic_axi4_stream_if.sv
+logic_add_interface(logic_axi4_stream_if.sv
     DEPENDS
         ${std_ovl_depends}
     MODELSIM_SUPPRESS
         2583
 )
 
-add_hdl_source(logic_axi4_lite_if.sv
+logic_add_interface(logic_axi4_lite_if.sv
     DEPENDS
         logic_axi4_lite_pkg
         ${std_ovl_depends}
@@ -42,14 +42,14 @@ if (STD_OVL_FOUND)
     )
 endif()
 
-add_hdl_source(logic_avalon_st_if.sv
+logic_add_interface(logic_avalon_st_if.sv
     DEPENDS
         ${std_ovl_depends}
     MODELSIM_SUPPRESS
         2583
 )
 
-add_hdl_source(logic_avalon_mm_if.sv
+logic_add_interface(logic_avalon_mm_if.sv
     DEPENDS
         logic_avalon_mm_pkg
 )

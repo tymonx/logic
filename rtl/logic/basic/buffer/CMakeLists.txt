@@ -12,7 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_hdl_source(logic_basic_buffer.sv
-    ANALYSIS
-        TRUE
-)
+logic_add_module(logic_basic_buffer.sv)

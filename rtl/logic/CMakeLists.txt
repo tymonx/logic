@@ -12,16 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(HDL_DEPENDS)
-set(HDL_DEFINES)
-set(HDL_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/include)
+set(LOGIC_DEPENDS)
+set(LOGIC_DEFINES)
+set(LOGIC_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 if (STD_OVL_FOUND)
-    set(HDL_INCLUDES ${HDL_INCLUDES}
+    set(LOGIC_INCLUDES ${LOGIC_INCLUDES}
         ${STD_OVL_DIR}
     )
 
-    set(HDL_DEFINES ${HDL_DEFINES}
+    set(LOGIC_DEFINES ${LOGIC_DEFINES}
         OVL_ASSERT_ON
     )
 endif()
@@ -30,6 +30,6 @@ add_subdirectory(packages)
 add_subdirectory(interfaces)
 add_subdirectory(reset)
 add_subdirectory(basic)
-add_subdirectory(clock)
+# add_subdirectory(clock)
 add_subdirectory(axi4)
-add_subdirectory(pll)
+# add_subdirectory(pll)

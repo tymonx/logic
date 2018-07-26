@@ -1,0 +1,46 @@
+# Copyright 2018 Tymoteusz Blazejczyk
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+set(CMAKE_VHDL_PLATFORM_ID "@CMAKE_VHDL_PLATFORM_ID@")
+set(CMAKE_VHDL_COMPILER_ID "@CMAKE_VHDL_COMPILER_ID@")
+set(CMAKE_VHDL_COMPILER_WORKS @CMAKE_VHDL_COMPILER_WORKS@)
+set(CMAKE_VHDL_COMPILER_ID_RUN @CMAKE_VHDL_COMPILER_ID_RUN@)
+
+set(CMAKE_VHDL_COMPILER
+    "@CMAKE_VHDL_COMPILER@"
+)
+
+set(CMAKE_VHDL_COMPILER_WRAPPER
+    "@CMAKE_VHDL_COMPILER_WRAPPER@"
+)
+
+set(CMAKE_VHDL_COMPILER_VERSION
+    "@CMAKE_VHDL_COMPILER_VERSION@"
+)
+
+set(CMAKE_VHDL_COMPILER_VERSION_INTERNAL
+    "@CMAKE_VHDL_COMPILER_VERSION_INTERNAL@"
+)
+
+set(CMAKE_VHDL_COMPILER_ENV_VAR
+    @CMAKE_VHDL_COMPILER_ENV_VAR@
+)
+
+set(CMAKE_VHDL_SOURCE_FILE_EXTENSIONS
+    @CMAKE_VHDL_SOURCE_FILE_EXTENSIONS@
+)
+
+set(CMAKE_VHDL_IGNORE_EXTENSIONS
+    @CMAKE_VHDL_IGNORE_EXTENSIONS@
+)

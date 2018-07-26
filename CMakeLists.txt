@@ -12,26 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake/Modules")
+
 cmake_minimum_required(VERSION 3.1)
-project(Logic C CXX)
+project(Logic C CXX SystemVerilog Verilog)
 
-set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_CURRENT_LIST_DIR}/cmake")
+find_package(StdOVL)
 
-option(LOGIC_TESTS "Enable/disable tests" ON)
-option(LOGIC_RTL "Enable/disable RTL build" ON)
-option(LOGIC_WARNINGS_INTO_ERRORS "Enable/disable warnings as errors" OFF)
+include(Logic)
 
-include(AddLogic)
-
-set(LOGIC_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
-
-add_subdirectory(src)
-
-if (LOGIC_RTL)
-    add_subdirectory(rtl)
-
-    if (LOGIC_TESTS)
-        include(CTest)
-        add_subdirectory(tests)
-    endif()
-endif()
+add_subdirectory(rtl)

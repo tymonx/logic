@@ -13,4 +13,4 @@
 # limitations under the License.
 
 add_subdirectory(stream)
-add_subdirectory(lite)
+#add_subdirectory(lite)

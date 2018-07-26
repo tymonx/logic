@@ -12,11 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_hdl_source(logic_reset_synchronizer.sv
+logic_add_module(logic_reset_synchronizer.sv
     SOURCES
         logic_reset_synchronizer_unit.sv
-    ANALYSIS
-        TRUE
     MODELSIM_SUPPRESS
         2583
 )

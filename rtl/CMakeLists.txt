@@ -12,6 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(HDL_SYNTHESIZABLE TRUE)
+set(LOGIC_SYNTHESIZABLE TRUE)
 
 add_subdirectory(logic)

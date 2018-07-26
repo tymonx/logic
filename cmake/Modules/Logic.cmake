@@ -12,9 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#add_subdirectory(synchronizer)
-#add_subdirectory(binary2gray)
-#add_subdirectory(gray2binary)
-add_subdirectory(buffer)
-#add_subdirectory(delay)
-#add_subdirectory(queue)
+include(LogicAddStdOVL)
+include(LogicAddModule)
+include(LogicAddPackage)
+include(LogicAddInterface)
