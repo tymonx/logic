@@ -12,18 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(LOGIC_DEPENDS)
-set(LOGIC_DEFINES)
+set(LOGIC_DEPENDS "")
+set(LOGIC_DEFINES "")
 set(LOGIC_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 if (STD_OVL_FOUND)
-    set(LOGIC_INCLUDES ${LOGIC_INCLUDES}
-        ${STD_OVL_DIR}
-    )
-
-    set(LOGIC_DEFINES ${LOGIC_DEFINES}
-        OVL_ASSERT_ON
-    )
+    list(APPEND LOGIC_INCLUDES "${STD_OVL_DIR}")
+    list(APPEND LOGIC_DEFINES OVL_ASSERT_ON)
 endif()
 
 add_subdirectory(packages)

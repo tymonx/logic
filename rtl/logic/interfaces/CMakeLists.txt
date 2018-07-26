@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(std_ovl_depends)
+set(std_ovl_depends "")
 
 if (STD_OVL_FOUND)
-    set(std_ovl_depends
+    list(APPEND std_ovl_depends
         ovl_never_unknown
         ovl_win_unchange
         ovl_always
@@ -34,13 +34,6 @@ logic_add_interface(logic_axi4_lite_if.sv
         logic_axi4_lite_pkg
         ${std_ovl_depends}
 )
-
-if (STD_OVL_FOUND)
-    set(std_ovl_depends
-        ovl_win_unchange
-        ovl_always
-    )
-endif()
 
 logic_add_interface(logic_avalon_st_if.sv
     DEPENDS
