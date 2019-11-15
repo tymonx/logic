@@ -262,7 +262,7 @@ function(add_hdl_verilator)
                 ${verilator_flags}
                 ${verilator_main}
             COMMAND
-                make
+                $(MAKE)
             ARGS
                 -f ${ARG_TARGET}.mk
             COMMAND
@@ -317,7 +317,7 @@ function(add_hdl_verilator)
                 ${verilator_flags}
                 "${verilator_main}"
             COMMAND
-                make
+                $(MAKE)
             ARGS
                 -f ${ARG_TARGET}.mk
             DEPENDS
