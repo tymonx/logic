@@ -323,7 +323,7 @@ function(add_hdl_verilator)
             DEPENDS
                 ${verilator_sources}
                 ${verilator_includes}
-                ${verilaotr_configuration_file}
+                ${verilator_configuration_file}
             WORKING_DIRECTORY
                 ${verilator_library_dir}
             COMMENT
